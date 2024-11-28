@@ -18,6 +18,18 @@ docker volume prune             # Remove unused volumes
 docker exec -it <container_name> bash  # Interactive shell
 docker logs -f <container_name>        # Follow container logs
 docker inspect <container_name>        # View container details
+
+# Container resource usage
+docker stats                    # Live resource usage
+docker top <container_name>     # View running processes
+
+# Network operations
+docker network ls              # List networks
+docker network inspect <network_name>  # Network details
+
+# Volume management
+docker volume create <volume_name>    # Create named volume
+docker volume ls                      # List volumes
 ```
 
 ## Git Commands
@@ -40,6 +52,14 @@ git push origin --delete <old_name>
 # List all branches
 git branch -a                    # Show all branches
 git branch -vv                   # Show branch tracking info
+
+# Search through commit history
+git log -S"<string>"            # Search for string in commits
+git log -p <file>               # Show file history with diffs
+
+# Advanced diff commands
+git diff --word-diff            # Show word level changes
+git diff --cached               # Show staged changes
 ```
 
 ### Cherry-picking and Logs
@@ -52,6 +72,10 @@ git cherry-pick <commit_hash>
 # View branch history
 git log --graph --abbrev-commit --decorate --first-parent <branch_name>
 git log --oneline --graph --decorate --all  # View all branches
+
+# Blame with ignored whitespace
+git blame -w <file>             # Ignore whitespace
+git blame -M <file>             # Detect moved lines
 ```
 
 ### Stashing and Submodules
@@ -61,13 +85,17 @@ git stash push -- /dir/to/folder/
 git stash apply
 git stash list                   # List stashes
 git stash show -p               # Show stash contents
+git stash drop                  # Remove last stash
+git stash clear                 # Remove all stashes
 
 # Submodule management
 git submodule update --init --recursive --rebase --force
+git submodule foreach git pull  # Update all submodules
+git submodule status           # Check submodule states
 
-# Update submodules (improved version)
-git submodule sync
-git submodule update --init --recursive --remote
+# Clean working directory
+git clean -fd                   # Remove untracked files/directories
+git clean -nx                   # Dry run clean
 ```
 
 ## General Commands
@@ -85,6 +113,8 @@ aria2c -x 16 -s 16 \
 # Search in files
 grep --include="*.*" -nRHI "pattern" *     # Search in all files
 grep -r --include="*.cpp" "pattern" *      # Search in specific file types
+grep -l "pattern" *                        # List only filenames
+grep -C 3 "pattern" file                   # Show 3 lines of context
 
 # Find duplicate files
 find -type f -exec md5sum '{}' ';' | \
@@ -94,51 +124,65 @@ find -type f -exec md5sum '{}' ';' | \
 find . -type f -exec sha256sum {} \; | \
     sort | uniq -w 64 --all-repeated=separate | \
     cut -f 3- -d ' '
-```
 
-### Debugging and Analysis
-```bash
-# Valgrind memory checker
-valgrind --leak-check=full \
-    --show-leak-kinds=all \
-    --track-origins=yes \
-    --verbose \
-    --log-file=valgrind-out.txt \
-    ./executable exampleParam1
-
-# Additional useful commands
-strace -f ./executable           # Trace system calls
-gdb ./executable                # GNU debugger
-perf stat ./executable          # Performance statistics
-```
-
-## Additional Suggested Commands
-
-### Docker
-```bash
-# Save and load Docker images
-docker save -o image.tar image:tag
-docker load -i image.tar
-
-# Clean up specific resources
-docker rmi $(docker images -f "dangling=true" -q)  # Remove dangling images
-```
-
-### Git
-```bash
-# Undo last commit but keep changes
-git reset --soft HEAD^
-
-# Find which commit introduced a bug
-git bisect start
-git bisect bad                  # Current version is bad
-git bisect good v2.6.13-rc2    # Last known good version
+# Advanced find commands
+find . -type f -mtime -7        # Files modified in last 7 days
+find . -size +100M              # Files larger than 100MB
+find . -exec chmod 644 {} \;    # Change permissions recursively
 ```
 
 ### System Monitoring
+
+#### htop - Interactive Process Viewer
+```plaintext
+  1  [||||||                                 17.2%]     Tasks: 44, 37 thr; 1 running
+  2  [||||||||                               21.0%]     Load average: 0.52 0.58 0.59
+  3  [|||||||                                18.7%]     Uptime: 3 days, 12:45:17
+  4  [|||||                                  13.2%]
+  Mem[||||||||||||||||||||||||||||||||||||7.27G/7.70G]
+  Swp[|||||||||                               2.1G/8.0G]
+
+  PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command
+ 1234 root       20   0  4196M 1.2G  8984 S  6.0 15.9  12:46.45 docker
+ 5678 mysql      20   0  8112M 2.1G    4M S  4.2 27.3   5:23.12 mysqld
+ 9012 www-data   20   0  2816M 382M   11M S  2.1  4.9   3:12.56 apache2
+```
+
+#### iotop - I/O Monitoring
+```plaintext
+Total DISK READ: 0.00 B/s | Total DISK WRITE: 142.22 K/s
+Current DISK READ:0.00 B/s | Current DISK WRITE: 0.00 B/s
+  TID  PRIO  USER     DISK READ  DISK WRITE  SWAPIN     IO>    COMMAND
+ 1234   be   mysql    0.00 B/s   123.45 K/s  0.00 %   3.44 % mysqld
+ 5678   be   root     0.00 B/s    18.77 K/s  0.00 %   0.00 % docker-compose
+ 9012   be   www-data 0.00 B/s     0.00 B/s  0.00 %   0.00 % apache2
+```
+
+#### netstat - Network Connections
+```plaintext
+Proto Recv-Q Send-Q Local Address           Foreign Address         State       PID/Program
+tcp        0      0 0.0.0.0:80             0.0.0.0:*               LISTEN      1234/nginx
+tcp        0      0 0.0.0.0:3306           0.0.0.0:*               LISTEN      5678/mysqld
+tcp        0      0 127.0.0.1:6379         0.0.0.0:*               LISTEN      9012/redis-server
+tcp6       0      0 :::22                  :::*                    LISTEN      1111/sshd
+```
+
+### Additional System Commands
 ```bash
-# Monitor system resources
-htop                           # Interactive process viewer
-iotop                         # I/O monitoring
-netstat -tulpn                # Network connections
+# Resource monitoring
+vmstat 1                       # Virtual memory stats every second
+iostat -x 1                    # I/O statistics every second
+dstat                         # Versatile resource statistics
+pidstat                       # Per-process statistics
+
+# Network monitoring
+ss -tuln                      # Alternative to netstat
+iftop                        # Network bandwidth monitor
+tcpdump -i any               # Packet capture
+mtr google.com               # Network path analysis
+
+# File system operations
+ncdu                         # Disk usage analyzer
+lsof                        # List open files
+fuser -m /mount/point       # Show processes using filesystem
 ```
