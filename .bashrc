@@ -76,6 +76,20 @@ export LESS_TERMCAP_us=$'\E[01;32m'
 
 # Alias's for SSH
 # alias SERVERNAME='ssh YOURWEBSITE.com -l USERNAME -p PORTNUMBERHERE'
+alias ops-middle-katy='ssh -X OPS-MIDDLE-KATY -l bob -p 8022'
+alias ops-ds9='ssh OPS-DS9 -l bob -p 8022'
+alias ops-vangogh='ssh -X OPS-VANGOGH -l bob -p 8022'
+alias ops-ot-lenovo='ssh -X OT-OPS-LENOVO -l bob -p 8022' 
+alias ops-ot-airtop='ssh -X OT-OPS-AIRTOP -l bob -p 8022' 
+
+alias dev-ops='ssh -X RctDevVmKarthik -l developer'
+
+alias dev-dvs='ssh -X DEV-DVS -l bob -p 8022'
+
+alias aac-vulcan='ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1 AAC-VULCAN -l root -p 8022'
+
+alias aac-pandora='ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1 AAC-PANDORA -l root -p 8022'
+
 
 # Alias's to change the directory
 alias web='cd /var/www/html'
@@ -176,7 +190,7 @@ alias countfiles="for t in files links directories; do echo \`find . -type \${t:
 alias checkcommand="type -t"
 
 # Show current network connections to the server
-alias ipview="netstat -anpl | grep :80 | awk {'print \$5'} | cut -d\":\" -f1 | sort | uniq -c | sort -n | sed -e 's/^ *//' -e 's/ *\$//'"
+alias ipview='ip -o addr show scope global | awk "{print $2, $4}" | column -t'
 
 # Show open ports
 alias openports='netstat -nape --inet'
@@ -204,40 +218,14 @@ alias ungz='tar -xvzf'
 # Show all logs in /var/log
 alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
 
+alias psme="ps aux | awk -v user=\"\$(whoami)\" 'BEGIN {printf \"%-15s %-10s %-7s %-7s %-10s %s\n\", \"USER\", \"PID\", \"%CPU\", \"%MEM\", \"VSZ\", \"COMMAND\"} \$1 == user {printf \"%-15s %-10s %-7s %-7s %-10s %s\n\", \$1, \$2, \$3, \$4, \$5, substr(\$0, index(\$0,\$11))}'"
+
 # SHA1
 alias sha1='openssl sha1'
 
 #######################################################
 # SPECIAL FUNCTIONS
 #######################################################
-
-# Use the best version of pico installed
-edit ()
-{
-	if [ "$(type -t jpico)" = "file" ]; then
-		# Use JOE text editor http://joe-editor.sourceforge.net/
-		jpico -nonotice -linums -nobackups "$@"
-	elif [ "$(type -t nano)" = "file" ]; then
-		nano -c "$@"
-	elif [ "$(type -t pico)" = "file" ]; then
-		pico "$@"
-	else
-		vim "$@"
-	fi
-}
-sedit ()
-{
-	if [ "$(type -t jpico)" = "file" ]; then
-		# Use JOE text editor http://joe-editor.sourceforge.net/
-		sudo jpico -nonotice -linums -nobackups "$@"
-	elif [ "$(type -t nano)" = "file" ]; then
-		sudo nano -c "$@"
-	elif [ "$(type -t pico)" = "file" ]; then
-		sudo pico "$@"
-	else
-		sudo vim "$@"
-	fi
-}
 
 # Extracts any archive(s) (if unp isn't installed)
 extract () {
@@ -263,17 +251,34 @@ extract () {
 	done
 }
 
+search_file() {
+    local filename=$1
+    find / -name "$filename" -type f 2>/dev/null
+}
+
 # Searches for text in all files in the current folder
-ftext ()
-{
-	# -i case-insensitive
-	# -I ignore binary files
-	# -H causes filename to be printed
-	# -r recursive search
-	# -n causes line number to be printed
-	# optional: -F treat search term as a literal, not a regular expression
-	# optional: -l only print filenames and not the matching lines ex. grep -irl "$1" *
-	grep -iIHrn --color=always "$1" . | less -r
+ftext () {
+    # Define the file extensions to exclude
+    local exclude_extensions=("*.bin" "*.exe" "*.o" "*.so" "*.dll" "*.map" "*.html" "*.js" "*.pb.h" "*.pb.cc" "*.pb.cpp")  # Add more extensions as needed
+
+    # Print excluded extensions in red
+    echo -e "\033[31mThe following extensions have been excluded from the search:\033[0m"
+    for ext in "${exclude_extensions[@]}"; do
+        echo -e "\033[31m$ext\033[0m"
+    done
+
+    # Construct the find command to exclude specified extensions
+    local find_command="find . -type f ! \( "
+    
+    for ext in "${exclude_extensions[@]}"; do
+        find_command+=" -name \"$ext\" -o"
+    done
+    
+    # Remove last '-o' and close parenthesis
+    find_command="${find_command% -o} \)"
+
+    # Execute the find command and pipe the results to grep
+    eval "$find_command" | xargs grep -iIHrn --color=always "$1" 2>/dev/null 
 }
 
 # Copy file with a progress bar
@@ -297,33 +302,6 @@ cpp()
 	END { print "" }' total_size=$(stat -c '%s' "${1}") count=0
 }
 
-# Copy and go to the directory
-cpg ()
-{
-	if [ -d "$2" ];then
-		cp $1 $2 && cd $2
-	else
-		cp $1 $2
-	fi
-}
-
-# Move and go to the directory
-mvg ()
-{
-	if [ -d "$2" ];then
-		mv $1 $2 && cd $2
-	else
-		mv $1 $2
-	fi
-}
-
-# Create and go to the directory
-mkdirg ()
-{
-	mkdir -p $1
-	cd $1
-}
-
 # Goes up a specified number of directories  (i.e. up 4)
 up ()
 {
@@ -339,16 +317,6 @@ up ()
 	fi
 	cd $d
 }
-
-#Automatically do an ls after each cd
-# cd ()
-# {
-# 	if [ -n "$1" ]; then
-# 		builtin cd "$@" && ls
-# 	else
-# 		builtin cd ~ && ls
-# 	fi
-# }
 
 # Returns the last 2 fields of the working directory
 pwdtail ()
@@ -460,76 +428,28 @@ install_bashrc_support ()
 }
 
 # Show current network information
-netinfo ()
-{
-	echo "--------------- Network Information ---------------"
-	/sbin/ifconfig | awk /'inet addr/ {print $2}'
-	echo ""
-	/sbin/ifconfig | awk /'Bcast/ {print $3}'
-	echo ""
-	/sbin/ifconfig | awk /'inet addr/ {print $4}'
+#!/bin/bash
 
-	/sbin/ifconfig | awk /'HWaddr/ {print $4,$5}'
-	echo "---------------------------------------------------"
+netinfo() {
+     /sbin/ifconfig | awk '
+    /^([a-zA-Z0-9]+):/ {
+        iface = $1;
+        status = ($2 ~ /UP/) ? "UP" : "DOWN";
+        ip = "";
+    }
+    /^ *inet / {
+        ip = $2;
+    }
+    {
+        if (iface && (ip || status == "DOWN")) {
+            print iface, status, ip;
+            iface = "";  # Reset iface to avoid printing duplicate entries
+            ip = "";     # Reset ip for the next interface
+        }
+    }'
 }
 
-# IP address lookup
-alias whatismyip="whatsmyip"
-function whatsmyip ()
-{
-	# Dumps a list of all IP addresses for every device
-	# /sbin/ifconfig |grep -B1 "inet addr" |awk '{ if ( $1 == "inet" ) { print $2 } else if ( $2 == "Link" ) { printf "%s:" ,$1 } }' |awk -F: '{ print $1 ": " $3 }';
 
-	# Internal IP Lookup
-	echo -n "Internal IP: " ; /sbin/ifconfig eth0 | grep "inet addr" | awk -F: '{print $2}' | awk '{print $1}'
-
-	# External IP Lookup
-	echo -n "External IP: " ; wget http://smart-ip.net/myip -O - -q
-}
-
-# View Apache logs
-apachelog ()
-{
-	if [ -f /etc/httpd/conf/httpd.conf ]; then
-		cd /var/log/httpd && ls -xAh && multitail --no-repeat -c -s 2 /var/log/httpd/*_log
-	else
-		cd /var/log/apache2 && ls -xAh && multitail --no-repeat -c -s 2 /var/log/apache2/*.log
-	fi
-}
-
-# Edit the Apache configuration
-apacheconfig ()
-{
-	if [ -f /etc/httpd/conf/httpd.conf ]; then
-		sedit /etc/httpd/conf/httpd.conf
-	elif [ -f /etc/apache2/apache2.conf ]; then
-		sedit /etc/apache2/apache2.conf
-	else
-		echo "Error: Apache config file could not be found."
-		echo "Searching for possible locations:"
-		sudo updatedb && locate httpd.conf && locate apache2.conf
-	fi
-}
-
-# Edit the PHP configuration file
-phpconfig ()
-{
-	if [ -f /etc/php.ini ]; then
-		sedit /etc/php.ini
-	elif [ -f /etc/php/php.ini ]; then
-		sedit /etc/php/php.ini
-	elif [ -f /etc/php5/php.ini ]; then
-		sedit /etc/php5/php.ini
-	elif [ -f /usr/bin/php5/bin/php.ini ]; then
-		sedit /usr/bin/php5/bin/php.ini
-	elif [ -f /etc/php5/apache2/php.ini ]; then
-		sedit /etc/php5/apache2/php.ini
-	else
-		echo "Error: php.ini file could not be found."
-		echo "Searching for possible locations:"
-		sudo updatedb && locate php.ini
-	fi
-}
 
 # Edit the MySQL configuration file
 mysqlconfig ()
@@ -570,6 +490,132 @@ trim()
 	var="${var%"${var##*[![:space:]]}"}"  # remove trailing whitespace characters
 	echo -n "$var"
 }
+
+
+docker-prune () 
+{ 
+    echo "Stopping docker ...";
+    sudo systemctl stop docker > /dev/null 2>&1;
+    echo "deleting all files in /var/lib/docker/*"
+    sudo rm -rf /var/lib/docker/*
+    echo "deleting all files in /var/lib/containerd/*"
+    sudo rm -rf /var/lib/containerd/*
+    echo "Clearing all buildx cache ...";
+    docker buildx ls --format "{{ .Name }}" | xargs -I{} docker buildx stop {} > /dev/null 2>&1;
+    docker buildx ls --format "{{ .Name }}" | xargs -I{} docker buildx rm --force {} > /dev/null 2>&1;
+    docker buildx ls --format "{{ .Name }}" | xargs -I{} docker buildx prune --all --force --builder {} > /dev/null 2>&1;
+    echo "Stopping and removing all containers and images ...";
+    docker container ls --all --quiet | xargs -I{} docker container stop {} > /dev/null 2>&1;
+    docker container ls --all --quiet | xargs -I{} docker container rm --force {} > /dev/null 2>&1;
+    docker image ls --all --quiet | xargs -I{} docker image rm --force {} > /dev/null 2>&1;
+    echo "Doing a full docker prune ...";
+    docker system prune --all --force --volumes > /dev/null 2>&1;
+    echo "Restarting docker and recreating builders ...";
+    sudo systemctl start docker;
+    runner host buildkit fix
+}
+
+######################################################################
+# xclean
+#   Cleans up all Python virtual environments/caches and Docker
+#   things. Useful when you want a fresh start, such as
+#   when you begin a new branch. It can also free up quite a bit of
+#   space in your development environment (VM).
+
+fn_xclean() {
+    toplevel="$(git rev-parse --show-toplevel)"
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Cleaning up Python virtual environments."
+    echo "$(date +%H:%M:%S) *** ----------------------------------------"
+    if [[ -d "${toplevel}" ]] ; then
+        (
+            cd "${toplevel}"
+            none=true
+            for dspec in $(find . -type d -name .venv) ; do
+                echo "$(date +%H:%M:%S)     - ${dspec}"
+                rm -rf "${dspec}"
+                none=false
+            done
+            ${none} && echo "$(date +%H:%M:%S)     There were none."
+        )
+    fi
+    echo
+    
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Cleaning up Python caches."
+    echo "$(date +%H:%M:%S) *** --------------------------"
+    if [[ -d "${toplevel}" ]] ; then
+        (
+            none=true
+            cd "${toplevel}"
+            for dspec in $(find . -type d -name __pycache__) ; do
+                echo "$(date +%H:%M:%S)     - ${dspec}"
+                rm -rf "${dspec}"
+                none=false
+            done
+            ${none} && echo "$(date +%H:%M:%S)     There were none."
+        )
+    fi
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Cleaning up work areas."
+    echo "$(date +%H:%M:%S) *** -----------------------"
+    if [[ -d "${toplevel}" ]] ; then
+        (
+            cd "${toplevel}"
+            for dspec in */work work ; do
+                echo "$(date +%H:%M:%S)     - ${dspec}"
+                rm -rf "${dspec}"
+            done
+        )
+    fi
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Stopping Docker."
+    echo "$(date +%H:%M:%S) *** ----------------"
+    sudo systemctl stop docker
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Cleaning up Docker image caches."
+    echo "$(date +%H:%M:%S) *** --------------------------------"
+    docker buildx prune -f 2> /dev/null
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Pruning system."
+    echo "$(date +%H:%M:%S) *** ---------------"
+    docker system prune --all --force --volumes
+    docker image prune -a -f
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Deleting Docker images."
+    echo "$(date +%H:%M:%S) *** -----------------------"
+    image_cont="$(docker image ls | awk '$1 != "REPOSITORY" {print $3}')"
+    if [[ -n "${image_cont}" ]] ; then
+        docker image rm ${image_cont}
+    fi
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Showing current status."
+    echo "$(date +%H:%M:%S) *** -----------------------"
+    echo "*** Containers remaining:"
+    docker container ls
+    echo "*** Images remaining:"
+    docker image ls
+    echo
+
+    echo "$(date +%H:%M:%S) *** ================================================================================"
+    echo "$(date +%H:%M:%S) *** Finished."
+    echo "$(date +%H:%M:%S) *** ---------"
+}
+
+alias xclean='fn_xclean'
 
 #######################################################
 # Set the ultimate amazing command prompt
