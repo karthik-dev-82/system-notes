@@ -36,32 +36,30 @@ shopt -s checkwinsize
 
 # Causes bash to append to history instead of overwriting it so if you start a new terminal, you have old session history
 shopt -s histappend
-PROMPT_COMMAND='history -a'
 
 # Allow ctrl-S for history navigation (with ctrl-R)
 [[ $- == *i* ]] && stty -ixon
 
 # Ignore case on auto-completion
-# Note: bind used instead of sticking these in .inputrc
 if [[ $iatest > 0 ]]; then bind "set completion-ignore-case on"; fi
 
 # Show auto-completion list automatically, without double tab
 if [[ $iatest > 0 ]]; then bind "set show-all-if-ambiguous On"; fi
 
 # Set the default editor
-export EDITOR=nano
-export VISUAL=nano
+export EDITOR=vim
+export VISUAL=vim
 alias pico='edit'
 alias spico='sedit'
 alias nano='edit'
 alias snano='sedit'
 
-# To have colors for ls and all grep commands such as grep, egrep and zgrep
+# Colors for ls and grep
 export CLICOLOR=1
 export LS_COLORS='no=00:fi=00:di=00;34:ln=01;36:pi=40;33:so=01;35:do=01;35:bd=40;33;01:cd=40;33;01:or=40;31;01:ex=01;32:*.tar=01;31:*.tgz=01;31:*.arj=01;31:*.taz=01;31:*.lzh=01;31:*.zip=01;31:*.z=01;31:*.Z=01;31:*.gz=01;31:*.bz2=01;31:*.deb=01;31:*.rpm=01;31:*.jar=01;31:*.jpg=01;35:*.jpeg=01;35:*.gif=01;35:*.bmp=01;35:*.pbm=01;35:*.pgm=01;35:*.ppm=01;35:*.tga=01;35:*.xbm=01;35:*.xpm=01;35:*.tif=01;35:*.tiff=01;35:*.png=01;35:*.mov=01;35:*.mpg=01;35:*.mpeg=01;35:*.avi=01;35:*.fli=01;35:*.gl=01;35:*.dl=01;35:*.xcf=01;35:*.xwd=01;35:*.ogg=01;35:*.mp3=01;35:*.wav=01;35:*.xml=00;31:'
 
 
-# Color for manpages in less makes manpages a little easier to read
+# Colors for manpages in less
 export LESS_TERMCAP_mb=$'\E[01;31m'
 export LESS_TERMCAP_md=$'\E[01;31m'
 export LESS_TERMCAP_me=$'\E[0m'
@@ -69,27 +67,6 @@ export LESS_TERMCAP_se=$'\E[0m'
 export LESS_TERMCAP_so=$'\E[01;44;33m'
 export LESS_TERMCAP_ue=$'\E[0m'
 export LESS_TERMCAP_us=$'\E[01;32m'
-
-#######################################################
-# MACHINE SPECIFIC ALIAS'S
-#######################################################
-
-# Alias's for SSH
-# alias SERVERNAME='ssh YOURWEBSITE.com -l USERNAME -p PORTNUMBERHERE'
-alias ops-middle-katy='ssh -X OPS-MIDDLE-KATY -l bob -p 8022'
-alias ops-ds9='ssh OPS-DS9 -l bob -p 8022'
-alias ops-vangogh='ssh -X OPS-VANGOGH -l bob -p 8022'
-alias ops-ot-lenovo='ssh -X OT-OPS-LENOVO -l bob -p 8022' 
-alias ops-ot-airtop='ssh -X OT-OPS-AIRTOP -l bob -p 8022' 
-
-alias dev-ops='ssh -X RctDevVmKarthik -l developer'
-
-alias dev-dvs='ssh -X DEV-DVS -l bob -p 8022'
-
-alias aac-vulcan='ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1 AAC-VULCAN -l root -p 8022'
-
-alias aac-pandora='ssh -oHostKeyAlgorithms=+ssh-rsa -oKexAlgorithms=+diffie-hellman-group1-sha1 AAC-PANDORA -l root -p 8022'
-
 
 # Alias's to change the directory
 alias web='cd /var/www/html'
@@ -121,7 +98,6 @@ alias da='date "+%Y-%m-%d %A %T %Z"'
 # Alias's to modified commands
 alias cp='cp -i'
 alias mv='mv -i'
-alias rm='rm -iv'
 alias mkdir='mkdir -p'
 alias ps='ps auxf'
 alias ping='ping -c 10'
@@ -133,7 +109,14 @@ alias freshclam='sudo freshclam'
 alias vi='vim'
 alias svi='sudo vi'
 alias vis='vim "+set si"'
-alias rm='trash-put'
+
+# Prefer trash-put (recoverable deletes) when available; otherwise fall back
+# to interactive+verbose rm so deletions still ask first and show what's removed.
+if command -v trash-put &> /dev/null; then
+	alias rm='trash-put'
+else
+	alias rm='rm -iv'
+fi
 
 # Change directory aliases
 alias home='cd ~'
@@ -215,7 +198,7 @@ alias untar='tar -xvf'
 alias unbz2='tar -xvjf'
 alias ungz='tar -xvzf'
 
-# Show all logs in /var/log
+# Logs and Process
 alias logs="sudo find /var/log -type f -exec file {} \; | grep 'text' | cut -d' ' -f1 | sed -e's/:$//g' | grep -v '[0-9]$' | xargs tail -f"
 
 alias psme="ps aux | awk -v user=\"\$(whoami)\" 'BEGIN {printf \"%-15s %-10s %-7s %-7s %-10s %s\n\", \"USER\", \"PID\", \"%CPU\", \"%MEM\", \"VSZ\", \"COMMAND\"} \$1 == user {printf \"%-15s %-10s %-7s %-7s %-10s %s\n\", \$1, \$2, \$3, \$4, \$5, substr(\$0, index(\$0,\$11))}'"
@@ -227,7 +210,6 @@ alias sha1='openssl sha1'
 # SPECIAL FUNCTIONS
 #######################################################
 
-# Extracts any archive(s) (if unp isn't installed)
 extract () {
 	for archive in $*; do
 		if [ -f $archive ] ; then
@@ -235,7 +217,7 @@ extract () {
 				*.tar.bz2)   tar xvjf $archive    ;;
 				*.tar.gz)    tar xvzf $archive    ;;
 				*.bz2)       bunzip2 $archive     ;;
-				*.rar)       rar x $archive       ;;
+                *.rar)       unrar x $archive     ;;
 				*.gz)        gunzip $archive      ;;
 				*.tar)       tar xvf $archive     ;;
 				*.tbz2)      tar xvjf $archive    ;;
@@ -256,10 +238,9 @@ search_file() {
     find / -name "$filename" -type f 2>/dev/null
 }
 
-# Searches for text in all files in the current folder
 ftext () {
     # Define the file extensions to exclude
-    local exclude_extensions=("*.bin" "*.exe" "*.o" "*.so" "*.dll" "*.map" "*.html" "*.js" "*.pb.h" "*.pb.cc" "*.pb.cpp")  # Add more extensions as needed
+    local exclude_extensions=("*.bin" "*.exe" "*.o" "*.so" "*.dll" "*.map" "*.html" "*.js" "*.pb.h" "*.pb.cc" "*.pb.cpp" "*.ts" "*.msg" "*.make" "*.cmake" "*.txt" "*.tsx" "*.tsx.snap" "Makefile2" "Makefile" "*.internal" "*.o.d" "*.internal" "*.installspace.in"  "*.develspace.in")
 
     # Print excluded extensions in red
     echo -e "\033[31mThe following extensions have been excluded from the search:\033[0m"
@@ -268,39 +249,44 @@ ftext () {
     done
 
     # Construct the find command to exclude specified extensions
-    local find_command="find . -type f ! \( "
-    
+    local exclusion_group=""
     for ext in "${exclude_extensions[@]}"; do
-        find_command+=" -name \"$ext\" -o"
+        if [ -z "$exclusion_group" ]; then
+            exclusion_group="-name \"$ext\""
+        else
+            exclusion_group="$exclusion_group -o -name \"$ext\""
+        fi
     done
-    
-    # Remove last '-o' and close parenthesis
-    find_command="${find_command% -o} \)"
+    local find_command="find . -type f ! \( $exclusion_group \)"
 
     # Execute the find command and pipe the results to grep
-    eval "$find_command" | xargs grep -iIHrn --color=always "$1" 2>/dev/null 
+    eval "$find_command" | xargs grep -iIHrn --color=always "$1" 2>/dev/null
 }
 
-# Copy file with a progress bar
-cpp()
-{
-	set -e
-	strace -q -ewrite cp -- "${1}" "${2}" 2>&1 \
-	| awk '{
-	count += $NF
-	if (count % 10 == 0) {
-		percent = count / total_size * 100
-		printf "%3d%% [", percent
-		for (i=0;i<=percent;i++)
-			printf "="
-			printf ">"
-			for (i=percent;i<100;i++)
-				printf " "
-				printf "]\r"
-			}
-		}
-	END { print "" }' total_size=$(stat -c '%s' "${1}") count=0
+ftextcount () {
+    # Define the file extensions to exclude (mirrors your ftext function)
+    local exclude_extensions=("*.bin" "*.exe" "*.o" "*.so" "*.dll" "*.map" "*.html" "*.js" "*.pb.h" "*.pb.cc" "*.pb.cpp" "*.ts" "*.msg" "*.make" "*.cmake" "*.txt" "*.tsx" "*.tsx.snap" "Makefile2" "Makefile" "*.internal" "*.o.d" "*.internal" "*.installspace.in"  "*.develspace.in")
+
+    # Print excluded extensions in red
+    echo -e "\033[31mExcluding standard extensions from count...\033[0m"
+
+    # Construct the find command to exclude specified extensions
+    local exclusion_group=""
+    for ext in "${exclude_extensions[@]}"; do
+        if [ -z "$exclusion_group" ]; then
+            exclusion_group="-name \"$ext\""
+        else
+            exclusion_group="$exclusion_group -o -name \"$ext\""
+        fi
+    done
+    local find_command="find . -type f ! \( $exclusion_group \)"
+
+    # Execute find, count occurrences (-c), filter out zero counts, and sort descending
+    eval "$find_command" | xargs grep -iIHc "$1" 2>/dev/null | awk -F: '$NF > 0' | sort -t: -k2 -nr
 }
+
+# Fast Copy with progress bar using rsync
+alias cpp='rsync -ah --info=progress2'
 
 # Goes up a specified number of directories  (i.e. up 4)
 up ()
@@ -324,129 +310,22 @@ pwdtail ()
 	pwd|awk -F/ '{nlast = NF -1;print $nlast"/"$NF}'
 }
 
-# Show the current distribution
-distribution ()
-{
-	local dtype
-	# Assume unknown
-	dtype="unknown"
-	
-	# First test against Fedora / RHEL / CentOS / generic Redhat derivative
-	if [ -r /etc/rc.d/init.d/functions ]; then
-		source /etc/rc.d/init.d/functions
-		[ zz`type -t passed 2>/dev/null` == "zzfunction" ] && dtype="redhat"
-	
-	# Then test against SUSE (must be after Redhat,
-	# I've seen rc.status on Ubuntu I think? TODO: Recheck that)
-	elif [ -r /etc/rc.status ]; then
-		source /etc/rc.status
-		[ zz`type -t rc_reset 2>/dev/null` == "zzfunction" ] && dtype="suse"
-	
-	# Then test against Debian, Ubuntu and friends
-	elif [ -r /lib/lsb/init-functions ]; then
-		source /lib/lsb/init-functions
-		[ zz`type -t log_begin_msg 2>/dev/null` == "zzfunction" ] && dtype="debian"
-	
-	# Then test against Gentoo
-	elif [ -r /etc/init.d/functions.sh ]; then
-		source /etc/init.d/functions.sh
-		[ zz`type -t ebegin 2>/dev/null` == "zzfunction" ] && dtype="gentoo"
-	
-	# For Mandriva we currently just test if /etc/mandriva-release exists
-	# and isn't empty (TODO: Find a better way :)
-	elif [ -s /etc/mandriva-release ]; then
-		dtype="mandriva"
-
-	# For Slackware we currently just test if /etc/slackware-version exists
-	elif [ -s /etc/slackware-version ]; then
-		dtype="slackware"
-
-	fi
-	echo $dtype
+# Modernized OS and Version checks
+distribution () {
+    grep '^ID=' /etc/os-release | cut -d= -f2 | tr -d '"'
 }
 
 # Show the current version of the operating system
-ver ()
-{
-	local dtype
-	dtype=$(distribution)
-
-	if [ $dtype == "redhat" ]; then
-		if [ -s /etc/redhat-release ]; then
-			cat /etc/redhat-release && uname -a
-		else
-			cat /etc/issue && uname -a
-		fi
-	elif [ $dtype == "suse" ]; then
-		cat /etc/SuSE-release
-	elif [ $dtype == "debian" ]; then
-		lsb_release -a
-		# sudo cat /etc/issue && sudo cat /etc/issue.net && sudo cat /etc/lsb_release && sudo cat /etc/os-release # Linux Mint option 2
-	elif [ $dtype == "gentoo" ]; then
-		cat /etc/gentoo-release
-	elif [ $dtype == "mandriva" ]; then
-		cat /etc/mandriva-release
-	elif [ $dtype == "slackware" ]; then
-		cat /etc/slackware-version
-	else
-		if [ -s /etc/issue ]; then
-			cat /etc/issue
-		else
-			echo "Error: Unknown distribution"
-			exit 1
-		fi
-	fi
+ver () {
+    grep '^PRETTY_NAME=' /etc/os-release | cut -d= -f2 | tr -d '"'
 }
 
-# Automatically install the needed support files for this .bashrc file
-install_bashrc_support ()
-{
-	local dtype
-	dtype=$(distribution)
 
-	if [ $dtype == "redhat" ]; then
-		sudo yum install multitail tree joe
-	elif [ $dtype == "suse" ]; then
-		sudo zypper install multitail
-		sudo zypper install tree
-		sudo zypper install joe
-	elif [ $dtype == "debian" ]; then
-		sudo apt-get install multitail tree joe
-	elif [ $dtype == "gentoo" ]; then
-		sudo emerge multitail
-		sudo emerge tree
-		sudo emerge joe
-	elif [ $dtype == "mandriva" ]; then
-		sudo urpmi multitail
-		sudo urpmi tree
-		sudo urpmi joe
-	elif [ $dtype == "slackware" ]; then
-		echo "No install support for Slackware"
-	else
-		echo "Unknown distribution"
-	fi
-}
 
-# Show current network information
-#!/bin/bash
+# Modernized Network Info
 
 netinfo() {
-     /sbin/ifconfig | awk '
-    /^([a-zA-Z0-9]+):/ {
-        iface = $1;
-        status = ($2 ~ /UP/) ? "UP" : "DOWN";
-        ip = "";
-    }
-    /^ *inet / {
-        ip = $2;
-    }
-    {
-        if (iface && (ip || status == "DOWN")) {
-            print iface, status, ip;
-            iface = "";  # Reset iface to avoid printing duplicate entries
-            ip = "";     # Reset ip for the next interface
-        }
-    }'
+    ip -br addr show | awk '{print $1, $2, $3}'
 }
 
 
@@ -491,39 +370,122 @@ trim()
 	echo -n "$var"
 }
 
+# Wipes all containers, images, volumes, and buildx cache via the Docker
+# CLI. Leaves the daemon running. Shared by docker-prune and fn_xclean.
+_docker_cli_wipe() {
+    echo "Clearing buildx builders and cache ...";
+    docker buildx ls --format "{{ .Name }}" 2>/dev/null | xargs -r -I{} docker buildx stop {} > /dev/null 2>&1
+    docker buildx ls --format "{{ .Name }}" 2>/dev/null | xargs -r -I{} docker buildx rm --force {} > /dev/null 2>&1
+    docker buildx prune --all --force > /dev/null 2>&1
+    echo "Stopping and removing all containers ...";
+    docker container ls --all --quiet | xargs -r docker container stop > /dev/null 2>&1
+    docker container ls --all --quiet | xargs -r docker container rm --force > /dev/null 2>&1
+    echo "Doing a full docker system prune ...";
+    docker system prune --all --force --volumes
+}
 
-docker-prune () 
-{ 
-    echo "Stopping docker ...";
-    sudo systemctl stop docker > /dev/null 2>&1;
-    echo "deleting all files in /var/lib/docker/*"
-    sudo rm -rf /var/lib/docker/*
-    echo "deleting all files in /var/lib/containerd/*"
-    sudo rm -rf /var/lib/containerd/*
-    echo "Clearing all buildx cache ...";
-    docker buildx ls --format "{{ .Name }}" | xargs -I{} docker buildx stop {} > /dev/null 2>&1;
-    docker buildx ls --format "{{ .Name }}" | xargs -I{} docker buildx rm --force {} > /dev/null 2>&1;
-    docker buildx ls --format "{{ .Name }}" | xargs -I{} docker buildx prune --all --force --builder {} > /dev/null 2>&1;
-    echo "Stopping and removing all containers and images ...";
-    docker container ls --all --quiet | xargs -I{} docker container stop {} > /dev/null 2>&1;
-    docker container ls --all --quiet | xargs -I{} docker container rm --force {} > /dev/null 2>&1;
-    docker image ls --all --quiet | xargs -I{} docker image rm --force {} > /dev/null 2>&1;
-    echo "Doing a full docker prune ...";
-    docker system prune --all --force --volumes > /dev/null 2>&1;
-    echo "Restarting docker and recreating builders ...";
-    sudo systemctl start docker;
-    runner host buildkit fix
+# Prints what will be destroyed and gives a few seconds to Ctrl-C before
+# continuing.
+_docker_wipe_warn() {
+    echo "This will remove ALL Docker containers, images, volumes, and build cache on this machine:"
+    docker container ls --all --format '  - %s (%s)' 2>/dev/null
+    echo "Ctrl-C in the next 4s to cancel ..."
+    sleep 4
+}
+
+# Routine use: docker-prune          -> CLI-level wipe only, daemon stays up.
+# Recovery from real corruption: docker-prune --deep -> also wipes Docker's
+# on-disk data directory directly, forcing a full daemon restart and a
+# re-pull of every image.
+docker-prune ()
+{
+    local deep=false
+    [[ "$1" == "--deep" ]] && deep=true
+
+    _docker_wipe_warn
+
+    if $deep; then
+        echo "DEEP CLEAN: stopping Docker and wiping /var/lib/docker + /var/lib/containerd directly."
+        sudo systemctl stop docker
+        sudo rm -rf /var/lib/docker/*
+        sudo rm -rf /var/lib/containerd/*
+        sudo systemctl start docker
+        sleep 2
+        # Internal builder-recreation command, not standard docker/OS
+        # tooling - guarded so it's a no-op on machines that don't have it.
+        command -v runner &> /dev/null && runner host buildkit fix
+    fi
+
+    _docker_cli_wipe
+
+    echo "*** Containers remaining:"
+    docker container ls
+    echo "*** Images remaining:"
+    docker image ls
+}
+
+
+fn_submodule_update()
+{
+  echo "Updated all submodules"
+  git submodule update --init --recursive --rebase --force
+}
+
+diskhealth() {
+    echo -e "\e[1;34m========================================================\e[0m"
+    echo -e "\e[1;34m                DISK & DOCKER USAGE DASHBOARD           \e[0m"
+    echo -e "\e[1;34m========================================================\e[0m"
+
+    echo -e "\n\e[1;33m[1] PHYSICAL DISK SPACE\e[0m"
+    df -h -x tmpfs -x squashfs -x devtmpfs -x efivarfs
+
+    echo -e "\n\e[1;33m[2] DOCKER STORAGE BREAKDOWN\e[0m"
+    if command -v docker &> /dev/null && docker info &> /dev/null; then
+        echo -e "Docker Storage Root: \e[1;31m$(docker info 2>/dev/null | grep 'Docker Root Dir' | awk '{print $NF}')\e[0m"
+        echo ""
+        docker system df
+    else
+        echo "Docker daemon is not running or lacks permissions."
+    fi
+
+    echo -e "\n\e[1;33m[3] SYSTEM CACHES & LOGS\e[0m"
+    # Systemd Journal Logs
+    if command -v journalctl &> /dev/null; then
+        JOURNAL_SIZE=$(journalctl --disk-usage 2>/dev/null | grep -oE '[0-9.]+[KMGTP]B?' | tail -n 1)
+        echo "  • Journal Logs: ${JOURNAL_SIZE:-Unknown}"
+    fi
+    # APT Cache (Debian/Ubuntu)
+    if [ -d /var/cache/apt/archives ]; then
+        echo "  • APT Package Cache: $(du -sh /var/cache/apt/archives 2>/dev/null | cut -f1)"
+    fi
+    # /var/log Size (no sudo) - only compute when the directory exists
+    if [ -d /var/log ]; then
+        projected_log_size=$(du -sh /var/log 2>/dev/null | cut -f1)
+        echo "  • Total /var/log Usage: $projected_log_size"
+    fi
+
+    echo -e "\n\e[1;34m========================================================\e[0m"
 }
 
 ######################################################################
 # xclean
-#   Cleans up all Python virtual environments/caches and Docker
-#   things. Useful when you want a fresh start, such as
-#   when you begin a new branch. It can also free up quite a bit of
-#   space in your development environment (VM).
+#   Cleans up Python virtual environments/caches and build "work" dirs
+#   inside the current git repo. Useful when you want a fresh start,
+#   such as when you begin a new branch.
+#
+#   Docker cleanup is opt-in (xclean --docker) rather than automatic:
+#   the Python cleanup above is scoped to the current repo, but a full
+#   Docker prune is machine-wide.
 
 fn_xclean() {
-    toplevel="$(git rev-parse --show-toplevel)"
+    local clean_docker=false
+    [[ "$1" == "--docker" ]] && clean_docker=true
+
+    toplevel="$(git rev-parse --show-toplevel 2>/dev/null)"
+    if [[ -z "$toplevel" ]]; then
+        echo "Not inside a git repo - aborting."
+        return 1
+    fi
 
     echo "$(date +%H:%M:%S) *** ================================================================================"
     echo "$(date +%H:%M:%S) *** Cleaning up Python virtual environments."
@@ -541,7 +503,7 @@ fn_xclean() {
         )
     fi
     echo
-    
+
     echo "$(date +%H:%M:%S) *** ================================================================================"
     echo "$(date +%H:%M:%S) *** Cleaning up Python caches."
     echo "$(date +%H:%M:%S) *** --------------------------"
@@ -573,42 +535,20 @@ fn_xclean() {
     fi
     echo
 
-    echo "$(date +%H:%M:%S) *** ================================================================================"
-    echo "$(date +%H:%M:%S) *** Stopping Docker."
-    echo "$(date +%H:%M:%S) *** ----------------"
-    sudo systemctl stop docker
-    echo
-
-    echo "$(date +%H:%M:%S) *** ================================================================================"
-    echo "$(date +%H:%M:%S) *** Cleaning up Docker image caches."
-    echo "$(date +%H:%M:%S) *** --------------------------------"
-    docker buildx prune -f 2> /dev/null
-    echo
-
-    echo "$(date +%H:%M:%S) *** ================================================================================"
-    echo "$(date +%H:%M:%S) *** Pruning system."
-    echo "$(date +%H:%M:%S) *** ---------------"
-    docker system prune --all --force --volumes
-    docker image prune -a -f
-    echo
-
-    echo "$(date +%H:%M:%S) *** ================================================================================"
-    echo "$(date +%H:%M:%S) *** Deleting Docker images."
-    echo "$(date +%H:%M:%S) *** -----------------------"
-    image_cont="$(docker image ls | awk '$1 != "REPOSITORY" {print $3}')"
-    if [[ -n "${image_cont}" ]] ; then
-        docker image rm ${image_cont}
+    if $clean_docker; then
+        echo "$(date +%H:%M:%S) *** ================================================================================"
+        echo "$(date +%H:%M:%S) *** Docker cleanup (--docker passed - this is machine-wide, not repo-scoped)."
+        echo "$(date +%H:%M:%S) *** -------------------------------------------------------------------------"
+        _docker_wipe_warn
+        sudo systemctl stop docker
+        _docker_cli_wipe
+        sudo systemctl start docker
+        echo "*** Containers remaining:"
+        docker container ls
+        echo "*** Images remaining:"
+        docker image ls
+        echo
     fi
-    echo
-
-    echo "$(date +%H:%M:%S) *** ================================================================================"
-    echo "$(date +%H:%M:%S) *** Showing current status."
-    echo "$(date +%H:%M:%S) *** -----------------------"
-    echo "*** Containers remaining:"
-    docker container ls
-    echo "*** Images remaining:"
-    docker image ls
-    echo
 
     echo "$(date +%H:%M:%S) *** ================================================================================"
     echo "$(date +%H:%M:%S) *** Finished."
@@ -624,118 +564,75 @@ alias xclean='fn_xclean'
 alias cpu="grep 'cpu ' /proc/stat | awk '{usage=(\$2+\$4)*100/(\$2+\$4+\$5)} END {print usage}' | awk '{printf(\"%.1f\n\", \$1)}'"
 function __setprompt
 {
-	local LAST_COMMAND=$? # Must come first!
+    local LAST_COMMAND=$?
 
-	# Define colors
-	local LIGHTGRAY="\033[0;37m"
-	local WHITE="\033[1;37m"
-	local BLACK="\033[0;30m"
-	local DARKGRAY="\033[1;30m"
-	local RED="\033[0;31m"
-	local LIGHTRED="\033[1;31m"
-	local GREEN="\033[0;32m"
-	local LIGHTGREEN="\033[1;32m"
-	local BROWN="\033[0;33m"
-	local YELLOW="\033[1;33m"
-	local BLUE="\033[0;34m"
-	local LIGHTBLUE="\033[1;34m"
-	local MAGENTA="\033[0;35m"
-	local LIGHTMAGENTA="\033[1;35m"
-	local CYAN="\033[0;36m"
-	local LIGHTCYAN="\033[1;36m"
-	local NOCOLOR="\033[0m"
+    local LIGHTGRAY="\033[0;37m"
+    local WHITE="\033[1;37m"
+    local DARKGRAY="\033[1;30m"
+    local RED="\033[0;31m"
+    local LIGHTRED="\033[1;31m"
+    local GREEN="\033[0;32m"
+    local BROWN="\033[0;33m"
+    local BLUE="\033[0;34m"
+    local MAGENTA="\033[0;35m"
+    local CYAN="\033[0;36m"
+    local NOCOLOR="\033[0m"
 
-	# Show error exit code if there is one
-	if [[ $LAST_COMMAND != 0 ]]; then
-		# PS1="\[${RED}\](\[${LIGHTRED}\]ERROR\[${RED}\])-(\[${LIGHTRED}\]Exit Code \[${WHITE}\]${LAST_COMMAND}\[${RED}\])-(\[${LIGHTRED}\]"
-		PS1="\[${DARKGRAY}\](\[${LIGHTRED}\]ERROR\[${DARKGRAY}\])-(\[${RED}\]Exit Code \[${LIGHTRED}\]${LAST_COMMAND}\[${DARKGRAY}\])-(\[${RED}\]"
-		if [[ $LAST_COMMAND == 1 ]]; then
-			PS1+="General error"
-		elif [ $LAST_COMMAND == 2 ]; then
-			PS1+="Missing keyword, command, or permission problem"
-		elif [ $LAST_COMMAND == 126 ]; then
-			PS1+="Permission problem or command is not an executable"
-		elif [ $LAST_COMMAND == 127 ]; then
-			PS1+="Command not found"
-		elif [ $LAST_COMMAND == 128 ]; then
-			PS1+="Invalid argument to exit"
-		elif [ $LAST_COMMAND == 129 ]; then
-			PS1+="Fatal error signal 1"
-		elif [ $LAST_COMMAND == 130 ]; then
-			PS1+="Script terminated by Control-C"
-		elif [ $LAST_COMMAND == 131 ]; then
-			PS1+="Fatal error signal 3"
-		elif [ $LAST_COMMAND == 132 ]; then
-			PS1+="Fatal error signal 4"
-		elif [ $LAST_COMMAND == 133 ]; then
-			PS1+="Fatal error signal 5"
-		elif [ $LAST_COMMAND == 134 ]; then
-			PS1+="Fatal error signal 6"
-		elif [ $LAST_COMMAND == 135 ]; then
-			PS1+="Fatal error signal 7"
-		elif [ $LAST_COMMAND == 136 ]; then
-			PS1+="Fatal error signal 8"
-		elif [ $LAST_COMMAND == 137 ]; then
-			PS1+="Fatal error signal 9"
-		elif [ $LAST_COMMAND -gt 255 ]; then
-			PS1+="Exit status out of range"
-		else
-			PS1+="Unknown error code"
-		fi
-		PS1+="\[${DARKGRAY}\])\[${NOCOLOR}\]\n"
-	else
-		PS1=""
-	fi
+    if [[ $LAST_COMMAND != 0 ]]; then
+        PS1="\[${DARKGRAY}\](\[${LIGHTRED}\]ERROR\[${DARKGRAY}\])-(\[${RED}\]Exit \[${LIGHTRED}\]${LAST_COMMAND}\[${DARKGRAY}\])\n"
+    else
+        PS1=""
+    fi
 
-	# Date
-	PS1+="\[${DARKGRAY}\](\[${CYAN}\]\$(date +%a) $(date +%b-'%-m')" # Date
-	PS1+="${BLUE} $(date +'%-I':%M:%S%P)\[${DARKGRAY}\])-" # Time
+    # Native Bash Time/Date (Zero latency)
+    PS1+="\[${DARKGRAY}\](\[${CYAN}\]\d\[${BLUE}\] \@\[${DARKGRAY}\])-"
 
-	# CPU
-	PS1+="(\[${MAGENTA}\]CPU $(cpu)%"
+    # Jobs
+    PS1+="(\[${MAGENTA}\]Jobs:\j\[${DARKGRAY}\])-"
 
-	# Jobs
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]\j"
+    # User and server
+    if [ -n "$SSH_CLIENT" ] || [ -n "$SSH2_CLIENT" ] ; then
+        PS1+="(\[${RED}\]\u@\h"
+    else
+        PS1+="(\[${RED}\]\u"
+    fi
 
-	# Network Connections (for a server - comment out for non-server)
-	PS1+="\[${DARKGRAY}\]:\[${MAGENTA}\]Net $(awk 'END {print NR}' /proc/net/tcp)"
+    # Current directory
+    PS1+="\[${DARKGRAY}\]:\[${BROWN}\]\w\[${DARKGRAY}\])\n"
 
-	PS1+="\[${DARKGRAY}\])-"
+    # User prompt
+    if [[ $EUID -ne 0 ]]; then
+        PS1+="\[${GREEN}\]>\[${NOCOLOR}\] "
+    else
+        PS1+="\[${RED}\]>\[${NOCOLOR}\] "
+    fi
 
-	# User and server
-	local SSH_IP=`echo $SSH_CLIENT | awk '{ print $1 }'`
-	local SSH2_IP=`echo $SSH2_CLIENT | awk '{ print $1 }'`
-	if [ $SSH2_IP ] || [ $SSH_IP ] ; then
-		PS1+="(\[${RED}\]\u@\h"
-	else
-		PS1+="(\[${RED}\]\u"
-	fi
-
-	# Current directory
-	PS1+="\[${DARKGRAY}\]:\[${BROWN}\]\w\[${DARKGRAY}\])-"
-
-	# Total size of files in current directory
-	PS1+="(\[${GREEN}\]$(/bin/ls -lah | /bin/grep -m 1 total | /bin/sed 's/total //')\[${DARKGRAY}\]:"
-
-	# Number of files
-	PS1+="\[${GREEN}\]\$(/bin/ls -A -1 | /usr/bin/wc -l)\[${DARKGRAY}\])"
-
-	# Skip to the next line
-	PS1+="\n"
-
-	if [[ $EUID -ne 0 ]]; then
-		PS1+="\[${GREEN}\]>\[${NOCOLOR}\] " # Normal user
-	else
-		PS1+="\[${RED}\]>\[${NOCOLOR}\] " # Root user
-	fi
-
-	# PS2 is used to continue a command using the \ character
-	PS2="\[${DARKGRAY}\]>\[${NOCOLOR}\] "
-
-	# PS3 is used to enter a number choice in a script
-	PS3='Please enter a number from above list: '
-
-	# PS4 is used for tracing a script in debug mode
-	PS4='\[${DARKGRAY}\]+\[${NOCOLOR}\] '
+    PS2="\[${DARKGRAY}\]>\[${NOCOLOR}\] "
+    PS3='Please enter a number from above list: '
+    PS4='\[${DARKGRAY}\]+\[${NOCOLOR}\] '
 }
-PROMPT_COMMAND='__setprompt'
+
+# Runs before every prompt: sync history immediately, then build the prompt.
+PROMPT_COMMAND='history -a; __setprompt'
+umask 022
+
+# Persist the ssh-agent's environment to a file and source it on shell
+# start, so every new shell reuses the same agent instead of starting a
+# fresh one that only the current shell knows about.
+SSH_ENV="$HOME/.ssh/agent-environment"
+
+fn_start_ssh_agent() {
+    echo "Starting new ssh-agent..."
+    ssh-agent -s > "$SSH_ENV"
+    chmod 600 "$SSH_ENV"
+    . "$SSH_ENV" > /dev/null
+}
+
+if [ -f "$SSH_ENV" ]; then
+    . "$SSH_ENV" > /dev/null
+    if ! kill -0 "$SSH_AGENT_PID" 2>/dev/null; then
+        fn_start_ssh_agent
+    fi
+else
+    fn_start_ssh_agent
+fi
