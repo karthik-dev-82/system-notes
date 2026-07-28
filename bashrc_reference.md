@@ -17,22 +17,6 @@ Documents everything in `bashrc_work`. The `bashrc_local` variant is identical e
 | `CLICOLOR=1` / `LS_COLORS` | Color-codes `ls` output by file type/extension. |
 | `LESS_TERMCAP_*` | Colors bold/underline text in `man` pages viewed through `less`. |
 
-## Company-specific (work environment only)
-
-Everything here is tied to this employer's internal hosts and registries. Present in `bashrc_work`, absent from `bashrc_local`.
-
-| Alias | What it does |
-| --- | --- |
-| `export PATH=...:/home/alice/.local/bin/` | Adds the local bin directory used by the internal "SDT runner" tool to `PATH`. |
-| `ops-middle-katy`, `ops-ds9`, `ops-twobig`, `ops-vangogh`, `ops-ot-lenovo`, `ops-ot-airtop`, `ot-ops-lite` | SSH shortcuts to various internal `OPS-*` hosts (port 8022, user `bob`). |
-| `dev-ops` | SSH into `RctDevVmKarthik` as user `developer`. |
-| `dev-dvs` | SSH into `DEV-DVS` (port 8022, user `bob`). |
-| `local-egret` | SSH into `EGRET-LOCAL` (port 8022, user `bob`). |
-| `aac-vulcan`, `aac-pandora`, `dev-aac` | SSH into legacy `AAC-*` hosts as root, forcing weak/deprecated `ssh-rsa` host keys and `diffie-hellman-group1-sha1` key exchange — needed for old firmware, but a known-weak KEX (vulnerable to Logjam). |
-| `mon` | SSH to `OPS-VANGOGH` and runs `monlayout` (a monitoring layout tool) — uses `sshpass` with a **plaintext password** embedded in the alias. |
-| `sim` | Same host/credentials as `mon`, runs `testsim` instead. |
-| `cmccu` | Runs the internal `tl-wine-ccu` Docker image (pinned tag `2025-08-08`) with X11 forwarding (`xhost +`/`xhost -`) for a GUI tool inside the container. |
-| `cmr_ccu` | Same as `cmccu` but pulls the `:latest` tag instead of a pinned date. |
 
 ## General aliases
 
