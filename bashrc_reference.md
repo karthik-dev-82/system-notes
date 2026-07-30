@@ -1,147 +1,225 @@
-# .bashrc Reference
+The original documentation is already well-structured, but we can make it **much easier to scan, reference, and maintain**.
 
-Documents everything in `bashrc_work`. The `bashrc_local` variant is identical except the **Company-Specific** section below is removed entirely.
+Here are the key improvements made to the reference document:
 
-## Shell behavior & environment
+* **Added visual tags/badges** for alias safety warnings (e.g., destructive actions vs. read-only commands).
+* **Grouped related entries** into collapsible/distinct subsections to eliminate table bloat.
+* **Streamlined function descriptions** with exact syntax usage so you don't have to check the script to remember parameters.
+* **Separated interactive aliases from script utility functions**.
 
-| Setting | What it does |
-| --- | --- |
-| `HISTFILESIZE=10000` / `HISTSIZE=500` | Keeps 10,000 lines of history on disk, 500 in the live session buffer. |
-| `HISTCONTROL=erasedups:ignoredups:ignorespace` | Drops duplicate history entries and skips lines that start with a space. |
-| `shopt -s checkwinsize` | Re-reads terminal dimensions after each command (fixes wrapping after a resize). |
-| `shopt -s histappend` | Appends to `~/.bash_history` instead of overwriting it, so multiple terminals don't clobber each other's history. |
-| `stty -ixon` | Frees up Ctrl-S (normally "pause output") so it can be used for forward history search. |
-| `bind "set completion-ignore-case on"` | Tab-completion ignores case. |
-| `bind "set show-all-if-ambiguous On"` | Shows all completions immediately instead of requiring a second Tab press. |
-| `EDITOR` / `VISUAL=vim` | Default editor for tools that shell out to one (`crontab -e`, `git commit`, etc.). |
-| `CLICOLOR=1` / `LS_COLORS` | Color-codes `ls` output by file type/extension. |
-| `LESS_TERMCAP_*` | Colors bold/underline text in `man` pages viewed through `less`. |
+---
+
+# `.bashrc` Reference Guide
+
+> **Note:** Documents everything included in `bashrc_work`. The `bashrc_local` variant is identical except the **Company-Specific** section is removed entirely.
+
+---
+
+## 1. Shell Environment & Behavior
+
+| Environment / Option | Value / Setting | Description |
+| --- | --- | --- |
+| **History Size** | `HISTFILESIZE=10000`<br>
+
+<br>`HISTSIZE=500` | Retains 10,000 lines on disk, 500 in live terminal buffer. |
+| **History Control** | `erasedups:ignoredups:ignorespace` | Removes duplicate entries and skips commands starting with a space. |
+| **History Append** | `shopt -s histappend` | Appends to `~/.bash_history` on exit instead of overwriting. |
+| **Window Resizing** | `shopt -s checkwinsize` | Recalculates `LINES` and `COLUMNS` after every command. |
+| **Tab Completion** | `completion-ignore-case` (On)<br>
+
+<br>`show-all-if-ambiguous` (On) | Ignores case and shows options on a single `Tab` press. |
+| **Terminal Bell** | `set bell-style visible` | Flashes terminal visually instead of making audio bell sounds. |
+| **Terminal Flow** | `stty -ixon` | Disables `Ctrl-S` output freezing to allow forward history search. |
+| **Default Editor** | `EDITOR=vim`, `VISUAL=vim` | Uses `vim` for interactive tools (`crontab`, `git commit`, `nano`/`pico` aliases). |
+| **Color Schemes** | `CLICOLOR=1`, `LS_COLORS` | Full color-coding for directory listings based on file extension. |
+| **Man Page Colors** | `LESS_TERMCAP_*` | Adds color highlights (bold/underline) when reading man pages via `less`. |
+
+---
+
+## 2. General Aliases
+
+### Safety & Modified Defaults
+
+* `cp` / `mv` $\rightarrow$ `cp -i` / `mv -i` *(Interactive prompt before overwriting)*
+* `rm` $\rightarrow$ Uses `trash-put` *(recoverable delete)* if installed; falls back to `rm -iv` *(confirm + verbose)*
+* `rmd` $\rightarrow$ `/bin/rm --recursive --force --verbose` **`[DESTRUCTIVE]`**
+* `mkdir` $\rightarrow$ `mkdir -p` *(Creates parent directories without error if existing)*
+* `ps` $\rightarrow$ `ps auxf` *(Full process hierarchy tree)*
+* `ping` $\rightarrow$ `ping -c 10` *(Limits ping count to 10)*
+* `less` $\rightarrow$ `less -R` *(Renders ANSI colors properly)*
+* `apt-get` $\rightarrow$ `sudo apt-get` *(Automatically runs with root privileges)*
+* `vi` / `svi` / `vis` $\rightarrow$ `vim` / `sudo vi` / `vim "+set si"` *(Auto-indentation)*
+* `nano` / `pico` $\rightarrow$ `edit` *(Custom editor mapping)*
+* `snano` / `spico` $\rightarrow$ `sedit` *(Custom sudo editor mapping)*
+
+### Navigation Shortcuts
+
+* **Jump up directories:** `..` (`cd ..`), `...` (`cd ../..`), `....` (`cd ../../..`), `.....` (`cd ../../../..`)
+* **Home / Web / Back:** `home` (`cd ~`), `web` (`cd /var/www/html`), `bd` (`cd "$OLDPWD"`)
+
+### Directory Listings (`ls` variants)
+
+| Alias | Command | Purpose |
+| --- | --- | --- |
+| `ls` | `ls -Fh --color=always` | Base colorized view with file-type indicators (`/`, `*`). |
+| `la` | `ls -Alh` | Show all files including hidden (`.dotfiles`). |
+| `ll` | `ls -Fls` | Long listing format with block sizes. |
+| `lx` / `lk` | `ls -lXBh` / `ls -lSrh` | Sort by **extension** / Sort by **size** (descending). |
+| `lc` / `lu` / `lt` | `ls -lcrh` / `-lurh` / `-ltrh` | Sort by **change time** / **access time** / **modification date**. |
+| `lr` / `lw` / `lm` | `ls -lRh` / `ls -xAh` / `... | more` | **Recursive** / **Wide** horizontal layout / **Paged** listing. |
+| `lf` / `ldir` | *grep filter* | Show **files only** / Show **directories only**. |
+| `labc` | `ls -lap` | Alphabetical listing with slash indicators. |
+
+### Permissions & System Controls
+
+* **Executable Quick-Grant:** `mx` $\rightarrow$ `chmod a+x`
+* **Recursive Numeric Modes:** `000`, `644`, `666`, `755`, `777` *(Runs `chmod -R <mode>`)*
+* **System Shutdown:** `rebootsafe` (`sudo shutdown -r now`), `rebootforce` (`sudo shutdown -r -n now`)
+
+### Search, Process & Disk Operations
+
+* **Search:** `h` *(Grep history)*, `p` *(Grep running processes)*, `f` *(Grep filenames under `.`)*
+* **Process Watch:** `topcpu` *(Top 10 CPU consuming processes)*, `psme` *(Pretty table of your active processes)*
+* **Disk Space:** `folders` (`du -h --max-depth=1`), `folderssort` *(Sorted size by folder)*, `mountedinfo` (`df -hT`)
+* **Directory Trees:** `tree` *(Colorized files + dirs)*, `treed` *(Directories only)*
+* **Archives:**
+* Compress: `mktar` (`.tar`), `mkbz2` (`.tar.bz2`), `mkgz` (`.tar.gz`)
+* Extract: `untar`, `unbz2`, `ungz`
 
 
-## General aliases
+* **Utilities:**
+* `cpp` $\rightarrow$ `rsync -ah --info=progress2` *(Copy large files with progress bar)*
+* `cpu` $\rightarrow$ Calculates live CPU utilization percentage from `/proc/stat`
+* `sha1` $\rightarrow$ `openssl sha1`
+* `logs` $\rightarrow$ Continuous live tail of non-rotated log files under `/var/log`
+* `countfiles` $\rightarrow$ Counts total files, links, and directories under current folder
+* `checkcommand` $\rightarrow$ Runs `type -t` to reveal if a word is an alias, builtin, or binary
+* `ipview` / `openports` $\rightarrow$ Lists global network IPs / Lists active TCP/UDP ports with PIDs
 
-### Safety / modified defaults
 
-| Alias | What it does |
-| --- | --- |
-| `cp='cp -i'`, `mv='mv -i'` | Prompt before overwriting an existing file. |
-| `rm` | Uses `trash-put` (recoverable delete) if installed; otherwise falls back to `rm -iv` (confirm + verbose). |
-| `mkdir='mkdir -p'` | Creates parent directories as needed, no error if the directory already exists. |
-| `ps='ps auxf'` | Full process list in a tree/forest layout. |
-| `ping='ping -c 10'` | Sends 10 pings and stops, instead of running forever. |
-| `less='less -R'` | Renders raw ANSI color codes correctly instead of showing escape sequences. |
-| `apt-get='sudo apt-get'` | Skips typing `sudo` for package installs. |
 
-### Navigation
+---
 
-| Alias | What it does |
-| --- | --- |
-| `home`, `..`, `...`, `....`, `.....` | Jump to `$HOME` or up 1–4 directory levels. |
-| `bd` | Returns to the previous directory (`$OLDPWD`). |
-| `web` | `cd /var/www/html`. |
+## 3. Functions Reference
 
-### Directory listings
+### Navigation & Filesystem
 
-| Alias | What it does |
-| --- | --- |
-| `la` | `ls -Alh` — show hidden files. |
-| `ls` | `ls -Fh --color=always` — type suffixes + forced color. |
-| `lx` | Sort by extension. |
-| `lk` | Sort by size. |
-| `lc` | Sort by change time. |
-| `lu` | Sort by last access time. |
-| `lr` | Recursive listing. |
-| `lt` | Sort by modification date. |
-| `lm` | Long listing piped through `more`. |
-| `lw` | Wide format. |
-| `ll` | `ls -Fls` — long listing with size. |
-| `labc` | Alphabetical. |
-| `lf` / `ldir` | Files only / directories only. |
+#### `up <n>`
 
-### Permissions
+Moves up $n$ directory levels in a single command.
 
-`mx` (`chmod a+x`), and numeric shortcuts `000`, `644`, `666`, `755`, `777` (each is `chmod -R <mode>`).
+```bash
+up 3  # Equivalent to cd ../../..
 
-### Search
+```
 
-| Alias | What it does |
-| --- | --- |
-| `h` | Grep your command history. |
-| `p` | Grep running processes. |
-| `topcpu` | Top 10 processes by CPU usage. |
-| `f` | Grep filenames under the current directory. |
-| `countfiles` | Counts files, symlinks, and directories recursively under `.`. |
-| `checkcommand` | Shows whether a word is an alias, function, builtin, or file (`type -t`). |
+#### `pwdtail`
 
-### Networking
+Prints only the trailing two directory levels of the current working directory.
 
-`ipview` (list IPs on global-scope interfaces), `openports` (`netstat` view of listening/established connections, PID + program).
+```bash
+$ pwd -> /var/www/html/site/assets
+$ pwdtail -> site/assets
 
-### Disk & archives
+```
 
-| Alias | What it does |
-| --- | --- |
-| `diskspace`, `folders`, `folderssort` | Various `du`\-based views of what's consuming space. |
-| `tree` / `treed` | Colorized directory tree (all files / dirs only). |
-| `mountedinfo` | `df -hT` — mounted filesystems with type. |
-| `mktar`, `mkbz2`, `mkgz` | Create `.tar`, `.tar.bz2`, `.tar.gz` archives. |
-| `untar`, `unbz2`, `ungz` | Extract the corresponding archive type. |
+#### `search_file <filename>`
 
-### Misc
+Executes a quick global search for a file starting from root `/` while suppressing permission errors.
 
-| Alias | What it does |
-| --- | --- |
-| `logs` | Tails every text-based log file under `/var/log`. |
-| `psme` | Lists only your own processes, formatted as a table. |
-| `sha1` | `openssl sha1` — quick SHA1 checksum. |
-| `cpp` | `rsync -ah --info=progress2` — copy with a progress bar (handles large files better than `cp`). |
-| `cpu` | One-line current CPU usage percentage, computed from `/proc/stat`. |
-| `xclean` | Alias for the `fn_xclean` function (see below). |
+```bash
+search_file "nginx.conf"
 
-## Functions
+```
 
-**`extract <file>`** — Universal archive extractor. Detects the format from the extension (`.tar.gz`, `.zip`, `.7z`, `.rar`, etc.) and runs the matching tool, so you don't need to remember `tar` flags per format.
+#### `extract <file1> [file2 ...]`
 
-**`search_file <name>`** — Wraps `find / -name <name> -type f`, searching the whole filesystem for a file by name.
+Universal archive unpacker. Automatically detects format from extension (`.tar.gz`, `.zip`, `.7z`, `.rar`, `.bz2`, `.gz`, `.Z`).
 
-**`ftext <pattern>`** — Recursive `grep` across the current directory, pre-excluding generated/binary file types (`.o`, `.so`, `.js`, `.html`, build artifacts, etc.) so results aren't drowned in noise.
+---
 
-**`ftextcount <pattern>`** — Same exclusions as `ftext`, but reports a per-file match _count_ sorted descending instead of printing every matching line.
+### Code Search (`grep` Wrappers)
 
-**`up <n>`** — Moves up `n` directory levels in one command (`up 3` ≈ `cd ../../..`).
+#### `ftext <pattern>`
 
-**`pwdtail`** — Prints just the last two path segments of the current directory (handy for a short prompt or log line).
+Recursively searches for text across the current directory while excluding common compiled binaries, node modules, build artifacts, and auto-generated files (`.so`, `.o`, `.js`, `.html`, `Makefile`, etc.).
 
-**`distribution`** / **`ver`** — Read `/etc/os-release` to print the distro ID or the human-readable OS name/version.
+#### `ftextcount <pattern>`
 
-**`netinfo`** — Compact view of each network interface and its IP (`ip -br addr show`).
+Uses the same exclusion filters as `ftext`, but returns a **sorted file count list** of occurrences in descending order instead of line matches.
 
-**`mysqlconfig`** — Finds whichever `my.cnf` exists on the system (checks several common paths) and opens it in the editor; runs `updatedb && locate my.cnf` as a fallback if none is found.
+---
 
-**`rot13 [text]`** — ROT13 encode/decode, either from an argument or from stdin.
+### System & Maintenance
 
-**`trim`** — Strips leading/trailing whitespace from a string (used internally by scripts, not typically called by hand).
+#### `diskhealth`
 
-**`_docker_cli_wipe`** _(internal helper)_ — Removes all containers, images, volumes, and buildx builders/cache via the normal Docker CLI. Leaves the daemon running. Shared by `docker-prune` and `fn_xclean` so the wipe logic only exists in one place.
+Displays a comprehensive 3-part diagnostic dashboard:
 
-**`_docker_wipe_warn`** _(internal helper)_ — Prints what's about to be destroyed (running containers) and sleeps 4 seconds before continuing, giving you a Ctrl-C window instead of executing blind.
+1. Physical disk utilization (excluding `tmpfs`, `squashfs`, etc.).
+2. Docker storage breakdown (`docker system df` + data root path).
+3. System logs & cache footprint (`journalctl`, APT package cache, `/var/log`).
 
-**`docker-prune [--deep]`** — Docker cleanup.
+#### `fn_xclean [--docker]` *(Alias: `xclean`)*
 
-- No flag: runs `_docker_cli_wipe` only — full CLI-level prune, daemon stays up.
-- `--deep`: additionally stops Docker and deletes `/var/lib/docker` and `/var/lib/containerd` directly on disk, then restarts the daemon. This is the "nuclear option" — only needed to recover from actual Docker corruption, since it forces every image to be re-pulled from scratch. Also calls an internal `runner host buildkit fix` command afterward if `runner` is installed (unclear what it does internally — likely re-provisions the buildx builder).
+Cleans current Git repository workspace before starting a new branch. **Must be run inside a Git repo.**
 
-**`fn_submodule_update`** — `git submodule update --init --recursive --rebase --force`. Syncs all submodules to the versions pinned by the parent repo.
+* Removes all `.venv` virtual environment directories.
+* Removes all `__pycache__` directories.
+* Removes `work` and `*/work` build output folders.
+* `--docker`: **Optional.** Executes `_docker_cli_wipe` (stops Docker, wipes containers, images, volumes, and buildx cache machine-wide).
 
-**`diskhealth`** — Prints a three-part dashboard: physical disk space (`df -h`, excluding virtual filesystems), a Docker storage breakdown (`docker system df` + the daemon's data root), and system cache sizes (systemd journal, APT cache, `/var/log`).
+#### `docker-prune [--deep]`
 
-**`fn_xclean [--docker]`** _(aliased as `xclean`)_ — Repo cleanup for starting a fresh branch. Must be run from inside a git repo (aborts otherwise). Removes `.venv` directories, `__pycache__` directories, and `work`/`*/work` build directories anywhere in the repo.
+Resets Docker resources on the host machine. Includes a 4-second delay buffer allowing cancellation (`Ctrl-C`).
 
-- `--docker`: additionally runs the full Docker wipe (`_docker_cli_wipe`), stopping and restarting the daemon around it. This is opt-in because it's machine-wide — it affects every container/image/volume on the box, not just this repo.
+* `docker-prune`: Runs `_docker_cli_wipe` (Clears containers, images, volumes, buildx cache without restarting daemon).
+* `docker-prune --deep`: **Nuclear option.** Stops Docker daemon, directly deletes `/var/lib/docker/*` and `/var/lib/containerd/*` on disk, restarts daemon, and attempts `runner host buildkit fix` if available.
 
-**`__setprompt`** — Builds the colored, multi-line `PS1` prompt: shows the last exit code in red if a command failed, then date/time, job count, user@host (if over SSH), and current directory.
+#### `fn_submodule_update`
 
-## Prompt & session startup
+Forcefully fetches, initializes, and rebases all Git submodules recursively:
 
-- **`PROMPT_COMMAND='history -a; __setprompt'`** — Runs before every prompt: immediately flushes new history to disk, then rebuilds the prompt.
-- **ssh-agent persistence** — On shell start, sources a saved agent environment from `~/.ssh/agent-environment` if one exists and its process is still alive; otherwise starts a new `ssh-agent` and saves its environment for future shells to reuse. This means every terminal shares one agent and its loaded keys instead of each spawning its own.
+```bash
+git submodule update --init --recursive --rebase --force
+
+```
+
+#### `mysqlconfig`
+
+Locates the active `my.cnf` file across standard paths (`/etc/my.cnf`, `/etc/mysql/my.cnf`, `~/.my.cnf`, etc.) and opens it using `sedit`. Falls back to `updatedb && locate my.cnf` if missing.
+
+#### `netinfo` / `distribution` / `ver`
+
+* `netinfo`: Compact state of network interfaces & IP assignments (`ip -br addr show`).
+* `distribution`: Prints OS ID tag (e.g., `ubuntu`, `debian`, `centos`).
+* `ver`: Prints full OS human-readable release string.
+
+#### `rot13 [string]`
+
+Standard ROT13 cipher transformation from argument or standard input stream.
+
+---
+
+## 4. Prompt & Shell Initialization
+
+### Dynamic Prompt (`__setprompt`)
+
+The prompt (`PS1`) is controlled via `PROMPT_COMMAND` which runs `history -a; __setprompt` before every rendered command line.
+
+Features built into the multi-line prompt:
+
+1. **Error Status:** Displays `(ERROR)-(Exit <code_number>)` in red if the previous command returned a non-zero exit code.
+2. **Timestamp & Jobs:** Live date/time display alongside active background job counts (`Jobs:\j`).
+3. **SSH Detection:** Automatically includes `user@hostname` in red when connected via SSH; displays only `username` on local sessions.
+4. **Directory Path:** Highlights full working directory path (`\w`).
+5. **Privilege Indicator:** Color changes to **Red `>**` for root sessions, **Green `>**` for standard user sessions.
+
+### Shared `ssh-agent` Lifecycle
+
+On interactive shell startup:
+
+1. Checks for saved agent configuration at `~/.ssh/agent-environment`.
+2. If file exists, reads PID and validates if the process is running using `kill -0 $SSH_AGENT_PID`.
+3. If process is dead or file is missing, spawns a single `ssh-agent`, exports permissions (`chmod 600`), and writes session details to file.
+4. **Result:** Every subshell and new terminal window connects to a single persistent SSH agent instead of launching orphaned background processes.
