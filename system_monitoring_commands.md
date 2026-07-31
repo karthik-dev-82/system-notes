@@ -6,11 +6,11 @@ A comprehensive, practical cheatsheet for monitoring Linux process performance, 
 
 ## 📋 Table of Contents
 
-* [Process & CPU Monitoring](https://www.google.com/search?q=%23-process--cpu-monitoring)
-* [Memory & System Performance](https://www.google.com/search?q=%23-memory--system-performance)
-* [Storage & Disk I/O Monitoring](https://www.google.com/search?q=%23-storage--disk-io-monitoring)
-* [Network Connection & Bandwidth](https://www.google.com/search?q=%23-network-connection--bandwidth)
-* [Pro Tips & Dashboard Workflows](https://www.google.com/search?q=%23-pro-tips--dashboard-workflows)
+* [Process & CPU Monitoring](#-process--cpu-monitoring)
+* [Memory & System Performance](#-memory--system-performance)
+* [Storage & Disk I/O Monitoring](#-storage--disk-io-monitoring)
+* [Network Connection & Bandwidth](#-network-connection--bandwidth)
+* [Pro Tips & Dashboard Workflows](#-pro-tips--dashboard-workflows)
 
 ---
 
