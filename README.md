@@ -15,7 +15,6 @@ A curated collection of practical reference guides, command-line cheat sheets, a
 | 📊 **[System Monitoring Commands](docs/source/system_monitoring_commands.rst)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
 | ⚡ **[Developer Commands](docs/source/developer_commands.rst)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
-| 🤖 **[Claude AI Preferences](docs/source/claude_ai_preference.rst)** | Custom instructions & preferences profile | Communication rules, PlantUML style, domain guidelines |
 
 ---
 
@@ -55,8 +54,7 @@ bash-miscellaneous/
         ├── bashrc_reference.rst
         ├── system_monitoring_commands.rst
         ├── developer_commands.rst
-        ├── network_interfaces.rst
-        └── claude_ai_preference.rst
+        └── network_interfaces.rst
 
 ```
 
