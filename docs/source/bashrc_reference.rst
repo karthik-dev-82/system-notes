@@ -10,6 +10,7 @@
 ---------------------------------
 
 .. list-table::
+   :class: longtable
    :header-rows: 1
    :widths: 20 30 50
 
@@ -79,6 +80,7 @@ Directory Listings (``ls`` variants)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
+   :class: longtable
    :header-rows: 1
    :widths: 15 30 55
 

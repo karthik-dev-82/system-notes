@@ -4,6 +4,7 @@
 A curated collection of practical reference guides, command-line cheat sheets, and DevOps workflows for Linux administration, container management, version control, and system diagnostics.
 
 📖 **Full rendered docs (with PlantUML diagrams): https://karthik-dev-82.github.io/bash-miscellaneous/**
+📥 **Single-file PDF (for offline reading/revision): https://karthik-dev-82.github.io/bash-miscellaneous/bash-miscellaneous.pdf**
 
 ---
 

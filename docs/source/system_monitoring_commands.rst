@@ -53,6 +53,7 @@ Reports virtual memory, process, disk activity, and CPU time breakdown.
    vmstat -d                      # Display disk statistics summary
 
 .. list-table::
+   :class: longtable
    :header-rows: 1
    :widths: 15 20 65
 

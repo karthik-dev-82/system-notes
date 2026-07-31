@@ -439,6 +439,7 @@ Bridge vs NAT Comparison
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
+   :class: longtable
    :header-rows: 1
    :widths: 25 35 40
 
@@ -607,6 +608,7 @@ Interface Types
 ~~~~~~~~~~~~~~~~~~
 
 .. list-table::
+   :class: longtable
    :header-rows: 1
    :widths: 15 15 20 50
 
@@ -643,6 +645,7 @@ Networking Modes
 ~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
+   :class: longtable
    :header-rows: 1
    :widths: 15 20 25 40
 

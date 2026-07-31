@@ -23,3 +23,24 @@ else:
     plantuml = "java -jar /usr/share/plantuml/plantuml.jar"
 
 plantuml_output_format = "svg_img"
+
+# --- PDF (latexpdf) output -------------------------------------------------
+# xelatex (not pdflatex) because the docs use Unicode arrows/checkmarks
+# (->, <->, Y/N) throughout. DejaVu fonts give broad Unicode coverage, but
+# pictographic emoji (setup, phone, camera, etc.) still won't render as
+# color glyphs in the PDF -- that needs a dedicated emoji font/package this
+# repo doesn't pull in. They'll likely show as blank boxes; harmless, just
+# cosmetic.
+latex_engine = "xelatex"
+latex_elements = {
+    "papersize": "a4paper",
+    "pointsize": "11pt",
+    "fontpkg": r"""
+\setmainfont{DejaVu Serif}
+\setsansfont{DejaVu Sans}
+\setmonofont{DejaVu Sans Mono}
+""",
+}
+latex_documents = [
+    ("index", "bash-miscellaneous.tex", "Bash Miscellaneous", "Karthik", "manual"),
+]
