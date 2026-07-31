@@ -1,5 +1,76 @@
-# bash-miscellaneous
+Here is a master `README.md` for the root of your **`bash-miscellaneous`** repository. It serves as an entry point, organizing both cheat sheets into clear categories and adding useful quick-access shortcuts.
 
-This repository contains the common files that I use for my Linux machine setup including .bashrc .vimrc and also some commonly used bash commands for reference.
+---
 
+# 🛠️ Bash Miscellaneous
 
+A curated collection of practical reference guides, command-line cheat sheets, and DevOps workflows for Linux administration, container management, version control, and system diagnostics.
+
+---
+
+## 📚 Quick Navigation Index
+
+| Reference Guide | Primary Focus | Key Utilities Covered |
+| --- | --- | --- |
+| 📊 **[System Monitoring Commands](https://www.google.com/search?q=./system%2520monitoring%2520commands.md)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
+| ⚡ **[Development Commands](https://www.google.com/search?q=./development%2520commands.md)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
+
+---
+
+## 📊 Overview of Included Guides
+
+### 1. [System Monitoring Commands](https://www.google.com/search?q=./system%2520monitoring%2520commands.md)
+
+Essential commands for inspecting system health, hunting down bottlenecks, and diagnosing real-time performance issues across CPU, Memory, Disk I/O, and Networking.
+
+* **Process & CPU:** Interactive process monitoring with `htop`/`btop` and per-process CPU profiling using `pidstat`.
+* **Memory & Performance:** Virtual memory pressure analysis with `vmstat`.
+* **Storage I/O:** Disk bottleneck identification via `iotop` and `iostat`.
+* **Network & Bandwidth:** Port inspection and connection tracing using modern `ss` and `iftop`.
+* **Pro Workflows:** `tmux` dashboard grids, continuous `watch` loops, and background performance logging with `sar`.
+
+### 2. [Development Commands](https://www.google.com/search?q=./development%2520commands.md)
+
+Practical command snippets for container management, repository hygiene, version control, and advanced file manipulation.
+
+* **Docker Management:** Container lifecycle operations, image maintenance, cleanup/pruning commands, networks, and volume persistence.
+* **Git Version Control:** Branch creation/renaming (`git switch`), diff inspection, safe/forced cleanups, cherry-picking, interactive rebasing, submodules, and stash management (`git stash push`).
+* **File Operations & Transfers:** High-speed multi-connection downloads using `aria2c`, directory mirroring with `rsync`, batch file renaming, SHA-256 duplicate detection, and modern search tools (`ripgrep`, `fd`).
+
+---
+
+## 🚀 Quick One-Liners & Daily Drivers
+
+A few high-frequency commands pulled directly from the guides for instant reference:
+
+### ⚡ System Health & Network Snapshots
+
+```bash
+# Watch the top 5 CPU-consuming processes (updates every second)
+watch -n 1 'ps aux --sort=-%cpu | head -n 6'
+
+# List all listening TCP/UDP sockets with process PIDs
+ss -tunlp
+
+```
+
+### 🐳 Docker & Git Cleanups
+
+```bash
+# Reclaim disk space by pruning all unused Docker resources
+docker system prune -a --volumes
+
+# Compact visualization of Git history across all branches
+git log --graph --oneline --decorate --all
+
+```
+
+---
+
+## 📂 Recommended Directory Structure
+
+```text
+bash-miscellaneous/
+├── README.md                           # Master repository index
+├── system_monitoring_commands.md       # Linux monitoring & metrics guide
+└── developer_commands.md             # Docker, Git & file operations guide
