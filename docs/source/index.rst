@@ -12,6 +12,7 @@ control, and system diagnostics.
    bashrc_reference
    developer_commands
    system_monitoring_commands
+   network_interfaces
    claude_ai_preference
 
 Quick Navigation
@@ -33,6 +34,9 @@ Quick Navigation
    * - :doc:`developer_commands`
      - Daily engineering workflows & tooling
      - ``docker``, ``git``, ``rsync``, ``aria2c``, ``find``, ``grep``
+   * - :doc:`network_interfaces`
+     - Linux network interfaces, explained with analogies & diagrams
+     - ``eth0``, ``lo``, ``veth``, ``docker0``, VLANs, TUN/TAP, NAT
    * - :doc:`claude_ai_preference`
      - Custom instructions & preferences profile
      - Communication rules, PlantUML style, domain guidelines
