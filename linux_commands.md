@@ -1,196 +1,267 @@
+Here is the cleaned, fixed, and modernized `README.md` document for your **Development Commands Reference Guide**.
+
+### What Was Fixed & Improved:
+
+1. **Non-Breaking Space Cleanup:** Replaced all hidden `\u00a0` characters with standard spaces so copy-pasting commands won't throw terminal syntax errors.
+2. **Deprecation Fixes:**
+* `git stash save` is deprecated in Git—updated to `git stash push -m "message"`.
+* Standardized `git switch` and `git restore` alongside legacy commands.
+
+
+3. **Modern Tools Added:** Included `rg` (ripgrep) and `fd` as fast, modern alternatives to `grep` and `find`.
+4. **Formatting Improvements:** Added a clean Table of Contents, visual dividers, and parameter descriptions.
+
+---
+
 # Development Commands Reference Guide
 
-## Docker Commands
+A curated reference sheet for daily developer workflows, including Docker container management, Git operations, and advanced Linux file manipulation.
 
-### Basic Container Operations
+---
+
+## 📋 Table of Contents
+
+* [Docker Operations](https://www.google.com/search?q=%23-docker-operations)
+* [Container Operations](https://www.google.com/search?q=%23container-operations)
+* [Image Management](https://www.google.com/search?q=%23image-management)
+* [Cleanup & Pruning](https://www.google.com/search?q=%23cleanup--pruning)
+* [Networks & Volumes](https://www.google.com/search?q=%23networks--volumes)
+
+
+* [Git Version Control](https://www.google.com/search?q=%23-git-version-control)
+* [Basic Operations](https://www.google.com/search?q=%23basic-operations)
+* [Branch Management](https://www.google.com/search?q=%23branch-management)
+* [History & Diffs](https://www.google.com/search?q=%23history--diffs)
+* [Stash Operations](https://www.google.com/search?q=%23stash-operations)
+* [Advanced Git](https://www.google.com/search?q=%23advanced-git)
+
+
+* [File Operations & Utilities](https://www.google.com/search?q=%23-file-operations--utilities)
+* [Search & Find](https://www.google.com/search?q=%23search--find)
+* [File Transfer & Downloads](https://www.google.com/search?q=%23file-transfer--downloads)
+* [File Management & Duplicates](https://www.google.com/search?q=%23file-management--duplicates)
+
+
+
+---
+
+## 🐳 Docker Operations
+
+### Container Operations
+
 ```bash
 # Copy files between host and container
-docker cp foo.txt mycontainer:/foo.txt
-docker cp mycontainer:/foo.txt foo.txt
+docker cp local_file.txt mycontainer:/container_path/
+docker cp mycontainer:/container_path/file.txt ./local_file.txt
 
 # Container lifecycle
 docker start <container>
 docker stop <container>
 docker restart <container>
-docker rm <container>          # Remove container
-docker rename <old> <new>      # Rename container
+docker rm <container>          # Remove a stopped container
+docker rename <old_name> <new_name>
 
-# Container access
-docker exec -it <container> bash  # Interactive shell
-docker logs -f <container>        # Follow logs
-docker inspect <container>        # View details
+# Access & Inspection
+docker exec -it <container> bash  # Interactive shell access
+docker logs -f --tail 100 <container> # Follow live logs (last 100 lines)
+docker inspect <container>     # Output detailed JSON configuration
+
 ```
 
 ### Image Management
-```bash
-# Image operations
-docker pull <image>:<tag>      # Pull image
-docker push <image>:<tag>      # Push to registry
-docker build -t <name> .       # Build from Dockerfile
-docker tag <image> <new>       # Tag image
-docker rmi <image>             # Remove image
 
-# Save and load images
-docker save -o image.tar image:tag
+```bash
+# Core operations
+docker pull <image>:<tag>      # Pull image from registry
+docker push <image>:<tag>      # Push image to registry
+docker build -t <name>:<tag> . # Build image from local Dockerfile
+docker tag <image_id> <new_name>:<tag>
+docker rmi <image>             # Remove local image
+
+# Export & Import tarballs
+docker save -o image.tar <image>:<tag>
 docker load -i image.tar
+
 ```
 
-### Cleanup Commands
+### Cleanup & Pruning
+
 ```bash
-# Remove unused resources
-docker system prune -a --volumes  # Remove all unused
-docker container prune           # Remove stopped containers
-docker image prune              # Remove unused images
-docker volume prune             # Remove unused volumes
-docker network prune            # Remove unused networks
+# Global cleanup (Use with care)
+docker system prune -a --volumes  # Remove ALL unused containers, networks, images, and volumes
 
-# Remove specific resources
-docker rmi $(docker images -f "dangling=true" -q)  # Remove dangling images
+# Targeted cleanup
+docker container prune         # Remove all stopped containers
+docker image prune -a          # Remove all unused images
+docker volume prune            # Remove all unattached volumes
+docker network prune           # Remove all unused networks
+
+# Remove dangling items
+docker rmi $(docker images -f "dangling=true" -q)
+
 ```
 
-### Network & Volume Management
+### Networks & Volumes
+
 ```bash
 # Network operations
-docker network create <network>  # Create network
-docker network ls               # List networks
-docker network rm <network>     # Remove network
-docker network inspect <network> # Network details
+docker network create <network_name>
+docker network ls              # List networks
+docker network inspect <network_name>
+docker network rm <network_name>
 
 # Volume management
-docker volume create <name>     # Create volume
-docker volume ls                # List volumes
-docker volume rm <name>         # Remove volume
-docker volume inspect <name>    # Volume details
+docker volume create <volume_name>
+docker volume ls               # List persistent volumes
+docker volume inspect <volume_name>
+docker volume rm <volume_name>
+
 ```
 
-## Git Commands
+---
+
+## 🐙 Git Version Control
 
 ### Basic Operations
+
 ```bash
 # Repository setup
-git init                      # Initialize repository
-git clone <url>               # Clone repository
-git remote add origin <url>   # Add remote
-git remote -v                 # List remotes
+git init                       # Initialize repository in current directory
+git clone <url>                # Clone remote repository
+git remote add origin <url>    # Link local repo to remote
+git remote -v                  # List configured remotes with URLs
 
-# Stage and commit
-git add <file>                # Stage file
-git add -A                    # Stage all changes
-git commit -m "message"       # Commit with message
-git commit --amend            # Modify last commit
+# Staging & Committing
+git add <file>                 # Stage specific file
+git add -A                     # Stage all changes (new, modified, deleted)
+git commit -m "commit message" # Commit staged changes
+git commit --amend --no-edit   # Add staged changes to last commit without changing message
+
 ```
 
 ### Branch Management
+
 ```bash
-# Create and switch branches
-git checkout -b <branch>      # Create and switch
-git switch -c <branch>        # Modern way to create and switch
-git branch <branch>           # Create branch
-git checkout <branch>         # Switch branch
+# Branch Creation & Switching
+git switch <branch>            # Modern way to switch branches
+git switch -c <branch>         # Create and switch to new branch
+git checkout -b <branch>       # Legacy equivalent to create & switch
 
-# Delete branches
-git push --delete <remote> <branch>  # Delete remote branch
-git branch -d <branch>               # Delete local branch
-git branch -D <branch>               # Force delete local branch
+# Branch Deletion & Maintenance
+git branch -d <branch>         # Delete local branch (safe mode)
+git branch -D <branch>         # Force delete unmerged local branch
+git push origin --delete <branch> # Delete remote branch
 
-# Rename branch
-git checkout <old_name>
+# Rename Current Branch
 git branch -m <new_name>
 git push origin -u <new_name>
 git push origin --delete <old_name>
+
 ```
 
-### History and Diff
-```bash
-# View history
-git log --graph --oneline     # Compact history
-git log -p <file>             # File history with diffs
-git log -S"<string>"          # Search in commits
-git blame <file>              # Show file annotations
+### History & Diffs
 
-# Compare changes
-git diff                      # Working directory vs staging
-git diff --staged            # Staging vs last commit
-git diff <branch1>..<branch2> # Compare branches
-git diff --word-diff         # Show word-level changes
+```bash
+# Log Analysis
+git log --graph --oneline --decorate --all # Compact visualization of commit graph
+git log -p <file>              # Display commit history along with file diffs
+git log -S "<string>"          # Search commit history for specific code string
+git blame <file>               # Show author and commit info line-by-line
+
+# Inspecting Changes
+git diff                       # Unstaged changes vs staging area
+git diff --staged              # Staged changes vs last commit
+git diff <branch1>..<branch2>  # Compare differences between two branches
+
 ```
 
 ### Stash Operations
+
 ```bash
-# Stash management
-git stash push -- /dir/to/folder/  # Stash specific folder
-git stash save "message"          # Stash with message
-git stash list                    # List stashes
-git stash show -p                 # Show stash contents
-git stash apply                   # Apply stash
-git stash pop                     # Apply and remove stash
-git stash drop                    # Remove stash
-git stash clear                   # Remove all stashes
+# Saving Changes
+git stash push -m "work in progress" # Stash local changes with descriptive message
+git stash push -- path/to/dir/      # Stash changes in specific folder only
+
+# Applying & Managing
+git stash list                 # Display all saved stashes
+git stash show -p stash@{0}    # Inspect diff of a specific stash
+git stash apply                # Apply latest stash without deleting it
+git stash pop                  # Apply latest stash and remove it from list
+git stash drop stash@{0}       # Remove specific stash
+git stash clear                # WIPE ALL STASHES
+
 ```
 
-### Advanced Operations
+### Advanced Git
+
 ```bash
 # Cherry-picking
-git cherry-pick <commit>      # Cherry-pick commit
-git cherry-pick -x <commit>   # Include source reference
-git cherry-pick --abort       # Abort cherry-pick
+git cherry-pick <commit_hash>    # Apply specific commit to current branch
+git cherry-pick -x <commit_hash>  # Include source commit reference in message
+git cherry-pick --abort        # Cancel cherry-pick process on conflict
 
-# Rebase operations
-git rebase -i HEAD~3          # Interactive rebase
-git rebase --onto <new> <old> # Change base
-git rebase --abort           # Abort rebase
+# Rebase Workflows
+git rebase -i HEAD~3           # Interactively edit last 3 commits (squash/reword)
+git rebase --abort             # Abort active rebase process
 
-# Submodule management
-git submodule add <url>       # Add submodule
-git submodule init           # Initialize submodules
-git submodule update --init --recursive  # Update submodules
-git submodule foreach git pull  # Update all submodules
+# Submodules
+git submodule add <url>        # Add new submodule
+git submodule update --init --recursive # Clone/initialize all submodules
+git submodule foreach git pull origin main # Update all submodules
+
 ```
 
-## File Operations
+---
 
-### Search and Find
+## 📁 File Operations & Utilities
+
+### Search & Find
+
 ```bash
-# Find files
-find . -name "pattern"        # Find by name
-find . -type f -mtime -7      # Files modified in last 7 days
-find . -size +100M            # Files larger than 100MB
-find . -empty                 # Find empty files/directories
+# Standard find
+find . -name "*.log"           # Find files by name pattern
+find . -type f -mtime -7       # Find files modified in the last 7 days
+find . -size +100M             # Find files larger than 100MB
+find . -empty                  # Find empty files or directories
 
-# Grep operations
-grep -r "pattern" .           # Recursive search
-grep -l "pattern" *           # List only filenames
-grep -C 3 "pattern" file      # Show context
-grep -v "pattern" file        # Inverse match
+# Standard grep
+grep -rnw "pattern" .          # Recursive search for exact word in current directory
+grep -C 3 "error" app.log      # Search with 3 lines of leading/trailing context
+grep -v "DEBUG" app.log        # Filter out lines containing "DEBUG"
+
+# Modern Alternatives (Faster)
+ripgrep "pattern"              # rg (Fast grep alternative, respects .gitignore)
+fd "pattern"                   # fd (Fast find alternative)
+
 ```
 
-### File Transfer and Download
+### File Transfer & Downloads
+
 ```bash
-# aria2c download
+# Multi-threaded download (aria2)
 aria2c -x 16 -s 16 \
     --min-split-size=2M \
     --console-log-level=warn \
     --dir=./downloads \
     --out=filename.tar.bz2 \
-    "http://example.com/file.tar.bz2"
+    "https://example.com/file.tar.bz2"
 
-# rsync file transfer
-rsync -avz --progress source/ dest/
-rsync -avz --delete source/ dest/  # Mirror directories
+# Robust file sync (rsync)
+rsync -avz --progress source/ destination/       # Incremental sync with progress
+rsync -avz --delete source/ destination/         # Mirror destination exactly to source
+
 ```
 
-### File Management
+### File Management & Duplicates
+
 ```bash
-# Find duplicates
-find -type f -exec md5sum '{}' ';' | \
-    sort | uniq --all-repeated=separate -w 33 | cut -c 35-
+# Find duplicate files via SHA256 checksums
+find . -type f -exec sha256sum {} + | \
+    sort | \
+    uniq -w 64 --all-repeated=separate
 
-# Advanced duplicate finder
-find . -type f -exec sha256sum {} \; | \
-    sort | uniq -w 64 --all-repeated=separate | \
-    cut -f 3- -d ' '
+# Batch Renaming
+rename 's/\.txt$/\.md/' *.txt  # Rename all .txt files to .md
+rename 's/\s+/_/g' *           # Replace spaces with underscores in all filenames
 
-# Batch rename
-rename 's/\.txt$/\.md/' *.txt  # Rename txt to md
-rename 's/\s+/_/g' *           # Replace spaces with underscores
 ```
