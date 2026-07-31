@@ -6,27 +6,23 @@ A curated reference sheet for daily developer workflows, including Docker contai
 
 ## 📋 Table of Contents
 
-* [Docker Operations](https://www.google.com/search?q=%23-docker-operations)
-* [Container Operations](https://www.google.com/search?q=%23container-operations)
-* [Image Management](https://www.google.com/search?q=%23image-management)
-* [Cleanup & Pruning](https://www.google.com/search?q=%23cleanup--pruning)
-* [Networks & Volumes](https://www.google.com/search?q=%23networks--volumes)
+* [Docker Operations](#-docker-operations)
+  * [Container Operations](#container-operations)
+  * [Image Management](#image-management)
+  * [Cleanup & Pruning](#cleanup--pruning)
+  * [Networks & Volumes](#networks--volumes)
 
+* [Git Version Control](#-git-version-control)
+  * [Basic Operations](#basic-operations)
+  * [Branch Management](#branch-management)
+  * [History & Diffs](#history--diffs)
+  * [Stash Operations](#stash-operations)
+  * [Advanced Git](#advanced-git)
 
-* [Git Version Control](https://www.google.com/search?q=%23-git-version-control)
-* [Basic Operations](https://www.google.com/search?q=%23basic-operations)
-* [Branch Management](https://www.google.com/search?q=%23branch-management)
-* [History & Diffs](https://www.google.com/search?q=%23history--diffs)
-* [Stash Operations](https://www.google.com/search?q=%23stash-operations)
-* [Advanced Git](https://www.google.com/search?q=%23advanced-git)
-
-
-* [File Operations & Utilities](https://www.google.com/search?q=%23-file-operations--utilities)
-* [Search & Find](https://www.google.com/search?q=%23search--find)
-* [File Transfer & Downloads](https://www.google.com/search?q=%23file-transfer--downloads)
-* [File Management & Duplicates](https://www.google.com/search?q=%23file-management--duplicates)
-
-
+* [File Operations & Utilities](#-file-operations--utilities)
+  * [Search & Find](#search--find)
+  * [File Transfer & Downloads](#file-transfer--downloads)
+  * [File Management & Duplicates](#file-management--duplicates)
 
 ---
 
