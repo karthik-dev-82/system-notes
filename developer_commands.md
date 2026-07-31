@@ -1,18 +1,3 @@
-Here is the cleaned, fixed, and modernized `README.md` document for your **Development Commands Reference Guide**.
-
-### What Was Fixed & Improved:
-
-1. **Non-Breaking Space Cleanup:** Replaced all hidden `\u00a0` characters with standard spaces so copy-pasting commands won't throw terminal syntax errors.
-2. **Deprecation Fixes:**
-* `git stash save` is deprecated in Git—updated to `git stash push -m "message"`.
-* Standardized `git switch` and `git restore` alongside legacy commands.
-
-
-3. **Modern Tools Added:** Included `rg` (ripgrep) and `fd` as fast, modern alternatives to `grep` and `find`.
-4. **Formatting Improvements:** Added a clean Table of Contents, visual dividers, and parameter descriptions.
-
----
-
 # Development Commands Reference Guide
 
 A curated reference sheet for daily developer workflows, including Docker container management, Git operations, and advanced Linux file manipulation.
