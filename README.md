@@ -1,4 +1,4 @@
-Here is a master `README.md` for the root of your **`bash-miscellaneous`** repository. It serves as an entry point, organizing both cheat sheets into clear categories and adding useful quick-access shortcuts.
+Here is the updated master `README.md` with the updated filenames and links so your repository navigation works smoothly!
 
 ---
 
@@ -12,14 +12,14 @@ A curated collection of practical reference guides, command-line cheat sheets, a
 
 | Reference Guide | Primary Focus | Key Utilities Covered |
 | --- | --- | --- |
-| 📊 **[System Monitoring Commands](https://www.google.com/search?q=./system%2520monitoring%2520commands.md)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
-| ⚡ **[Development Commands](https://www.google.com/search?q=./development%2520commands.md)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
+| 📊 **[System Monitoring Commands](https://www.google.com/search?q=./system_monitoring_commands.md)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
+| ⚡ **[Developer Commands](https://www.google.com/search?q=./developer_commands.md)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
 
 ---
 
 ## 📊 Overview of Included Guides
 
-### 1. [System Monitoring Commands](https://www.google.com/search?q=./system%2520monitoring%2520commands.md)
+### 1. [System Monitoring Commands](https://www.google.com/search?q=./system_monitoring_commands.md)
 
 Essential commands for inspecting system health, hunting down bottlenecks, and diagnosing real-time performance issues across CPU, Memory, Disk I/O, and Networking.
 
@@ -29,7 +29,7 @@ Essential commands for inspecting system health, hunting down bottlenecks, and d
 * **Network & Bandwidth:** Port inspection and connection tracing using modern `ss` and `iftop`.
 * **Pro Workflows:** `tmux` dashboard grids, continuous `watch` loops, and background performance logging with `sar`.
 
-### 2. [Development Commands](https://www.google.com/search?q=./development%2520commands.md)
+### 2. [Developer Commands](https://www.google.com/search?q=./developer_commands.md)
 
 Practical command snippets for container management, repository hygiene, version control, and advanced file manipulation.
 
@@ -67,10 +67,12 @@ git log --graph --oneline --decorate --all
 
 ---
 
-## 📂 Recommended Directory Structure
+## 📂 Repository Layout
 
 ```text
 bash-miscellaneous/
-├── README.md                           # Master repository index
-├── system_monitoring_commands.md       # Linux monitoring & metrics guide
-└── developer_commands.md             # Docker, Git & file operations guide
+├── README.md                          # Master repository index
+├── system_monitoring_commands.md      # Linux monitoring & metrics guide
+└── developer_commands.md              # Docker, Git & file operations guide
+
+```
