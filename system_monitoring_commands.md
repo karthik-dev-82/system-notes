@@ -1,9 +1,3 @@
-Here is a polished, fully formatted `README.md` document ready for your `bash-miscellaneous` repository.
-
-All non-breaking space syntax bugs have been fixed, deprecated tools are appropriately flagged with modern alternatives added, and the entire structure has been upgraded with clean Markdown headers, tables, and scannable sections.
-
----
-
 # System Monitoring Commands Reference
 
 A comprehensive, practical cheatsheet for monitoring Linux process performance, storage I/O, memory, and network activity.
