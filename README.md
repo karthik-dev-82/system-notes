@@ -33,35 +33,7 @@ Practical command snippets for container management, repository hygiene, version
 * **Docker Management:** Container lifecycle operations, image maintenance, cleanup/pruning commands, networks, and volume persistence.
 * **Git Version Control:** Branch creation/renaming (`git switch`), diff inspection, safe/forced cleanups, cherry-picking, interactive rebasing, submodules, and stash management (`git stash push`).
 * **File Operations & Transfers:** High-speed multi-connection downloads using `aria2c`, directory mirroring with `rsync`, batch file renaming, SHA-256 duplicate detection, and modern search tools (`ripgrep`, `fd`).
-
----
-
-## 🚀 Quick One-Liners & Daily Drivers
-
-A few high-frequency commands pulled directly from the guides for instant reference:
-
-### ⚡ System Health & Network Snapshots
-
-```bash
-# Watch the top 5 CPU-consuming processes (updates every second)
-watch -n 1 'ps aux --sort=-%cpu | head -n 6'
-
-# List all listening TCP/UDP sockets with process PIDs
-ss -tunlp
-
-```
-
-### 🐳 Docker & Git Cleanups
-
-```bash
-# Reclaim disk space by pruning all unused Docker resources
-docker system prune -a --volumes
-
-# Compact visualization of Git history across all branches
-git log --graph --oneline --decorate --all
-
-```
-
+  
 ---
 
 ## 📂 Repository Layout
