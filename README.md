@@ -1,6 +1,3 @@
-Here is the updated master `README.md` with the updated filenames and links so your repository navigation works smoothly!
-
----
 
 # 🛠️ Bash Miscellaneous
 
@@ -12,8 +9,8 @@ A curated collection of practical reference guides, command-line cheat sheets, a
 
 | Reference Guide | Primary Focus | Key Utilities Covered |
 | --- | --- | --- |
-| 📊 **[System Monitoring Commands](https://www.google.com/search?q=./system_monitoring_commands.md)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
-| ⚡ **[Developer Commands](https://www.google.com/search?q=./developer_commands.md)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
+| 📊 **[System Monitoring Commands](system_monitoring_commands.md)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
+| ⚡ **[Developer Commands](developer_commands.md)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
 
 ---
 
