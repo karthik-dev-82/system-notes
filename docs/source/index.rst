@@ -6,6 +6,7 @@ and DevOps workflows for Linux administration, container management, version
 control, and system diagnostics.
 
 .. toctree::
+   :hidden:
    :maxdepth: 2
    :caption: Guides
 
