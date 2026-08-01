@@ -18,6 +18,7 @@ down and coming back to.
    spdlog_sinks_architecture
    linux_devices
    kernel_networking_docker_internals
+   lidar_slam
 
 Quick Navigation
 -----------------
@@ -54,3 +55,6 @@ Quick Navigation
    * - :doc:`kernel_networking_docker_internals`
      - Kernel networking stack, Docker internals, iptables, OverlayFS
      - netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2
+   * - :doc:`lidar_slam`
+     - LIDAR and SLAM for navigation where GPS doesn't work
+     - point clouds, localization, mapping, autonomous vehicles

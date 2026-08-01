@@ -19,6 +19,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 📝 **[spdlog Sinks & Architecture](docs/source/spdlog_sinks_architecture.rst)** | spdlog logging architecture, sinks, and log levels | `spdlog`, sinks, formatters, log levels, rotation |
 | 🔌 **[Linux Devices](docs/source/linux_devices.rst)** | Block/char/network/terminal/pseudo devices, and USB layering | `/dev`, `lsblk`, `ttyACM`/`ttyUSB`, `udevadm`, PTYs |
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
+| 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
 
 ---
 
@@ -62,7 +63,8 @@ personal-notes/
         ├── docker_dev_environment.rst
         ├── spdlog_sinks_architecture.rst
         ├── linux_devices.rst
-        └── kernel_networking_docker_internals.rst
+        ├── kernel_networking_docker_internals.rst
+        └── lidar_slam.rst
 
 ```
 
