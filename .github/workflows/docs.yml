@@ -23,10 +23,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install PlantUML + Java + Graphviz
+      - name: Install Java + Graphviz
         run: |
           sudo apt-get update
-          sudo apt-get install -y plantuml default-jre graphviz
+          sudo apt-get install -y default-jre graphviz
+
+      - name: Download current PlantUML release
+        run: |
+          curl -sL --fail -o "$HOME/plantuml.jar" \
+            https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+          echo "PLANTUML_JAR=$HOME/plantuml.jar" >> "$GITHUB_ENV"
 
       - name: Install LaTeX toolchain (for PDF export)
         run: |

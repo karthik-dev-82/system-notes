@@ -1,3 +1,4 @@
+import os
 import shutil
 
 project = "Bash Miscellaneous"
@@ -13,11 +14,16 @@ exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
 
-# CI (see .github/workflows/docs.yml) installs the Debian/Ubuntu "plantuml"
-# package, which provides a `plantuml` launcher script on PATH. Fall back to
-# invoking the jar directly for local builds that only installed the jar.
+# Debian/Ubuntu's "plantuml" apt package lags upstream by years and chokes
+# on modern syntax (e.g. `!theme plain`), so CI downloads the current
+# release jar itself (see .github/workflows/docs.yml) and points here via
+# PLANTUML_JAR. Fall back to a `plantuml` binary on PATH, then a
+# conventional local jar location, for anyone building this outside CI.
+_plantuml_jar = os.environ.get("PLANTUML_JAR")
 _plantuml_bin = shutil.which("plantuml")
-if _plantuml_bin:
+if _plantuml_jar:
+    plantuml = f"java -jar {_plantuml_jar}"
+elif _plantuml_bin:
     plantuml = _plantuml_bin
 else:
     plantuml = "java -jar /usr/share/plantuml/plantuml.jar"
