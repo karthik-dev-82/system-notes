@@ -17,6 +17,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
 | 🐳 **[Docker Dev Environment](docs/source/docker_dev_environment.rst)** | How the `development` repo's Docker dev container is built | `Dockerfile`, `devcontainer.json`, `docker-compose.yml` |
 | 📝 **[spdlog Sinks & Architecture](docs/source/spdlog_sinks_architecture.rst)** | spdlog logging architecture, sinks, and log levels | `spdlog`, sinks, formatters, log levels, rotation |
+| 🔌 **[Linux Devices](docs/source/linux_devices.rst)** | Block/char/network/terminal/pseudo devices, and USB layering | `/dev`, `lsblk`, `ttyACM`/`ttyUSB`, `udevadm`, PTYs |
 
 ---
 
@@ -58,7 +59,8 @@ personal-notes/
         ├── developer_commands.rst
         ├── network_interfaces.rst
         ├── docker_dev_environment.rst
-        └── spdlog_sinks_architecture.rst
+        ├── spdlog_sinks_architecture.rst
+        └── linux_devices.rst
 
 ```
 

@@ -23,6 +23,8 @@ data on a network. It's like a doorway for network traffic.
    concepts apply — just don't be surprised if ``ip link show`` on a recent
    machine doesn't say ``eth0``.
 
+.. _decoding-interface-names:
+
 Decoding Predictable Interface Names
 ------------------------------------------
 

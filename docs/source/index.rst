@@ -16,6 +16,7 @@ down and coming back to.
    network_interfaces
    docker_dev_environment
    spdlog_sinks_architecture
+   linux_devices
 
 Quick Navigation
 -----------------
@@ -46,3 +47,6 @@ Quick Navigation
    * - :doc:`spdlog_sinks_architecture`
      - spdlog logging architecture, sinks, and log levels
      - ``spdlog``, sinks, formatters, log levels, rotation
+   * - :doc:`linux_devices`
+     - Block/char/network/terminal/pseudo devices, and USB layering
+     - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
