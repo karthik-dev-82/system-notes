@@ -23,6 +23,66 @@ data on a network. It's like a doorway for network traffic.
    concepts apply — just don't be surprised if ``ip link show`` on a recent
    machine doesn't say ``eth0``.
 
+Decoding Predictable Interface Names
+------------------------------------------
+
+The new-style names aren't random -- each letter/number segment encodes
+where the device sits, using ``systemd``'s naming scheme
+(``systemd.net-naming-scheme``).
+
+**Prefix -- what kind of interface:**
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 15 85
+
+   * - Prefix
+     - Meaning
+   * - ``en``
+     - Ethernet
+   * - ``wl``
+     - WLAN (Wi-Fi)
+   * - ``ww``
+     - WWAN (cellular/mobile broadband modem)
+
+**Suffix -- where the device is attached:**
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Pattern
+     - Meaning
+   * - ``o<index>``
+     - On-board device index, as numbered by the firmware/BIOS
+       (e.g. ``eno1`` -- typically the built-in NIC on a server/desktop)
+   * - ``s<slot>``
+     - Hotplug slot index (e.g. ``ens33`` -- common on VMware VMs)
+   * - ``p<bus>s<slot>``
+     - PCI geographic location: bus number then slot number
+       (e.g. ``enp0s3`` -- common on VirtualBox/KVM VMs)
+   * - ``x<mac>``
+     - Built from the interface's MAC address (e.g.
+       ``enx78e7d1ea46da``) -- the fallback when nothing about the
+       physical location is stable, common for USB Ethernet adapters
+
+Putting it together, using the two examples from the note above:
+
+* ``enp0s3`` = Ethernet, PCI bus ``0``, slot ``3``
+* ``wlp2s0`` = **W**\ ireless **L**\ AN, PCI bus ``2``, slot ``0``
+
+A trailing ``f<function>`` or ``d<dev_port>`` can show up too, for
+multi-function PCI cards or NICs with more than one physical port -- e.g.
+``enp0s3f1`` for the second function on that same PCI slot.
+
+.. note::
+   If none of these are stable enough (some virtualized/cloud setups
+   fall back further), you'll still occasionally see the classic
+   ``eth0``/``wlan0`` style -- it's the last resort in the scheme, not
+   gone entirely.
+
 Types of Network Interfaces
 --------------------------------
 
