@@ -26,17 +26,17 @@ questions: is this a **login** shell, and is it **interactive**?
    !theme plain
    start
    if (Login shell?) then (yes)
-     #LightBlue:Read /etc/profile;
-     #LightBlue:Read ~/.bash_profile\n(or ~/.bash_login or ~/.profile);
+     :Read /etc/profile;<<#LightBlue>>
+     :Read ~/.bash_profile\n(or ~/.bash_login or ~/.profile);<<#LightBlue>>
      note right: These usually contain a line\nlike ". ~/.bashrc" so login\nshells pick up ~/.bashrc too
    else (no)
      if (Interactive shell?) then (yes)
-       #LightGreen:Read ~/.bashrc;
+       :Read ~/.bashrc;<<#LightGreen>>
      else (no)
-       #LightSalmon:Read $BASH_ENV\nif it is set (scripts, cron);
+       :Read $BASH_ENV\nif it is set (scripts, cron);<<#LightSalmon>>
      endif
    endif
-   #GreenYellow:Shell ready\n(prompt shown if interactive);
+   :Shell ready\n(prompt shown if interactive);<<#GreenYellow>>
    stop
 
 This is why the file in this repo matters at all: it's built for
@@ -354,12 +354,12 @@ renders diagrams end-to-end — delete it once you've verified the docs build:
 
    !theme plain
    start
-   #LightBlue:Check ~/.ssh/agent-environment;
+   :Check ~/.ssh/agent-environment;<<#LightBlue>>
    if (Agent PID alive?) then (yes)
-     #LightGreen:Reuse existing ssh-agent;
+     :Reuse existing ssh-agent;<<#LightGreen>>
    else (no)
-     #LightSalmon:Spawn new ssh-agent;
-     #LightSalmon:chmod 600 + write session file;
+     :Spawn new ssh-agent;<<#LightSalmon>>
+     :chmod 600 + write session file;<<#LightSalmon>>
    endif
-   #GreenYellow:Shell exports SSH_AUTH_SOCK;
+   :Shell exports SSH_AUTH_SOCK;<<#GreenYellow>>
    stop
