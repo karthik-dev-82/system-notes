@@ -619,8 +619,8 @@ Q2: What does the ``who`` output mean?
 
 .. code-block:: text
 
-   alice  tty2         2025-10-06 10:33
-   alice  pts/2        2025-10-06 10:33 (:0)
+   alice     tty2         2025-10-06 10:33
+   alice     pts/2        2025-10-06 10:33 (:0)
 
 .. note::
    **Correction:** the original notes showed a ``who`` line with
@@ -653,7 +653,9 @@ Q3: SSH terminal output explained
 **Explanation:**
 
 * ``pts/0`` = first pseudo-terminal on that remote machine
-* ``203.0.113.50`` = your local machine's IP (where you SSH'd from)
+* ``203.0.113.50`` = your local machine's IP (where you SSH'd from) --
+  shown here as a documentation-reserved address (RFC 5737); yours will
+  be whatever your actual machine's IP is
 * You're connected over the network, not a serial cable
 
 **Why not ``/dev/ttyS0``?**
