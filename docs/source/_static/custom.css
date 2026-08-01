@@ -1,0 +1,6 @@
+/* sphinx_rtd_theme caps the content column at ~800px. For a reading/revision
+   site that's mostly tables, code blocks, and wide diagrams, that wastes
+   most of a normal monitor and forces tables into their own scrollbars. */
+.wy-nav-content {
+    max-width: none;
+}

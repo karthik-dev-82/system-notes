@@ -13,6 +13,8 @@ templates_path = ["_templates"]
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store"]
 
 html_theme = "sphinx_rtd_theme"
+html_static_path = ["_static"]
+html_css_files = ["custom.css"]
 
 # Debian/Ubuntu's "plantuml" apt package lags upstream by years and chokes
 # on modern syntax (e.g. `!theme plain`), so CI downloads the current
