@@ -1,4 +1,4 @@
-Personal Notes
+System Notes
 ===================
 
 A curated collection of reference guides and revision notes -- Linux

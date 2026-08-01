@@ -1,7 +1,7 @@
 import os
 import shutil
 
-project = "Personal Notes"
+project = "System Notes"
 copyright = "2026, Karthik"
 author = "Karthik"
 

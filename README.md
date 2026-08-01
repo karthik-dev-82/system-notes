@@ -1,9 +1,9 @@
 
-# 🛠️ Personal Notes
+# 🛠️ System Notes
 
 A curated collection of reference guides and revision notes -- Linux internals, networking, containers, and whatever else is worth writing down and coming back to.
 
-📖 **Full rendered docs (with PlantUML diagrams): https://karthik-dev-82.github.io/personal-notes/**
+📖 **Full rendered docs (with PlantUML diagrams): https://karthik-dev-82.github.io/system-notes/**
 
 ---
 
@@ -48,7 +48,7 @@ Practical command snippets for container management, repository hygiene, version
 ## 📂 Repository Layout
 
 ```text
-personal-notes/
+system-notes/
 ├── README.md                          # Master repository index
 ├── .bashrc                            # The actual dotfile
 └── docs/                              # Sphinx + PlantUML documentation source
