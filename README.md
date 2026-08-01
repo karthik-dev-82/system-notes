@@ -1,9 +1,9 @@
 
-# 🛠️ Bash Miscellaneous
+# 🛠️ Personal Notes
 
-A curated collection of practical reference guides, command-line cheat sheets, and DevOps workflows for Linux administration, container management, version control, and system diagnostics.
+A curated collection of reference guides and revision notes -- Linux internals, networking, containers, and whatever else is worth writing down and coming back to.
 
-📖 **Full rendered docs (with PlantUML diagrams): https://karthik-dev-82.github.io/bash-miscellaneous/**
+📖 **Full rendered docs (with PlantUML diagrams): https://karthik-dev-82.github.io/personal-notes/**
 
 ---
 
@@ -44,7 +44,7 @@ Practical command snippets for container management, repository hygiene, version
 ## 📂 Repository Layout
 
 ```text
-bash-miscellaneous/
+personal-notes/
 ├── README.md                          # Master repository index
 ├── .bashrc                            # The actual dotfile
 └── docs/                              # Sphinx + PlantUML documentation source

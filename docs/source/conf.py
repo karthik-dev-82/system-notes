@@ -1,7 +1,7 @@
 import os
 import shutil
 
-project = "Bash Miscellaneous"
+project = "Personal Notes"
 copyright = "2026, Karthik"
 author = "Karthik"
 

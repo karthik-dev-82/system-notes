@@ -1,9 +1,9 @@
-Bash Miscellaneous
+Personal Notes
 ===================
 
-A curated collection of practical reference guides, command-line cheat sheets,
-and DevOps workflows for Linux administration, container management, version
-control, and system diagnostics.
+A curated collection of reference guides and revision notes -- Linux
+internals, networking, containers, and whatever else is worth writing
+down and coming back to.
 
 .. toctree::
    :hidden:
