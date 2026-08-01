@@ -1,10 +1,53 @@
 ``.bashrc`` Reference Guide
 ============================
 
-.. note::
-   Documents everything included in ``bashrc_work``. The ``bashrc_local``
-   variant is identical except the **Company-Specific** section is removed
-   entirely.
+How Bash Startup Works
+---------------------------
+
+Before the aliases and functions below make sense, it helps to know
+**when** Bash actually reads ``~/.bashrc``, because it doesn't always.
+Bash decides which startup files to read based on two independent
+questions: is this a **login** shell, and is it **interactive**?
+
+* **Login shell** -- you get one when you SSH into a machine, switch
+  user with ``su -``, or open a fresh console/TTY. Bash reads
+  ``/etc/profile``, then the *first* of ``~/.bash_profile``,
+  ``~/.bash_login``, or ``~/.profile`` that exists -- **not**
+  ``~/.bashrc``.
+* **Interactive non-login shell** -- what you get every time you open a
+  new terminal tab/window on an already-logged-in desktop. Bash reads
+  ``~/.bashrc`` only.
+* **Non-interactive shell** -- running a script (``bash script.sh``) or
+  a cron job. Neither ``~/.bashrc`` nor the login files are read, unless
+  ``$BASH_ENV`` is set to point at one.
+
+.. uml::
+
+   !theme plain
+   start
+   if (Login shell?) then (yes)
+     #LightBlue:Read /etc/profile;
+     #LightBlue:Read ~/.bash_profile\n(or ~/.bash_login or ~/.profile);
+     note right: These usually contain a line\nlike ". ~/.bashrc" so login\nshells pick up ~/.bashrc too
+   else (no)
+     if (Interactive shell?) then (yes)
+       #LightGreen:Read ~/.bashrc;
+     else (no)
+       #LightSalmon:Read $BASH_ENV\nif it is set (scripts, cron);
+     endif
+   endif
+   #GreenYellow:Shell ready\n(prompt shown if interactive);
+   stop
+
+This is why the file in this repo matters at all: it's built for
+**interactive use** (aliases, prompt, completion), so it only takes
+effect on its own in a new terminal tab. For it to also apply to login
+sessions (fresh SSH connections, new TTYs), your ``~/.bash_profile`` or
+``~/.profile`` needs a line such as:
+
+.. code-block:: bash
+
+   [ -f ~/.bashrc ] && . ~/.bashrc
 
 1. Shell Environment & Behavior
 ---------------------------------

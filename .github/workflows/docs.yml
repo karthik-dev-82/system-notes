@@ -34,12 +34,6 @@ jobs:
             https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
           echo "PLANTUML_JAR=$HOME/plantuml.jar" >> "$GITHUB_ENV"
 
-      - name: Install LaTeX toolchain (for PDF export)
-        run: |
-          sudo apt-get install -y \
-            texlive-xetex texlive-fonts-recommended texlive-latex-recommended \
-            texlive-latex-extra latexmk fonts-dejavu
-
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -49,18 +43,6 @@ jobs:
 
       - name: Build Sphinx site
         run: sphinx-build -n -W docs/source docs/_build/html
-
-      - name: Build PDF (best-effort; site still deploys if this fails)
-        continue-on-error: true
-        run: sphinx-build -M latexpdf docs/source docs/_build
-
-      - name: Publish PDF alongside the HTML site
-        run: |
-          if [ -f docs/_build/latex/bash-miscellaneous.pdf ]; then
-            cp docs/_build/latex/bash-miscellaneous.pdf docs/_build/html/bash-miscellaneous.pdf
-          else
-            echo "::warning::PDF build did not produce an output file; skipping PDF publish for this run"
-          fi
 
       - uses: actions/upload-pages-artifact@v3
         with:
