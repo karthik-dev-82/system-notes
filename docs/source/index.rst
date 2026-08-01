@@ -13,6 +13,7 @@ control, and system diagnostics.
    developer_commands
    system_monitoring_commands
    network_interfaces
+   docker_dev_environment
 
 Quick Navigation
 -----------------
@@ -37,3 +38,6 @@ Quick Navigation
    * - :doc:`network_interfaces`
      - Linux network interfaces, explained with analogies & diagrams
      - ``eth0``, ``lo``, ``veth``, ``docker0``, VLANs, TUN/TAP, NAT
+   * - :doc:`docker_dev_environment`
+     - How the ``development`` repo's Docker dev container is built
+     - ``Dockerfile``, ``devcontainer.json``, ``docker-compose.yml``

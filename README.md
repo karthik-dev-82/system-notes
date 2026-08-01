@@ -15,6 +15,7 @@ A curated collection of practical reference guides, command-line cheat sheets, a
 | 📊 **[System Monitoring Commands](docs/source/system_monitoring_commands.rst)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
 | ⚡ **[Developer Commands](docs/source/developer_commands.rst)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
+| 🐳 **[Docker Dev Environment](docs/source/docker_dev_environment.rst)** | How the `development` repo's Docker dev container is built | `Dockerfile`, `devcontainer.json`, `docker-compose.yml` |
 
 ---
 
@@ -54,7 +55,8 @@ bash-miscellaneous/
         ├── bashrc_reference.rst
         ├── system_monitoring_commands.rst
         ├── developer_commands.rst
-        └── network_interfaces.rst
+        ├── network_interfaces.rst
+        └── docker_dev_environment.rst
 
 ```
 
