@@ -17,6 +17,7 @@ down and coming back to.
    docker_dev_environment
    spdlog_sinks_architecture
    linux_devices
+   kernel_networking_docker_internals
 
 Quick Navigation
 -----------------
@@ -50,3 +51,6 @@ Quick Navigation
    * - :doc:`linux_devices`
      - Block/char/network/terminal/pseudo devices, and USB layering
      - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
+   * - :doc:`kernel_networking_docker_internals`
+     - Kernel networking stack, Docker internals, iptables, OverlayFS
+     - netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2
