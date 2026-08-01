@@ -235,3 +235,14 @@ Think of it as giving robots the ability to explore and remember a
 space the way you might explore and remember a building you've walked
 through -- except they do it in pitch darkness, with laser precision,
 and without ever needing a satellite signal.
+
+Going Deeper
+----------------
+
+Everything above is the intuition-level picture. If you want to see it
+actually built end-to-end -- real hardware, a real SLAM implementation,
+not just the analogy -- `How to Make an Autonomous Mapping Robot Using
+SLAM <https://www.youtube.com/watch?v=xqjVTE7QvOg>`_ (Kai Nakamura)
+walks through a full project. Fair warning: it moves fast into real
+implementation detail, so it's worth having the concepts above settled
+first.
