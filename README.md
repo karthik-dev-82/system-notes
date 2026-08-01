@@ -16,6 +16,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | ⚡ **[Developer Commands](docs/source/developer_commands.rst)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
 | 🐳 **[Docker Dev Environment](docs/source/docker_dev_environment.rst)** | How the `development` repo's Docker dev container is built | `Dockerfile`, `devcontainer.json`, `docker-compose.yml` |
+| 📝 **[spdlog Sinks & Architecture](docs/source/spdlog_sinks_architecture.rst)** | spdlog logging architecture, sinks, and log levels | `spdlog`, sinks, formatters, log levels, rotation |
 
 ---
 
@@ -56,7 +57,8 @@ personal-notes/
         ├── system_monitoring_commands.rst
         ├── developer_commands.rst
         ├── network_interfaces.rst
-        └── docker_dev_environment.rst
+        ├── docker_dev_environment.rst
+        └── spdlog_sinks_architecture.rst
 
 ```
 

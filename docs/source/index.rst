@@ -15,6 +15,7 @@ down and coming back to.
    system_monitoring_commands
    network_interfaces
    docker_dev_environment
+   spdlog_sinks_architecture
 
 Quick Navigation
 -----------------
@@ -42,3 +43,6 @@ Quick Navigation
    * - :doc:`docker_dev_environment`
      - How the ``development`` repo's Docker dev container is built
      - ``Dockerfile``, ``devcontainer.json``, ``docker-compose.yml``
+   * - :doc:`spdlog_sinks_architecture`
+     - spdlog logging architecture, sinks, and log levels
+     - ``spdlog``, sinks, formatters, log levels, rotation
