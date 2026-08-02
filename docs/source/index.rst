@@ -23,6 +23,7 @@ down and coming back to.
    unicode_utf8_encoding
    base64_encoding
    databases_postgresql_mongodb_redis
+   image_formats
 
 Quick Navigation
 -----------------
@@ -74,3 +75,6 @@ Quick Navigation
    * - :doc:`databases_postgresql_mongodb_redis`
      - PostgreSQL, MongoDB, and Redis compared with a kitchen analogy
      - joins, documents, key-value, ACID, indexes, sorted sets
+   * - :doc:`image_formats`
+     - SVG vs. PNG vs. JPEG, and when to use each
+     - vector vs. raster, transparency, lossy/lossless compression
