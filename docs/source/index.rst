@@ -21,6 +21,7 @@ down and coming back to.
    lidar_slam
    ssh_secure_shell
    unicode_utf8_encoding
+   base64_encoding
 
 Quick Navigation
 -----------------
@@ -66,3 +67,6 @@ Quick Navigation
    * - :doc:`unicode_utf8_encoding`
      - How Unicode code points and UTF-8's variable-length encoding work
      - code points, planes, UTF-8 bit patterns, multi-byte characters
+   * - :doc:`base64_encoding`
+     - Base64, ASCII, URL encoding, and hex, explained with analogies
+     - Base64 alphabet, percent-encoding, MIME attachments, hex colors
