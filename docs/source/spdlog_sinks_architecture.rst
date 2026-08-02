@@ -41,14 +41,6 @@ The Architecture: Three Layers
      Quick Start Template below.
    end note
 
-.. note::
-   **Correction:** the original notes drew a single "Formatter" box
-   sitting between the Logger and the Sinks, as if one format applied
-   to everything. In practice each sink carries its own pattern and its
-   own minimum level (``console_sink->set_pattern(...)`` can differ
-   completely from ``file_sink->set_pattern(...)``) -- there's no single
-   shared formatting step. The diagram above reflects that.
-
 **Analogy:** think of it like a restaurant.
 
 * Your code = customer placing an order
@@ -294,21 +286,19 @@ spdlog has different "urgency" levels:
    logger->error("Something failed!");
    logger->critical("CRITICAL FAILURE!");
 
-**Pro tip:** you can set a minimum level to filter messages:
+**Pro tip:** you can set a minimum level to filter messages. Note that
+the logger *methods* are named ``trace()``, ``debug()``, ``info()``,
+``warn()``, ``error()``, and ``critical()``, but the
+``spdlog::level::level_enum`` constant for the error level is spelled
+``err``, not ``error``:
 
 .. code-block:: cpp
 
    logger->set_level(spdlog::level::info);  // Only show info and above
    // Now trace() and debug() messages won't appear!
 
-.. note::
-   **Correction:** the *methods* you call on a logger are named
-   ``trace()``, ``debug()``, ``info()``, ``warn()``, ``error()``, and
-   ``critical()`` -- but the underlying ``spdlog::level::level_enum``
-   constant for the error level is spelled ``err``, not ``error``.
-   ``logger->error("...")`` is correct; ``spdlog::level::error`` is not
-   -- it won't compile. If you're setting a level explicitly, it's
-   ``spdlog::level::err``.
+   logger->set_level(spdlog::level::err);   // Only show error and above
+   // spdlog::level::error doesn't exist -- it won't compile
 
 Advanced: Rotating File Sink
 ---------------------------------

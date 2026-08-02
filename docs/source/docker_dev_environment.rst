@@ -171,14 +171,10 @@ Analogy: adding a JavaScript workshop to your treehouse.
 
    RUN apt-get install ros-jazzy-ros-base python3-rosdep python3-colcon-common-extensions
 
-Analogy: installing a robotics lab in your workspace.
-
-.. note::
-   **Correction:** this installs ``ros-jazzy-ros-base``, the minimal
-   headless ROS2 package set -- not ``ros-jazzy-desktop``. That matters
-   because ``ros-base`` does **not** include GUI tools like ``rviz2`` or
-   ``rqt``. If you need those, they'd have to be added separately; don't
-   assume they're already in the container.
+Analogy: installing a robotics lab in your workspace -- but note this
+installs ``ros-jazzy-ros-base``, the minimal headless ROS2 package
+set, not ``ros-jazzy-desktop``. It does **not** include GUI tools like
+``rviz2`` or ``rqt``; those would need to be added separately.
 
 *Layer 8: C++ libraries*
 
@@ -198,15 +194,14 @@ projects.
        && /opt/python-dev/bin/pip install pytest black mypy poetry numpy pandas fastapi
    RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
 
-.. note::
-   **Addition -- this is missing from the original notes entirely:** the
-   ``Dockerfile`` also installs the full Rust toolchain via ``rustup``,
-   then uses ``cargo`` to build several modern CLI tools: ``bat``, ``eza``,
-   ``bottom``, ``procs``, ``dust``, ``delta``, and ``hyperfine``. The
-   generated ``~/.bashrc`` then aliases the classics over to them --
-   ``cat`` → ``bat``, ``ls``/``la``/``l`` → ``eza``, ``find`` → ``fd``,
-   ``grep`` → ``rg``, ``ps`` → ``procs``, ``top`` → ``bottom``. If a
-   command feels unusually fast or colorful in this container, that's why.
+The ``Dockerfile`` also installs the full Rust toolchain via
+``rustup``, then uses ``cargo`` to build several modern CLI tools:
+``bat``, ``eza``, ``bottom``, ``procs``, ``dust``, ``delta``, and
+``hyperfine``. The generated ``~/.bashrc`` then aliases the classics
+over to them -- ``cat`` -> ``bat``, ``ls``/``la``/``l`` -> ``eza``,
+``find`` -> ``fd``, ``grep`` -> ``rg``, ``ps`` -> ``procs``, ``top`` ->
+``bottom``. If a command feels unusually fast or colorful in this
+container, that's why.
 
 2. devcontainer.json - The Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -332,18 +327,6 @@ doing.
    dev --> postgres : Can reach via\nlocalhost (host networking)
    dev --> redis : Can reach via\nlocalhost (host networking)
    dev --> mongo : Can reach via\nlocalhost (host networking)
-
-.. note::
-   **Correction:** the compose file's main service is named
-   ``dev-environment`` and its ``container_name`` is ``dev-container`` --
-   *not* "development." Also, ``postgres``, ``redis``, and ``mongodb`` are
-   each gated behind a Compose ``profiles:`` entry, so they are **opt-in**:
-   a bare ``docker-compose up`` only starts ``dev-environment``. You need
-   either ``docker-compose --profile database up`` or to name the service
-   explicitly (``docker-compose up -d postgres``) to bring one up. And
-   because ``dev-environment`` runs with ``network_mode: host``, it talks
-   to the database containers over ``localhost:<port>``, not via Compose's
-   internal service-name DNS.
 
 Analogy: your treehouse (dev container) is the main building, but you can
 add separate buildings for storage (databases) that all connect via paths
@@ -569,15 +552,14 @@ with full system access.
 DNS Settings
 ~~~~~~~~~~~~~~
 
-.. note::
-   **Correction -- this was flat-out backwards in the original notes.**
-   The container does **not** use ``--dns=8.8.8.8``/``--dns=1.1.1.1``
-   flags. ``devcontainer.json`` says so explicitly in a comment: those
-   flags are silently *ignored* by Docker once ``--network=host`` is set.
-   DNS is instead fixed by a dedicated ``.devcontainer/fix-dns.sh`` script,
-   which runs **first** in ``postCreateCommand`` -- before ``setup-git.sh``
-   or anything that needs to reach the network -- because, as the repo's
-   own comment puts it, "everything else depends on working DNS."
+The container does **not** use ``--dns=8.8.8.8``/``--dns=1.1.1.1``
+flags -- ``devcontainer.json`` says so explicitly in a comment: those
+flags are silently *ignored* by Docker once ``--network=host`` is set.
+DNS is instead fixed by a dedicated ``.devcontainer/fix-dns.sh``
+script, which runs **first** in ``postCreateCommand`` -- before
+``setup-git.sh`` or anything that needs to reach the network --
+because, as the repo's own comment puts it, "everything else depends
+on working DNS."
 
 Analogy: rather than handing the container a couple of phone numbers to
 try, the setup script rewires its phone line directly so it can dial out
@@ -606,30 +588,20 @@ The Complete Startup Sequence
    :Docker: Create container from image;
    :Docker: Mount your project files;
    :Container: Start Ubuntu;
-   fork
-     :Run: fix-dns.sh;
-     :Fix DNS resolution FIRST;
-   fork again
-     :Run: setup-git.sh;
-     :Configure Git username/email;
-   fork again
-     :Run: fix-permissions.sh;
-     :Fix file ownership;
-   end fork
+   :Run: fix-dns.sh;
+   note right: Must run first --\nnetwork depends on it
+   :Run: setup-git.sh;
+   :Run: fix-permissions.sh;
    :Run: npm install;
    :VS Code: Connect to container;
    :VS Code: Install extensions;
    :Ready to code!;
    stop
 
-.. note::
-   The original notes showed ``fix-dns.sh``, ``setup-git.sh``, and
-   ``fix-permissions.sh`` as running in parallel (fork/join), same as
-   above. In the real ``postCreateCommand`` they're actually chained with
-   ``&&`` in a strict sequence (DNS, then git, then permissions, then
-   package installs, then ``npm install``) -- because DNS has to work
-   before anything that touches the network can run. The diagram keeps
-   the fork for readability, but treat the real order as sequential.
+``postCreateCommand`` chains these with ``&&`` in a strict sequence --
+DNS, then git, then permissions, then package installs, then
+``npm install`` -- because DNS has to work before anything that
+touches the network can run.
 
 What Gets Installed
 ------------------------
@@ -667,15 +639,12 @@ ROS2 Robotics
 ~~~~~~~~~~~~~~~~
 
 * ROS2 Jazzy -- ``ros-jazzy-ros-base`` (headless; **no** rviz2/rqt by
-  default -- see the correction above)
+  default)
 * colcon (build tool)
 * rosdep (dependencies)
 
 Rust & Modern CLI Tools
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. note::
-   This entire category was missing from the original notes.
 
 * Rust toolchain via ``rustup``
 * ``bat`` (better ``cat``), ``eza`` (better ``ls``), ``bottom`` (better

@@ -158,7 +158,7 @@ Important ones:
      - Infinite zeros
      - ``dd if=/dev/zero of=file bs=1M count=100``
    * - ``/dev/random``
-     - "True" random numbers
+     - Random numbers, same CSPRNG as ``/dev/urandom`` on Linux 5.6+
      - ``head -c 32 /dev/random``
    * - ``/dev/urandom``
      - Pseudo-random, never blocks
@@ -170,15 +170,12 @@ Important ones:
      - Mount files as devices
      - ``mount -o loop file.iso /mnt``
 
-.. note::
-   **Correction:** "``/dev/random`` can block" was true historically, but
-   it's stale advice for anything running Linux 5.6+ (2020) -- which by
-   now is every current mainstream distro. Since that kernel version,
-   ``/dev/random`` and ``/dev/urandom`` are both backed by the same CSPRNG
-   and behave almost identically once it's initialized (a brief moment
-   during early boot). In practice there's rarely a reason to prefer one
-   over the other on a modern system; ``/dev/urandom`` remains the safe
-   default choice either way.
+On Linux 5.6+ (2020 onward -- every current mainstream distro),
+``/dev/random`` and ``/dev/urandom`` are both backed by the same
+CSPRNG and behave almost identically once it's initialized (a brief
+moment during early boot). There's rarely a reason to prefer one over
+the other on a modern system; ``/dev/urandom`` remains the safe
+default choice either way.
 
 USB Devices - Understanding the Layers
 -------------------------------------------
@@ -319,18 +316,16 @@ Not all USB serial devices use CDC-ACM! Here are the common ones:
 * ``ttyUSB`` = uses a separate vendor-specific chip that converts USB to
   serial (needs that chip's specific driver)
 
-.. note::
-   **Clarification:** CDC-ACM, on one hand, and FTDI/CP210x/CH340/PL2303
-   on the other, aren't really peers -- they're two different kinds of
-   thing. CDC-ACM (like Mass Storage, HID, UVC, and UAC, further below)
-   is an official USB device **class**: a standard the kernel already
-   ships generic support for, which is exactly why no extra driver is
-   needed. FTDI/CP210x/CH340/PL2303 are specific **vendor chips** with no
-   standard class descriptor -- each one needs its own dedicated kernel
-   driver (``ftdi_sio``, ``cp210x``, ``ch341``, ``pl2303``) to expose a
-   serial-like interface at all. That's the real reason CDC-ACM "just
-   works" while the others depend on whether that particular chip's
-   driver is present.
+CDC-ACM and FTDI/CP210x/CH340/PL2303 are two different kinds of thing,
+not peers. CDC-ACM (like Mass Storage, HID, UVC, and UAC, further
+below) is an official USB device **class**: a standard the kernel
+already ships generic support for, which is why no extra driver is
+needed. FTDI/CP210x/CH340/PL2303 are specific **vendor chips** with no
+standard class descriptor -- each one needs its own dedicated kernel
+driver (``ftdi_sio``, ``cp210x``, ``ch341``, ``pl2303``) to expose a
+serial-like interface at all. That's why CDC-ACM "just works" while
+the others depend on whether that particular chip's driver is
+present.
 
 **Analogy:**
 
@@ -621,17 +616,6 @@ Q2: What does the ``who`` output mean?
 
    alice     tty2         2025-10-06 10:33
    alice     pts/2        2025-10-06 10:33 (:0)
-
-.. note::
-   **Correction:** the original notes showed a ``who`` line with
-   ``seat0`` as the device/line field (e.g.
-   ``alice  seat0  ... (login screen)``). That's not something ``who``
-   actually prints -- ``seat0`` is a ``systemd-logind``/``loginctl``
-   concept (a "seat" is a collection of physical input/output hardware),
-   not a value that shows up in ``who``'s LINE column. ``who`` reports
-   real tty/pts/display names there instead. The example above is more
-   representative, though the exact display-manager notation
-   (``:0``, blank, or something else) varies by distro/desktop.
 
 **Explanation:**
 
