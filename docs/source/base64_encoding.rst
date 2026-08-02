@@ -48,18 +48,6 @@ How Base64 Works (Simple Version)
 
    note right of convert : Each piece gets\na letter/number\nfrom the alphabet
 
-.. note::
-   **Correction:** the original version of this diagram showed a
-   12-bit input (``010010110101``) next to a 4-character output
-   (``S2Vy``), but those don't match -- 12 bits only splits into two
-   6-bit chunks (two output characters), and those particular 12 bits
-   don't decode to ``S2Vy`` either. Base64 always consumes input in
-   3-byte (24-bit) groups and emits 4 output characters per group, so
-   the diagram now uses a real, checkable example: the ASCII bytes for
-   ``"Man"`` (``01001101 01100001 01101110``, 24 bits) split into four
-   6-bit chunks and mapped through the Base64 alphabet, producing
-   ``TWFu``.
-
 Other Important Encodings
 -------------------------------
 
@@ -70,14 +58,6 @@ ASCII Encoding
 * **Analogy:** like giving each letter in the alphabet a jersey number
 * **Example:** letter ``A`` = 65, ``B`` = 66
 * **Used for:** basic English text in computers
-
-.. note::
-   **Correction:** the original note gave ASCII's range as 0-255.
-   That's the range of a full byte -- ASCII itself only defines 128
-   values, 0-127 (7 bits). 128-255 is "extended ASCII" territory,
-   where different vendors historically put different, incompatible
-   characters -- which is part of why Unicode exists. See
-   :doc:`unicode_utf8_encoding` for how that gap gets closed.
 
 UTF-8 Encoding
 ~~~~~~~~~~~~~~~~~~
@@ -118,20 +98,9 @@ Base64 in action:
 * **Web images:** sometimes small icons are embedded as Base64 text
   right in the webpage (a "data URI")
 * **HTTP Basic Auth:** ``username:password`` gets Base64-encoded
-  before being sent in a request header
-
-.. note::
-   **Correction:** the original note listed "Passwords: Stored safely
-   (though usually with additional security)" as a Base64 use case.
-   That's a real and common misconception worth calling out directly:
-   Base64 is *encoding*, not encryption or hashing -- it's fully and
-   trivially reversible with no key required, so it adds zero
-   confidentiality. Passwords should be stored as the output of a
-   slow, salted cryptographic hash (bcrypt, scrypt, Argon2), never as
-   Base64. The legitimate password-adjacent use of Base64 is HTTP
-   Basic Auth, where credentials are Base64-encoded purely so they fit
-   in a text header -- that's explicitly *not* secure on its own and
-   relies entirely on TLS for actual protection.
+  before being sent in a request header -- this is *not* secure on
+  its own (Base64 is trivially reversible, not encryption), and
+  relies entirely on TLS for actual protection
 
 Quick Memory Trick
 ------------------------

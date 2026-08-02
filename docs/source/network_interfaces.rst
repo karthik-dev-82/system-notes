@@ -348,23 +348,17 @@ Think of it like this:
 
    Physical eth0 (the actual network card)
        ├── eth0 (main IP: 192.168.1.10)
-       ├── eth0:0 (alias IP: 192.168.1.11)
-       ├── eth0:1 (alias IP: 192.168.1.12)
        ├── eth0.10 (VLAN 10)
        └── eth0.20 (VLAN 20)
 
 **Analogy:** Your house (physical) has one street address, but inside you
 have multiple rooms (virtual interfaces), each with a different purpose!
 
-.. note::
-   **Correction/clarification:** the ``eth0:0`` / ``eth0:1`` alias names are
-   the *old* ``ifconfig`` (net-tools) convention. The ``ip addr add``
-   commands below it are the modern (``iproute2``) way of doing the same
-   thing, and they do **not** create a separately-named interface — running
-   ``ip addr show`` afterward will list all three addresses under the same
-   ``eth0``, with no ``eth0:0``/``eth0:1`` labels. Both approaches result in
-   one card answering to multiple IPs; only the legacy tool gives the alias
-   a distinct name.
+The old ``ifconfig`` (net-tools) world used to show extra IPs on the same
+card as separately-named aliases, ``eth0:0``, ``eth0:1``, and so on. The
+modern ``iproute2`` commands below do the same job -- one card answering to
+multiple IPs -- but without a separate alias name: running ``ip addr show``
+afterward lists all the addresses under the same ``eth0``.
 
 Example: Multiple IPs on One Card
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -378,7 +372,8 @@ Example: Multiple IPs on One Card
    ip addr add 192.168.1.11/24 dev eth0
    ip addr add 192.168.1.12/24 dev eth0
 
-   # Now one network card responds to 3 different IP addresses!
+   # Now one network card responds to 3 different IP addresses,
+   # all listed under the same "eth0" (no eth0:0/eth0:1 aliases)
 
 **Why would you do this?**
 

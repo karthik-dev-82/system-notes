@@ -90,19 +90,6 @@ The Visual Flow
 
    Client <-> Server: Commands & responses\n(all scrambled)
 
-.. note::
-   **Correction:** the original version of this diagram had "Everything
-   is now ENCRYPTED" as its own step *after* the login step, which
-   reads as if your password gets sent first and encryption switches on
-   afterward. That's backwards, and worth being precise about since
-   it's the whole point of SSH: the secret/session key from Step 2 is
-   established during the initial **key exchange**, before any login
-   step happens, and it's already protecting the channel by the time
-   Step 3 (password or key auth) runs. Your password -- or your key's
-   challenge/response -- is never sent in the clear, not even for a
-   moment. Step 4 isn't a new state; it's the same encryption from
-   Step 2 continuing for the rest of the session.
-
 Fun Analogies to Remember
 ------------------------------
 
