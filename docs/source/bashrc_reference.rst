@@ -337,6 +337,11 @@ Features built into the multi-line prompt:
 Shared ``ssh-agent`` Lifecycle
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. seealso::
+   This section is about managing the agent that holds your *unlocked*
+   keys. For how the SSH handshake and encryption actually work, see
+   :doc:`ssh_secure_shell`.
+
 On interactive shell startup:
 
 1. Checks for saved agent configuration at ``~/.ssh/agent-environment``.

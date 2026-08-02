@@ -19,6 +19,7 @@ down and coming back to.
    linux_devices
    kernel_networking_docker_internals
    lidar_slam
+   ssh_secure_shell
 
 Quick Navigation
 -----------------
@@ -58,3 +59,6 @@ Quick Navigation
    * - :doc:`lidar_slam`
      - LIDAR and SLAM for navigation where GPS doesn't work
      - point clouds, localization, mapping, autonomous vehicles
+   * - :doc:`ssh_secure_shell`
+     - How the SSH handshake, encryption, and key auth actually work
+     - key exchange, host keys, password vs. key auth, tunneling
