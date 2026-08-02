@@ -165,26 +165,51 @@ These don't have physical hardware - they're created by software!
 a) Virtual Ethernet Pairs (``veth``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-**The Big Idea:** Like a virtual cable connecting two containers or network
-namespaces.
+**The Big Idea:** a virtual cable with exactly two ends (a "pair").
+Whatever goes in one end comes out the other. You can wire those two
+ends into any two network namespaces you like -- Docker's specific
+choice is to put one end inside a container and leave the other end on
+the host.
 
-**Analogy:** Imagine two tin cans connected by a string. Whatever you say
-into one can, the other can hears! It's a private phone line.
+**Analogy:** imagine two tin cans connected by a string. Whatever you
+say into one can, the other can hears! It's a private phone line.
 
 .. uml::
 
    !theme plain
    skinparam backgroundColor white
-   rectangle "Container 1" {
-     component "veth0" as veth0 #yellow
+   rectangle "Container" {
+     component "eth0" as veth0 #yellow
    }
-   rectangle "Container 2" {
-     component "veth1" as veth1 #yellow
+   rectangle "Host" {
+     component "veth1234...\n(host-side end)" as veth1 #LightBlue
    }
-   veth0 <--> veth1: Virtual cable
-   note bottom: Data goes in one end,\ncomes out the other!
+   veth0 <--> veth1 : Virtual cable\n(one veth pair)
+   note bottom of veth1
+     This host-side end plugs into
+     the docker0 bridge (next section)
+     so the container can reach the
+     outside world -- and other
+     containers, via the bridge.
+   end note
 
-**Use case:** Docker uses veth pairs to connect containers to the host!
+.. note::
+   **Correction:** this diagram used to show one veth pair directly
+   linking *two containers*, right above a caption saying Docker uses
+   veth pairs "to connect containers to the host" -- those two things
+   contradicted each other. A veth pair only ever has two ends, and
+   Docker always uses one of them inside the container (as its
+   ``eth0``) and the other on the host side -- never container-to-
+   container directly. When two containers need to reach each other,
+   Docker doesn't share one veth pair between them: each container gets
+   its *own* veth pair to the host, and the ``docker0`` bridge (next
+   section) switches traffic between the host-side ends. That bridging
+   step is what actually makes container-to-container communication
+   work.
+
+**Use case:** Docker gives every container its own veth pair, connecting
+that container to the host -- specifically, to the ``docker0`` bridge
+on the host side (see next section).
 
 b) Bridge Interfaces (``br0``, ``docker0``)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
