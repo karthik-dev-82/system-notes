@@ -20,6 +20,7 @@ down and coming back to.
    kernel_networking_docker_internals
    lidar_slam
    ssh_secure_shell
+   unicode_utf8_encoding
 
 Quick Navigation
 -----------------
@@ -62,3 +63,6 @@ Quick Navigation
    * - :doc:`ssh_secure_shell`
      - How the SSH handshake, encryption, and key auth actually work
      - key exchange, host keys, password vs. key auth, tunneling
+   * - :doc:`unicode_utf8_encoding`
+     - How Unicode code points and UTF-8's variable-length encoding work
+     - code points, planes, UTF-8 bit patterns, multi-byte characters

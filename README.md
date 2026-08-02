@@ -21,6 +21,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
+| 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
 
 ---
 
@@ -66,7 +67,8 @@ system-notes/
         ├── linux_devices.rst
         ├── kernel_networking_docker_internals.rst
         ├── lidar_slam.rst
-        └── ssh_secure_shell.rst
+        ├── ssh_secure_shell.rst
+        └── unicode_utf8_encoding.rst
 
 ```
 
