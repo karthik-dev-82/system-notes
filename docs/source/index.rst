@@ -22,6 +22,7 @@ down and coming back to.
    ssh_secure_shell
    unicode_utf8_encoding
    base64_encoding
+   databases_postgresql_mongodb_redis
 
 Quick Navigation
 -----------------
@@ -70,3 +71,6 @@ Quick Navigation
    * - :doc:`base64_encoding`
      - Base64, ASCII, URL encoding, and hex, explained with analogies
      - Base64 alphabet, percent-encoding, MIME attachments, hex colors
+   * - :doc:`databases_postgresql_mongodb_redis`
+     - PostgreSQL, MongoDB, and Redis compared with a kitchen analogy
+     - joins, documents, key-value, ACID, indexes, sorted sets

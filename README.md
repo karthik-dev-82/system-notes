@@ -23,6 +23,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
 | 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
 | 🔠 **[Base64 Encoding](docs/source/base64_encoding.rst)** | Base64, ASCII, URL encoding, and hex, explained with analogies | Base64 alphabet, percent-encoding, MIME attachments, hex colors |
+| 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
 
 ---
 
@@ -70,7 +71,8 @@ system-notes/
         ├── lidar_slam.rst
         ├── ssh_secure_shell.rst
         ├── unicode_utf8_encoding.rst
-        └── base64_encoding.rst
+        ├── base64_encoding.rst
+        └── databases_postgresql_mongodb_redis.rst
 
 ```
 
