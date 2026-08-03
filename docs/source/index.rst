@@ -36,6 +36,7 @@ down and coming back to.
    proc_filesystem_interactive
    linux_fs_basics_interactive
    overlayfs_interactive
+   cpp_memory_interactive
 
 Quick Navigation
 -----------------
@@ -126,3 +127,6 @@ Quick Navigation
    * - :doc:`overlayfs_interactive`
      - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
      - lowerdir, upperdir, merged view, copy-up, whiteouts
+   * - :doc:`cpp_memory_interactive`
+     - Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free
+     - stack frames, heap allocation, raw pointers, undefined behavior

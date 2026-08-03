@@ -1,0 +1,904 @@
+<div class="cm-root" id="cmWidget">
+  <style>
+    #cmWidget {
+      --cm-bg: #0f172a;
+      --cm-panel: #16213e;
+      --cm-border: #2a3655;
+      --cm-text: #e2e8f0;
+      --cm-muted: #94a3b8;
+      --cm-a: #4ade80;
+      --cm-b: #38bdf8;
+      --cm-bad: #f87171;
+      --cm-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cm-bg);
+      color: var(--cm-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cmWidget * { box-sizing: border-box; }
+    #cmWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cmWidget h4 { margin: 0 0 10px; font-size: 0.95rem; color: #fff; }
+    #cmWidget .cm-sub { color: var(--cm-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cm-topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--cm-panel);
+      border: 1px solid var(--cm-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      min-width: 760px;
+      font-size: 0.8rem;
+      color: var(--cm-muted);
+    }
+    .cm-topbar input[type="range"] { width: 130px; accent-color: var(--cm-b); }
+
+    .cm-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 760px; }
+    .cm-tab {
+      background: var(--cm-panel);
+      color: var(--cm-muted);
+      border: 1px solid var(--cm-border);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .cm-tab.active { background: var(--cm-b); color: #041322; border-color: var(--cm-b); }
+
+    .cm-panel { display: none; }
+    .cm-panel.active { display: block; }
+
+    .cm-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--cm-panel);
+      border: 1px solid var(--cm-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 760px;
+    }
+    .cm-toggle { display: inline-flex; border: 1px solid var(--cm-border); border-radius: 8px; overflow: hidden; }
+    .cm-toggle button { background: transparent; color: var(--cm-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .cm-toggle button.active { background: var(--cm-warn); color: #2a1c00; }
+    .cm-btn { background: var(--cm-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .cm-btn.secondary { background: transparent; color: var(--cm-text); border: 1px solid var(--cm-border); }
+    .cm-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .cm-stage {
+      background: var(--cm-panel);
+      border: 1px solid var(--cm-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      min-width: 760px;
+    }
+
+    .cm-code {
+      background: #0a1128;
+      border: 1px solid var(--cm-border);
+      border-radius: 8px;
+      padding: 10px 0;
+      margin-bottom: 14px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .cm-code-line { padding: 1px 14px; color: var(--cm-muted); white-space: pre; }
+    .cm-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--cm-b); padding-left: 11px; }
+    .cm-code-line.hl.bad-hl { background: rgba(248,113,113,0.16); border-left-color: var(--cm-bad); }
+
+    .cm-vis-row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+    .cm-vis-col { flex: 1; min-width: 260px; }
+    .cm-vis-col-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cm-muted); margin-bottom: 8px; }
+
+    .cm-frame {
+      border: 2px solid var(--cm-a);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: #10182e;
+    }
+    .cm-frame.popped { opacity: 0.3; border-style: dashed; }
+    .cm-frame-title { font-weight: 800; font-size: 0.85rem; color: var(--cm-a); margin-bottom: 6px; }
+    .cm-var-row { font-family: ui-monospace, monospace; font-size: 0.8rem; margin: 3px 0; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .cm-var-name { color: var(--cm-text); }
+    .cm-var-val { color: var(--cm-muted); }
+    .cm-badge { display: inline-block; font-size: 0.66rem; font-weight: 800; padding: 1px 7px; border-radius: 9px; }
+    .cm-badge.ptr-valid { background: rgba(56,189,248,0.18); color: var(--cm-b); }
+    .cm-badge.dangling { background: rgba(248,113,113,0.2); color: var(--cm-bad); }
+    .cm-empty-note { color: var(--cm-muted); font-size: 0.78rem; font-style: italic; }
+
+    .cm-heap-block {
+      border: 2px solid var(--cm-b);
+      border-radius: 8px;
+      padding: 8px 12px;
+      margin-bottom: 8px;
+      background: #10182e;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+    }
+    .cm-heap-block.freed { border-color: var(--cm-muted); opacity: 0.55; }
+    .cm-heap-block.leaked { border-color: var(--cm-warn); }
+    .cm-heap-block .cm-badge.freed-badge { background: rgba(148,163,184,0.2); color: var(--cm-muted); }
+    .cm-heap-block .cm-badge.leaked-badge { background: rgba(251,191,36,0.2); color: var(--cm-warn); }
+
+    .cm-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .cm-banner.bad { background: rgba(248,113,113,0.18); color: var(--cm-bad); }
+    .cm-banner.ok { background: rgba(74,222,128,0.12); color: var(--cm-a); }
+    .cm-banner.warn { background: rgba(251,191,36,0.15); color: var(--cm-warn); }
+
+    .cm-counter { text-align: center; font-size: 1rem; margin-bottom: 10px; color: var(--cm-muted); }
+    .cm-counter b { color: #fff; font-size: 1.3rem; font-family: ui-monospace, monospace; }
+
+    .cm-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 760px; }
+    .cm-explain-panel, .cm-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .cm-explain-panel { flex: 1.4; }
+    .cm-box { background: var(--cm-panel); border: 1px solid var(--cm-border); border-radius: 10px; padding: 12px 14px; }
+    .cm-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cm-muted); margin-bottom: 8px; }
+    .cm-log { height: 140px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cm-log div { color: var(--cm-muted); }
+    .cm-log div.ok { color: var(--cm-a); }
+    .cm-log div.info { color: var(--cm-b); }
+    .cm-log div.bad { color: var(--cm-bad); font-weight: 700; }
+    .cm-log div.warn { color: var(--cm-warn); }
+
+    details.cm-notes {
+      margin-top: 14px;
+      background: var(--cm-panel);
+      border: 1px solid var(--cm-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 760px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.cm-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cm-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cm-muted); }
+    details.cm-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cm-b); }
+  </style>
+
+  <h3>Stack, Heap &amp; Pointers: Play With It</h3>
+  <div class="cm-sub">Three scenarios, each a classic C++ memory bug next to its fix: a pointer that outlives the stack frame it pointed into, a heap block that outlives every pointer to it, and two pointers aliasing one heap block that gets freed once too often.</div>
+
+  <div class="cm-topbar">
+    <label>Playback speed: <span id="cmSpeedVal">1x</span></label>
+    <input type="range" id="cmSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    <span style="font-size:0.75rem;">applies to every "Play" button below</span>
+  </div>
+
+  <div class="cm-tabs">
+    <button class="cm-tab active" data-tab="dangling">1. Dangling Reference</button>
+    <button class="cm-tab" data-tab="leak">2. Heap Leak</button>
+    <button class="cm-tab" data-tab="uaf">3. Use-After-Free</button>
+  </div>
+
+  <!-- ============ TAB 1: DANGLING REFERENCE ============ -->
+  <div class="cm-panel active" id="panel-dangling">
+    <div class="cm-controls">
+      <div class="cm-toggle">
+        <button class="dg-mode-btn active" data-mode="addr">Return Address (Bug)</button>
+        <button class="dg-mode-btn" data-mode="value">Return By Value (Fix)</button>
+      </div>
+      <button class="cm-btn" id="dgStep">Step</button>
+      <button class="cm-btn" id="dgPlay">&#9654; Play</button>
+      <button class="cm-btn secondary" id="dgReset">Reset</button>
+    </div>
+    <div class="cm-stage">
+      <div class="cm-code" id="dgCodeAddr">
+        <div class="cm-code-line" data-line="1">int* make_dangling() {</div>
+        <div class="cm-code-line" data-line="2">    int local = 42;</div>
+        <div class="cm-code-line" data-line="3">    return &amp;local;</div>
+        <div class="cm-code-line" data-line="4">}</div>
+        <div class="cm-code-line" data-line="5">&nbsp;</div>
+        <div class="cm-code-line" data-line="6">int main() {</div>
+        <div class="cm-code-line" data-line="7">    int* p = make_dangling();</div>
+        <div class="cm-code-line" data-line="8">    std::cout &lt;&lt; *p;</div>
+        <div class="cm-code-line" data-line="9">}</div>
+      </div>
+      <div class="cm-code" id="dgCodeValue" style="display:none;">
+        <div class="cm-code-line" data-line="1">int make_ok() {</div>
+        <div class="cm-code-line" data-line="2">    int local = 42;</div>
+        <div class="cm-code-line" data-line="3">    return local;</div>
+        <div class="cm-code-line" data-line="4">}</div>
+        <div class="cm-code-line" data-line="5">&nbsp;</div>
+        <div class="cm-code-line" data-line="6">int main() {</div>
+        <div class="cm-code-line" data-line="7">    int result = make_ok();</div>
+        <div class="cm-code-line" data-line="8">    std::cout &lt;&lt; result;</div>
+        <div class="cm-code-line" data-line="9">}</div>
+      </div>
+      <div class="cm-vis-row">
+        <div class="cm-vis-col">
+          <div class="cm-vis-col-title">Call Stack (top = most recent call)</div>
+          <div id="dgStack"></div>
+        </div>
+      </div>
+      <div class="cm-banner" id="dgBanner" style="display:none;"></div>
+    </div>
+    <div class="cm-panels">
+      <div class="cm-explain-panel">
+        <div class="cm-box">
+          <div class="cm-panel-title">What's happening right now</div>
+          <div id="dgExplain">Click Step to enter <code>make_dangling()</code>, declare its local variable, and return its address to <code>main</code>. Watch what <code>p</code> is left holding once that frame is gone.</div>
+        </div>
+      </div>
+      <div class="cm-side-panel-col">
+        <div class="cm-box">
+          <div class="cm-panel-title">Event log</div>
+          <div class="cm-log" id="dgLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: HEAP LEAK ============ -->
+  <div class="cm-panel" id="panel-leak">
+    <div class="cm-controls">
+      <div class="cm-toggle">
+        <button class="lk-mode-btn active" data-mode="leaky">Never Delete (Bug)</button>
+        <button class="lk-mode-btn" data-mode="correct">Delete + Null Out (Fix)</button>
+      </div>
+      <button class="cm-btn" id="lkStep">Step</button>
+      <button class="cm-btn" id="lkPlay">&#9654; Play</button>
+      <button class="cm-btn secondary" id="lkCallAgain">Call Function Again</button>
+      <button class="cm-btn secondary" id="lkReset">Reset</button>
+    </div>
+    <div class="cm-stage">
+      <div class="cm-code" id="lkCodeLeaky">
+        <div class="cm-code-line" data-line="1">void leaky() {</div>
+        <div class="cm-code-line" data-line="2">    int* p = new int(10);</div>
+        <div class="cm-code-line" data-line="3">    // no delete -- p is a local, it dies with the frame</div>
+        <div class="cm-code-line" data-line="4">}</div>
+        <div class="cm-code-line" data-line="5">&nbsp;</div>
+        <div class="cm-code-line" data-line="6">int main() {</div>
+        <div class="cm-code-line" data-line="7">    leaky(); leaky(); leaky();</div>
+        <div class="cm-code-line" data-line="8">}</div>
+      </div>
+      <div class="cm-code" id="lkCodeCorrect" style="display:none;">
+        <div class="cm-code-line" data-line="1">void correct() {</div>
+        <div class="cm-code-line" data-line="2">    int* p = new int(10);</div>
+        <div class="cm-code-line" data-line="3">    delete p;</div>
+        <div class="cm-code-line" data-line="4">    p = nullptr;</div>
+        <div class="cm-code-line" data-line="5">}</div>
+        <div class="cm-code-line" data-line="6">&nbsp;</div>
+        <div class="cm-code-line" data-line="7">int main() {</div>
+        <div class="cm-code-line" data-line="8">    correct(); correct(); correct();</div>
+        <div class="cm-code-line" data-line="9">}</div>
+      </div>
+      <div class="cm-counter">Currently leaked: <b id="lkLeakedBytes">0</b> bytes across <b id="lkCallCount">0</b> call(s)</div>
+      <div class="cm-vis-row">
+        <div class="cm-vis-col">
+          <div class="cm-vis-col-title">Call Stack</div>
+          <div id="lkStack"></div>
+        </div>
+        <div class="cm-vis-col">
+          <div class="cm-vis-col-title">Heap</div>
+          <div id="lkHeap"></div>
+        </div>
+      </div>
+    </div>
+    <div class="cm-panels">
+      <div class="cm-explain-panel">
+        <div class="cm-box">
+          <div class="cm-panel-title">What's happening right now</div>
+          <div id="lkExplain">Step through one call. Then hit "Call Function Again" and step through it a second and third time -- in bug mode, watch the leaked total climb every single call; in fix mode it always returns to zero.</div>
+        </div>
+      </div>
+      <div class="cm-side-panel-col">
+        <div class="cm-box">
+          <div class="cm-panel-title">Event log</div>
+          <div class="cm-log" id="lkLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 3: USE-AFTER-FREE / DOUBLE-FREE ============ -->
+  <div class="cm-panel" id="panel-uaf">
+    <div class="cm-controls">
+      <button class="cm-btn" id="uafStep">Step</button>
+      <button class="cm-btn" id="uafPlay">&#9654; Play</button>
+      <button class="cm-btn secondary" id="uafReset">Reset</button>
+    </div>
+    <div class="cm-stage">
+      <div class="cm-code" id="uafCode">
+        <div class="cm-code-line" data-line="1">int* p = new int(10);</div>
+        <div class="cm-code-line" data-line="2">int* q = p;   // q aliases the SAME heap block as p</div>
+        <div class="cm-code-line" data-line="3">delete p;     // block freed -- but q still points at it!</div>
+        <div class="cm-code-line" data-line="4">*q = 5;       // q is now a stale pointer</div>
+        <div class="cm-code-line" data-line="5">delete q;     // freeing it again</div>
+      </div>
+      <div class="cm-vis-row">
+        <div class="cm-vis-col">
+          <div class="cm-vis-col-title">Pointers</div>
+          <div id="uafVars"></div>
+        </div>
+        <div class="cm-vis-col">
+          <div class="cm-vis-col-title">Heap</div>
+          <div id="uafHeap"></div>
+        </div>
+      </div>
+      <div class="cm-banner" id="uafBanner" style="display:none;"></div>
+    </div>
+    <div class="cm-panels">
+      <div class="cm-explain-panel">
+        <div class="cm-box">
+          <div class="cm-panel-title">What's happening right now</div>
+          <div id="uafExplain">Two raw pointers, one block. Step through and watch <code>delete p</code> free the block while <code>q</code> has no idea anything happened -- it still holds the same address.</div>
+        </div>
+      </div>
+      <div class="cm-side-panel-col">
+        <div class="cm-box">
+          <div class="cm-panel-title">Event log</div>
+          <div class="cm-log" id="uafLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="cm-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The addresses shown (<code>0x7ffee0010</code>, <code>h1</code>, ...) are illustrative placeholders, not real ones -- real stack addresses depend on ASLR, the calling convention, and what the compiler decided to inline, and real heap addresses come from whatever the allocator's free-list looks like at that moment.</li>
+      <li>In the dangling-reference demo, dereferencing <code>p</code> after the frame pops is undefined behavior, not "guaranteed garbage." It might print 42 anyway (nothing has overwritten that stack memory yet), might print nonsense, or might crash -- and a debug build and an optimized build can genuinely disagree, which is exactly why this class of bug is so easy to ship without noticing.</li>
+      <li>The heap-leak demo counts a fixed 4 bytes per <code>int</code> block purely so the counter has something concrete to show -- the actual lesson is the shape, not the number: a block becomes unreachable the instant its last pointer goes out of scope without a matching <code>delete</code>, and it stays allocated for the rest of the process's life because nothing will ever call <code>delete</code> on it again.</li>
+      <li>Double-free isn't just "wasteful" the way a leak is -- it corrupts the allocator's own bookkeeping (the free-list or heap metadata), which is why glibc's <code>malloc</code> actively tries to detect it and abort (<code>free(): double free detected in tcache 2</code>) rather than silently continuing.</li>
+      <li>The root cause in scenarios 1 and 3 is the same idea seen from two angles: a raw pointer carries no information about who owns the memory it points to, or for how long. <code>std::unique_ptr</code> and <code>std::shared_ptr</code> exist specifically to make ownership explicit and enforce it at compile time or via reference counting instead of by convention -- that's the natural next page after this one.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('cmWidget');
+
+    const speedSlider = document.getElementById('cmSpeedSlider');
+    const speedVal = document.getElementById('cmSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.cm-tab');
+    const panels = {
+      dangling: document.getElementById('panel-dangling'),
+      leak: document.getElementById('panel-leak'),
+      uaf: document.getElementById('panel-uaf'),
+    };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+      if (t.dataset.tab !== 'dangling' && window.dgPlaying) window.dgPause();
+      if (t.dataset.tab !== 'leak' && window.lkPlaying) window.lkPause();
+      if (t.dataset.tab !== 'uaf' && window.uafPlaying) window.uafPause();
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, bad) {
+      codeEl.querySelectorAll('.cm-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('bad-hl', isTarget && !!bad);
+      });
+    }
+
+    // =========================================================
+    // TAB 1: DANGLING REFERENCE
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.dg-mode-btn');
+      const stepBtn = document.getElementById('dgStep');
+      const playBtn = document.getElementById('dgPlay');
+      const resetBtn = document.getElementById('dgReset');
+      const codeAddr = document.getElementById('dgCodeAddr');
+      const codeValue = document.getElementById('dgCodeValue');
+      const stackEl = document.getElementById('dgStack');
+      const banner = document.getElementById('dgBanner');
+      const explainEl = document.getElementById('dgExplain');
+      const logEl = document.getElementById('dgLog');
+
+      let mode = 'addr';
+      let stack, step, pDangling, lastPoppedFrame, timer;
+      window.dgPlaying = false;
+
+      const STEPS = {
+        addr: ['call', 'declare_local', 'return_addr', 'pop_frame', 'deref'],
+        value: ['call', 'declare_local', 'return_value', 'pop_frame', 'use'],
+      };
+      const LINES = {
+        addr: { call: 1, declare_local: 2, return_addr: 3, pop_frame: 4, deref: 8 },
+        value: { call: 1, declare_local: 2, return_value: 3, pop_frame: 4, use: 8 },
+      };
+
+      function resetState() {
+        stack = [{ name: 'main', vars: {}, popped: false }];
+        step = 0;
+        pDangling = null;
+        lastPoppedFrame = null;
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeAddr.style.display = mode === 'addr' ? 'block' : 'none';
+        codeValue.style.display = mode === 'value' ? 'block' : 'none';
+        highlightLine(mode === 'addr' ? codeAddr : codeValue, 0, false);
+        explainEl.textContent = mode === 'addr'
+          ? 'Click Step to enter make_dangling(), declare its local variable, and return its address to main. Watch what p is left holding once that frame is gone.'
+          : 'Click Step to enter make_ok(), declare its local variable, and return it BY VALUE. Watch what happens to that value once the frame is gone.';
+        render();
+      }
+
+      function advance() {
+        const seq = STEPS[mode];
+        if (step >= seq.length) return;
+        const action = seq[step];
+        const codeEl = mode === 'addr' ? codeAddr : codeValue;
+
+        if (action === 'call') {
+          stack.push({ name: mode === 'addr' ? 'make_dangling' : 'make_ok', vars: {}, popped: false });
+          logTo(logEl, 'Enter ' + stack[1].name + '() -- a new stack frame is created.', 'info');
+        } else if (action === 'declare_local') {
+          stack[stack.length - 1].vars.local = { value: 42, addr: '0x7ffee0010' };
+          logTo(logEl, 'local = 42, stored at stack address 0x7ffee0010 inside this frame.', 'info');
+        } else if (action === 'return_addr') {
+          stack[0].vars.p = { value: '0x7ffee0010', kind: 'pointer', danglingTargetFrame: 1 };
+          logTo(logEl, 'return &local -- p in main now holds the ADDRESS 0x7ffee0010.', 'info');
+        } else if (action === 'return_value') {
+          stack[0].vars.result = { value: 42, kind: 'value' };
+          logTo(logEl, 'return local -- a COPY of the value 42 is made and handed back to main.', 'info');
+        } else if (action === 'pop_frame') {
+          const popped = stack.pop();
+          lastPoppedFrame = popped;
+          if (mode === 'addr') {
+            pDangling = true;
+            logTo(logEl, popped.name + '() returns -- its frame (and local) is destroyed. p still holds 0x7ffee0010, but nothing owns that address anymore.', 'bad');
+          } else {
+            logTo(logEl, popped.name + '() returns -- its frame (and local) is destroyed. result is unaffected -- it was already a separate copy in main.', 'ok');
+          }
+        } else if (action === 'deref') {
+          logTo(logEl, 'std::cout << *p -- reading through a dangling pointer. UNDEFINED BEHAVIOR.', 'bad');
+          banner.style.display = 'block';
+          banner.className = 'cm-banner bad';
+          banner.textContent = "Undefined behavior: *p reads a stack address that no longer belongs to any live variable. It might print 42, might print garbage, might crash.";
+        } else if (action === 'use') {
+          logTo(logEl, 'std::cout << result -- reading a plain local int. Perfectly safe.', 'ok');
+          banner.style.display = 'block';
+          banner.className = 'cm-banner ok';
+          banner.textContent = "Safe: result is an ordinary value in main's own frame. Returning by value copied it out before make_ok's frame was destroyed.";
+        }
+
+        highlightLine(codeEl, LINES[mode][action], action === 'deref');
+        step++;
+        render();
+      }
+
+      function render() {
+        stackEl.innerHTML = '';
+        stack.forEach((frame) => {
+          const div = document.createElement('div');
+          div.className = 'cm-frame';
+          const title = document.createElement('div');
+          title.className = 'cm-frame-title';
+          title.textContent = frame.name + '()';
+          div.appendChild(title);
+          const varNames = Object.keys(frame.vars);
+          if (varNames.length === 0) {
+            const empty = document.createElement('div');
+            empty.className = 'cm-empty-note';
+            empty.textContent = '(no locals yet)';
+            div.appendChild(empty);
+          }
+          varNames.forEach(name => {
+            const v = frame.vars[name];
+            const row = document.createElement('div');
+            row.className = 'cm-var-row';
+            if (v.kind === 'pointer') {
+              const isDangling = mode === 'addr' && pDangling;
+              row.innerHTML = '<span class="cm-var-name">' + name + '</span> = ' +
+                '<span class="cm-var-val">' + v.value + '</span> ' +
+                '<span class="cm-badge ' + (isDangling ? 'dangling' : 'ptr-valid') + '">' +
+                (isDangling ? 'DANGLING' : 'points into a live frame') + '</span>';
+            } else {
+              row.innerHTML = '<span class="cm-var-name">' + name + '</span> = <span class="cm-var-val">' + v.value +
+                (v.addr ? ' @ ' + v.addr : '') + '</span>';
+            }
+            div.appendChild(row);
+          });
+          stackEl.appendChild(div);
+        });
+        if (lastPoppedFrame) {
+          const div = document.createElement('div');
+          div.className = 'cm-frame popped';
+          const title = document.createElement('div');
+          title.className = 'cm-frame-title';
+          title.textContent = lastPoppedFrame.name + '() -- DESTROYED';
+          div.appendChild(title);
+          Object.keys(lastPoppedFrame.vars).forEach(name => {
+            const v = lastPoppedFrame.vars[name];
+            const row = document.createElement('div');
+            row.className = 'cm-var-row';
+            row.innerHTML = '<span class="cm-var-name">' + name + '</span> = <span class="cm-var-val">' + v.value +
+              (v.addr ? ' @ ' + v.addr : '') + '</span> <span class="cm-badge dangling">gone -- reclaimed</span>';
+            div.appendChild(row);
+          });
+          stackEl.appendChild(div);
+        }
+      }
+
+      function play() {
+        if (window.dgPlaying) return;
+        window.dgPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (step >= STEPS[mode].length) { window.dgPause(); return; }
+          advance();
+          timer = setTimeout(tick, scaled(1400));
+        }
+        tick();
+      }
+      window.dgPause = function () {
+        window.dgPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearTimeout(timer);
+      };
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        window.dgPause();
+        resetState();
+      }));
+      stepBtn.addEventListener('click', advance);
+      playBtn.addEventListener('click', () => window.dgPlaying ? window.dgPause() : play());
+      resetBtn.addEventListener('click', () => { window.dgPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: HEAP LEAK
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.lk-mode-btn');
+      const stepBtn = document.getElementById('lkStep');
+      const playBtn = document.getElementById('lkPlay');
+      const callAgainBtn = document.getElementById('lkCallAgain');
+      const resetBtn = document.getElementById('lkReset');
+      const codeLeaky = document.getElementById('lkCodeLeaky');
+      const codeCorrect = document.getElementById('lkCodeCorrect');
+      const stackEl = document.getElementById('lkStack');
+      const heapEl = document.getElementById('lkHeap');
+      const leakedBytesEl = document.getElementById('lkLeakedBytes');
+      const callCountEl = document.getElementById('lkCallCount');
+      const explainEl = document.getElementById('lkExplain');
+      const logEl = document.getElementById('lkLog');
+
+      const BLOCK_BYTES = 4;
+      let mode = 'leaky';
+      let heap, stack, step, nextId, leakedBytes, callCount, lastPoppedFrame, timer;
+      window.lkPlaying = false;
+
+      const STEPS = {
+        leaky: ['call', 'alloc', 'pop'],
+        correct: ['call', 'alloc', 'delete', 'pop'],
+      };
+      const LINES = {
+        leaky: { call: 1, alloc: 2, pop: 4 },
+        correct: { call: 1, alloc: 2, delete: 3, pop: 5 },
+      };
+
+      function resetState() {
+        heap = {};
+        stack = [];
+        step = 0;
+        nextId = 1;
+        leakedBytes = 0;
+        callCount = 0;
+        lastPoppedFrame = null;
+        clearTimeout(timer);
+        logEl.innerHTML = '';
+        codeLeaky.style.display = mode === 'leaky' ? 'block' : 'none';
+        codeCorrect.style.display = mode === 'correct' ? 'block' : 'none';
+        highlightLine(mode === 'leaky' ? codeLeaky : codeCorrect, 0, false);
+        leakedBytesEl.textContent = '0';
+        callCountEl.textContent = '0';
+        explainEl.textContent = mode === 'leaky'
+          ? 'Step through one call. Then hit "Call Function Again" and step through it a second and third time -- watch the leaked total climb every call.'
+          : 'Step through one call. Then hit "Call Function Again" -- the leaked total always comes back to zero because delete runs before the frame pops.';
+        render();
+      }
+
+      function callAgain() {
+        step = 0;
+        stack = [];
+        lastPoppedFrame = null;
+        logTo(logEl, '--- calling ' + mode + '() again ---', 'warn');
+        highlightLine(mode === 'leaky' ? codeLeaky : codeCorrect, 0, false);
+        render();
+      }
+
+      function advance() {
+        const seq = STEPS[mode];
+        if (step >= seq.length) return;
+        const action = seq[step];
+        const codeEl = mode === 'leaky' ? codeLeaky : codeCorrect;
+
+        if (action === 'call') {
+          stack.push({ name: mode, vars: {} });
+          logTo(logEl, 'Enter ' + mode + '() -- new stack frame.', 'info');
+        } else if (action === 'alloc') {
+          const id = 'h' + nextId++;
+          heap[id] = { value: 10, freed: false, leaked: false };
+          stack[stack.length - 1].vars.p = { kind: 'pointer', target: id };
+          logTo(logEl, 'p = new int(10) -- heap block ' + id + ' allocated (' + BLOCK_BYTES + ' bytes).', 'info');
+        } else if (action === 'delete') {
+          const frame = stack[stack.length - 1];
+          const target = frame.vars.p.target;
+          heap[target].freed = true;
+          frame.vars.p.target = null;
+          logTo(logEl, 'delete p; p = nullptr -- block ' + target + ' freed before the frame ends.', 'ok');
+        } else if (action === 'pop') {
+          lastPoppedFrame = stack.pop();
+          callCount++;
+          callCountEl.textContent = callCount;
+          Object.keys(heap).forEach(id => {
+            if (!heap[id].freed && !heap[id].leaked) {
+              heap[id].leaked = true;
+              leakedBytes += BLOCK_BYTES;
+              logTo(logEl, 'Frame ends. Block ' + id + ' had no other pointer to it -- it is now LEAKED.', 'bad');
+            }
+          });
+          leakedBytesEl.textContent = leakedBytes;
+        }
+
+        highlightLine(codeEl, LINES[mode][action], action === 'pop' && mode === 'leaky');
+        step++;
+        render();
+      }
+
+      function render() {
+        stackEl.innerHTML = '';
+        if (stack.length === 0 && !lastPoppedFrame) {
+          const empty = document.createElement('div');
+          empty.className = 'cm-empty-note';
+          empty.textContent = '(no active frame -- press Step or Call Function Again)';
+          stackEl.appendChild(empty);
+        }
+        stack.forEach(frame => {
+          const div = document.createElement('div');
+          div.className = 'cm-frame';
+          const title = document.createElement('div');
+          title.className = 'cm-frame-title';
+          title.textContent = frame.name + '()';
+          div.appendChild(title);
+          Object.keys(frame.vars).forEach(name => {
+            const v = frame.vars[name];
+            const row = document.createElement('div');
+            row.className = 'cm-var-row';
+            row.innerHTML = '<span class="cm-var-name">' + name + '</span> = ' +
+              '<span class="cm-var-val">' + (v.target || 'nullptr') + '</span>';
+            div.appendChild(row);
+          });
+          stackEl.appendChild(div);
+        });
+        if (lastPoppedFrame) {
+          const div = document.createElement('div');
+          div.className = 'cm-frame popped';
+          const title = document.createElement('div');
+          title.className = 'cm-frame-title';
+          title.textContent = lastPoppedFrame.name + '() -- DESTROYED';
+          div.appendChild(title);
+          Object.keys(lastPoppedFrame.vars).forEach(name => {
+            const v = lastPoppedFrame.vars[name];
+            const row = document.createElement('div');
+            row.className = 'cm-var-row';
+            row.innerHTML = '<span class="cm-var-name">' + name + '</span> = ' +
+              '<span class="cm-var-val">' + (v.target || 'nullptr') + '</span> ' +
+              '<span class="cm-badge dangling">gone -- reclaimed</span>';
+            div.appendChild(row);
+          });
+          stackEl.appendChild(div);
+        }
+
+        heapEl.innerHTML = '';
+        const ids = Object.keys(heap);
+        if (ids.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'cm-empty-note';
+          empty.textContent = '(nothing allocated yet)';
+          heapEl.appendChild(empty);
+        }
+        ids.forEach(id => {
+          const b = heap[id];
+          const div = document.createElement('div');
+          div.className = 'cm-heap-block' + (b.freed ? ' freed' : '') + (b.leaked ? ' leaked' : '');
+          let badge = '';
+          if (b.leaked) badge = '<span class="cm-badge leaked-badge">LEAKED</span>';
+          else if (b.freed) badge = '<span class="cm-badge freed-badge">freed</span>';
+          else badge = '<span class="cm-badge ptr-valid">alive</span>';
+          div.innerHTML = id + ': value=' + b.value + ' ' + badge;
+          heapEl.appendChild(div);
+        });
+      }
+
+      function play() {
+        if (window.lkPlaying) return;
+        window.lkPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (step >= STEPS[mode].length) { window.lkPause(); return; }
+          advance();
+          timer = setTimeout(tick, scaled(1300));
+        }
+        tick();
+      }
+      window.lkPause = function () {
+        window.lkPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearTimeout(timer);
+      };
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        window.lkPause();
+        resetState();
+      }));
+      stepBtn.addEventListener('click', advance);
+      playBtn.addEventListener('click', () => window.lkPlaying ? window.lkPause() : play());
+      callAgainBtn.addEventListener('click', () => { window.lkPause(); callAgain(); });
+      resetBtn.addEventListener('click', () => { window.lkPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 3: USE-AFTER-FREE / DOUBLE-FREE
+    // =========================================================
+    (function () {
+      const stepBtn = document.getElementById('uafStep');
+      const playBtn = document.getElementById('uafPlay');
+      const resetBtn = document.getElementById('uafReset');
+      const codeEl = document.getElementById('uafCode');
+      const varsEl = document.getElementById('uafVars');
+      const heapEl = document.getElementById('uafHeap');
+      const banner = document.getElementById('uafBanner');
+      const explainEl = document.getElementById('uafExplain');
+      const logEl = document.getElementById('uafLog');
+
+      let heap, vars, step, timer;
+      window.uafPlaying = false;
+
+      const STEPS = ['alloc', 'alias', 'delete_p', 'write_via_q', 'delete_q'];
+      const LINES = { alloc: 1, alias: 2, delete_p: 3, write_via_q: 4, delete_q: 5 };
+
+      function resetState() {
+        heap = {};
+        vars = {};
+        step = 0;
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, false);
+        explainEl.textContent = 'Two raw pointers, one block. Step through and watch delete p free the block while q has no idea anything happened -- it still holds the same address.';
+        render();
+      }
+
+      function advance() {
+        if (step >= STEPS.length) return;
+        const action = STEPS[step];
+        let bad = false;
+
+        if (action === 'alloc') {
+          heap.h1 = { value: 10, freed: false };
+          vars.p = { kind: 'pointer', target: 'h1' };
+          logTo(logEl, 'p = new int(10) -- heap block h1 allocated.', 'info');
+        } else if (action === 'alias') {
+          vars.q = { kind: 'pointer', target: 'h1' };
+          logTo(logEl, 'q = p -- q now points at the SAME block h1. Two pointers, one owner-less block.', 'info');
+        } else if (action === 'delete_p') {
+          heap[vars.p.target].freed = true;
+          vars.p.target = null;
+          logTo(logEl, 'delete p -- h1 is freed. p is nulled out, but q was never told anything.', 'warn');
+        } else if (action === 'write_via_q') {
+          const t = vars.q.target;
+          if (t && heap[t].freed) {
+            bad = true;
+            logTo(logEl, '*q = 5 -- USE-AFTER-FREE. Writing through a pointer to memory that has already been freed.', 'bad');
+            banner.style.display = 'block';
+            banner.className = 'cm-banner bad';
+            banner.textContent = "Use-after-free: q still points at h1, which was freed via p. This write is undefined behavior -- it may corrupt whatever the allocator put there since.";
+          } else {
+            logTo(logEl, '*q = 5 (block still alive).', 'ok');
+          }
+        } else if (action === 'delete_q') {
+          const t = vars.q.target;
+          if (t && heap[t].freed) {
+            bad = true;
+            logTo(logEl, 'delete q -- DOUBLE-FREE. This block was already freed once.', 'bad');
+            banner.style.display = 'block';
+            banner.className = 'cm-banner bad';
+            banner.textContent = "Double-free: h1 is being freed a second time. This corrupts the allocator's bookkeeping -- real allocators often abort here (glibc: free(): double free detected in tcache 2).";
+          }
+        }
+
+        highlightLine(codeEl, LINES[action], bad);
+        step++;
+        render();
+        if (step >= STEPS.length) { stepBtn.disabled = true; playBtn.disabled = true; }
+      }
+
+      function render() {
+        varsEl.innerHTML = '';
+        ['p', 'q'].forEach(name => {
+          const v = vars[name];
+          const div = document.createElement('div');
+          div.className = 'cm-var-row';
+          if (!v) {
+            div.innerHTML = '<span class="cm-var-name">' + name + '</span> = <span class="cm-var-val">(not yet declared)</span>';
+          } else if (v.target === null) {
+            div.innerHTML = '<span class="cm-var-name">' + name + '</span> = <span class="cm-var-val">nullptr</span>';
+          } else {
+            const stale = heap[v.target] && heap[v.target].freed;
+            div.innerHTML = '<span class="cm-var-name">' + name + '</span> = <span class="cm-var-val">&amp;' + v.target + '</span> ' +
+              '<span class="cm-badge ' + (stale ? 'dangling' : 'ptr-valid') + '">' + (stale ? 'STALE (points at freed memory)' : 'valid') + '</span>';
+          }
+          varsEl.appendChild(div);
+        });
+
+        heapEl.innerHTML = '';
+        Object.keys(heap).forEach(id => {
+          const b = heap[id];
+          const div = document.createElement('div');
+          div.className = 'cm-heap-block' + (b.freed ? ' freed' : '');
+          div.innerHTML = id + ': value=' + b.value + ' ' +
+            (b.freed ? '<span class="cm-badge freed-badge">freed</span>' : '<span class="cm-badge ptr-valid">alive</span>');
+          heapEl.appendChild(div);
+        });
+      }
+
+      function play() {
+        if (window.uafPlaying) return;
+        window.uafPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (step >= STEPS.length) { window.uafPause(); return; }
+          advance();
+          if (step < STEPS.length) timer = setTimeout(tick, scaled(1400));
+          else window.uafPause();
+        }
+        tick();
+      }
+      window.uafPause = function () {
+        window.uafPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearTimeout(timer);
+      };
+
+      stepBtn.addEventListener('click', advance);
+      playBtn.addEventListener('click', () => window.uafPlaying ? window.uafPause() : play());
+      resetBtn.addEventListener('click', () => {
+        window.uafPause();
+        stepBtn.disabled = false;
+        playBtn.disabled = false;
+        resetState();
+      });
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>

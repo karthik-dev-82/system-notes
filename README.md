@@ -37,6 +37,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
 | 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
 | 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
+| 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
 
 ---
 
@@ -99,6 +100,7 @@ system-notes/
         ├── proc_filesystem_interactive.rst
         ├── linux_fs_basics_interactive.rst
         ├── overlayfs_interactive.rst
+        ├── cpp_memory_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
@@ -108,7 +110,8 @@ system-notes/
             ├── consistent_hash_widget.html
             ├── proc_explorer_widget.html
             ├── linux_fs_basics_widget.html
-            └── overlayfs_widget.html
+            ├── overlayfs_widget.html
+            └── cpp_memory_widget.html
 
 ```
 
