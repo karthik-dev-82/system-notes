@@ -26,6 +26,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
+| 🔐 **[Complete Guide to OpenSSL](docs/source/openssl_guide.rst)** | Encryption, hashing, and certificates, plus practical OpenSSL commands | symmetric/asymmetric crypto, TLS, x509 certs, `openssl` CLI |
 
 ---
 
@@ -76,7 +77,8 @@ system-notes/
         ├── base64_encoding.rst
         ├── databases_postgresql_mongodb_redis.rst
         ├── image_formats.rst
-        └── threads_processes_synchronization.rst
+        ├── threads_processes_synchronization.rst
+        └── openssl_guide.rst
 
 ```
 

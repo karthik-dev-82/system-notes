@@ -25,6 +25,7 @@ down and coming back to.
    databases_postgresql_mongodb_redis
    image_formats
    threads_processes_synchronization
+   openssl_guide
 
 Quick Navigation
 -----------------
@@ -82,3 +83,6 @@ Quick Navigation
    * - :doc:`threads_processes_synchronization`
      - Threads, processes, and synchronization primitives in C++
      - mutex, semaphore, condition variable, deadlock, race conditions
+   * - :doc:`openssl_guide`
+     - Encryption, hashing, and certificates, plus practical OpenSSL commands
+     - symmetric/asymmetric crypto, TLS, x509 certs, ``openssl`` CLI
