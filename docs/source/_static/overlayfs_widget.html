@@ -1,0 +1,334 @@
+<div class="ofviz-root" id="ofWidget">
+  <style>
+    #ofWidget {
+      --of-bg: #0f172a;
+      --of-panel: #16213e;
+      --of-border: #2a3655;
+      --of-text: #e2e8f0;
+      --of-muted: #94a3b8;
+      --of-good: #4ade80;
+      --of-bad: #f87171;
+      --of-warn: #fbbf24;
+      --of-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--of-bg);
+      color: var(--of-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ofWidget * { box-sizing: border-box; }
+    #ofWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ofWidget h4 { margin: 0 0 10px; font-size: 0.9rem; color: #fff; }
+    #ofWidget .of-sub { color: var(--of-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .of-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--of-panel); border: 1px solid var(--of-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 900px; }
+    .of-controls select { background: #0a1128; color: var(--of-text); border: 1px solid var(--of-border); border-radius: 6px; padding: 6px 8px; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .of-btn { background: var(--of-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .of-btn.secondary { background: transparent; color: var(--of-text); border: 1px solid var(--of-border); }
+    .of-btn.danger { background: var(--of-bad); color: #2a0a0a; }
+    .of-toggle { display: inline-flex; border: 1px solid var(--of-border); border-radius: 8px; overflow: hidden; }
+    .of-toggle button { background: transparent; color: var(--of-muted); border: none; padding: 6px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .of-toggle button.active { background: var(--of-warn); color: #2a1c00; }
+
+    .of-stack { display: flex; flex-direction: column-reverse; gap: 8px; min-width: 260px; }
+    .of-layer { border-radius: 8px; border: 2px solid var(--of-border); padding: 10px 12px; }
+    .of-layer.merged { border-color: var(--of-good); background: rgba(74,222,128,0.06); }
+    .of-layer.upper { border-color: var(--of-warn); background: rgba(251,191,36,0.06); }
+    .of-layer.lower { border-color: var(--of-accent); background: rgba(56,189,248,0.05); }
+    .of-layer-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--of-muted); margin-bottom: 6px; }
+    .of-layer.merged .of-layer-title { color: var(--of-good); }
+    .of-layer.upper .of-layer-title { color: var(--of-warn); }
+    .of-layer.lower .of-layer-title { color: var(--of-accent); }
+    .of-file-row { font-family: ui-monospace, monospace; font-size: 0.78rem; padding: 3px 0; display: flex; gap: 8px; }
+    .of-file-row .name { color: #fff; font-weight: 700; min-width: 120px; }
+    .of-file-row .content { color: var(--of-muted); }
+    .of-file-row.whiteout .name { color: var(--of-bad); text-decoration: line-through; }
+    .of-file-row.copied-up { animation: ofFlash 1.2s ease-out; }
+    @keyframes ofFlash { 0% { background: rgba(251,191,36,0.4); } 100% { background: transparent; } }
+
+    .of-main { display: flex; gap: 16px; flex-wrap: wrap; min-width: 900px; }
+    .of-col { flex: 1; min-width: 280px; }
+    .of-box { background: var(--of-panel); border: 1px solid var(--of-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .of-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--of-muted); margin-bottom: 8px; }
+
+    .of-trace { font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.7; }
+    .of-trace .step { display: block; padding: 2px 0; }
+    .of-trace .hit { color: var(--of-good); font-weight: 700; }
+    .of-trace .warn { color: var(--of-warn); font-weight: 700; }
+    .of-trace .bad { color: var(--of-bad); font-weight: 700; }
+
+    .of-log { height: 130px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .of-log div { color: var(--of-muted); }
+    .of-log div.good { color: var(--of-good); }
+    .of-log div.warn { color: var(--of-warn); }
+    .of-log div.bad { color: var(--of-bad); }
+
+    details.of-notes {
+      margin-top: 14px; background: var(--of-panel); border: 1px solid var(--of-border); border-radius: 10px;
+      padding: 12px 16px; min-width: 900px; font-size: 0.85rem; line-height: 1.6;
+    }
+    details.of-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.of-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--of-muted); }
+    details.of-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--of-accent); }
+  </style>
+
+  <h3>OverlayFS: The Layers Trick</h3>
+  <div class="of-sub">Two read-only base layers, one writable layer on top, and one merged view. Read, write, and delete a file and watch exactly which layer actually does the work.</div>
+
+  <div class="of-controls">
+    <div class="of-toggle">
+      <button class="of-container-btn active" data-container="A">Container A</button>
+      <button class="of-container-btn" data-container="B">Container B</button>
+    </div>
+    <select id="ofFileSelect">
+      <option value="/etc/hosts">/etc/hosts</option>
+      <option value="/bin/bash">/bin/bash</option>
+      <option value="/etc/nginx.conf">/etc/nginx.conf</option>
+      <option value="/app/data.txt">/app/data.txt (new file)</option>
+    </select>
+    <button class="of-btn" id="ofReadBtn">Read</button>
+    <button class="of-btn" id="ofWriteBtn">Write</button>
+    <button class="of-btn danger" id="ofDeleteBtn">Delete</button>
+    <button class="of-btn secondary" id="ofResetBtn">Reset</button>
+  </div>
+
+  <div class="of-main">
+    <div class="of-col">
+      <div class="of-box">
+        <div class="of-panel-title">The stack (both containers share the lower layers, but not the upperdir)</div>
+        <div class="of-stack" id="ofStack"></div>
+      </div>
+    </div>
+    <div class="of-col">
+      <div class="of-box">
+        <div class="of-panel-title">What just happened</div>
+        <div class="of-trace" id="ofTrace">Pick a file and an operation above.</div>
+      </div>
+      <div class="of-box">
+        <div class="of-panel-title">Event log</div>
+        <div class="of-log" id="ofLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="of-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>Try writing to <code>/etc/hosts</code>, watch the copy-up happen, then write to it again --
+        the second write does NOT copy up a second time, because it's already in the upperdir. The
+        expensive part only happens once per file, on its first modification.</li>
+      <li>Switch to Container B and read <code>/etc/hosts</code> after Container A has already modified it.
+        Container B still sees the original, unmodified lower-layer version -- each container's upperdir is
+        completely private, even though they're both reading from the exact same shared lower layers. That
+        isolation is what makes it safe for hundreds of containers to share one base image without stepping
+        on each other.</li>
+      <li>Delete a file that only exists in the upperdir (try creating <code>/app/data.txt</code> first, then
+        deleting it) and notice the log says it was removed directly, no whiteout. Whiteouts only exist to
+        mask something that would otherwise show through from a lower layer -- if there's nothing underneath
+        to hide, a real deletion is all that is needed.</li>
+      <li>The practical consequence the main docs page calls out is real: writing a single byte to a
+        multi-gigabyte file that only exists in a lower layer copies the <i>entire</i> file up before the
+        write can happen. That's the actual reason databases and other write-heavy workloads inside
+        containers are normally pointed at a volume (which bypasses OverlayFS entirely) instead of writing
+        straight into the container's own filesystem.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('ofWidget');
+    const stackEl = document.getElementById('ofStack');
+    const traceEl = document.getElementById('ofTrace');
+    const logEl = document.getElementById('ofLog');
+    const fileSelect = document.getElementById('ofFileSelect');
+    const readBtn = document.getElementById('ofReadBtn');
+    const writeBtn = document.getElementById('ofWriteBtn');
+    const deleteBtn = document.getElementById('ofDeleteBtn');
+    const resetBtn = document.getElementById('ofResetBtn');
+    const containerBtns = root.querySelectorAll('.of-container-btn');
+
+    const WHITEOUT = 'WHITEOUT';
+    const LOWER_LAYERS = [
+      { name: 'lowerdir 1: ubuntu base', files: { '/etc/hosts': 'base hosts file', '/bin/bash': 'bash binary (4.2MB)' } },
+      { name: 'lowerdir 2: nginx install', files: { '/etc/nginx.conf': 'default nginx config' } },
+    ];
+    let writeCounter = 1;
+
+    // Two containers share the SAME lower layers but get their OWN upperdir.
+    let uppers; // { A: Map, B: Map }
+    let activeContainer = 'A';
+
+    function findInLowers(path) {
+      for (let i = LOWER_LAYERS.length - 1; i >= 0; i--) {
+        if (LOWER_LAYERS[i].files.hasOwnProperty(path)) return { layerIndex: i, content: LOWER_LAYERS[i].files[path] };
+      }
+      return null;
+    }
+
+    function upper() { return uppers[activeContainer]; }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = '[Container ' + activeContainer + '] ' + msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function resetState() {
+      uppers = { A: new Map(), B: new Map() };
+      writeCounter = 1;
+      logEl.innerHTML = '';
+      traceEl.textContent = 'Pick a file and an operation above.';
+      log('Reset. Both containers start with empty upperdirs, sharing the same two lower layers.', 'good');
+      render();
+    }
+
+    function render(highlightPath, highlightCls) {
+      stackEl.innerHTML = '';
+
+      // merged view (top, rendered first because of column-reverse layout... actually
+      // we want merged visually ON TOP, so with column-reverse we append it LAST)
+      const lowerDivs = LOWER_LAYERS.map((layer, i) => {
+        const div = document.createElement('div');
+        div.className = 'of-layer lower';
+        div.innerHTML = '<div class="of-layer-title">' + layer.name + ' (read-only, shared by every container)</div>' +
+          Object.entries(layer.files).map(([name, content]) => '<div class="of-file-row"><span class="name">' + name + '</span><span class="content">' + content + '</span></div>').join('');
+        return div;
+      });
+      lowerDivs.forEach(d => stackEl.appendChild(d));
+
+      const upperDiv = document.createElement('div');
+      upperDiv.className = 'of-layer upper';
+      const upperEntries = [...upper().entries()];
+      upperDiv.innerHTML = '<div class="of-layer-title">upperdir (writable, private to Container ' + activeContainer + ')</div>' +
+        (upperEntries.length === 0 ? '<div class="of-file-row"><span class="content">(empty)</span></div>' :
+          upperEntries.map(([name, content]) => {
+            const isWhiteout = content === WHITEOUT;
+            const isHighlighted = name === highlightPath;
+            return '<div class="of-file-row' + (isWhiteout ? ' whiteout' : '') + (isHighlighted ? ' ' + highlightCls : '') + '"><span class="name">' + name + '</span><span class="content">' + (isWhiteout ? '(whiteout -- masks lower layer)' : content) + '</span></div>';
+          }).join(''));
+      stackEl.appendChild(upperDiv);
+
+      const mergedDiv = document.createElement('div');
+      mergedDiv.className = 'of-layer merged';
+      const allPaths = new Set();
+      LOWER_LAYERS.forEach(l => Object.keys(l.files).forEach(p => allPaths.add(p)));
+      upper().forEach((v, k) => allPaths.add(k));
+      const visibleRows = [...allPaths].sort().map(path => {
+        const r = mergedRead(path);
+        if (!r.ok) return null;
+        return '<div class="of-file-row"><span class="name">' + path + '</span><span class="content">' + r.content + ' <i style="opacity:0.6">(' + r.source + ')</i></span></div>';
+      }).filter(Boolean);
+      mergedDiv.innerHTML = '<div class="of-layer-title">merged view -- what Container ' + activeContainer + ' actually sees</div>' + visibleRows.join('');
+      stackEl.appendChild(mergedDiv);
+    }
+
+    function mergedRead(path) {
+      if (upper().has(path)) {
+        const v = upper().get(path);
+        if (v === WHITEOUT) return { ok: false };
+        return { ok: true, content: v, source: 'upperdir' };
+      }
+      const found = findInLowers(path);
+      if (found) return { ok: true, content: found.content, source: LOWER_LAYERS[found.layerIndex].name.split(':')[0] };
+      return { ok: false };
+    }
+
+    function doRead(path) {
+      const steps = ['$ cat ' + path];
+      if (upper().has(path) && upper().get(path) !== WHITEOUT) {
+        steps.push('-> found in upperdir');
+        steps.push('<span class="hit">-> ' + upper().get(path) + '</span>');
+        log('read ' + path + ': found in upperdir.', 'good');
+      } else if (upper().has(path) && upper().get(path) === WHITEOUT) {
+        steps.push('-> whiteout present in upperdir');
+        steps.push('<span class="bad">-> No such file or directory (masked, even though a lower layer still has it)</span>');
+        log('read ' + path + ': masked by a whiteout in upperdir.', 'bad');
+      } else {
+        const found = findInLowers(path);
+        if (found) {
+          steps.push('-> not in upperdir');
+          LOWER_LAYERS.forEach((l, i) => { if (i > found.layerIndex) steps.push('-> not in ' + l.name); });
+          steps.push('<span class="hit">-> found in ' + LOWER_LAYERS[found.layerIndex].name + ': ' + found.content + '</span>');
+          log('read ' + path + ': fell through to ' + LOWER_LAYERS[found.layerIndex].name + '.', 'good');
+        } else {
+          steps.push('-> not in upperdir, not in any lower layer');
+          steps.push('<span class="bad">-> No such file or directory</span>');
+          log('read ' + path + ': not found anywhere.', 'bad');
+        }
+      }
+      traceEl.innerHTML = steps.map(s => '<span class="step">' + s + '</span>').join('');
+      render();
+    }
+
+    function doWrite(path) {
+      const newContent = 'edited by Container ' + activeContainer + ' (revision ' + (writeCounter++) + ')';
+      const steps = ['$ echo ... > ' + path];
+      if (upper().has(path) && upper().get(path) !== WHITEOUT) {
+        upper().set(path, newContent);
+        steps.push('-> already in upperdir');
+        steps.push('<span class="hit">-> overwritten directly, no copy-up needed</span>');
+        log('write ' + path + ': already in upperdir, overwritten directly.', 'good');
+        render(path, 'copied-up');
+        return;
+      }
+      const found = findInLowers(path);
+      if (found) {
+        steps.push('-> not yet in upperdir, found in ' + LOWER_LAYERS[found.layerIndex].name);
+        steps.push('<span class="warn">-> COPY-UP: entire file copied from ' + LOWER_LAYERS[found.layerIndex].name + ' into upperdir first</span>');
+        steps.push('<span class="hit">-> write applied to the upperdir copy; the lower layer itself is untouched</span>');
+        log('write ' + path + ': triggered copy-up from ' + LOWER_LAYERS[found.layerIndex].name + '.', 'warn');
+      } else {
+        steps.push('-> brand new path, not in upperdir or any lower layer');
+        steps.push('<span class="hit">-> created directly in upperdir</span>');
+        log('write ' + path + ': brand new file, created directly in upperdir.', 'good');
+      }
+      upper().set(path, newContent);
+      traceEl.innerHTML = steps.map(s => '<span class="step">' + s + '</span>').join('');
+      render(path, 'copied-up');
+    }
+
+    function doDelete(path) {
+      const steps = ['$ rm ' + path];
+      const found = findInLowers(path);
+      if (found) {
+        upper().set(path, WHITEOUT);
+        steps.push('-> exists in ' + LOWER_LAYERS[found.layerIndex].name);
+        steps.push('<span class="warn">-> cannot actually delete a read-only lower layer</span>');
+        steps.push('<span class="hit">-> whiteout placed in upperdir instead -- merged view now hides it, lower layer is untouched</span>');
+        log('delete ' + path + ': placed a whiteout (file still physically exists in ' + LOWER_LAYERS[found.layerIndex].name + ').', 'warn');
+      } else if (upper().has(path)) {
+        upper().delete(path);
+        steps.push('-> only ever existed in upperdir, nothing to hide from a lower layer');
+        steps.push('<span class="hit">-> deleted directly, no whiteout needed</span>');
+        log('delete ' + path + ': real deletion, no lower-layer copy to mask.', 'good');
+      } else {
+        steps.push('<span class="bad">-> does not exist anywhere -- nothing to delete</span>');
+        log('delete ' + path + ': path does not exist.', 'bad');
+      }
+      traceEl.innerHTML = steps.map(s => '<span class="step">' + s + '</span>').join('');
+      render();
+    }
+
+    function setContainer(c) {
+      activeContainer = c;
+      containerBtns.forEach(b => b.classList.toggle('active', b.dataset.container === c));
+      traceEl.textContent = 'Switched to Container ' + c + '. Pick a file and an operation above.';
+      log('Switched active view to Container ' + c + '.', 'good');
+      render();
+    }
+
+    containerBtns.forEach(b => b.addEventListener('click', () => setContainer(b.dataset.container)));
+    readBtn.addEventListener('click', () => doRead(fileSelect.value));
+    writeBtn.addEventListener('click', () => doWrite(fileSelect.value));
+    deleteBtn.addEventListener('click', () => doDelete(fileSelect.value));
+    resetBtn.addEventListener('click', resetState);
+
+    resetState();
+  })();
+  </script>
+</div>
