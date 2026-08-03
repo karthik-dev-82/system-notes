@@ -30,6 +30,7 @@ down and coming back to.
    hash_load_balancer
    tcp_udp_interactive
    tcp_congestion_control_interactive
+   docker_packet_journey_interactive
 
 Quick Navigation
 -----------------
@@ -102,3 +103,6 @@ Quick Navigation
    * - :doc:`tcp_congestion_control_interactive`
      - Interactive TCP congestion control -- drive the cwnd sawtooth yourself
      - slow start, congestion avoidance, fast retransmit, timeout, ssthresh
+   * - :doc:`docker_packet_journey_interactive`
+     - Interactive packet journey -- container, veth, docker0, netfilter, and back
+     - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack

@@ -1,0 +1,647 @@
+<div class="pjviz-root" id="pjWidget">
+  <style>
+    #pjWidget {
+      --pj-bg: #0f172a;
+      --pj-panel: #16213e;
+      --pj-border: #2a3655;
+      --pj-text: #e2e8f0;
+      --pj-muted: #94a3b8;
+      --pj-container: #4ade80;
+      --pj-host: #38bdf8;
+      --pj-external: #c084fc;
+      --pj-hub: #fbbf24;
+      --pj-highlight: #f87171;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pj-bg);
+      color: var(--pj-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pjWidget * { box-sizing: border-box; }
+    #pjWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pjWidget .pj-sub { color: var(--pj-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pj-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--pj-panel);
+      border: 1px solid var(--pj-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 900px;
+    }
+    .pj-toggle { display: inline-flex; border: 1px solid var(--pj-border); border-radius: 8px; overflow: hidden; }
+    .pj-toggle button { background: transparent; color: var(--pj-muted); border: none; padding: 7px 14px; font-size: 0.82rem; font-weight: 600; cursor: pointer; }
+    .pj-toggle button.active { background: var(--pj-host); color: #041322; }
+    .pj-controls label { font-size: 0.8rem; color: var(--pj-muted); display: flex; align-items: center; gap: 8px; }
+    .pj-controls input[type="range"] { width: 120px; accent-color: var(--pj-host); }
+    .pj-btn { background: var(--pj-host); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .pj-btn.secondary { background: transparent; color: var(--pj-text); border: 1px solid var(--pj-border); }
+    .pj-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .pj-stage {
+      position: relative;
+      background: var(--pj-panel);
+      border: 1px solid var(--pj-border);
+      border-radius: 10px;
+      padding: 18px 14px 46px;
+      margin-bottom: 14px;
+      min-width: 900px;
+    }
+    .pj-track {
+      position: relative;
+      display: flex;
+      align-items: stretch;
+      gap: 8px;
+    }
+    .pj-station {
+      flex: 1;
+      min-width: 90px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    .pj-station .pj-box {
+      width: 100%;
+      min-height: 56px;
+      border-radius: 8px;
+      background: #1e2a4a;
+      border: 2px solid var(--pj-border);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.35rem;
+      padding: 4px;
+      transition: box-shadow 0.2s, border-color 0.2s;
+    }
+    .pj-station.active .pj-box { border-color: #fff; box-shadow: 0 0 0 3px rgba(255,255,255,0.15); }
+    .pj-station .pj-label { font-size: 0.66rem; color: var(--pj-muted); margin-top: 6px; line-height: 1.25; }
+    .pj-station[data-side="container"] .pj-label { color: #86efac; }
+    .pj-station[data-side="host"] .pj-label { color: #7dd3fc; }
+
+    .pj-hub {
+      flex: 1.6;
+      min-width: 190px;
+    }
+    .pj-hub .pj-box {
+      background: #241a08;
+      border-color: #6b5216;
+      flex-direction: row;
+      justify-content: space-between;
+      padding: 6px;
+      gap: 3px;
+    }
+    .pj-hub.active .pj-box { border-color: var(--pj-hub); box-shadow: 0 0 0 3px rgba(251,191,36,0.2); }
+    .pj-subcell {
+      flex: 1;
+      font-size: 0.58rem;
+      color: var(--pj-muted);
+      background: #1a1408;
+      border-radius: 5px;
+      padding: 5px 2px;
+      line-height: 1.2;
+      transition: background 0.2s, color 0.2s, transform 0.2s;
+    }
+    .pj-subcell.on { background: #3a2c08; color: var(--pj-hub); }
+    .pj-subcell.hot { background: var(--pj-highlight); color: #2a0a0a; font-weight: 800; transform: scale(1.08); }
+    .pj-hub .pj-label { color: #fcd34d; }
+
+    .pj-arrow-track {
+      position: absolute;
+      left: 14px;
+      right: 14px;
+      top: 44px;
+      height: 0;
+    }
+    .pj-marker {
+      position: absolute;
+      top: -13px;
+      width: 26px;
+      height: 26px;
+      margin-left: -13px;
+      border-radius: 6px;
+      background: var(--pj-highlight);
+      color: #2a0a0a;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 800;
+      transition: left 0.5s ease-in-out;
+      z-index: 5;
+      box-shadow: 0 0 0 3px rgba(0,0,0,0.35);
+    }
+
+    .pj-panels {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      min-width: 900px;
+    }
+    .pj-explain-panel {
+      flex: 2;
+      min-width: 380px;
+      background: var(--pj-panel);
+      border: 1px solid var(--pj-border);
+      border-radius: 10px;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .pj-explain-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pj-muted); }
+    .pj-explain-text { font-size: 0.95rem; line-height: 1.55; min-height: 4.5em; }
+    .pj-header-row { display: flex; gap: 18px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    .pj-header-row .src { color: var(--pj-container); }
+    .pj-header-row .dst { color: var(--pj-external); }
+
+    .pj-side-panel { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 14px; }
+    .pj-conntrack-box, .pj-log-box { background: var(--pj-panel); border: 1px solid var(--pj-border); border-radius: 10px; padding: 12px 14px; }
+    .pj-panel-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pj-muted); margin-bottom: 8px; }
+    .pj-conntrack-entries { font-size: 0.72rem; font-family: ui-monospace, monospace; min-height: 3em; }
+    .pj-conntrack-entries .entry { padding: 5px 6px; border-radius: 5px; margin-bottom: 4px; background: #0a1128; color: var(--pj-muted); }
+    .pj-conntrack-entries .entry.matched { background: #3a2c08; color: var(--pj-hub); }
+    .pj-conntrack-empty { color: var(--pj-muted); font-size: 0.75rem; font-style: italic; }
+
+    .pj-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pj-log div { color: var(--pj-muted); }
+    .pj-log div.container { color: var(--pj-container); }
+    .pj-log div.host { color: var(--pj-host); }
+    .pj-log div.hot { color: var(--pj-highlight); font-weight: 700; }
+
+    .pj-progress { font-size: 0.78rem; color: var(--pj-muted); margin-top: 12px; min-width: 900px; }
+
+    details.pj-notes {
+      margin-top: 14px;
+      background: var(--pj-panel);
+      border: 1px solid var(--pj-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 900px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.pj-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.pj-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--pj-muted); }
+    details.pj-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--pj-host); }
+  </style>
+
+  <h3>A Packet's Journey: Container to Internet and Back</h3>
+  <div class="pj-sub">Follow one real connection through every hop -- container network namespace, veth pair, docker0 bridge, the netfilter hub, and back -- and watch the packet's own header change at each step.</div>
+
+  <div class="pj-controls">
+    <div class="pj-toggle">
+      <button class="pj-mode-btn active" data-mode="outbound">Outbound: container → internet</button>
+      <button class="pj-mode-btn" data-mode="inbound">Inbound: docker run -p 8080:80</button>
+    </div>
+    <label>Speed: <span id="pjSpeedVal">0.5x</span>
+      <input type="range" id="pjSpeedSlider" min="0.2" max="2" step="0.1" value="0.5">
+    </label>
+    <button class="pj-btn" id="pjPlay">▶ Play</button>
+    <button class="pj-btn secondary" id="pjStep">Next Step</button>
+    <button class="pj-btn secondary" id="pjReset">Reset</button>
+  </div>
+
+  <div class="pj-stage">
+    <div class="pj-track" id="pjTrack"></div>
+    <div class="pj-arrow-track" id="pjArrowTrack">
+      <div class="pj-marker" id="pjMarker">📦</div>
+    </div>
+  </div>
+
+  <div class="pj-progress" id="pjProgress">Step 0 / 0 -- press Play or Next Step to begin</div>
+
+  <div class="pj-panels" style="margin-top:14px;">
+    <div class="pj-explain-panel">
+      <div class="pj-explain-title">What's happening right now</div>
+      <div class="pj-header-row">
+        <span class="src">src: <b id="pjSrc">--</b></span>
+        <span class="dst">dst: <b id="pjDst">--</b></span>
+      </div>
+      <div class="pj-explain-text" id="pjExplainText">Choose a direction above, then press Play or step through manually.</div>
+    </div>
+    <div class="pj-side-panel">
+      <div class="pj-conntrack-box">
+        <div class="pj-panel-title">conntrack table</div>
+        <div class="pj-conntrack-entries" id="pjConntrack"><div class="pj-conntrack-empty">No tracked connections yet.</div></div>
+      </div>
+      <div class="pj-log-box">
+        <div class="pj-panel-title">Event log</div>
+        <div class="pj-log" id="pjLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="pj-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>PREROUTING and POSTROUTING aren't "the inbound hook" and "the outbound hook" -- <b>every</b> packet
+        passes through both, in that fixed order relative to the routing decision, on every interface. Whether
+        either one actually rewrites anything depends entirely on which rules match. This widget highlights
+        whichever hook does real work for the leg you're watching and shows the other as a pass-through, but
+        both are genuinely traversed every time.</li>
+      <li>The real MASQUERADE rule Docker installs is
+        <code>iptables -t nat -A POSTROUTING -s 172.17.0.0/16 ! -o docker0 -j MASQUERADE</code> -- it only fires
+        when traffic from the container subnet is leaving via something <i>other than</i> <code>docker0</code>
+        itself, which is exactly why container-to-container traffic over the bridge is never MASQUERADEd.</li>
+      <li><b>conntrack</b> is what makes the reply leg automatic. NAT rules are only consulted for the first
+        packet of a new connection; every packet after that -- including replies travelling in the opposite
+        direction -- gets rewritten straight from the tracked connection entry, without re-walking the rule
+        chains. You can see the live table on a real system at <code>/proc/net/nf_conntrack</code>.</li>
+      <li>MASQUERADE can also rewrite the <b>source port</b>, not just the source IP, when two different
+        containers happen to pick the same ephemeral port for an outbound connection at the same time -- the
+        host has only one IP to hide them all behind, so ports are what keep their connections distinguishable.
+        This widget keeps the port fixed for one connection to keep the walkthrough readable.</li>
+      <li>This entire hub -- PREROUTING, the routing decision, FORWARD, POSTROUTING -- is <code>iptables</code>
+        acting as a frontend to <b>netfilter</b>, the actual packet-filtering engine built into the kernel.
+        Newer systems increasingly use <code>nftables</code> instead, but the hook points and this ordering are
+        the same concept either way.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('pjWidget');
+    const track = document.getElementById('pjTrack');
+    const arrowTrack = document.getElementById('pjArrowTrack');
+    const marker = document.getElementById('pjMarker');
+    const modeButtons = root.querySelectorAll('.pj-mode-btn');
+    const speedSlider = document.getElementById('pjSpeedSlider');
+    const speedVal = document.getElementById('pjSpeedVal');
+    const playBtn = document.getElementById('pjPlay');
+    const stepBtn = document.getElementById('pjStep');
+    const resetBtn = document.getElementById('pjReset');
+    const progressEl = document.getElementById('pjProgress');
+    const srcEl = document.getElementById('pjSrc');
+    const dstEl = document.getElementById('pjDst');
+    const explainEl = document.getElementById('pjExplainText');
+    const conntrackEl = document.getElementById('pjConntrack');
+    const logEl = document.getElementById('pjLog');
+
+    // Macro stations, left to right on screen. The hub is a single macro
+    // station that internally always visits PRE -> ROUTE -> FWD -> POST in
+    // that fixed order, regardless of which side of it the packet entered
+    // from -- that's the whole point: PREROUTING always precedes the
+    // routing decision and FORWARD; POSTROUTING always follows them.
+    const MACRO = [
+      { id: 'app',      label: 'App (Container)',          icon: '📦', side: 'container' },
+      { id: 'ceth0',     label: 'eth0 (container netns)',   icon: '🔌', side: 'container' },
+      { id: 'veth',      label: 'veth (host-side end)',     icon: '🔗', side: 'container' },
+      { id: 'docker0',   label: 'docker0 bridge',           icon: '🌉', side: 'container' },
+      { id: 'hub',       label: 'Netfilter hub',            icon: '🛂', side: 'hub', isHub: true },
+      { id: 'hostnic',   label: 'Host NIC',                 icon: '🖧', side: 'host' },
+      { id: 'external',  label: 'Internet / Server',        icon: '☁️', side: 'host' },
+    ];
+    const HUB_SUBS = ['pre', 'route', 'fwd', 'post'];
+    const HUB_SUB_LABEL = { pre: 'PRE', route: 'ROUTE', fwd: 'FWD', post: 'POST' };
+
+    const CONTAINER_IP = '172.17.0.2';
+    const HOST_IP = '192.168.1.100';
+    const GOOGLE = '142.250.80.14:443';
+    const CLIENT = '203.0.113.50:53821';
+
+    function s(station, sub, src, dst, text, hot, conntrack, log, logCls) {
+      return { station, sub: sub || null, src, dst, text, hot: !!hot, conntrack, log, logCls: logCls || 'container' };
+    }
+
+    const LEGS = {
+      outbound: [
+        [ // forward: container -> internet
+          s('app', null, CONTAINER_IP + ':51234', GOOGLE,
+            "The container's app opens a connection to google.com. As far as it's concerned, 172.17.0.2 is just “my IP.”",
+            false, null, 'App in container opens connection to google.com', 'container'),
+          s('ceth0', null, CONTAINER_IP + ':51234', GOOGLE,
+            "Leaves the container's own network namespace via its eth0.",
+            false, null, 'Packet leaves via container eth0', 'container'),
+          s('veth', null, CONTAINER_IP + ':51234', GOOGLE,
+            "Crosses the veth pair -- a virtual cable with one end inside the container's namespace, one end in the host's root namespace.",
+            false, null, 'Crosses veth pair into host namespace', 'container'),
+          s('docker0', null, CONTAINER_IP + ':51234', GOOGLE,
+            "Arrives at the docker0 bridge. The packet is now fully inside the host's root network namespace.",
+            false, null, 'Arrives at docker0 bridge', 'container'),
+          s('hub', 'pre', CONTAINER_IP + ':51234', GOOGLE,
+            "PREROUTING: checked, but no rule matches outbound container traffic here -- passes through unchanged.",
+            false, null, 'PREROUTING: no match, pass through', 'host'),
+          s('hub', 'route', CONTAINER_IP + ':51234', GOOGLE,
+            "Routing decision: is " + GOOGLE.split(':')[0] + " this host's own address? No -- route it onward, don't deliver it locally.",
+            false, null, 'Routing decision: not local, forward it', 'host'),
+          s('hub', 'fwd', CONTAINER_IP + ':51234', GOOGLE,
+            "FORWARD chain: this is traffic passing through the host, not to or from it. Docker's default rules accept it.",
+            false, null, 'FORWARD chain: accepted', 'host'),
+          s('hub', 'post', HOST_IP + ':51234', GOOGLE,
+            "POSTROUTING: MASQUERADE fires -- source is in 172.17.0.0/16 and leaving via a non-docker0 interface, so the kernel rewrites the source to the host's own address. conntrack records the mapping.",
+            true, { key: 'out1', add: CONTAINER_IP + ':51234 ↔ ' + HOST_IP + ':51234' },
+            'POSTROUTING: MASQUERADE rewrites source → ' + HOST_IP + ':51234', 'hot'),
+          s('hostnic', null, HOST_IP + ':51234', GOOGLE,
+            "Exits the host's real interface. From here on it's indistinguishable from traffic the host generated itself.",
+            false, null, 'Exits host NIC as ' + HOST_IP + ':51234', 'host'),
+          s('external', null, HOST_IP + ':51234', GOOGLE,
+            "Reaches google.com. It only ever sees " + HOST_IP + " -- it has no idea a container, or Docker, exists.",
+            false, null, 'Reaches google.com', 'host'),
+        ],
+        [ // reply: internet -> container
+          s('external', null, GOOGLE, HOST_IP + ':51234',
+            "google.com replies to the address it saw: " + HOST_IP + ".",
+            false, null, 'google.com sends its reply', 'host'),
+          s('hostnic', null, GOOGLE, HOST_IP + ':51234',
+            "The reply arrives at the host's real interface.",
+            false, null, 'Reply arrives at host NIC', 'host'),
+          s('hub', 'pre', GOOGLE, CONTAINER_IP + ':51234',
+            "PREROUTING: conntrack recognizes this as the reply half of a tracked connection and automatically reverses the earlier MASQUERADE -- no separate rule needed, it just remembers. The kernel now knows this really belongs to 172.17.0.2.",
+            true, { key: 'out1', match: true },
+            'PREROUTING: conntrack un-NATs dest → ' + CONTAINER_IP + ':51234', 'hot'),
+          s('hub', 'route', GOOGLE, CONTAINER_IP + ':51234',
+            "Routing decision: " + CONTAINER_IP + " isn't this host either -- forward it, don't deliver it locally.",
+            false, null, 'Routing decision: forward to container', 'host'),
+          s('hub', 'fwd', GOOGLE, CONTAINER_IP + ':51234',
+            "FORWARD chain: passing through again, same as any forwarded traffic.",
+            false, null, 'FORWARD chain: accepted', 'host'),
+          s('hub', 'post', GOOGLE, CONTAINER_IP + ':51234',
+            "POSTROUTING: nothing left to rewrite -- the address was already corrected back at PREROUTING.",
+            false, null, 'POSTROUTING: no-op, already corrected', 'host'),
+          s('docker0', null, GOOGLE, CONTAINER_IP + ':51234',
+            "Back onto the bridge, heading for the right veth pair.",
+            false, null, 'Back onto docker0 bridge', 'container'),
+          s('veth', null, GOOGLE, CONTAINER_IP + ':51234',
+            "Crosses back over the veth pair.",
+            false, null, 'Crosses veth pair back into container', 'container'),
+          s('ceth0', null, GOOGLE, CONTAINER_IP + ':51234',
+            "Arrives inside the container's network namespace.",
+            false, null, 'Arrives at container eth0', 'container'),
+          s('app', null, GOOGLE, CONTAINER_IP + ':51234',
+            "The app receives the reply looking exactly like a normal, direct response from google.com. It never sees " + HOST_IP + ", and has no idea NAT happened at all.",
+            false, null, 'App receives reply -- looks like a direct response', 'container'),
+        ],
+      ],
+      inbound: [
+        [ // forward: external client -> nginx container
+          s('external', null, CLIENT, HOST_IP + ':8080',
+            "A client somewhere on the internet connects to the host on port 8080.",
+            false, null, 'External client connects to ' + HOST_IP + ':8080', 'host'),
+          s('hostnic', null, CLIENT, HOST_IP + ':8080',
+            "Arrives at the host's real interface.",
+            false, null, 'Arrives at host NIC', 'host'),
+          s('hub', 'pre', CLIENT, CONTAINER_IP + ':80',
+            "PREROUTING: Docker's DNAT rule fires here, before any routing decision is even made -- “anything hitting me on 8080 really means 172.17.0.2:80.” conntrack records the mapping.",
+            true, { key: 'in1', add: CLIENT + ' → ' + CONTAINER_IP + ':80 (via ' + HOST_IP + ':8080)' },
+            'PREROUTING: DNAT rewrites dest → ' + CONTAINER_IP + ':80', 'hot'),
+          s('hub', 'route', CLIENT, CONTAINER_IP + ':80',
+            "Routing decision: now destined for 172.17.0.2, not this host -- routed onward.",
+            false, null, 'Routing decision: forward to container', 'host'),
+          s('hub', 'fwd', CLIENT, CONTAINER_IP + ':80',
+            "FORWARD chain: passing through, not delivered locally.",
+            false, null, 'FORWARD chain: accepted', 'host'),
+          s('hub', 'post', CLIENT, CONTAINER_IP + ':80',
+            "POSTROUTING: nothing to rewrite here -- the source is left alone on this leg.",
+            false, null, 'POSTROUTING: no-op on this leg', 'host'),
+          s('docker0', null, CLIENT, CONTAINER_IP + ':80',
+            "Onto the bridge, toward nginx's veth pair.",
+            false, null, 'Onto docker0 bridge', 'container'),
+          s('veth', null, CLIENT, CONTAINER_IP + ':80',
+            "Crosses the veth pair.",
+            false, null, 'Crosses veth pair into container', 'container'),
+          s('ceth0', null, CLIENT, CONTAINER_IP + ':80',
+            "Arrives inside the container's network namespace.",
+            false, null, 'Arrives at container eth0', 'container'),
+          s('app', null, CLIENT, CONTAINER_IP + ':80',
+            "nginx receives a completely normal-looking request on port 80. It has no idea a DNAT rewrite happened, or that the client thinks it's talking to port 8080.",
+            false, null, 'nginx receives the request on port 80', 'container'),
+        ],
+        [ // reply: nginx -> external client
+          s('app', null, CONTAINER_IP + ':80', CLIENT,
+            "nginx sends its response back to the address it saw the request come from.",
+            false, null, 'nginx sends its reply', 'container'),
+          s('ceth0', null, CONTAINER_IP + ':80', CLIENT,
+            "Leaves the container's network namespace.",
+            false, null, 'Leaves via container eth0', 'container'),
+          s('veth', null, CONTAINER_IP + ':80', CLIENT,
+            "Crosses the veth pair.",
+            false, null, 'Crosses veth pair', 'container'),
+          s('docker0', null, CONTAINER_IP + ':80', CLIENT,
+            "Arrives at the bridge.",
+            false, null, 'Arrives at docker0 bridge', 'container'),
+          s('hub', 'pre', CONTAINER_IP + ':80', CLIENT,
+            "PREROUTING: nothing matches here for this leg -- passes through.",
+            false, null, 'PREROUTING: no match, pass through', 'host'),
+          s('hub', 'route', CONTAINER_IP + ':80', CLIENT,
+            "Routing decision: " + CLIENT.split(':')[0] + " isn't this host -- forward it.",
+            false, null, 'Routing decision: forward to client', 'host'),
+          s('hub', 'fwd', CONTAINER_IP + ':80', CLIENT,
+            "FORWARD chain: allowed through.",
+            false, null, 'FORWARD chain: accepted', 'host'),
+          s('hub', 'post', HOST_IP + ':8080', CLIENT,
+            "POSTROUTING: conntrack reverses the earlier DNAT automatically -- the reply's source gets rewritten back to match what the client originally contacted.",
+            true, { key: 'in1', match: true },
+            'POSTROUTING: conntrack un-DNATs source → ' + HOST_IP + ':8080', 'hot'),
+          s('hostnic', null, HOST_IP + ':8080', CLIENT,
+            "Exits the host's real interface.",
+            false, null, 'Exits host NIC as ' + HOST_IP + ':8080', 'host'),
+          s('external', null, HOST_IP + ':8080', CLIENT,
+            "The client sees a reply from exactly the address:port it connected to -- " + HOST_IP + ":8080 -- with zero indication that nginx is actually running inside a container at a completely different address.",
+            false, null, 'Client receives reply from ' + HOST_IP + ':8080', 'host'),
+        ],
+      ],
+    };
+
+    let mode = 'outbound';
+    let legIndex = 0;   // 0 = forward leg, 1 = reply leg
+    let stepIndex = -1; // index within the current leg's step array
+    let playing = false;
+    let playTimer = null;
+    const conntrackState = {};
+
+    function allSteps() {
+      return LEGS[mode][0].concat(LEGS[mode][1]);
+    }
+    function totalSteps() { return allSteps().length; }
+    function currentGlobalIndex() {
+      return legIndex === 0 ? stepIndex : LEGS[mode][0].length + stepIndex;
+    }
+    function currentStep() {
+      if (stepIndex < 0) return null;
+      return LEGS[mode][legIndex][stepIndex];
+    }
+
+    function buildTrack() {
+      track.innerHTML = '';
+      MACRO.forEach(m => {
+        const el = document.createElement('div');
+        el.className = 'pj-station' + (m.isHub ? ' pj-hub' : '');
+        el.dataset.side = m.side;
+        el.id = 'pjstation-' + m.id;
+        if (m.isHub) {
+          el.innerHTML =
+            '<div class="pj-box">' +
+              HUB_SUBS.map(sub => '<div class="pj-subcell" id="pjsub-' + sub + '">' + HUB_SUB_LABEL[sub] + '</div>').join('') +
+            '</div>' +
+            '<div class="pj-label">' + m.label + '</div>';
+        } else {
+          el.innerHTML =
+            '<div class="pj-box">' + m.icon + '</div>' +
+            '<div class="pj-label">' + m.label + '</div>';
+        }
+        track.appendChild(el);
+      });
+    }
+
+    function stationCenterX(stationId) {
+      const el = document.getElementById('pjstation-' + stationId);
+      if (!el) return 0;
+      const trackRect = track.getBoundingClientRect();
+      const elRect = el.getBoundingClientRect();
+      return (elRect.left - trackRect.left) + elRect.width / 2;
+    }
+
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderConntrack() {
+      const keys = Object.keys(conntrackState);
+      if (keys.length === 0) {
+        conntrackEl.innerHTML = '<div class="pj-conntrack-empty">No tracked connections yet.</div>';
+        return;
+      }
+      conntrackEl.innerHTML = keys.map(k => {
+        const e = conntrackState[k];
+        return '<div class="entry' + (e.matched ? ' matched' : '') + '">' + e.text + '</div>';
+      }).join('');
+    }
+
+    function applyStep(step) {
+      // Highlight active station / hub sub-cell
+      MACRO.forEach(m => {
+        const el = document.getElementById('pjstation-' + m.id);
+        el.classList.toggle('active', m.id === step.station);
+      });
+      HUB_SUBS.forEach(sub => {
+        const cell = document.getElementById('pjsub-' + sub);
+        cell.classList.remove('on', 'hot');
+        if (step.station === 'hub' && sub === step.sub) {
+          cell.classList.add(step.hot ? 'hot' : 'on');
+        }
+      });
+
+      // Move marker
+      const targetX = stationCenterX(step.station);
+      marker.style.transitionDuration = scaled(500) + 'ms';
+      requestAnimationFrame(() => { marker.style.left = targetX + 'px'; });
+
+      // Header inspector
+      srcEl.textContent = step.src;
+      dstEl.textContent = step.dst;
+      explainEl.textContent = step.text;
+
+      // conntrack
+      if (step.conntrack) {
+        if (step.conntrack.add) {
+          conntrackState[step.conntrack.key] = { text: step.conntrack.add, matched: false };
+        } else if (step.conntrack.match) {
+          if (conntrackState[step.conntrack.key]) conntrackState[step.conntrack.key].matched = true;
+        }
+        renderConntrack();
+      }
+
+      // Log
+      log(step.log, step.logCls);
+
+      // Progress
+      const gi = currentGlobalIndex() + 1;
+      const total = totalSteps();
+      const legName = legIndex === 0 ? 'forward leg' : 'reply leg';
+      progressEl.textContent = 'Step ' + gi + ' / ' + total + ' (' + legName + ')';
+    }
+
+    function advance() {
+      const legs = LEGS[mode];
+      if (stepIndex + 1 < legs[legIndex].length) {
+        stepIndex++;
+      } else if (legIndex === 0) {
+        legIndex = 1;
+        stepIndex = 0;
+      } else {
+        pause();
+        progressEl.textContent = 'Journey complete (' + totalSteps() + ' / ' + totalSteps() + '). Press Reset to run it again, or switch direction above.';
+        return false;
+      }
+      applyStep(currentStep());
+      return true;
+    }
+
+    function play() {
+      if (playing) return;
+      if (legIndex === 1 && stepIndex >= LEGS[mode][1].length - 1) return; // already finished
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      const tick = () => {
+        const more = advance();
+        if (!more) { pause(); return; }
+        playTimer = setTimeout(tick, scaled(1400));
+      };
+      tick();
+    }
+
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play';
+      clearTimeout(playTimer);
+    }
+
+    function reset() {
+      pause();
+      legIndex = 0;
+      stepIndex = -1;
+      Object.keys(conntrackState).forEach(k => delete conntrackState[k]);
+      renderConntrack();
+      logEl.innerHTML = '';
+      srcEl.textContent = '--';
+      dstEl.textContent = '--';
+      explainEl.textContent = 'Choose a direction above, then press Play or step through manually.';
+      MACRO.forEach(m => document.getElementById('pjstation-' + m.id).classList.remove('active'));
+      HUB_SUBS.forEach(sub => document.getElementById('pjsub-' + sub).classList.remove('on', 'hot'));
+      marker.style.transitionDuration = '0ms';
+      marker.style.left = stationCenterX('app') + 'px';
+      progressEl.textContent = 'Step 0 / ' + totalSteps() + ' -- press Play or Next Step to begin';
+      log(mode === 'outbound'
+        ? 'Ready: watch a container-initiated connection reach google.com and come back.'
+        : 'Ready: watch an external client reach a container published with -p 8080:80.', 'container');
+    }
+
+    function setMode(m) {
+      if (playing) pause();
+      mode = m;
+      modeButtons.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      reset();
+    }
+
+    modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    stepBtn.addEventListener('click', () => { if (!playing) advance(); });
+    resetBtn.addEventListener('click', reset);
+    window.addEventListener('resize', () => {
+      const step = currentStep();
+      if (step) { marker.style.transitionDuration = '0ms'; marker.style.left = stationCenterX(step.station) + 'px'; }
+      else { marker.style.left = stationCenterX('app') + 'px'; }
+    });
+
+    buildTrack();
+    reset();
+  })();
+  </script>
+</div>
