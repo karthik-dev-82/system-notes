@@ -1,0 +1,449 @@
+<div class="ccviz-root" id="ccWidget">
+  <style>
+    #ccWidget {
+      --cc-bg: #0f172a;
+      --cc-panel: #16213e;
+      --cc-border: #2a3655;
+      --cc-text: #e2e8f0;
+      --cc-muted: #94a3b8;
+      --cc-ss: #4ade80;
+      --cc-ca: #38bdf8;
+      --cc-loss: #f87171;
+      --cc-timeout: #fb923c;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cc-bg);
+      color: var(--cc-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ccWidget * { box-sizing: border-box; }
+    #ccWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ccWidget .cc-sub { color: var(--cc-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cc-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--cc-panel);
+      border: 1px solid var(--cc-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 680px;
+    }
+    .cc-controls label {
+      font-size: 0.8rem;
+      color: var(--cc-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cc-controls input[type="range"] { width: 130px; accent-color: var(--cc-ca); }
+    .cc-btn {
+      background: var(--cc-ca);
+      color: #041322;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .cc-btn.secondary { background: transparent; color: var(--cc-text); border: 1px solid var(--cc-border); }
+    .cc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .cc-main {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      min-width: 680px;
+    }
+    .cc-graph-panel {
+      flex: 2;
+      min-width: 420px;
+      background: var(--cc-panel);
+      border: 1px solid var(--cc-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .cc-side-panel {
+      flex: 1;
+      min-width: 220px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .cc-panel-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cc-muted); margin-bottom: 8px; }
+
+    canvas#ccCanvas { width: 100%; height: 260px; display: block; }
+
+    .cc-legend { display: flex; gap: 16px; font-size: 0.75rem; color: var(--cc-muted); margin-top: 6px; flex-wrap: wrap; }
+    .cc-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .cc-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    .cc-stats-box, .cc-highway-box, .cc-log-box {
+      background: var(--cc-panel);
+      border: 1px solid var(--cc-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .cc-stat-row { display: flex; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px dashed var(--cc-border); }
+    .cc-stat-row:last-child { border-bottom: none; }
+    .cc-stat-row b { color: #fff; }
+    #ccPhaseVal.ss { color: var(--cc-ss); }
+    #ccPhaseVal.ca { color: var(--cc-ca); }
+
+    .cc-highway {
+      min-height: 54px;
+      line-height: 1;
+      font-size: 1.1rem;
+      word-break: break-all;
+      overflow: hidden;
+      max-height: 90px;
+      overflow-y: auto;
+    }
+    .cc-highway span { opacity: 0.9; }
+
+    .cc-log { height: 150px; overflow-y: auto; font-size: 0.76rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cc-log div { color: var(--cc-muted); }
+    .cc-log div.ss { color: var(--cc-ss); }
+    .cc-log div.ca { color: var(--cc-ca); }
+    .cc-log div.loss { color: var(--cc-loss); font-weight: 600; }
+    .cc-log div.timeout { color: var(--cc-timeout); font-weight: 700; }
+
+    details.cc-notes {
+      margin-top: 16px;
+      background: var(--cc-panel);
+      border: 1px solid var(--cc-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 680px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--cc-text);
+    }
+    details.cc-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cc-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cc-muted); }
+    details.cc-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cc-ca); }
+  </style>
+
+  <h3>TCP Congestion Control: Play With It</h3>
+  <div class="cc-sub">Drive the congestion window yourself. Adjust the loss rate, hit play, and watch slow start, congestion avoidance, fast retransmit, and timeout all kick in exactly when the real algorithm would trigger them.</div>
+
+  <div class="cc-controls">
+    <button class="cc-btn" id="ccPlay">▶ Play</button>
+    <button class="cc-btn secondary" id="ccStep">Step +1 RTT</button>
+    <button class="cc-btn secondary" id="ccReset">Reset</button>
+    <label>Loss probability per RTT: <span id="ccLossVal">5%</span>
+      <input type="range" id="ccLossSlider" min="0" max="30" value="5">
+    </label>
+    <label>Speed: <span id="ccSpeedVal">2/s</span>
+      <input type="range" id="ccSpeedSlider" min="1" max="8" value="2">
+    </label>
+  </div>
+
+  <div class="cc-main">
+    <div class="cc-graph-panel">
+      <div class="cc-panel-title">Congestion window (cwnd) over time</div>
+      <canvas id="ccCanvas" width="900" height="260"></canvas>
+      <div class="cc-legend">
+        <span><i class="cc-dot" style="background:#4ade80"></i> Slow start</span>
+        <span><i class="cc-dot" style="background:#38bdf8"></i> Congestion avoidance</span>
+        <span><i class="cc-dot" style="background:#f87171"></i> Fast retransmit (halve)</span>
+        <span><i class="cc-dot" style="background:#fb923c"></i> Timeout (reset to 1)</span>
+        <span style="opacity:0.7">- - - ssthresh</span>
+      </div>
+    </div>
+    <div class="cc-side-panel">
+      <div class="cc-stats-box">
+        <div class="cc-panel-title">Live state</div>
+        <div class="cc-stat-row"><span>RTT round</span><b id="ccRoundVal">0</b></div>
+        <div class="cc-stat-row"><span>cwnd</span><b id="ccCwndVal">1</b> segment(s)</div>
+        <div class="cc-stat-row"><span>ssthresh</span><b id="ccSsthreshVal">64</b></div>
+        <div class="cc-stat-row"><span>Phase</span><b id="ccPhaseVal" class="ss">Slow Start</b></div>
+        <div class="cc-stat-row"><span>Last event</span><b id="ccEventVal">--</b></div>
+      </div>
+      <div class="cc-highway-box">
+        <div class="cc-panel-title">The highway (cwnd = cars in flight)</div>
+        <div class="cc-highway" id="ccHighway">🚗</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cc-log-box" style="margin-top:14px; min-width:680px;">
+    <div class="cc-panel-title">Event log</div>
+    <div class="cc-log" id="ccLog"></div>
+  </div>
+
+  <details class="cc-notes">
+    <summary>What this simplifies, for the technically curious</summary>
+    <ul>
+      <li>This models classic <b>TCP Reno / NewReno</b> -- additive-increase/multiplicative-decrease
+        (AIMD) congestion control, exactly as described in RFC 5681. It's the textbook model, and it's
+        still a correct description of one real algorithm -- but it isn't the only one in use today.</li>
+      <li><b>Linux's actual default since kernel 2.6.19 is CUBIC</b>, not Reno. CUBIC grows the window
+        along a cubic function of time since the last loss rather than a strict AIMD line/doubling, and
+        it's deliberately less aggressive about backing off, which matters a lot on high-bandwidth
+        long-distance links. Google's <b>BBR</b> goes further and doesn't treat packet loss as the primary
+        congestion signal at all -- it continuously estimates the bottleneck bandwidth and round-trip time
+        and paces sends against that model instead.</li>
+      <li>The "found the limit" moment has a real name: <b><code>ssthresh</code></b> (slow start threshold).
+        Slow start doubles <code>cwnd</code> every RTT until <code>cwnd</code> would reach or exceed
+        <code>ssthresh</code>, at which point congestion avoidance's +1-per-RTT growth takes over.</li>
+      <li>Real slow start doesn't start at <code>cwnd = 1</code> segment anymore either. <b>RFC 6928</b>
+        raised the typical initial window to around 10 segments on modern stacks, specifically to make
+        short connections (most web requests) finish faster.</li>
+      <li>Whether a loss becomes a <b>fast retransmit</b> (halve and keep going) or a <b>timeout</b>
+        (collapse to 1 and restart slow start) isn't random here -- it's driven by whether there were
+        enough packets already in flight to generate 3 duplicate ACKs (this sim uses <code>cwnd &ge;
+        4</code> as that cutoff). That's the real reason timeouts hit small windows hardest: there simply
+        aren't enough packets in flight yet to trigger the faster recovery path.</li>
+      <li>Real TCP typically uses <b>SACK</b> (Selective Acknowledgment) rather than plain cumulative
+        duplicate ACKs, so the sender learns exactly which segments are missing instead of just "still
+        waiting for the oldest unacked one."</li>
+      <li><code>cwnd</code> is <i>congestion control</i>. There's a separate, unrelated mechanism called
+        <i>flow control</i> using the receiver's advertised window (<code>rwnd</code>) to stop a fast
+        sender from overrunning a slow receiver's buffer. The actual amount in flight at any moment is
+        <code>min(cwnd, rwnd)</code> -- this widget only visualizes the <code>cwnd</code> half.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('ccWidget');
+    const canvas = document.getElementById('ccCanvas');
+    const ctx = canvas.getContext('2d');
+    const playBtn = document.getElementById('ccPlay');
+    const stepBtn = document.getElementById('ccStep');
+    const resetBtn = document.getElementById('ccReset');
+    const lossSlider = document.getElementById('ccLossSlider');
+    const lossVal = document.getElementById('ccLossVal');
+    const speedSlider = document.getElementById('ccSpeedSlider');
+    const speedVal = document.getElementById('ccSpeedVal');
+    const roundVal = document.getElementById('ccRoundVal');
+    const cwndVal = document.getElementById('ccCwndVal');
+    const ssthreshVal = document.getElementById('ccSsthreshVal');
+    const phaseVal = document.getElementById('ccPhaseVal');
+    const eventVal = document.getElementById('ccEventVal');
+    const highway = document.getElementById('ccHighway');
+    const logEl = document.getElementById('ccLog');
+
+    const INITIAL_SSTHRESH = 64;
+    const MAX_HISTORY = 60;
+
+    let cwnd, ssthresh, phase, round, history, playing, playTimer;
+
+    // -- Verified AIMD state machine (see cc_sim_test.js) --
+    function step(lossThisRound) {
+      round++;
+      let event = null;
+
+      if (lossThisRound) {
+        const prevCwnd = cwnd;
+        if (cwnd >= 4) {
+          ssthresh = Math.max(Math.floor(cwnd / 2), 2);
+          cwnd = ssthresh;
+          phase = 'congestion-avoidance';
+          event = { type: 'fast-retransmit', prevCwnd, newCwnd: cwnd, newSsthresh: ssthresh };
+        } else {
+          ssthresh = Math.max(Math.floor(cwnd / 2), 2);
+          cwnd = 1;
+          phase = 'slow-start';
+          event = { type: 'timeout', prevCwnd, newCwnd: cwnd, newSsthresh: ssthresh };
+        }
+      } else {
+        if (phase === 'slow-start') {
+          const prevCwnd = cwnd;
+          cwnd = cwnd * 2;
+          if (cwnd >= ssthresh) {
+            cwnd = ssthresh;
+            phase = 'congestion-avoidance';
+            event = { type: 'threshold-reached', prevCwnd, newCwnd: cwnd };
+          }
+        } else {
+          cwnd = cwnd + 1;
+        }
+      }
+      return event;
+    }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = 'RTT ' + round + ': ' + msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function updateStats() {
+      roundVal.textContent = round;
+      cwndVal.textContent = cwnd;
+      ssthreshVal.textContent = ssthresh;
+      phaseVal.textContent = phase === 'slow-start' ? 'Slow Start' : 'Congestion Avoidance';
+      phaseVal.className = phase === 'slow-start' ? 'ss' : 'ca';
+      const cap = 60;
+      const shown = Math.min(cwnd, cap);
+      highway.textContent = '🚗'.repeat(shown) + (cwnd > cap ? '  (+' + (cwnd - cap) + ' more)' : '');
+    }
+
+    function drawGraph() {
+      const dpr = window.devicePixelRatio || 1;
+      const cssW = canvas.clientWidth || 860;
+      const cssH = 260;
+      canvas.width = cssW * dpr;
+      canvas.height = cssH * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.clearRect(0, 0, cssW, cssH);
+
+      const padL = 40, padR = 12, padT = 12, padB = 24;
+      const w = cssW - padL - padR;
+      const h = cssH - padT - padB;
+
+      const data = history.slice(-MAX_HISTORY);
+      const maxRound = Math.max(1, round);
+      const minRoundShown = Math.max(0, maxRound - MAX_HISTORY);
+      const maxCwnd = Math.max(8, ...data.map(p => Math.max(p.cwnd, p.ssthresh > 200 ? 0 : p.ssthresh)));
+
+      function x(r) { return padL + ((r - minRoundShown) / Math.max(1, MAX_HISTORY)) * w; }
+      function y(v) { return padT + h - (v / maxCwnd) * h; }
+
+      // gridlines
+      ctx.strokeStyle = '#243154';
+      ctx.lineWidth = 1;
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '10px ui-monospace, monospace';
+      const ySteps = 5;
+      for (let i = 0; i <= ySteps; i++) {
+        const v = Math.round((maxCwnd / ySteps) * i);
+        const yy = y(v);
+        ctx.beginPath();
+        ctx.moveTo(padL, yy);
+        ctx.lineTo(padL + w, yy);
+        ctx.stroke();
+        ctx.fillText(String(v), 4, yy + 3);
+      }
+      ctx.fillText('RTT →', padL + w - 30, padT + h + 18);
+
+      if (data.length < 1) return;
+
+      // ssthresh dashed line (only if within visible range and not absurdly large)
+      if (ssthresh <= maxCwnd * 1.2) {
+        ctx.save();
+        ctx.setLineDash([4, 4]);
+        ctx.strokeStyle = '#64748b';
+        ctx.beginPath();
+        ctx.moveTo(padL, y(ssthresh));
+        ctx.lineTo(padL + w, y(ssthresh));
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // line segments, colored by what produced each point
+      ctx.lineWidth = 2.2;
+      let prev = null;
+      for (const p of data) {
+        if (prev) {
+          ctx.strokeStyle = p.color;
+          ctx.beginPath();
+          ctx.moveTo(x(prev.round), y(prev.cwnd));
+          ctx.lineTo(x(p.round), y(p.cwnd));
+          ctx.stroke();
+        }
+        prev = p;
+      }
+      // event dots
+      for (const p of data) {
+        if (p.eventType) {
+          ctx.fillStyle = p.color;
+          ctx.beginPath();
+          ctx.arc(x(p.round), y(p.cwnd), 4, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+    }
+
+    function colorFor(eventType, phaseAtPoint) {
+      if (eventType === 'timeout') return '#fb923c';
+      if (eventType === 'fast-retransmit') return '#f87171';
+      return phaseAtPoint === 'slow-start' ? '#4ade80' : '#38bdf8';
+    }
+
+    function doStep() {
+      const lossProb = parseInt(lossSlider.value, 10) / 100;
+      const lost = Math.random() < lossProb;
+      const event = step(lost);
+      // phase already reflects the state *after* this step, which is
+      // exactly what we want to color the point by: slow-start doubling
+      // steps green, congestion-avoidance +1 steps blue, and loss/timeout
+      // events override both via colorFor's early-return checks.
+      const color = colorFor(event ? event.type : null, phase);
+
+      history.push({ round, cwnd, ssthresh, color, eventType: event ? event.type : null });
+      if (history.length > 500) history.shift();
+
+      if (event && event.type === 'fast-retransmit') {
+        eventVal.textContent = 'Fast retransmit (cwnd ' + event.prevCwnd + ' → ' + event.newCwnd + ')';
+        log('3 duplicate ACKs -- packet lost, but ' + event.prevCwnd + ' segments were already in flight. Fast retransmit: cwnd halved ' + event.prevCwnd + ' → ' + event.newCwnd + ', ssthresh = ' + event.newSsthresh + '.', 'loss');
+      } else if (event && event.type === 'timeout') {
+        eventVal.textContent = 'TIMEOUT (cwnd ' + event.prevCwnd + ' → 1)';
+        log('Packet lost, but only ' + event.prevCwnd + ' segment(s) in flight -- not enough for 3 dup ACKs. Timeout! cwnd collapses ' + event.prevCwnd + ' → 1, ssthresh = ' + event.newSsthresh + '. Restarting slow start.', 'timeout');
+      } else if (event && event.type === 'threshold-reached') {
+        eventVal.textContent = 'Reached ssthresh -- switching to congestion avoidance';
+        log('cwnd reached ssthresh (' + ssthresh + '). Switching from slow start to congestion avoidance.', 'ca');
+      } else if (phase === 'slow-start') {
+        log('No loss -- slow start doubles cwnd to ' + cwnd + '.', 'ss');
+      } else {
+        log('No loss -- congestion avoidance adds 1, cwnd = ' + cwnd + '.', 'ca');
+      }
+
+      updateStats();
+      drawGraph();
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      const speed = parseInt(speedSlider.value, 10);
+      const interval = Math.round(1000 / speed);
+      playTimer = setInterval(doStep, interval);
+    }
+
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play';
+      clearInterval(playTimer);
+    }
+
+    function reset() {
+      pause();
+      cwnd = 1;
+      ssthresh = INITIAL_SSTHRESH;
+      phase = 'slow-start';
+      round = 0;
+      history = [{ round: 0, cwnd: 1, ssthresh: INITIAL_SSTHRESH, color: '#4ade80', eventType: null }];
+      logEl.innerHTML = '';
+      eventVal.textContent = '--';
+      log('Simulation reset. cwnd = 1, ssthresh = ' + INITIAL_SSTHRESH + '.', 'ss');
+      updateStats();
+      drawGraph();
+    }
+
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    stepBtn.addEventListener('click', () => { if (!playing) doStep(); });
+    resetBtn.addEventListener('click', reset);
+    lossSlider.addEventListener('input', () => { lossVal.textContent = lossSlider.value + '%'; });
+    speedSlider.addEventListener('input', () => {
+      speedVal.textContent = speedSlider.value + '/s';
+      if (playing) { pause(); play(); }
+    });
+    window.addEventListener('resize', drawGraph);
+
+    reset();
+  })();
+  </script>
+</div>

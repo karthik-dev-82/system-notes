@@ -29,6 +29,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔐 **[Complete Guide to OpenSSL](docs/source/openssl_guide.rst)** | Encryption, hashing, and certificates, plus practical OpenSSL commands | symmetric/asymmetric crypto, TLS, x509 certs, `openssl` CLI |
 | 🪟 **[The /proc Filesystem](docs/source/proc_filesystem.rst)** | The virtual /proc filesystem -- process info, system stats, tuning knobs | `/proc/PID`, `/proc/cpuinfo`, `/proc/meminfo`, `/proc/sys` |
 | ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
+| 🎮 **[TCP vs UDP (Interactive)](docs/source/tcp_udp_interactive.rst)** | Interactive TCP vs. UDP packet delivery -- play with loss and see the difference | handshake, retransmission, ordering, best-effort delivery |
+| 🎮 **[TCP Congestion Control (Interactive)](docs/source/tcp_congestion_control_interactive.rst)** | Interactive TCP congestion control -- drive the cwnd sawtooth yourself | slow start, congestion avoidance, fast retransmit, timeout, ssthresh |
 
 ---
 
@@ -82,7 +84,13 @@ system-notes/
         ├── threads_processes_synchronization.rst
         ├── openssl_guide.rst
         ├── proc_filesystem.rst
-        └── hash_load_balancer.rst
+        ├── hash_load_balancer.rst
+        ├── tcp_udp_interactive.rst
+        ├── tcp_congestion_control_interactive.rst
+        └── _static/
+            ├── custom.css
+            ├── tcp_udp_widget.html
+            └── tcp_congestion_widget.html
 
 ```
 

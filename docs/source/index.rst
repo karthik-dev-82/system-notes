@@ -28,6 +28,8 @@ down and coming back to.
    openssl_guide
    proc_filesystem
    hash_load_balancer
+   tcp_udp_interactive
+   tcp_congestion_control_interactive
 
 Quick Navigation
 -----------------
@@ -94,3 +96,9 @@ Quick Navigation
    * - :doc:`hash_load_balancer`
      - Hash-based load balancing, sticky sessions, and consistent hashing
      - modulo hashing, session affinity, CDN routing, reshuffling problem
+   * - :doc:`tcp_udp_interactive`
+     - Interactive TCP vs. UDP packet delivery -- play with loss and see the difference
+     - handshake, retransmission, ordering, best-effort delivery
+   * - :doc:`tcp_congestion_control_interactive`
+     - Interactive TCP congestion control -- drive the cwnd sawtooth yourself
+     - slow start, congestion avoidance, fast retransmit, timeout, ssthresh

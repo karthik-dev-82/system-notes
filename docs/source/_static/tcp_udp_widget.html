@@ -1,0 +1,486 @@
+<div class="netviz-root" id="tcpUdpWidget">
+  <style>
+    #tcpUdpWidget {
+      --nv-bg: #0f172a;
+      --nv-panel: #16213e;
+      --nv-border: #2a3655;
+      --nv-text: #e2e8f0;
+      --nv-muted: #94a3b8;
+      --nv-accent: #38bdf8;
+      --nv-good: #4ade80;
+      --nv-bad: #f87171;
+      --nv-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--nv-bg);
+      color: var(--nv-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #tcpUdpWidget * { box-sizing: border-box; }
+    #tcpUdpWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #tcpUdpWidget .nv-sub { color: var(--nv-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .nv-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--nv-panel);
+      border: 1px solid var(--nv-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+    .nv-toggle {
+      display: inline-flex;
+      border: 1px solid var(--nv-border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .nv-toggle button {
+      background: transparent;
+      color: var(--nv-muted);
+      border: none;
+      padding: 7px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .nv-toggle button.active.tcp { background: var(--nv-accent); color: #041322; }
+    .nv-toggle button.active.udp { background: #c084fc; color: #1a0b2e; }
+    .nv-controls label {
+      font-size: 0.8rem;
+      color: var(--nv-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nv-controls input[type="range"] { width: 130px; accent-color: var(--nv-accent); }
+    .nv-btn {
+      background: var(--nv-accent);
+      color: #041322;
+      border: none;
+      border-radius: 7px;
+      padding: 8px 16px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .nv-btn.secondary { background: transparent; color: var(--nv-text); border: 1px solid var(--nv-border); }
+    .nv-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .nv-stage {
+      position: relative;
+      background: var(--nv-panel);
+      border: 1px solid var(--nv-border);
+      border-radius: 10px;
+      height: 150px;
+      margin-bottom: 14px;
+      min-width: 640px;
+      overflow: hidden;
+    }
+    .nv-node {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 92px;
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--nv-muted);
+    }
+    .nv-node .nv-node-box {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 6px;
+      border-radius: 10px;
+      background: #1e2a4a;
+      border: 2px solid var(--nv-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+    }
+    .nv-sender { left: 8px; }
+    .nv-receiver { right: 8px; }
+
+    .nv-lane {
+      position: absolute;
+      left: 108px;
+      right: 108px;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, var(--nv-border) 0%, var(--nv-border) 100%);
+      background-size: 12px 2px;
+      background-repeat: repeat-x;
+      opacity: 0.6;
+    }
+
+    .nv-packet {
+      position: absolute;
+      top: 50%;
+      width: 30px;
+      height: 30px;
+      margin-top: -15px;
+      border-radius: 7px;
+      background: var(--nv-accent);
+      color: #041322;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.75rem;
+      font-weight: 800;
+      transition: left linear, opacity 0.25s, transform 0.25s;
+      z-index: 3;
+    }
+    #tcpUdpWidget[data-mode="udp"] .nv-packet { background: #c084fc; color: #1a0b2e; }
+    .nv-packet.nv-ack { background: var(--nv-good); color: #052e12; width: 22px; height: 22px; font-size: 0.6rem; }
+    .nv-packet.nv-lost { background: var(--nv-bad) !important; opacity: 0; transform: scale(1.6) rotate(20deg); }
+    .nv-packet.nv-handshake { background: var(--nv-warn); color: #3a2600; width: 26px; height: 26px; font-size: 0.55rem; }
+
+    .nv-lower {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      min-width: 640px;
+    }
+    .nv-slots-panel, .nv-log-panel {
+      background: var(--nv-panel);
+      border: 1px solid var(--nv-border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      flex: 1;
+      min-width: 260px;
+    }
+    .nv-panel-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nv-muted); margin-bottom: 10px; }
+    .nv-slots { display: flex; gap: 6px; flex-wrap: wrap; }
+    .nv-slot {
+      width: 34px;
+      height: 34px;
+      border-radius: 6px;
+      border: 1px dashed var(--nv-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      color: var(--nv-muted);
+      transition: all 0.2s;
+    }
+    .nv-slot.filled { background: var(--nv-good); color: #052e12; border-style: solid; font-weight: 700; }
+    .nv-slot.gap { background: rgba(248,113,113,0.15); border-color: var(--nv-bad); color: var(--nv-bad); }
+
+    .nv-log { height: 108px; overflow-y: auto; font-size: 0.78rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .nv-log div { color: var(--nv-muted); }
+    .nv-log div.good { color: var(--nv-good); }
+    .nv-log div.bad { color: var(--nv-bad); }
+    .nv-log div.info { color: var(--nv-accent); }
+
+    .nv-stats {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 12px;
+      font-size: 0.82rem;
+      min-width: 640px;
+    }
+    .nv-stats b { color: #fff; }
+
+    .nv-note {
+      margin-top: 14px;
+      font-size: 0.8rem;
+      color: var(--nv-muted);
+      border-top: 1px solid var(--nv-border);
+      padding-top: 10px;
+      min-width: 640px;
+    }
+  </style>
+
+  <h3>TCP vs. UDP: Watch the Delivery Happen</h3>
+  <div class="nv-sub">Send the same 8 packets over an unreliable link and watch what each protocol actually does about it.</div>
+
+  <div class="nv-controls">
+    <div class="nv-toggle">
+      <button class="mode-btn active tcp" data-mode="tcp">TCP</button>
+      <button class="mode-btn udp" data-mode="udp">UDP</button>
+    </div>
+    <label>Packet loss rate: <span id="lossVal">20%</span>
+      <input type="range" id="lossSlider" min="0" max="60" value="20">
+    </label>
+    <button class="nv-btn" id="sendBtn">Send 8 Packets</button>
+    <button class="nv-btn secondary" id="resetBtn">Reset</button>
+  </div>
+
+  <div class="nv-stage" id="stage">
+    <div class="nv-node nv-sender">
+      <div class="nv-node-box">🖥️</div>
+      Sender
+    </div>
+    <div class="nv-lane"></div>
+    <div class="nv-node nv-receiver">
+      <div class="nv-node-box">📥</div>
+      Receiver
+    </div>
+  </div>
+
+  <div class="nv-lower">
+    <div class="nv-slots-panel">
+      <div class="nv-panel-title">Receiver buffer (message order)</div>
+      <div class="nv-slots" id="slots"></div>
+    </div>
+    <div class="nv-log-panel">
+      <div class="nv-panel-title">Event log</div>
+      <div class="nv-log" id="log"></div>
+    </div>
+  </div>
+
+  <div class="nv-stats" id="stats">
+    <div>Elapsed: <b id="statTime">0.0s</b></div>
+    <div>Delivered: <b id="statDelivered">0/8</b></div>
+    <div>Retransmissions: <b id="statRetx">0</b></div>
+    <div>Status: <b id="statStatus">Idle</b></div>
+  </div>
+
+  <div class="nv-note" id="modeNote">
+    <b>TCP mode:</b> a real 3-way handshake runs first. Every lost packet is detected and resent until it
+    arrives, and the receiver reassembles everything in the original order before declaring the transfer
+    done -- that's why it can take longer as loss increases, but it always ends 8/8.
+  </div>
+
+  <script>
+  (function () {
+    const root = document.getElementById('tcpUdpWidget');
+    const stage = document.getElementById('stage');
+    const slotsEl = document.getElementById('slots');
+    const logEl = document.getElementById('log');
+    const sendBtn = document.getElementById('sendBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const lossSlider = document.getElementById('lossSlider');
+    const lossVal = document.getElementById('lossVal');
+    const modeButtons = root.querySelectorAll('.mode-btn');
+    const modeNote = document.getElementById('modeNote');
+    const statTime = document.getElementById('statTime');
+    const statDelivered = document.getElementById('statDelivered');
+    const statRetx = document.getElementById('statRetx');
+    const statStatus = document.getElementById('statStatus');
+
+    const N = 8;
+    let mode = 'tcp';
+    let running = false;
+    let startTime = 0;
+    let delivered = 0;
+    let retx = 0;
+    let timers = [];
+
+    function laneWidth() {
+      return stage.clientWidth - 108 - 108 - 30;
+    }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      const t = ((performance.now() - startTime) / 1000).toFixed(1);
+      d.textContent = '[' + t + 's] ' + msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setMode(m) {
+      if (running) return;
+      mode = m;
+      root.setAttribute('data-mode', m);
+      modeButtons.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      modeNote.innerHTML = m === 'tcp'
+        ? '<b>TCP mode:</b> a real 3-way handshake runs first. Every lost packet is detected and resent until it arrives, and the receiver reassembles everything in the original order before declaring the transfer done -- that\'s why it can take longer as loss increases, but it always ends 8/8.'
+        : '<b>UDP mode:</b> no handshake, no waiting, no retries. Packets fire off immediately and whatever arrives, arrives. The transfer always finishes in the same fixed time -- but at higher loss rates, you keep the gaps forever. This is exactly why a laggy video call skips a frame instead of freezing to redownload it.';
+      buildSlots();
+    }
+
+    function buildSlots() {
+      slotsEl.innerHTML = '';
+      for (let i = 1; i <= N; i++) {
+        const s = document.createElement('div');
+        s.className = 'nv-slot';
+        s.id = 'slot-' + i;
+        s.textContent = i;
+        slotsEl.appendChild(s);
+      }
+    }
+
+    function clearTimers() {
+      timers.forEach(t => clearTimeout(t));
+      timers = [];
+    }
+
+    function after(ms, fn) {
+      const id = setTimeout(fn, ms);
+      timers.push(id);
+      return id;
+    }
+
+    function spawnPacket(label, extraClass) {
+      const p = document.createElement('div');
+      p.className = 'nv-packet' + (extraClass ? ' ' + extraClass : '');
+      p.textContent = label;
+      p.style.left = '108px';
+      stage.appendChild(p);
+      return p;
+    }
+
+    function flyTo(el, targetLeft, duration, onDone) {
+      el.style.transitionDuration = duration + 'ms';
+      requestAnimationFrame(() => { el.style.left = targetLeft + 'px'; });
+      after(duration, onDone);
+    }
+
+    function fillSlot(i, ok) {
+      const s = document.getElementById('slot-' + i);
+      if (!s) return;
+      s.classList.add(ok ? 'filled' : 'gap');
+      s.textContent = ok ? i : '✗';
+    }
+
+    function reset() {
+      clearTimers();
+      running = false;
+      delivered = 0;
+      retx = 0;
+      Array.from(stage.querySelectorAll('.nv-packet')).forEach(p => p.remove());
+      buildSlots();
+      logEl.innerHTML = '';
+      statTime.textContent = '0.0s';
+      statDelivered.textContent = '0/' + N;
+      statRetx.textContent = '0';
+      statStatus.textContent = 'Idle';
+      sendBtn.disabled = false;
+    }
+
+    function lossRate() { return parseInt(lossSlider.value, 10) / 100; }
+
+    function runHandshake(done) {
+      log('Starting 3-way handshake...', 'info');
+      const w = laneWidth();
+      const p1 = spawnPacket('SYN', 'nv-handshake');
+      flyTo(p1, 108 + w, 500, () => {
+        log('SYN sent', 'good');
+        p1.remove();
+        const p2 = spawnPacket('SYN-ACK', 'nv-handshake');
+        p2.style.left = (108 + w) + 'px';
+        flyTo(p2, 108, 500, () => {
+          log('SYN-ACK received', 'good');
+          p2.remove();
+          const p3 = spawnPacket('ACK', 'nv-handshake');
+          flyTo(p3, 108 + w, 400, () => {
+            log('ACK sent -- connection established!', 'good');
+            p3.remove();
+            done();
+          });
+        });
+      });
+    }
+
+    function sendOnePacket(i, isRetry) {
+      const w = laneWidth();
+      const duration = 700 + Math.random() * 300;
+      const lost = Math.random() < lossRate();
+      const label = String(i);
+      const pkt = spawnPacket(label);
+      const travelDistance = lost ? w * (0.35 + Math.random() * 0.35) : w;
+
+      log((isRetry ? 'Retransmitting' : 'Sending') + ' packet #' + i + '...');
+
+      flyTo(pkt, 108 + travelDistance, lost ? duration * (travelDistance / w) : duration, () => {
+        if (lost) {
+          pkt.classList.add('nv-lost');
+          after(250, () => pkt.remove());
+          if (mode === 'tcp') {
+            log('Packet #' + i + ' LOST -- detected, will resend', 'bad');
+            after(500, () => {
+              retx++;
+              statRetx.textContent = retx;
+              sendOnePacket(i, true);
+            });
+          } else {
+            log('Packet #' + i + ' LOST -- gone forever (no retry in UDP)', 'bad');
+            fillSlot(i, false);
+            packetSettled();
+          }
+        } else {
+          pkt.remove();
+          delivered++;
+          statDelivered.textContent = delivered + '/' + N;
+          fillSlot(i, true);
+          if (mode === 'tcp') {
+            log('Packet #' + i + ' delivered -- ACK sent back', 'good');
+            const ack = spawnPacket('✓', 'nv-ack');
+            ack.style.left = (108 + w) + 'px';
+            flyTo(ack, 108, 350, () => ack.remove());
+          } else {
+            log('Packet #' + i + ' delivered', 'good');
+          }
+          packetSettled();
+        }
+      });
+    }
+
+    let settledCount = 0;
+    function packetSettled() {
+      settledCount++;
+      if (settledCount === N) {
+        finish();
+      }
+    }
+
+    function finish() {
+      running = false;
+      sendBtn.disabled = false;
+      const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+      statTime.textContent = elapsed + 's';
+      if (mode === 'tcp') {
+        statStatus.textContent = 'Complete -- 8/8 delivered';
+        log('Transfer complete. Every packet accounted for (' + retx + ' retransmission' + (retx === 1 ? '' : 's') + ').', 'info');
+      } else {
+        statStatus.textContent = delivered + '/' + N + ' arrived, rest lost forever';
+        log('Stream finished. ' + delivered + '/' + N + ' packets made it -- no way to recover the rest.', 'info');
+      }
+    }
+
+    function tick() {
+      statTime.textContent = ((performance.now() - startTime) / 1000).toFixed(1) + 's';
+      if (running) after(100, tick);
+    }
+
+    function start() {
+      reset();
+      running = true;
+      sendBtn.disabled = true;
+      settledCount = 0;
+      startTime = performance.now();
+      statStatus.textContent = 'Running...';
+      tick();
+
+      const beginSending = () => {
+        for (let i = 1; i <= N; i++) {
+          after((i - 1) * 550, () => sendOnePacket(i, false));
+        }
+      };
+
+      if (mode === 'tcp') {
+        runHandshake(beginSending);
+      } else {
+        log('UDP: no handshake -- sending immediately.', 'info');
+        beginSending();
+      }
+    }
+
+    lossSlider.addEventListener('input', () => { lossVal.textContent = lossSlider.value + '%'; });
+    modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    sendBtn.addEventListener('click', start);
+    resetBtn.addEventListener('click', reset);
+
+    setMode('tcp');
+    reset();
+  })();
+  </script>
+</div>
