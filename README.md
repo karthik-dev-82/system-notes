@@ -28,6 +28,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
 | 🔐 **[Complete Guide to OpenSSL](docs/source/openssl_guide.rst)** | Encryption, hashing, and certificates, plus practical OpenSSL commands | symmetric/asymmetric crypto, TLS, x509 certs, `openssl` CLI |
 | 🪟 **[The /proc Filesystem](docs/source/proc_filesystem.rst)** | The virtual /proc filesystem -- process info, system stats, tuning knobs | `/proc/PID`, `/proc/cpuinfo`, `/proc/meminfo`, `/proc/sys` |
+| ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
 
 ---
 
@@ -80,7 +81,8 @@ system-notes/
         ├── image_formats.rst
         ├── threads_processes_synchronization.rst
         ├── openssl_guide.rst
-        └── proc_filesystem.rst
+        ├── proc_filesystem.rst
+        └── hash_load_balancer.rst
 
 ```
 

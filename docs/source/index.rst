@@ -27,6 +27,7 @@ down and coming back to.
    threads_processes_synchronization
    openssl_guide
    proc_filesystem
+   hash_load_balancer
 
 Quick Navigation
 -----------------
@@ -90,3 +91,6 @@ Quick Navigation
    * - :doc:`proc_filesystem`
      - The virtual /proc filesystem -- process info, system stats, tuning knobs
      - ``/proc/PID``, ``/proc/cpuinfo``, ``/proc/meminfo``, ``/proc/sys``
+   * - :doc:`hash_load_balancer`
+     - Hash-based load balancing, sticky sessions, and consistent hashing
+     - modulo hashing, session affinity, CDN routing, reshuffling problem
