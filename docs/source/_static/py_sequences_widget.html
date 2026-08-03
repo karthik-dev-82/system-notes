@@ -1,0 +1,787 @@
+<div class="ps-root" id="psWidget">
+  <style>
+    #psWidget {
+      --ps-bg: #0f172a;
+      --ps-panel: #16213e;
+      --ps-border: #2a3655;
+      --ps-text: #e2e8f0;
+      --ps-muted: #94a3b8;
+      --ps-a: #4ade80;
+      --ps-b: #38bdf8;
+      --ps-bad: #f87171;
+      --ps-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ps-bg);
+      color: var(--ps-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #psWidget * { box-sizing: border-box; }
+    #psWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #psWidget h4 { margin: 0 0 10px; font-size: 0.95rem; color: #fff; }
+    #psWidget .ps-sub { color: var(--ps-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ps-topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--ps-panel);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      min-width: 780px;
+      font-size: 0.8rem;
+      color: var(--ps-muted);
+    }
+    .ps-topbar input[type="range"] { width: 130px; accent-color: var(--ps-b); }
+
+    .ps-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 780px; }
+    .ps-tab {
+      background: var(--ps-panel);
+      color: var(--ps-muted);
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ps-tab.active { background: var(--ps-b); color: #041322; border-color: var(--ps-b); }
+
+    .ps-panel { display: none; }
+    .ps-panel.active { display: block; }
+
+    .ps-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--ps-panel);
+      border: 1px solid var(--ps-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 780px;
+    }
+    .ps-toggle { display: inline-flex; border: 1px solid var(--ps-border); border-radius: 8px; overflow: hidden; }
+    .ps-toggle button { background: transparent; color: var(--ps-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .ps-toggle button.active { background: var(--ps-warn); color: #2a1c00; }
+    .ps-btn { background: var(--ps-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ps-btn.secondary { background: transparent; color: var(--ps-text); border: 1px solid var(--ps-border); }
+    .ps-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .ps-stage {
+      background: var(--ps-panel);
+      border: 1px solid var(--ps-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      min-width: 780px;
+    }
+
+    .ps-code {
+      background: #0a1128;
+      border: 1px solid var(--ps-border);
+      border-radius: 8px;
+      padding: 10px 0;
+      margin-bottom: 14px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .ps-code-line { padding: 1px 14px; color: var(--ps-muted); white-space: pre; }
+    .ps-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--ps-b); padding-left: 11px; }
+    .ps-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--ps-warn); }
+    .ps-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--ps-a); }
+
+    .ps-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--ps-muted); }
+    .ps-counter-row b { color: #fff; font-size: 1.15rem; font-family: ui-monospace, monospace; }
+
+    .ps-array-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; min-height: 54px; align-items: flex-end; }
+    .ps-slot {
+      width: 42px; height: 42px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700;
+      border: 2px solid var(--ps-b); background: #10182e; color: var(--ps-text);
+      position: relative; flex-shrink: 0;
+    }
+    .ps-slot.empty { border: 2px dashed var(--ps-border); color: var(--ps-border); background: transparent; }
+    .ps-slot.shifted { border-color: var(--ps-warn); background: rgba(251,191,36,0.18); }
+    .ps-slot-idx { position: absolute; top: -18px; font-size: 0.62rem; color: var(--ps-muted); }
+
+    .ps-stack-col { display: flex; flex-direction: column-reverse; gap: 4px; align-items: flex-start; min-height: 220px; justify-content: flex-start; }
+    .ps-stack-plate {
+      width: 60px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-weight: 800; font-size: 1rem;
+      border: 2px solid var(--ps-a); background: rgba(74,222,128,0.12); color: var(--ps-a);
+    }
+
+    .ps-expr-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 16px; }
+    .ps-expr-char {
+      width: 30px; height: 34px; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-weight: 800; font-size: 1rem;
+      border-radius: 5px; background: #10182e; border: 2px solid var(--ps-border); color: var(--ps-muted);
+    }
+    .ps-expr-char.cursor { border-color: var(--ps-b); color: #fff; }
+    .ps-expr-char.done-ok { border-color: var(--ps-a); color: var(--ps-a); }
+    .ps-expr-char.done-bad { border-color: var(--ps-bad); color: var(--ps-bad); background: rgba(248,113,113,0.18); }
+
+    .ps-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .ps-banner.bad { background: rgba(248,113,113,0.18); color: var(--ps-bad); }
+    .ps-banner.ok { background: rgba(74,222,128,0.12); color: var(--ps-a); }
+    .ps-banner.warn { background: rgba(251,191,36,0.15); color: var(--ps-warn); }
+
+    .ps-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 780px; }
+    .ps-explain-panel, .ps-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .ps-explain-panel { flex: 1.4; }
+    .ps-box { background: var(--ps-panel); border: 1px solid var(--ps-border); border-radius: 10px; padding: 12px 14px; }
+    .ps-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ps-muted); margin-bottom: 8px; }
+    .ps-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .ps-log div { color: var(--ps-muted); }
+    .ps-log div.ok { color: var(--ps-a); }
+    .ps-log div.info { color: var(--ps-b); }
+    .ps-log div.bad { color: var(--ps-bad); font-weight: 700; }
+    .ps-log div.warn { color: var(--ps-warn); }
+
+    details.ps-notes {
+      margin-top: 14px;
+      background: var(--ps-panel);
+      border: 1px solid var(--ps-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 780px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.ps-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ps-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ps-muted); }
+    details.ps-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ps-b); }
+  </style>
+
+  <h3>Python Sequences: Play With It</h3>
+  <div class="ps-sub">list, stack, queue and deque are all "put things in a line" structures, but they differ in exactly one question: which end(s) can you touch cheaply? All three tabs use CPython's real, verified internal behavior -- not a generic textbook approximation.</div>
+
+  <div class="ps-topbar">
+    <label>Playback speed: <span id="psSpeedVal">1x</span></label>
+    <input type="range" id="psSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    <span style="font-size:0.75rem;">applies to every "Play" button below</span>
+  </div>
+
+  <div class="ps-tabs">
+    <button class="ps-tab active" data-tab="list">1. List: Dynamic Array</button>
+    <button class="ps-tab" data-tab="stack">2. Stack: Balanced Parens</button>
+    <button class="ps-tab" data-tab="queue">3. Queue vs Deque</button>
+  </div>
+
+  <!-- ============ TAB 1: LIST (DYNAMIC ARRAY) ============ -->
+  <div class="ps-panel active" id="panel-list">
+    <div class="ps-controls">
+      <button class="ps-btn" id="listAppend">Append</button>
+      <button class="ps-btn" id="listInsertFront">Insert at Front</button>
+      <button class="ps-btn" id="listPop">Pop</button>
+      <button class="ps-btn" id="listPlay">&#9654; Play (append x20)</button>
+      <button class="ps-btn secondary" id="listReset">Reset</button>
+    </div>
+    <div class="ps-stage">
+      <div class="ps-code" id="listCode">
+        <div class="ps-code-line" data-line="1">nums = []</div>
+        <div class="ps-code-line" data-line="2">&nbsp;</div>
+        <div class="ps-code-line" data-line="3">nums.append(x)      # O(1) amortized -- may trigger a resize</div>
+        <div class="ps-code-line" data-line="4">nums.insert(0, x)   # O(n) -- shifts every existing element right</div>
+        <div class="ps-code-line" data-line="5">nums.pop()          # O(1) amortized -- rarely triggers a shrink</div>
+      </div>
+      <div class="ps-counter-row">
+        <div>length: <b id="listLen">0</b></div>
+        <div>capacity: <b id="listCap">0</b></div>
+        <div>reserved (unused): <b id="listReserved">0</b></div>
+        <div>total elements shifted (lifetime): <b id="listShifts">0</b></div>
+      </div>
+      <div class="ps-array-row" id="listArray"></div>
+      <div class="ps-banner" id="listBanner" style="display:none;"></div>
+    </div>
+    <div class="ps-panels">
+      <div class="ps-explain-panel">
+        <div class="ps-box">
+          <div class="ps-panel-title">What's happening right now</div>
+          <div id="listExplain">Click Append repeatedly and watch the capacity (dashed slots) grow in jumps, not one at a time -- CPython over-allocates so most appends are O(1) with no copy at all. Click "Insert at Front" to see the one operation that's genuinely expensive: everything has to move.</div>
+        </div>
+      </div>
+      <div class="ps-side-panel-col">
+        <div class="ps-box">
+          <div class="ps-panel-title">Event log</div>
+          <div class="ps-log" id="listLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: STACK (BALANCED PARENS) ============ -->
+  <div class="ps-panel" id="panel-stack">
+    <div class="ps-controls">
+      <div class="ps-toggle">
+        <button class="stk-expr-btn active" data-expr="(()())">(()())  -- balanced</button>
+        <button class="stk-expr-btn" data-expr="()()()">()()()  -- balanced</button>
+        <button class="stk-expr-btn" data-expr="((()">((()  -- unclosed</button>
+        <button class="stk-expr-btn" data-expr="())">())  -- extra close</button>
+      </div>
+      <button class="ps-btn" id="stkStep">Step</button>
+      <button class="ps-btn" id="stkPlay">&#9654; Play</button>
+      <button class="ps-btn secondary" id="stkReset">Reset</button>
+    </div>
+    <div class="ps-stage">
+      <div class="ps-code" id="stkCode">
+        <div class="ps-code-line" data-line="1">def is_balanced(expr: str) -> bool:</div>
+        <div class="ps-code-line" data-line="2">    stack = []</div>
+        <div class="ps-code-line" data-line="3">    for ch in expr:</div>
+        <div class="ps-code-line" data-line="4">        if ch == '(':</div>
+        <div class="ps-code-line" data-line="5">            stack.append(ch)</div>
+        <div class="ps-code-line" data-line="6">        elif ch == ')':</div>
+        <div class="ps-code-line" data-line="7">            if not stack:</div>
+        <div class="ps-code-line" data-line="8">                return False</div>
+        <div class="ps-code-line" data-line="9">            stack.pop()</div>
+        <div class="ps-code-line" data-line="10">    return not stack</div>
+      </div>
+      <div class="ps-expr-row" id="stkExprRow"></div>
+      <div class="ps-vis-row" style="display:flex; gap:16px;">
+        <div style="flex:1; min-width:180px;">
+          <div class="ps-panel-title">Stack (top = most recently pushed)</div>
+          <div class="ps-stack-col" id="stkStack"></div>
+        </div>
+      </div>
+      <div class="ps-banner" id="stkBanner" style="display:none;"></div>
+    </div>
+    <div class="ps-panels">
+      <div class="ps-explain-panel">
+        <div class="ps-box">
+          <div class="ps-panel-title">What's happening right now</div>
+          <div id="stkExplain">Step through the expression one character at a time. Every '(' is pushed; every ')' pops the most recent unmatched '('. This is exactly how editors highlight matching brackets, and exactly what a JSON/XML/code parser does to check nesting is well-formed.</div>
+        </div>
+      </div>
+      <div class="ps-side-panel-col">
+        <div class="ps-box">
+          <div class="ps-panel-title">Event log</div>
+          <div class="ps-log" id="stkLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 3: QUEUE VS DEQUE ============ -->
+  <div class="ps-panel" id="panel-queue">
+    <div class="ps-controls">
+      <div class="ps-toggle">
+        <button class="q-mode-btn active" data-mode="list">list (bad)</button>
+        <button class="q-mode-btn" data-mode="deque">collections.deque (good)</button>
+      </div>
+      <button class="ps-btn" id="qEnqueue">Enqueue</button>
+      <button class="ps-btn" id="qDequeue">Dequeue</button>
+      <button class="ps-btn" id="qPlay">&#9654; Play (scripted demo)</button>
+      <button class="ps-btn secondary" id="qReset">Reset</button>
+    </div>
+    <div class="ps-stage">
+      <div class="ps-code" id="qCodeList">
+        <div class="ps-code-line" data-line="1">queue = []</div>
+        <div class="ps-code-line" data-line="2">queue.append(x)   # enqueue -- O(1)</div>
+        <div class="ps-code-line" data-line="3">queue.pop(0)      # dequeue -- O(n): shifts every remaining element left</div>
+      </div>
+      <div class="ps-code" id="qCodeDeque" style="display:none;">
+        <div class="ps-code-line" data-line="1">from collections import deque</div>
+        <div class="ps-code-line" data-line="2">queue = deque()</div>
+        <div class="ps-code-line" data-line="3">queue.append(x)      # enqueue -- O(1)</div>
+        <div class="ps-code-line" data-line="4">queue.popleft()      # dequeue -- O(1): no shifting, ever</div>
+      </div>
+      <div class="ps-counter-row">
+        <div>queue length: <b id="qLen">0</b></div>
+        <div>total element-shifts so far: <b id="qShifts">0</b></div>
+      </div>
+      <div class="ps-array-row" id="qArray"></div>
+    </div>
+    <div class="ps-panels">
+      <div class="ps-explain-panel">
+        <div class="ps-box">
+          <div class="ps-panel-title">What's happening right now</div>
+          <div id="qExplain">Enqueue always appends to the right end -- O(1) either way. The difference is dequeuing from the front. Watch the shift counter: in list mode it climbs every single dequeue; in deque mode it never moves, because deque is a doubly-linked chain of blocks with genuine O(1) access at both ends.</div>
+        </div>
+      </div>
+      <div class="ps-side-panel-col">
+        <div class="ps-box">
+          <div class="ps-panel-title">Event log</div>
+          <div class="ps-log" id="qLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ps-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The list growth formula and the exact sequence <code>0, 4, 8, 16, 24, 32, 40, 52, 64, 76, ...</code> shown here are copied straight from CPython's own source comment in <code>Objects/listobject.c</code> (<code>list_resize</code>), current as of Python 3.11+: <code>new_allocated = (newsize + newsize/8 + 6) rounded down to a multiple of 4</code>. Versions before 3.11 used a slightly different formula (<code>newsize + newsize/8 + (newsize&lt;9 ? 3 : 6)</code>, giving <code>0, 4, 8, 16, 25, 35, 46, ...</code> instead) -- the exact numbers have changed across releases, but "over-allocate geometrically, not one slot at a time" has been true for a very long time and is why <code>append()</code> is described as O(1) <i>amortized</i> rather than O(1) outright.</li>
+      <li><code>pop()</code> (from the end) is cheap in more than one way: not only does it not shift anything, CPython usually doesn't even shrink the underlying array -- it only reallocates to a smaller block once the length drops below half of the current capacity (also verified directly against <code>list_resize</code>). A list that grew large and then shrank back down can sit on a lot of reserved-but-unused memory for a while.</li>
+      <li>The balanced-parens check is the simplest member of a whole family: the same push-on-open/pop-on-close pattern is how real parsers validate JSON/XML/code nesting, how "matching bracket" highlighting works in every code editor, and -- not a coincidence -- how the CPU itself tracks function calls. See <a href="cpp_memory_interactive.html">the C++ stack/heap page</a> for that same call stack from the other side, as actual memory being pushed and popped by <code>call</code>/<code>ret</code>.</li>
+      <li><code>collections.deque</code> is not "a list that's also fast at the front" -- it's a genuinely different structure: a doubly-linked list of fixed-size blocks of 64 elements each (verified against <code>Modules/_collectionsmodule.c</code>, <code>BLOCKLEN</code>), not one node per element the way a naive linked list would be. That block size is what gives it O(1) at both ends without paying a full pointer-chasing cost per element the way a plain linked list would.</li>
+      <li>Python's own documentation is explicit that <code>list.pop(0)</code> and <code>list.insert(0, x)</code> are O(n) and recommends <code>deque</code> for anything that regularly adds or removes from the front -- this isn't a minor style preference, it's the difference between an algorithm that's accidentally quadratic and one that isn't, the moment you queue/dequeue in a loop.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('psWidget');
+
+    const speedSlider = document.getElementById('psSpeedSlider');
+    const speedVal = document.getElementById('psSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.ps-tab');
+    const panels = {
+      list: document.getElementById('panel-list'),
+      stack: document.getElementById('panel-stack'),
+      queue: document.getElementById('panel-queue'),
+    };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+      if (t.dataset.tab !== 'list' && window.listPlaying) window.listPause();
+      if (t.dataset.tab !== 'stack' && window.stkPlaying) window.stkPause();
+      if (t.dataset.tab !== 'queue' && window.qPlaying) window.qPause();
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.ps-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('warn-hl', isTarget && kind === 'warn');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    // =========================================================
+    // TAB 1: LIST (DYNAMIC ARRAY) -- real CPython 3.11+ growth formula
+    // =========================================================
+    (function () {
+      const appendBtn = document.getElementById('listAppend');
+      const insertFrontBtn = document.getElementById('listInsertFront');
+      const popBtn = document.getElementById('listPop');
+      const playBtn = document.getElementById('listPlay');
+      const resetBtn = document.getElementById('listReset');
+      const codeEl = document.getElementById('listCode');
+      const arrayEl = document.getElementById('listArray');
+      const lenEl = document.getElementById('listLen');
+      const capEl = document.getElementById('listCap');
+      const reservedEl = document.getElementById('listReserved');
+      const shiftsEl = document.getElementById('listShifts');
+      const banner = document.getElementById('listBanner');
+      const explainEl = document.getElementById('listExplain');
+      const logEl = document.getElementById('listLog');
+
+      function newAllocated(newsize) {
+        return (newsize + (newsize >> 3) + 6) & ~3;
+      }
+
+      let items, allocated, totalShifts, nextVal, timer;
+      window.listPlaying = false;
+
+      function resetState() {
+        items = [];
+        allocated = 0;
+        totalShifts = 0;
+        nextVal = 1;
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, null);
+        explainEl.textContent = 'Click Append repeatedly and watch the capacity (dashed slots) grow in jumps, not one at a time -- CPython over-allocates so most appends are O(1) with no copy at all. Click "Insert at Front" to see the one operation that\'s genuinely expensive: everything has to move.';
+        render();
+      }
+
+      function doAppend() {
+        const newsize = items.length + 1;
+        let resized = false;
+        if (newsize > allocated) {
+          const oldAlloc = allocated;
+          allocated = newAllocated(newsize);
+          resized = true;
+          banner.style.display = 'block';
+          banner.className = 'ps-banner warn';
+          banner.textContent = 'RESIZE: capacity ' + oldAlloc + ' -> ' + allocated + ' -- a new array is allocated and all ' + items.length + ' existing elements are copied over.';
+          logTo(logEl, 'append(' + nextVal + ') -- capacity too small, resized ' + oldAlloc + ' -> ' + allocated + ' (copied ' + items.length + ' elements).', 'warn');
+        } else {
+          banner.style.display = 'none';
+          logTo(logEl, 'append(' + nextVal + ') -- fits in existing capacity, O(1), no copy.', 'ok');
+        }
+        items.push(nextVal);
+        nextVal++;
+        highlightLine(codeEl, 3, resized ? 'warn' : 'ok');
+        explainEl.textContent = resized
+          ? 'This append did NOT fit in the reserved capacity, so CPython allocated a bigger array and copied every existing element into it. This is the expensive case -- but it happens rarely, geometrically less often as the list grows.'
+          : 'This append landed in capacity that was already reserved from an earlier resize -- no allocation, no copy, genuinely O(1).';
+        render();
+      }
+
+      function doInsertFront() {
+        const shiftCount = items.length;
+        const newsize = items.length + 1;
+        let resized = false;
+        if (newsize > allocated) {
+          const oldAlloc = allocated;
+          allocated = newAllocated(newsize);
+          resized = true;
+          logTo(logEl, 'insert(0, ' + nextVal + ') -- also needed a resize ' + oldAlloc + ' -> ' + allocated + '.', 'warn');
+        }
+        items.unshift(nextVal);
+        nextVal++;
+        totalShifts += shiftCount;
+        shiftsEl.textContent = totalShifts;
+        logTo(logEl, 'insert(0, x) -- shifted all ' + shiftCount + ' existing elements right by one. O(n), not O(1).', 'bad');
+        highlightLine(codeEl, 4, 'warn');
+        explainEl.textContent = 'insert(0, x) has no shortcut: every single existing element has to move one slot to the right to make room at index 0, no matter how much spare capacity there is. Compare the shift counter to how rarely append() actually copies anything.';
+        banner.style.display = 'block';
+        banner.className = 'ps-banner bad';
+        banner.textContent = 'insert(0, x): ' + shiftCount + ' element(s) shifted right, O(n).' + (resized ? ' (a resize also happened this time)' : '');
+        flashAll();
+        render();
+      }
+
+      function doPop() {
+        if (items.length === 0) { logTo(logEl, 'pop() on an empty list -- nothing to do.', 'bad'); return; }
+        const popped = items.pop();
+        const newsize = items.length;
+        let shrunk = false;
+        if (!(allocated >= newsize && newsize >= (allocated >> 1))) {
+          const oldAlloc = allocated;
+          allocated = newAllocated(newsize);
+          shrunk = true;
+          logTo(logEl, 'pop() -> ' + popped + ' -- length dropped below half of capacity, shrank ' + oldAlloc + ' -> ' + allocated + '.', 'warn');
+        } else {
+          logTo(logEl, 'pop() -> ' + popped + ' -- capacity unchanged (still well above half-full).', 'ok');
+        }
+        highlightLine(codeEl, 5, shrunk ? 'warn' : 'ok');
+        explainEl.textContent = shrunk
+          ? 'This pop dropped the length below half of the reserved capacity, so CPython actually shrank the array this time -- that\'s the uncommon case.'
+          : 'pop() just decremented the length. The reserved capacity is untouched -- CPython does NOT shrink on every pop, only once you drop below half of it.';
+        banner.style.display = 'none';
+        render();
+      }
+
+      function flashAll() {
+        arrayEl.querySelectorAll('.ps-slot:not(.empty)').forEach(el => el.classList.add('shifted'));
+        setTimeout(() => arrayEl.querySelectorAll('.ps-slot').forEach(el => el.classList.remove('shifted')), scaled(500));
+      }
+
+      function render() {
+        lenEl.textContent = items.length;
+        capEl.textContent = allocated;
+        reservedEl.textContent = allocated - items.length;
+        shiftsEl.textContent = totalShifts;
+        arrayEl.innerHTML = '';
+        for (let i = 0; i < allocated; i++) {
+          const el = document.createElement('div');
+          if (i < items.length) {
+            el.className = 'ps-slot';
+            el.textContent = items[i];
+          } else {
+            el.className = 'ps-slot empty';
+            el.textContent = '';
+          }
+          const idx = document.createElement('div');
+          idx.className = 'ps-slot-idx';
+          idx.textContent = i;
+          el.appendChild(idx);
+          arrayEl.appendChild(el);
+        }
+      }
+
+      function play() {
+        if (window.listPlaying) return;
+        window.listPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        let count = 0;
+        function tick() {
+          if (count >= 20) { window.listPause(); return; }
+          doAppend();
+          count++;
+          timer = setTimeout(tick, scaled(500));
+        }
+        tick();
+      }
+      window.listPause = function () {
+        window.listPlaying = false;
+        playBtn.textContent = '▶ Play (append x20)';
+        clearTimeout(timer);
+      };
+
+      appendBtn.addEventListener('click', doAppend);
+      insertFrontBtn.addEventListener('click', doInsertFront);
+      popBtn.addEventListener('click', doPop);
+      playBtn.addEventListener('click', () => window.listPlaying ? window.listPause() : play());
+      resetBtn.addEventListener('click', () => { window.listPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: STACK (BALANCED PARENS)
+    // =========================================================
+    (function () {
+      const exprButtons = root.querySelectorAll('.stk-expr-btn');
+      const stepBtn = document.getElementById('stkStep');
+      const playBtn = document.getElementById('stkPlay');
+      const resetBtn = document.getElementById('stkReset');
+      const codeEl = document.getElementById('stkCode');
+      const exprRowEl = document.getElementById('stkExprRow');
+      const stackEl = document.getElementById('stkStack');
+      const banner = document.getElementById('stkBanner');
+      const explainEl = document.getElementById('stkExplain');
+      const logEl = document.getElementById('stkLog');
+
+      let expr = '(()())';
+      let pos, stack, failed, timer;
+      window.stkPlaying = false;
+
+      function resetState() {
+        pos = 0;
+        stack = [];
+        failed = false;
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, null);
+        explainEl.textContent = 'Step through the expression one character at a time. Every ‘(’ is pushed; every ‘)’ pops the most recent unmatched ‘(’.';
+        renderExpr();
+        renderStack();
+      }
+
+      function advance() {
+        if (failed || pos >= expr.length) return;
+        const ch = expr[pos];
+        if (ch === '(') {
+          stack.push(pos);
+          logTo(logEl, "push '(' at position " + pos + ' -- depth now ' + stack.length, 'ok');
+          highlightLine(codeEl, 5, 'ok');
+          explainEl.textContent = "Saw '(' -- pushed. Depth is now " + stack.length + '.';
+        } else if (ch === ')') {
+          if (stack.length === 0) {
+            failed = true;
+            logTo(logEl, "pop on EMPTY stack at position " + pos + ' -- unmatched close.', 'bad');
+            highlightLine(codeEl, 8, 'warn');
+            explainEl.textContent = "This ')' has no '(' left to match -- the stack is already empty. Unbalanced.";
+            banner.style.display = 'block';
+            banner.className = 'ps-banner bad';
+            banner.textContent = 'Unbalanced: unmatched ’)’ at position ' + pos + ' with nothing on the stack to pop.';
+            pos++;
+            renderExpr();
+            return;
+          }
+          stack.pop();
+          logTo(logEl, "pop matching '(' for ')' at position " + pos + ' -- depth now ' + stack.length, 'info');
+          highlightLine(codeEl, 9, 'ok');
+          explainEl.textContent = "Saw ')' -- popped its matching '('. Depth is now " + stack.length + '.';
+        }
+        pos++;
+        if (pos >= expr.length) {
+          highlightLine(codeEl, 10, stack.length === 0 ? 'ok' : 'warn');
+          banner.style.display = 'block';
+          if (stack.length === 0) {
+            banner.className = 'ps-banner ok';
+            banner.textContent = 'Balanced! Every ‘(’ found its ‘)’ and the stack is empty.';
+            logTo(logEl, 'end of expression -- stack empty -- BALANCED.', 'ok');
+          } else {
+            banner.className = 'ps-banner bad';
+            banner.textContent = 'Unbalanced: ' + stack.length + ' unclosed ‘(’ left on the stack.';
+            logTo(logEl, 'end of expression -- ' + stack.length + ' unclosed paren(s) left -- UNBALANCED.', 'bad');
+          }
+        }
+        renderExpr();
+        renderStack();
+      }
+
+      function renderExpr() {
+        exprRowEl.innerHTML = '';
+        for (let i = 0; i < expr.length; i++) {
+          const el = document.createElement('div');
+          let cls = 'ps-expr-char';
+          if (i === pos && !failed && pos < expr.length) cls += ' cursor';
+          else if (i < pos) cls += (failed && i === pos - 1) ? ' done-bad' : ' done-ok';
+          el.className = cls;
+          el.textContent = expr[i];
+          exprRowEl.appendChild(el);
+        }
+      }
+
+      function renderStack() {
+        stackEl.innerHTML = '';
+        stack.forEach((openPos, depth) => {
+          const el = document.createElement('div');
+          el.className = 'ps-stack-plate';
+          el.textContent = '( @' + openPos;
+          stackEl.appendChild(el);
+        });
+      }
+
+      function play() {
+        if (window.stkPlaying) return;
+        window.stkPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (failed || pos >= expr.length) { window.stkPause(); return; }
+          advance();
+          timer = setTimeout(tick, scaled(650));
+        }
+        tick();
+      }
+      window.stkPause = function () {
+        window.stkPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearTimeout(timer);
+      };
+
+      exprButtons.forEach(b => b.addEventListener('click', () => {
+        exprButtons.forEach(x => x.classList.toggle('active', x === b));
+        expr = b.dataset.expr;
+        window.stkPause();
+        resetState();
+      }));
+      stepBtn.addEventListener('click', advance);
+      playBtn.addEventListener('click', () => window.stkPlaying ? window.stkPause() : play());
+      resetBtn.addEventListener('click', () => { window.stkPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 3: QUEUE VS DEQUE
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.q-mode-btn');
+      const enqueueBtn = document.getElementById('qEnqueue');
+      const dequeueBtn = document.getElementById('qDequeue');
+      const playBtn = document.getElementById('qPlay');
+      const resetBtn = document.getElementById('qReset');
+      const codeList = document.getElementById('qCodeList');
+      const codeDeque = document.getElementById('qCodeDeque');
+      const arrayEl = document.getElementById('qArray');
+      const lenEl = document.getElementById('qLen');
+      const shiftsEl = document.getElementById('qShifts');
+      const explainEl = document.getElementById('qExplain');
+      const logEl = document.getElementById('qLog');
+
+      let mode = 'list';
+      let items, totalShifts, nextVal, timer;
+      window.qPlaying = false;
+
+      function activeCode() { return mode === 'list' ? codeList : codeDeque; }
+
+      function resetState() {
+        items = [];
+        totalShifts = 0;
+        nextVal = 1;
+        clearTimeout(timer);
+        logEl.innerHTML = '';
+        codeList.style.display = mode === 'list' ? 'block' : 'none';
+        codeDeque.style.display = mode === 'deque' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = 'Enqueue always appends to the right end -- O(1) either way. The difference is dequeuing from the front. Watch the shift counter: in list mode it climbs every single dequeue; in deque mode it never moves.';
+        render();
+      }
+
+      function doEnqueue() {
+        items.push(nextVal);
+        logTo(logEl, 'enqueue(' + nextVal + ') -- append to the right end, O(1).', 'ok');
+        highlightLine(activeCode(), mode === 'list' ? 2 : 3, 'ok');
+        nextVal++;
+        render();
+      }
+
+      function doDequeue() {
+        if (items.length === 0) { logTo(logEl, 'dequeue on an empty queue -- nothing to do.', 'bad'); return; }
+        const front = items[0];
+        if (mode === 'list') {
+          const shiftCount = items.length - 1;
+          items.shift();
+          totalShifts += shiftCount;
+          shiftsEl.textContent = totalShifts;
+          logTo(logEl, 'pop(0) -> ' + front + ' -- shifted the remaining ' + shiftCount + ' element(s) left. O(n).', 'bad');
+          highlightLine(activeCode(), 3, 'warn');
+          explainEl.textContent = 'pop(0) removes index 0, but a Python list is one contiguous block -- everything after index 0 has to slide left by one to close the gap. That cost grows with queue length.';
+          flashAll();
+        } else {
+          items.shift(); // model-only removal; deque.popleft() never shifts other elements
+          logTo(logEl, 'popleft() -> ' + front + ' -- O(1), nothing else moves.', 'ok');
+          highlightLine(activeCode(), 4, 'ok');
+          explainEl.textContent = 'popleft() just detaches the front element from its block. No other element’s position changes, so the cost is constant no matter how long the queue is.';
+        }
+        render();
+      }
+
+      function flashAll() {
+        arrayEl.querySelectorAll('.ps-slot').forEach(el => el.classList.add('shifted'));
+        setTimeout(() => arrayEl.querySelectorAll('.ps-slot').forEach(el => el.classList.remove('shifted')), scaled(450));
+      }
+
+      function render() {
+        lenEl.textContent = items.length;
+        shiftsEl.textContent = totalShifts;
+        arrayEl.innerHTML = '';
+        items.forEach(v => {
+          const el = document.createElement('div');
+          el.className = 'ps-slot';
+          el.textContent = v;
+          arrayEl.appendChild(el);
+        });
+        if (items.length === 0) {
+          const empty = document.createElement('div');
+          empty.className = 'ps-slot empty';
+          empty.textContent = '';
+          arrayEl.appendChild(empty);
+        }
+      }
+
+      function play() {
+        if (window.qPlaying) return;
+        window.qPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        const script = ['e', 'e', 'e', 'd', 'e', 'd', 'd', 'e', 'e', 'd'];
+        let i = 0;
+        function tick() {
+          if (i >= script.length) { window.qPause(); return; }
+          if (script[i] === 'e') doEnqueue(); else doDequeue();
+          i++;
+          timer = setTimeout(tick, scaled(700));
+        }
+        tick();
+      }
+      window.qPause = function () {
+        window.qPlaying = false;
+        playBtn.textContent = '▶ Play (scripted demo)';
+        clearTimeout(timer);
+      };
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        window.qPause();
+        resetState();
+      }));
+      enqueueBtn.addEventListener('click', doEnqueue);
+      dequeueBtn.addEventListener('click', doDequeue);
+      playBtn.addEventListener('click', () => window.qPlaying ? window.qPause() : play());
+      resetBtn.addEventListener('click', () => { window.qPause(); resetState(); });
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>

@@ -37,6 +37,8 @@ down and coming back to.
    linux_fs_basics_interactive
    overlayfs_interactive
    cpp_memory_interactive
+   python_sequences_interactive
+   python_hashing_interactive
 
 Quick Navigation
 -----------------
@@ -130,3 +132,9 @@ Quick Navigation
    * - :doc:`cpp_memory_interactive`
      - Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free
      - stack frames, heap allocation, raw pointers, undefined behavior
+   * - :doc:`python_sequences_interactive`
+     - Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source
+     - dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks
+   * - :doc:`python_hashing_interactive`
+     - Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra
+     - hash tables, open addressing, insertion order, union/intersection/difference

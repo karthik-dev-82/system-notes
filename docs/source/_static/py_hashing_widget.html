@@ -1,0 +1,760 @@
+<div class="ph-root" id="phWidget">
+  <style>
+    #phWidget {
+      --ph-bg: #0f172a;
+      --ph-panel: #16213e;
+      --ph-border: #2a3655;
+      --ph-text: #e2e8f0;
+      --ph-muted: #94a3b8;
+      --ph-a: #4ade80;
+      --ph-b: #38bdf8;
+      --ph-bad: #f87171;
+      --ph-warn: #fbbf24;
+      --ph-purple: #c084fc;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ph-bg);
+      color: var(--ph-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #phWidget * { box-sizing: border-box; }
+    #phWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #phWidget h4 { margin: 0 0 10px; font-size: 0.95rem; color: #fff; }
+    #phWidget .ph-sub { color: var(--ph-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ph-topbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: var(--ph-panel);
+      border: 1px solid var(--ph-border);
+      border-radius: 8px;
+      padding: 8px 14px;
+      margin-bottom: 14px;
+      min-width: 780px;
+      font-size: 0.8rem;
+      color: var(--ph-muted);
+    }
+    .ph-topbar input[type="range"] { width: 130px; accent-color: var(--ph-b); }
+
+    .ph-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 780px; }
+    .ph-tab {
+      background: var(--ph-panel);
+      color: var(--ph-muted);
+      border: 1px solid var(--ph-border);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ph-tab.active { background: var(--ph-b); color: #041322; border-color: var(--ph-b); }
+
+    .ph-panel { display: none; }
+    .ph-panel.active { display: block; }
+
+    .ph-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--ph-panel);
+      border: 1px solid var(--ph-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 780px;
+    }
+    .ph-btn { background: var(--ph-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ph-btn.secondary { background: transparent; color: var(--ph-text); border: 1px solid var(--ph-border); }
+    .ph-btn.purple { background: var(--ph-purple); }
+    .ph-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .ph-stage {
+      background: var(--ph-panel);
+      border: 1px solid var(--ph-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      min-width: 780px;
+    }
+
+    .ph-code {
+      background: #0a1128;
+      border: 1px solid var(--ph-border);
+      border-radius: 8px;
+      padding: 10px 0;
+      margin-bottom: 14px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.82rem;
+      line-height: 1.6;
+    }
+    .ph-code-line { padding: 1px 14px; color: var(--ph-muted); white-space: pre; }
+    .ph-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--ph-b); padding-left: 11px; }
+    .ph-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--ph-warn); }
+
+    .ph-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--ph-muted); }
+    .ph-counter-row b { color: #fff; font-size: 1.1rem; font-family: ui-monospace, monospace; }
+
+    .ph-slot-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+    .ph-slot {
+      width: 58px; height: 44px; border-radius: 6px;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-size: 0.68rem; font-weight: 700;
+      border: 2px solid var(--ph-b); background: #10182e; color: var(--ph-text);
+      position: relative; flex-shrink: 0;
+    }
+    .ph-slot.empty { border: 2px dashed var(--ph-border); color: var(--ph-border); background: transparent; }
+    .ph-slot.probed { border-color: var(--ph-warn); background: rgba(251,191,36,0.18); }
+    .ph-slot.landed { border-color: var(--ph-a); background: rgba(74,222,128,0.2); }
+    .ph-slot-idx { position: absolute; top: -18px; font-size: 0.6rem; color: var(--ph-muted); }
+
+    .ph-order-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; align-items: center; }
+    .ph-chip {
+      padding: 5px 10px; border-radius: 14px; font-family: ui-monospace, monospace; font-size: 0.78rem;
+      border: 2px solid var(--ph-border); background: #10182e; color: var(--ph-text);
+    }
+    .ph-chip.hi { border-color: var(--ph-purple); background: rgba(192,132,252,0.18); color: var(--ph-purple); }
+    .ph-order-label { font-size: 0.75rem; color: var(--ph-muted); min-width: 190px; }
+
+    .ph-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .ph-banner.bad { background: rgba(248,113,113,0.18); color: var(--ph-bad); }
+    .ph-banner.ok { background: rgba(74,222,128,0.12); color: var(--ph-a); }
+    .ph-banner.warn { background: rgba(251,191,36,0.15); color: var(--ph-warn); }
+
+    .ph-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 780px; }
+    .ph-explain-panel, .ph-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .ph-explain-panel { flex: 1.4; }
+    .ph-box { background: var(--ph-panel); border: 1px solid var(--ph-border); border-radius: 10px; padding: 12px 14px; }
+    .ph-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ph-muted); margin-bottom: 8px; }
+    .ph-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .ph-log div { color: var(--ph-muted); }
+    .ph-log div.ok { color: var(--ph-a); }
+    .ph-log div.info { color: var(--ph-b); }
+    .ph-log div.bad { color: var(--ph-bad); font-weight: 700; }
+    .ph-log div.warn { color: var(--ph-warn); }
+
+    .ph-algebra-row { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 6px; }
+    .ph-algebra-set { flex: 1; min-width: 200px; }
+    .ph-algebra-result { flex: 1.2; min-width: 240px; }
+
+    details.ph-notes {
+      margin-top: 14px;
+      background: var(--ph-panel);
+      border: 1px solid var(--ph-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 780px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.ph-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ph-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ph-muted); }
+    details.ph-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ph-b); }
+  </style>
+
+  <h3>Python Hashing: Play With It</h3>
+  <div class="ph-sub">dict and set are both open-addressing hash tables under the hood -- but they are NOT the same implementation. This widget uses CPython's real, verified probing sequences, load-factor thresholds, and growth formulas for each, so the differences you see here are genuine, not illustrative simplifications.</div>
+
+  <div class="ph-topbar">
+    <label>Playback speed: <span id="phSpeedVal">1x</span></label>
+    <input type="range" id="phSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    <span style="font-size:0.75rem;">applies to probe-path animations</span>
+  </div>
+
+  <div class="ph-tabs">
+    <button class="ph-tab active" data-tab="dict">1. dict: Hash Table + Insertion Order</button>
+    <button class="ph-tab" data-tab="set">2. set: Hash Table + Set Algebra</button>
+  </div>
+
+  <!-- ============ TAB 1: DICT ============ -->
+  <div class="ph-panel active" id="panel-dict">
+    <div class="ph-controls">
+      <button class="ph-btn" id="dictAdd">Add Next Key</button>
+      <button class="ph-btn" id="dictPlay">&#9654; Play (add all 6)</button>
+      <button class="ph-btn secondary" id="dictReset">Reset</button>
+    </div>
+    <div class="ph-stage">
+      <div class="ph-code" id="dictCode">
+        <div class="ph-code-line" data-line="1">d = {}</div>
+        <div class="ph-code-line" data-line="2">d[key] = value   # hash(key) picks a slot; collisions probe forward</div>
+        <div class="ph-code-line" data-line="3">&nbsp;</div>
+        <div class="ph-code-line" data-line="4">for key in d:</div>
+        <div class="ph-code-line" data-line="5">    print(key)   # ALWAYS visits keys in insertion order</div>
+      </div>
+      <div class="ph-counter-row">
+        <div>table size: <b id="dictSize">8</b></div>
+        <div>used: <b id="dictUsed">0</b></div>
+        <div>usable before next resize: <b id="dictUsable">5</b></div>
+      </div>
+      <div class="ph-slot-row" id="dictSlots"></div>
+      <div class="ph-order-row"><div class="ph-order-label">Insertion order:</div><div id="dictOrderIns" style="display:flex; gap:6px; flex-wrap:wrap;"></div></div>
+      <div class="ph-order-row"><div class="ph-order-label">Iteration order (for key in d):</div><div id="dictOrderIter" style="display:flex; gap:6px; flex-wrap:wrap;"></div></div>
+      <div class="ph-banner" id="dictBanner" style="display:none;"></div>
+    </div>
+    <div class="ph-panels">
+      <div class="ph-explain-panel">
+        <div class="ph-box">
+          <div class="ph-panel-title">What's happening right now</div>
+          <div id="dictExplain">Click "Add Next Key" to insert one key at a time. Watch the two order lists below the table stay identical after every single insert, including across the resize -- that's not a coincidence, it's how CPython's compact dict is built.</div>
+        </div>
+      </div>
+      <div class="ph-side-panel-col">
+        <div class="ph-box">
+          <div class="ph-panel-title">Probe / event log</div>
+          <div class="ph-log" id="dictLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: SET ============ -->
+  <div class="ph-panel" id="panel-set">
+    <div class="ph-controls">
+      <button class="ph-btn" id="setAdd">Add Next Element</button>
+      <button class="ph-btn" id="setPlay">&#9654; Play (add all 8)</button>
+      <button class="ph-btn secondary" id="setReset">Reset</button>
+    </div>
+    <div class="ph-stage">
+      <div class="ph-code" id="setCode">
+        <div class="ph-code-line" data-line="1">s = set()</div>
+        <div class="ph-code-line" data-line="2">s.add(elem)   # hash(elem) picks a slot; collisions probe forward</div>
+        <div class="ph-code-line" data-line="3">&nbsp;</div>
+        <div class="ph-code-line" data-line="4">for elem in s:</div>
+        <div class="ph-code-line" data-line="5">    print(elem)   # visits in SLOT order -- NOT insertion order</div>
+      </div>
+      <div class="ph-counter-row">
+        <div>table size: <b id="setSize">8</b></div>
+        <div>used: <b id="setUsed">0</b></div>
+        <div>fill*5 vs mask*3: <b id="setLoad">0 / 21</b></div>
+      </div>
+      <div class="ph-slot-row" id="setSlots"></div>
+      <div class="ph-order-row"><div class="ph-order-label">Insertion order:</div><div id="setOrderIns" style="display:flex; gap:6px; flex-wrap:wrap;"></div></div>
+      <div class="ph-order-row"><div class="ph-order-label">Iteration order (for elem in s):</div><div id="setOrderIter" style="display:flex; gap:6px; flex-wrap:wrap;"></div></div>
+      <div class="ph-banner" id="setBanner" style="display:none;"></div>
+    </div>
+    <div class="ph-panels">
+      <div class="ph-explain-panel">
+        <div class="ph-box">
+          <div class="ph-panel-title">What's happening right now</div>
+          <div id="setExplain">Click "Add Next Element" and compare the two order lists as you go -- unlike dict, they will diverge. A set has no separate insertion-order bookkeeping; iterating it just walks the raw table slot by slot.</div>
+        </div>
+      </div>
+      <div class="ph-side-panel-col">
+        <div class="ph-box">
+          <div class="ph-panel-title">Probe / event log</div>
+          <div class="ph-log" id="setLog"></div>
+        </div>
+      </div>
+    </div>
+
+    <h4 style="margin-top:18px;">Set Algebra</h4>
+    <div class="ph-stage">
+      <div class="ph-code">
+        <div class="ph-code-line" data-line="1">a = {'mango', 'kiwi', 'lime', 'plum'}</div>
+        <div class="ph-code-line" data-line="2">b = {'lime', 'plum', 'olive', 'fig'}</div>
+        <div class="ph-code-line" data-line="3">a | b   # union -- everything in either</div>
+        <div class="ph-code-line" data-line="4">a &amp; b   # intersection -- only in both</div>
+        <div class="ph-code-line" data-line="5">a - b   # difference -- in a, not in b</div>
+      </div>
+      <div class="ph-controls" style="margin-bottom:0;">
+        <button class="ph-btn purple" id="algUnion">a | b (union)</button>
+        <button class="ph-btn purple" id="algInter">a &amp; b (intersection)</button>
+        <button class="ph-btn purple" id="algDiffAB">a - b (difference)</button>
+        <button class="ph-btn purple" id="algDiffBA">b - a (difference)</button>
+      </div>
+      <div class="ph-algebra-row">
+        <div class="ph-algebra-set">
+          <div class="ph-panel-title">Set a</div>
+          <div id="algSetA" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        </div>
+        <div class="ph-algebra-set">
+          <div class="ph-panel-title">Set b</div>
+          <div id="algSetB" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        </div>
+        <div class="ph-algebra-result">
+          <div class="ph-panel-title" id="algResultTitle">Result</div>
+          <div id="algResult" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ph-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>Every number in this widget (<code>PyDict_MINSIZE=8</code>, <code>PySet_MINSIZE=8</code>, the <code>perturb</code>-based probe recurrence, the 2/3 vs 3/5 load-factor thresholds, the growth formulas) was read directly from CPython's own source (<code>Objects/dictobject.c</code>, <code>Objects/setobject.c</code>) rather than recalled from general knowledge -- the two implementations really do differ this specifically, it's not a simplification for teaching purposes.</li>
+      <li>The hash values shown here are from a small illustrative hash function, not real CPython <code>hash()</code> output -- real string hashing in CPython is randomized per-process (SipHash, seeded by <code>PYTHONHASHSEED</code>) specifically so that hash-flooding attacks against dict-backed structures (like a web server's request-parameter dict) can't be engineered by an attacker who knows the algorithm.</li>
+      <li><code>dict</code> resizes <i>before</i> the insert that would exceed capacity (a pre-emptive check: CPython keeps a running "usable slots left" counter and resizes the moment it would hit zero); <code>set</code> resizes <i>after</i> the insert that crosses the threshold (it inserts first, then checks <code>fill*5 &gt;= mask*3</code>). Both are correct and both keep the table below its load factor at all times -- they just checked at different points in the CPython codebase's history and were never unified.</li>
+      <li><code>set</code>'s collision resolution isn't identical to <code>dict</code>'s: at each landing index, <code>set</code> first checks up to <b>9 consecutive slots</b> (<code>LINEAR_PROBES</code>) before doing the pseudo-random <code>perturb</code> jump that <code>dict</code> uses on every single step. In a small table those 9 slots usually don't fit without wrapping, so the difference mostly shows up once a set has grown past its initial size -- it's a real optimization for cache locality on larger tables, added to <code>set</code> and never ported to <code>dict</code>.</li>
+      <li>The most practically important fact here isn't the internals -- it's this: <b>never rely on set iteration order.</b> ``dict`` has preserved insertion order as a language guarantee since Python 3.7; ``set`` has never made that promise and its actual order (as this widget shows) depends on hash values and table layout, which can change between Python versions, between runs (hash randomization), and after any resize.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('phWidget');
+
+    const speedSlider = document.getElementById('phSpeedSlider');
+    const speedVal = document.getElementById('phSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.ph-tab');
+    const panels = { dict: document.getElementById('panel-dict'), set: document.getElementById('panel-set') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+      if (t.dataset.tab !== 'dict' && window.dictPlaying) window.dictPause();
+      if (t.dataset.tab !== 'set' && window.setPlaying) window.setPause();
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.ph-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('warn-hl', isTarget && kind === 'warn');
+      });
+    }
+
+    // Illustrative deterministic hash -- NOT real CPython hash() (which is
+    // randomized per-process). Chosen only so this demo is reproducible.
+    function demoHash(key) {
+      let h = 0;
+      for (let i = 0; i < key.length; i++) {
+        h = (Math.imul(h, 31) + key.charCodeAt(i)) | 0;
+      }
+      return h >>> 0;
+    }
+    const PERTURB_SHIFT = 5;
+    const LINEAR_PROBES = 9;
+
+    // =========================================================
+    // DemoDict -- ported from the Node-verified model.
+    // PyDict_MINSIZE=8, USABLE_FRACTION(n)=floor(2n/3),
+    // GROWTH_RATE(used)=used*3, resize is PRE-emptive, pure
+    // perturb-jump probing (no linear phase), insertion order
+    // preserved via a separate array. (Verified against
+    // python/cpython Objects/dictobject.c.)
+    // =========================================================
+    class DemoDict {
+      constructor() {
+        this.size = 8;
+        this.slots = new Array(this.size).fill(null);
+        this.insertionOrder = [];
+        this.used = 0;
+      }
+      usableFraction(n) { return Math.floor((n << 1) / 3); }
+      calculateLog2Keysize(minsize) {
+        let size = 8;
+        while (size < minsize) size <<= 1;
+        return size;
+      }
+      findSlot(hash, key) {
+        const mask = this.size - 1;
+        let perturb = hash >>> 0;
+        let i = hash & mask;
+        const probes = [];
+        while (this.slots[i] !== null && this.slots[i].key !== key) {
+          probes.push(i);
+          perturb = perturb >>> PERTURB_SHIFT;
+          i = (i * 5 + perturb + 1) & mask;
+        }
+        probes.push(i);
+        return { index: i, probes };
+      }
+      maybeResize() {
+        const usable = this.usableFraction(this.size) - this.used;
+        if (usable > 0) return null;
+        const minsize = this.used * 3;
+        const newSize = this.calculateLog2Keysize(minsize);
+        const oldSize = this.size;
+        this.size = newSize;
+        this.slots = new Array(newSize).fill(null);
+        this.insertionOrder.forEach(key => {
+          const hash = demoHash(key);
+          const { index } = this.findSlot(hash, key);
+          this.slots[index] = { key, hash };
+        });
+        return { oldSize, newSize };
+      }
+      insert(key) {
+        const hash = demoHash(key);
+        const existing = this.findSlot(hash, key);
+        if (this.slots[existing.index] !== null) {
+          return { inserted: false, index: existing.index, probes: existing.probes, resized: null };
+        }
+        const resized = this.maybeResize();
+        const { index, probes } = this.findSlot(hash, key);
+        this.slots[index] = { key, hash };
+        this.used++;
+        this.insertionOrder.push(key);
+        return { inserted: true, index, probes, resized };
+      }
+    }
+
+    // =========================================================
+    // DemoSet -- ported from the Node-verified model.
+    // PySet_MINSIZE=8, up to 9 linear probes per landing index
+    // before a perturb jump, growth = used>50000?used*2:used*4,
+    // resize is POST-emptive, NO insertion-order preservation.
+    // (Verified against python/cpython Objects/setobject.c.)
+    // =========================================================
+    class DemoSet {
+      constructor() {
+        this.size = 8;
+        this.slots = new Array(this.size).fill(null);
+        this.fill = 0;
+        this.used = 0;
+      }
+      findSlot(hash, key) {
+        const mask = this.size - 1;
+        let perturb = hash >>> 0;
+        let i = hash & mask;
+        const probes = [];
+        while (true) {
+          const linearLimit = (i + LINEAR_PROBES <= mask) ? LINEAR_PROBES : 0;
+          for (let p = 0; p <= linearLimit; p++) {
+            const idx = (i + p) & mask;
+            probes.push(idx);
+            const slot = this.slots[idx];
+            if (slot === null || slot.key === key) return { index: idx, probes };
+          }
+          perturb = perturb >>> PERTURB_SHIFT;
+          i = (i * 5 + 1 + perturb) & mask;
+        }
+      }
+      maybeResize() {
+        if (this.fill * 5 < (this.size - 1) * 3) return null;
+        const minused = this.used > 50000 ? this.used * 2 : this.used * 4;
+        let newSize = 8;
+        while (newSize <= minused) newSize <<= 1;
+        const oldSize = this.size;
+        const oldKeys = this.slots.filter(s => s !== null).map(s => s.key);
+        this.size = newSize;
+        this.slots = new Array(newSize).fill(null);
+        this.fill = 0;
+        oldKeys.forEach(key => {
+          const hash = demoHash(key);
+          const { index } = this.findSlot(hash, key);
+          this.slots[index] = { key, hash };
+          this.fill++;
+        });
+        return { oldSize, newSize };
+      }
+      add(key) {
+        const hash = demoHash(key);
+        const { index, probes } = this.findSlot(hash, key);
+        if (this.slots[index] !== null) {
+          return { inserted: false, index, probes, resized: null };
+        }
+        this.slots[index] = { key, hash };
+        this.fill++;
+        this.used++;
+        const resized = this.maybeResize();
+        return { inserted: true, index, probes, resized };
+      }
+    }
+
+    // =========================================================
+    // TAB 1: DICT
+    // =========================================================
+    (function () {
+      const KEYS = ['apple', 'pear', 'plum', 'mango', 'fig', 'grape'];
+      const addBtn = document.getElementById('dictAdd');
+      const playBtn = document.getElementById('dictPlay');
+      const resetBtn = document.getElementById('dictReset');
+      const codeEl = document.getElementById('dictCode');
+      const slotsEl = document.getElementById('dictSlots');
+      const sizeEl = document.getElementById('dictSize');
+      const usedEl = document.getElementById('dictUsed');
+      const usableEl = document.getElementById('dictUsable');
+      const orderInsEl = document.getElementById('dictOrderIns');
+      const orderIterEl = document.getElementById('dictOrderIter');
+      const banner = document.getElementById('dictBanner');
+      const explainEl = document.getElementById('dictExplain');
+      const logEl = document.getElementById('dictLog');
+
+      let dict, keyIdx, timer;
+      window.dictPlaying = false;
+
+      function resetState() {
+        dict = new DemoDict();
+        keyIdx = 0;
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, null);
+        explainEl.textContent = 'Click "Add Next Key" to insert one key at a time. Watch the two order lists below the table stay identical after every single insert, including across the resize.';
+        render();
+      }
+
+      function doAdd() {
+        if (keyIdx >= KEYS.length) return;
+        const key = KEYS[keyIdx];
+        const r = dict.insert(key);
+        keyIdx++;
+        if (r.resized) {
+          logTo(logEl, 'RESIZE: usable slots hit 0 before inserting "' + key + '" -- table grew ' + r.resized.oldSize + ' -> ' + r.resized.newSize + ' and every existing key was rehashed into the new table.', 'warn');
+          banner.style.display = 'block';
+          banner.className = 'ph-banner warn';
+          banner.textContent = 'RESIZE (pre-emptive): ' + r.resized.oldSize + ' -> ' + r.resized.newSize + ' slots, triggered BEFORE inserting "' + key + '".';
+        } else {
+          banner.style.display = 'none';
+        }
+        if (r.probes.length > 1) {
+          logTo(logEl, 'insert "' + key + '" -- collision at slot ' + r.probes[0] + ', probed ' + r.probes.slice(0, -1).join(' -> ') + ' -> landed at ' + r.index + '.', 'bad');
+          explainEl.textContent = '"' + key + '" hashed to a slot that was already occupied by a different key, so CPython jumped to the next probe index using the perturb recurrence -- not the next slot over -- until it found an empty one.';
+        } else {
+          logTo(logEl, 'insert "' + key + '" -- landed directly at slot ' + r.index + ', no collision.', 'ok');
+          explainEl.textContent = '"' + key + '" hashed straight to an empty slot -- the common case when the table isn’t too full yet.';
+        }
+        highlightLine(codeEl, 2, r.probes.length > 1 ? 'warn' : null);
+        render();
+      }
+
+      function render() {
+        sizeEl.textContent = dict.size;
+        usedEl.textContent = dict.used;
+        usableEl.textContent = Math.max(0, dict.usableFraction(dict.size) - dict.used);
+        slotsEl.innerHTML = '';
+        for (let i = 0; i < dict.size; i++) {
+          const el = document.createElement('div');
+          const s = dict.slots[i];
+          el.className = 'ph-slot' + (s ? '' : ' empty');
+          el.textContent = s ? s.key : '';
+          const idx = document.createElement('div');
+          idx.className = 'ph-slot-idx';
+          idx.textContent = i;
+          el.appendChild(idx);
+          slotsEl.appendChild(el);
+        }
+        orderInsEl.innerHTML = '';
+        orderIterEl.innerHTML = '';
+        dict.insertionOrder.forEach(k => {
+          const chip = document.createElement('div');
+          chip.className = 'ph-chip';
+          chip.textContent = k;
+          orderInsEl.appendChild(chip);
+        });
+        dict.insertionOrder.forEach(k => {
+          const chip = document.createElement('div');
+          chip.className = 'ph-chip hi';
+          chip.textContent = k;
+          orderIterEl.appendChild(chip);
+        });
+      }
+
+      function play() {
+        if (window.dictPlaying) return;
+        window.dictPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (keyIdx >= KEYS.length) { window.dictPause(); return; }
+          doAdd();
+          timer = setTimeout(tick, scaled(1100));
+        }
+        tick();
+      }
+      window.dictPause = function () {
+        window.dictPlaying = false;
+        playBtn.textContent = '▶ Play (add all 6)';
+        clearTimeout(timer);
+      };
+
+      addBtn.addEventListener('click', doAdd);
+      playBtn.addEventListener('click', () => window.dictPlaying ? window.dictPause() : play());
+      resetBtn.addEventListener('click', () => { window.dictPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: SET
+    // =========================================================
+    (function () {
+      const KEYS = ['zebra', 'otter', 'koala', 'tiger', 'moose', 'camel', 'llama', 'heron'];
+      const addBtn = document.getElementById('setAdd');
+      const playBtn = document.getElementById('setPlay');
+      const resetBtn = document.getElementById('setReset');
+      const codeEl = document.getElementById('setCode');
+      const slotsEl = document.getElementById('setSlots');
+      const sizeEl = document.getElementById('setSize');
+      const usedEl = document.getElementById('setUsed');
+      const loadEl = document.getElementById('setLoad');
+      const orderInsEl = document.getElementById('setOrderIns');
+      const orderIterEl = document.getElementById('setOrderIter');
+      const banner = document.getElementById('setBanner');
+      const explainEl = document.getElementById('setExplain');
+      const logEl = document.getElementById('setLog');
+
+      let set, insertionOrder, keyIdx, timer;
+      window.setPlaying = false;
+
+      function resetState() {
+        set = new DemoSet();
+        insertionOrder = [];
+        keyIdx = 0;
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, null);
+        explainEl.textContent = 'Click "Add Next Element" and compare the two order lists as you go -- unlike dict, they will diverge.';
+        render();
+      }
+
+      function doAdd() {
+        if (keyIdx >= KEYS.length) return;
+        const key = KEYS[keyIdx];
+        const r = set.add(key);
+        insertionOrder.push(key);
+        keyIdx++;
+        if (r.resized) {
+          logTo(logEl, 'RESIZE: fill*5 crossed mask*3 AFTER inserting "' + key + '" -- table grew ' + r.resized.oldSize + ' -> ' + r.resized.newSize + ' and every existing element was rehashed.', 'warn');
+          banner.style.display = 'block';
+          banner.className = 'ph-banner warn';
+          banner.textContent = 'RESIZE (post-emptive): ' + r.resized.oldSize + ' -> ' + r.resized.newSize + ' slots, triggered AFTER inserting "' + key + '".';
+        } else {
+          banner.style.display = 'none';
+        }
+        if (r.probes.length > 1) {
+          logTo(logEl, 'add "' + key + '" -- checked slots ' + r.probes.slice(0, -1).join(', ') + ' (occupied), landed at ' + r.index + '.', 'bad');
+          explainEl.textContent = '"' + key + '" collided. Notice the probe path can revisit the same physical slot number more than once via different jumps -- that\'s expected, the recurrence doesn\'t remember what it already tried.';
+        } else {
+          logTo(logEl, 'add "' + key + '" -- landed directly at slot ' + r.index + ', no collision.', 'ok');
+          explainEl.textContent = '"' + key + '" hashed straight to an empty slot.';
+        }
+        highlightLine(codeEl, 2, r.probes.length > 1 ? 'warn' : null);
+        render();
+      }
+
+      function render() {
+        sizeEl.textContent = set.size;
+        usedEl.textContent = set.used;
+        loadEl.textContent = (set.fill * 5) + ' / ' + ((set.size - 1) * 3);
+        slotsEl.innerHTML = '';
+        for (let i = 0; i < set.size; i++) {
+          const el = document.createElement('div');
+          const s = set.slots[i];
+          el.className = 'ph-slot' + (s ? '' : ' empty');
+          el.textContent = s ? s.key : '';
+          const idx = document.createElement('div');
+          idx.className = 'ph-slot-idx';
+          idx.textContent = i;
+          el.appendChild(idx);
+          slotsEl.appendChild(el);
+        }
+        orderInsEl.innerHTML = '';
+        insertionOrder.forEach(k => {
+          const chip = document.createElement('div');
+          chip.className = 'ph-chip';
+          chip.textContent = k;
+          orderInsEl.appendChild(chip);
+        });
+        orderIterEl.innerHTML = '';
+        const iterOrder = set.slots.filter(s => s !== null).map(s => s.key);
+        iterOrder.forEach((k, i) => {
+          const chip = document.createElement('div');
+          const diverged = insertionOrder.indexOf(k) !== i || insertionOrder.length !== iterOrder.length;
+          chip.className = 'ph-chip' + (diverged ? ' hi' : '');
+          chip.textContent = k;
+          orderIterEl.appendChild(chip);
+        });
+      }
+
+      function play() {
+        if (window.setPlaying) return;
+        window.setPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (keyIdx >= KEYS.length) { window.setPause(); return; }
+          doAdd();
+          timer = setTimeout(tick, scaled(1100));
+        }
+        tick();
+      }
+      window.setPause = function () {
+        window.setPlaying = false;
+        playBtn.textContent = '▶ Play (add all 8)';
+        clearTimeout(timer);
+      };
+
+      addBtn.addEventListener('click', doAdd);
+      playBtn.addEventListener('click', () => window.setPlaying ? window.setPause() : play());
+      resetBtn.addEventListener('click', () => { window.setPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // SET ALGEBRA
+    // =========================================================
+    (function () {
+      const A = ['mango', 'kiwi', 'lime', 'plum'];
+      const B = ['lime', 'plum', 'olive', 'fig'];
+      const setAEl = document.getElementById('algSetA');
+      const setBEl = document.getElementById('algSetB');
+      const resultEl = document.getElementById('algResult');
+      const resultTitleEl = document.getElementById('algResultTitle');
+
+      function chip(text, hi) {
+        const el = document.createElement('div');
+        el.className = 'ph-chip' + (hi ? ' hi' : '');
+        el.textContent = text;
+        return el;
+      }
+
+      // aPredicate/bPredicate decide which chips in the SOURCE panels
+      // light up for a given operation -- kept as plain named predicates
+      // per element rather than one tangled boolean expression.
+      function renderBase(aPredicate, bPredicate) {
+        setAEl.innerHTML = '';
+        A.forEach(x => setAEl.appendChild(chip(x, aPredicate(x))));
+        setBEl.innerHTML = '';
+        B.forEach(x => setBEl.appendChild(chip(x, bPredicate(x))));
+      }
+
+      function showResult(label, values) {
+        resultTitleEl.textContent = label;
+        resultEl.innerHTML = '';
+        values.forEach(x => resultEl.appendChild(chip(x, true)));
+      }
+
+      const always = () => true;
+      const never = () => false;
+
+      document.getElementById('algUnion').addEventListener('click', () => {
+        renderBase(always, always);
+        showResult('a | b', Array.from(new Set([...A, ...B])));
+      });
+      document.getElementById('algInter').addEventListener('click', () => {
+        renderBase(x => B.includes(x), x => A.includes(x));
+        showResult('a & b', A.filter(x => B.includes(x)));
+      });
+      document.getElementById('algDiffAB').addEventListener('click', () => {
+        renderBase(x => !B.includes(x), never);
+        showResult('a - b', A.filter(x => !B.includes(x)));
+      });
+      document.getElementById('algDiffBA').addEventListener('click', () => {
+        renderBase(never, x => !A.includes(x));
+        showResult('b - a', B.filter(x => !A.includes(x)));
+      });
+
+      renderBase(never, never);
+      showResult('click a button above', []);
+    })();
+  })();
+  </script>
+</div>

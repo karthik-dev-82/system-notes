@@ -38,6 +38,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
 | 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
 | 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
+| 🎮 **[Python Sequences (Interactive)](docs/source/python_sequences_interactive.rst)** | Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source | dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks |
+| 🎮 **[Python Hashing (Interactive)](docs/source/python_hashing_interactive.rst)** | Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra | hash tables, open addressing, insertion order, union/intersection/difference |
 
 ---
 
@@ -101,6 +103,8 @@ system-notes/
         ├── linux_fs_basics_interactive.rst
         ├── overlayfs_interactive.rst
         ├── cpp_memory_interactive.rst
+        ├── python_sequences_interactive.rst
+        ├── python_hashing_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
@@ -111,7 +115,9 @@ system-notes/
             ├── proc_explorer_widget.html
             ├── linux_fs_basics_widget.html
             ├── overlayfs_widget.html
-            └── cpp_memory_widget.html
+            ├── cpp_memory_widget.html
+            ├── py_sequences_widget.html
+            └── py_hashing_widget.html
 
 ```
 
