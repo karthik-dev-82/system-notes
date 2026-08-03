@@ -31,6 +31,7 @@ down and coming back to.
    tcp_udp_interactive
    tcp_congestion_control_interactive
    docker_packet_journey_interactive
+   threads_sync_interactive
 
 Quick Navigation
 -----------------
@@ -106,3 +107,6 @@ Quick Navigation
    * - :doc:`docker_packet_journey_interactive`
      - Interactive packet journey -- container, veth, docker0, netfilter, and back
      - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack
+   * - :doc:`threads_sync_interactive`
+     - Interactive threads & synchronization -- step through race conditions and deadlock yourself
+     - mutex, semaphore, condition variable, race condition, deadlock

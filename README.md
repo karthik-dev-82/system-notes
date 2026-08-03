@@ -32,6 +32,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[TCP vs UDP (Interactive)](docs/source/tcp_udp_interactive.rst)** | Interactive TCP vs. UDP packet delivery -- play with loss and see the difference | handshake, retransmission, ordering, best-effort delivery |
 | 🎮 **[TCP Congestion Control (Interactive)](docs/source/tcp_congestion_control_interactive.rst)** | Interactive TCP congestion control -- drive the cwnd sawtooth yourself | slow start, congestion avoidance, fast retransmit, timeout, ssthresh |
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
+| 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 
 ---
 
@@ -89,11 +90,13 @@ system-notes/
         ├── tcp_udp_interactive.rst
         ├── tcp_congestion_control_interactive.rst
         ├── docker_packet_journey_interactive.rst
+        ├── threads_sync_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
             ├── tcp_congestion_widget.html
-            └── docker_packet_journey_widget.html
+            ├── docker_packet_journey_widget.html
+            └── threads_sync_widget.html
 
 ```
 

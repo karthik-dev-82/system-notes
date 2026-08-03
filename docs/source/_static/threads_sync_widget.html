@@ -1,0 +1,926 @@
+<div class="tsviz-root" id="tsWidget">
+  <style>
+    #tsWidget {
+      --ts-bg: #0f172a;
+      --ts-panel: #16213e;
+      --ts-border: #2a3655;
+      --ts-text: #e2e8f0;
+      --ts-muted: #94a3b8;
+      --ts-a: #4ade80;
+      --ts-b: #38bdf8;
+      --ts-bad: #f87171;
+      --ts-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ts-bg);
+      color: var(--ts-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #tsWidget * { box-sizing: border-box; }
+    #tsWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #tsWidget h4 { margin: 0 0 10px; font-size: 0.95rem; color: #fff; }
+    #tsWidget .ts-sub { color: var(--ts-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ts-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 760px; }
+    .ts-tab {
+      background: var(--ts-panel);
+      color: var(--ts-muted);
+      border: 1px solid var(--ts-border);
+      border-radius: 8px;
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .ts-tab.active { background: var(--ts-b); color: #041322; border-color: var(--ts-b); }
+
+    .ts-panel { display: none; }
+    .ts-panel.active { display: block; }
+
+    .ts-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--ts-panel);
+      border: 1px solid var(--ts-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 760px;
+    }
+    .ts-controls label { font-size: 0.8rem; color: var(--ts-muted); display: flex; align-items: center; gap: 8px; }
+    .ts-controls input[type="range"] { width: 120px; accent-color: var(--ts-b); }
+    .ts-toggle { display: inline-flex; border: 1px solid var(--ts-border); border-radius: 8px; overflow: hidden; }
+    .ts-toggle button { background: transparent; color: var(--ts-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .ts-toggle button.active { background: var(--ts-warn); color: #2a1c00; }
+    .ts-btn { background: var(--ts-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ts-btn.secondary { background: transparent; color: var(--ts-text); border: 1px solid var(--ts-border); }
+    .ts-btn.a { background: var(--ts-a); }
+    .ts-btn.b { background: var(--ts-b); }
+    .ts-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .ts-stage {
+      background: var(--ts-panel);
+      border: 1px solid var(--ts-border);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 14px;
+      min-width: 760px;
+    }
+
+    .ts-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 760px; }
+    .ts-explain-panel, .ts-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .ts-explain-panel { flex: 1.4; }
+    .ts-box { background: var(--ts-panel); border: 1px solid var(--ts-border); border-radius: 10px; padding: 12px 14px; }
+    .ts-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ts-muted); margin-bottom: 8px; }
+    .ts-log { height: 140px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .ts-log div { color: var(--ts-muted); }
+    .ts-log div.a { color: var(--ts-a); }
+    .ts-log div.b { color: var(--ts-b); }
+    .ts-log div.bad { color: var(--ts-bad); font-weight: 700; }
+    .ts-log div.warn { color: var(--ts-warn); }
+
+    /* --- Race condition --- */
+    .ts-thread-row { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+    .ts-thread-card {
+      flex: 1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      border: 2px solid var(--ts-border);
+      background: #10182e;
+    }
+    .ts-thread-card.thread-a { border-color: var(--ts-a); }
+    .ts-thread-card.thread-b { border-color: var(--ts-b); }
+    .ts-thread-card.blocked { opacity: 0.55; }
+    .ts-thread-title { font-weight: 800; font-size: 0.9rem; margin-bottom: 6px; }
+    .thread-a .ts-thread-title { color: var(--ts-a); }
+    .thread-b .ts-thread-title { color: var(--ts-b); }
+    .ts-phase-pill { display: inline-block; font-size: 0.68rem; padding: 2px 8px; border-radius: 10px; background: #223; color: var(--ts-muted); margin-bottom: 6px; }
+    .ts-phase-pill.hot { background: var(--ts-warn); color: #2a1c00; font-weight: 700; }
+    .ts-local-val { font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    .ts-counter-display {
+      text-align: center;
+      font-size: 2.2rem;
+      font-weight: 800;
+      font-family: ui-monospace, monospace;
+      color: #fff;
+      margin: 8px 0;
+    }
+    .ts-counter-caption { text-align: center; font-size: 0.78rem; color: var(--ts-muted); margin-bottom: 10px; }
+    .ts-lock-indicator { text-align: center; font-size: 0.85rem; margin-bottom: 10px; color: var(--ts-muted); }
+    .ts-lock-indicator b { color: var(--ts-warn); }
+    .ts-result-banner { text-align: center; padding: 8px; border-radius: 8px; font-weight: 700; font-size: 0.9rem; margin-top: 4px; }
+    .ts-result-banner.ok { background: rgba(74,222,128,0.15); color: var(--ts-a); }
+    .ts-result-banner.bug { background: rgba(248,113,113,0.15); color: var(--ts-bad); }
+
+    /* --- Semaphore --- */
+    .ts-sem-slots { display: flex; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .ts-slot { width: 64px; height: 64px; border-radius: 10px; border: 2px dashed var(--ts-border); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--ts-muted); }
+    .ts-slot.filled { border-style: solid; background: #17311f; border-color: var(--ts-a); }
+    .ts-queue-row { display: flex; gap: 8px; flex-wrap: wrap; min-height: 44px; align-items: center; }
+    .ts-thread-chip {
+      width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 800; background: #1e2a4a; border: 2px solid var(--ts-border); color: var(--ts-muted);
+    }
+    .ts-thread-chip.holding { background: #17311f; border-color: var(--ts-a); color: var(--ts-a); }
+    .ts-thread-chip.waiting { background: #3a1414; border-color: var(--ts-bad); color: var(--ts-bad); }
+
+    /* --- Condition variable --- */
+    .ts-cv-scene { display: flex; gap: 30px; align-items: center; justify-content: space-around; padding: 10px 0; }
+    .ts-cv-actor { text-align: center; }
+    .ts-cv-actor .icon { font-size: 2.4rem; }
+    .ts-cv-actor .caption { font-size: 0.78rem; color: var(--ts-muted); margin-top: 4px; }
+    .ts-cv-queue-box { min-width: 90px; min-height: 60px; border: 2px dashed var(--ts-border); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; gap: 4px; flex-wrap: wrap; padding: 6px; }
+    .ts-cv-stats { display: flex; gap: 24px; margin-top: 14px; font-size: 0.85rem; flex-wrap: wrap; }
+    .ts-cv-stats b { color: #fff; font-size: 1.1rem; }
+
+    /* --- Deadlock --- */
+    .ts-lock-row { display: flex; justify-content: center; gap: 60px; margin: 10px 0 18px; }
+    .ts-lock-box { text-align: center; }
+    .ts-lock-icon { font-size: 2rem; }
+    .ts-lock-holder { font-size: 0.78rem; color: var(--ts-muted); margin-top: 4px; }
+    .ts-lock-holder.a { color: var(--ts-a); font-weight: 700; }
+    .ts-lock-holder.b { color: var(--ts-b); font-weight: 700; }
+    .ts-deadlock-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .ts-deadlock-banner.dead { background: rgba(248,113,113,0.18); color: var(--ts-bad); }
+    .ts-deadlock-banner.safe { background: rgba(74,222,128,0.12); color: var(--ts-a); }
+
+    details.ts-notes {
+      margin-top: 14px;
+      background: var(--ts-panel);
+      border: 1px solid var(--ts-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 760px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.ts-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ts-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ts-muted); }
+    details.ts-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ts-b); }
+  </style>
+
+  <h3>Threads &amp; Synchronization: Play With It</h3>
+  <div class="ts-sub">Four small scenarios, in the order they motivate each other: why threads need locks at all, the general "N slots" idea a mutex is a special case of, why waiting doesn't have to waste CPU, and how locks themselves can go wrong.</div>
+
+  <div class="ts-tabs">
+    <button class="ts-tab active" data-tab="race">1. Race Condition</button>
+    <button class="ts-tab" data-tab="sem">2. Semaphore Slots</button>
+    <button class="ts-tab" data-tab="cv">3. Condition Variable</button>
+    <button class="ts-tab" data-tab="deadlock">4. Deadlock</button>
+  </div>
+
+  <!-- ============ TAB 1: RACE CONDITION ============ -->
+  <div class="ts-panel active" id="panel-race">
+    <div class="ts-controls">
+      <div class="ts-toggle">
+        <button class="race-mode-btn active" data-mode="nosync">No Synchronization</button>
+        <button class="race-mode-btn" data-mode="mutex">With Mutex</button>
+      </div>
+      <button class="ts-btn a" id="raceStepA">Step Thread A</button>
+      <button class="ts-btn b" id="raceStepB">Step Thread B</button>
+      <button class="ts-btn secondary" id="raceDemoBtn">Demo: Force the Bug</button>
+      <button class="ts-btn secondary" id="raceResetBtn">Reset</button>
+    </div>
+    <div class="ts-stage">
+      <div class="ts-counter-display" id="raceCounter">0</div>
+      <div class="ts-counter-caption">shared <code>counter</code> -- each thread wants to increment it 3 times (expected final: 6)</div>
+      <div class="ts-lock-indicator" id="raceLockIndicator" style="display:none;">🔒 Mutex: <b id="raceLockHolder">free</b></div>
+      <div class="ts-thread-row">
+        <div class="ts-thread-card thread-a" id="raceCardA">
+          <div class="ts-thread-title">Thread A</div>
+          <div class="ts-phase-pill" id="racePhaseA">ready</div>
+          <div class="ts-local-val">local = <b id="raceLocalA">--</b></div>
+        </div>
+        <div class="ts-thread-card thread-b" id="raceCardB">
+          <div class="ts-thread-title">Thread B</div>
+          <div class="ts-phase-pill" id="racePhaseB">ready</div>
+          <div class="ts-local-val">local = <b id="raceLocalB">--</b></div>
+        </div>
+      </div>
+      <div class="ts-result-banner" id="raceResultBanner" style="display:none;"></div>
+    </div>
+    <div class="ts-panels">
+      <div class="ts-explain-panel">
+        <div class="ts-box">
+          <div class="ts-panel-title">What's happening right now</div>
+          <div id="raceExplain">Click "Step Thread A" or "Step Thread B" to advance that thread by one micro-instruction: read the shared counter, increment its own private copy, then write it back. You control the exact order the two threads interleave -- try to cause the bug yourself, or hit the demo button to see a guaranteed one.</div>
+        </div>
+      </div>
+      <div class="ts-side-panel-col">
+        <div class="ts-box">
+          <div class="ts-panel-title">Event log</div>
+          <div class="ts-log" id="raceLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: SEMAPHORE ============ -->
+  <div class="ts-panel" id="panel-sem">
+    <div class="ts-controls">
+      <label>Slots (N): <span id="semNVal">2</span>
+        <input type="range" id="semNSlider" min="1" max="4" step="1" value="2">
+      </label>
+      <button class="ts-btn" id="semPlay">▶ Play</button>
+      <button class="ts-btn secondary" id="semReset">Reset</button>
+      <span style="font-size:0.78rem;color:var(--ts-muted);">N = 1 is exactly a mutex.</span>
+    </div>
+    <div class="ts-stage">
+      <h4>Slots</h4>
+      <div class="ts-sem-slots" id="semSlots"></div>
+      <h4>Threads (green = holding a slot, red = waiting in the queue)</h4>
+      <div class="ts-queue-row" id="semThreads"></div>
+    </div>
+    <div class="ts-panels">
+      <div class="ts-explain-panel">
+        <div class="ts-box">
+          <div class="ts-panel-title">What this shows</div>
+          <div id="semExplain">5 threads keep trying to grab a slot, hold it briefly, then release it and try again. Turn N down to 1 and watch it behave exactly like a mutex -- one holder at a time, everyone else queued. Turn it up and watch several run at once.</div>
+        </div>
+      </div>
+      <div class="ts-side-panel-col">
+        <div class="ts-box">
+          <div class="ts-panel-title">Event log</div>
+          <div class="ts-log" id="semLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 3: CONDITION VARIABLE ============ -->
+  <div class="ts-panel" id="panel-cv">
+    <div class="ts-controls">
+      <div class="ts-toggle">
+        <button class="cv-mode-btn active" data-mode="busy">Busy-Wait (Polling)</button>
+        <button class="cv-mode-btn" data-mode="notify">Condition Variable (Notify)</button>
+      </div>
+      <button class="ts-btn" id="cvPlay">▶ Play</button>
+      <button class="ts-btn secondary" id="cvReset">Reset</button>
+    </div>
+    <div class="ts-stage">
+      <div class="ts-cv-scene">
+        <div class="ts-cv-actor">
+          <div class="icon" id="cvProducerIcon">🍕</div>
+          <div class="caption">Producer</div>
+        </div>
+        <div class="ts-cv-queue-box" id="cvQueueBox">(empty)</div>
+        <div class="ts-cv-actor">
+          <div class="icon" id="cvConsumerIcon">😴</div>
+          <div class="caption" id="cvConsumerCaption">Consumer (asleep)</div>
+        </div>
+      </div>
+      <div class="ts-cv-stats">
+        <div>Items produced: <b id="cvProduced">0</b></div>
+        <div>Items consumed: <b id="cvConsumed">0</b></div>
+        <div>Checks performed by consumer: <b id="cvChecks">0</b></div>
+      </div>
+    </div>
+    <div class="ts-panels">
+      <div class="ts-explain-panel">
+        <div class="ts-box">
+          <div class="ts-panel-title">What this shows</div>
+          <div id="cvExplain">Same producer, same pace. In busy-wait mode the consumer never sleeps -- it keeps re-checking the queue as fast as it possibly can, whether or not anything is there, burning CPU the whole time. In condition-variable mode it truly sleeps and only wakes when the producer explicitly notifies it. Watch the "checks performed" counter -- that's the entire difference, made visible.</div>
+        </div>
+      </div>
+      <div class="ts-side-panel-col">
+        <div class="ts-box">
+          <div class="ts-panel-title">Event log</div>
+          <div class="ts-log" id="cvLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 4: DEADLOCK ============ -->
+  <div class="ts-panel" id="panel-deadlock">
+    <div class="ts-controls">
+      <div class="ts-toggle">
+        <button class="dl-mode-btn active" data-mode="inconsistent">Inconsistent Lock Order</button>
+        <button class="dl-mode-btn" data-mode="consistent">Consistent Lock Order</button>
+      </div>
+      <button class="ts-btn a" id="dlStepA">Step Thread A</button>
+      <button class="ts-btn b" id="dlStepB">Step Thread B</button>
+      <button class="ts-btn secondary" id="dlDemoBtn">Demo: Force the Deadlock</button>
+      <button class="ts-btn secondary" id="dlResetBtn">Reset</button>
+    </div>
+    <div class="ts-stage">
+      <div class="ts-lock-row">
+        <div class="ts-lock-box">
+          <div class="ts-lock-icon">🔒</div>
+          <div>Lock 1</div>
+          <div class="ts-lock-holder" id="dlHolder1">free</div>
+        </div>
+        <div class="ts-lock-box">
+          <div class="ts-lock-icon">🔒</div>
+          <div>Lock 2</div>
+          <div class="ts-lock-holder" id="dlHolder2">free</div>
+        </div>
+      </div>
+      <div class="ts-thread-row">
+        <div class="ts-thread-card thread-a" id="dlCardA">
+          <div class="ts-thread-title">Thread A</div>
+          <div class="ts-phase-pill" id="dlPhaseA">wants Lock 1</div>
+        </div>
+        <div class="ts-thread-card thread-b" id="dlCardB">
+          <div class="ts-thread-title">Thread B</div>
+          <div class="ts-phase-pill" id="dlPhaseB">wants Lock 1</div>
+        </div>
+      </div>
+      <div class="ts-deadlock-banner" id="dlBanner" style="display:none;"></div>
+    </div>
+    <div class="ts-panels">
+      <div class="ts-explain-panel">
+        <div class="ts-box">
+          <div class="ts-panel-title">What's happening right now</div>
+          <div id="dlExplain">In "Inconsistent Lock Order" mode, Thread A takes Lock 1 then Lock 2, while Thread B takes Lock 2 then Lock 1 -- try stepping them so each grabs one lock first, then watch what happens when they both try to grab the other's lock. In "Consistent Lock Order" mode both threads always take Lock 1 first -- try as hard as you like, you won't be able to construct a deadlock.</div>
+        </div>
+      </div>
+      <div class="ts-side-panel-col">
+        <div class="ts-box">
+          <div class="ts-panel-title">Event log</div>
+          <div class="ts-log" id="dlLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ts-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The race-condition demo breaks <code>counter++</code> into three steps (read, increment locally,
+        write back) because that's genuinely what it compiles down to at the machine level -- there's no
+        single atomic "increment" instruction happening here, which is exactly why two threads can interleave
+        in the middle of it.</li>
+      <li>Notice that "No Synchronization" doesn't <i>always</i> produce a wrong answer -- try stepping the
+        threads in strict turns and you'll get the correct result even with zero locking. That's the genuinely
+        dangerous part of race conditions: the bug is real and always possible, but it doesn't announce itself
+        every run, which is exactly why they're notorious for passing testing and then showing up in
+        production under load.</li>
+      <li>A mutex is a counting semaphore with <code>N=1</code> -- there's no separate mechanism, just a
+        special case. The general form shows up constantly in real systems: a database connection pool is a
+        semaphore sized to the pool's connection limit; a thread pool's work queue is bounded the same way.</li>
+      <li>Real semaphores and mutexes differ in one important way this widget doesn't model: a mutex is
+        normally expected to be released by the same thread that locked it, while a semaphore's
+        <code>release()</code>/<code>post()</code> can legitimately be called by a different thread than the
+        one that called <code>acquire()</code>/<code>wait()</code> -- that's what makes semaphores usable for
+        signaling between threads, not just mutual exclusion.</li>
+      <li>Real condition variables always pair with a mutex (you saw this in the C++ code on the main page --
+        <code>std::unique_lock</code> plus <code>std::condition_variable::wait</code>): the mutex protects the
+        shared queue itself, and the condition variable is what lets a thread release that mutex and sleep in
+        one atomic step, so nothing can sneak in and change the queue in the gap between "check it's still
+        empty" and "go to sleep."</li>
+      <li>The deadlock demo shows a 2-thread, 2-lock cycle, but the same idea generalizes: a deadlock is any
+        cycle in the "who's waiting for whom" graph, and it can involve any number of threads and locks. Lock
+        ordering (always acquire in the same global order) is one real fix; others include using a single
+        coarser lock, a lock-free design, or a timeout that backs off and retries instead of waiting forever.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('tsWidget');
+
+    // ---------- Tab switching ----------
+    const tabs = root.querySelectorAll('.ts-tab');
+    const panels = {
+      race: document.getElementById('panel-race'),
+      sem: document.getElementById('panel-sem'),
+      cv: document.getElementById('panel-cv'),
+      deadlock: document.getElementById('panel-deadlock'),
+    };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+      // pause any running auto-play sims when leaving their tab
+      if (t.dataset.tab !== 'sem' && window.semPlaying) window.semPause();
+      if (t.dataset.tab !== 'cv' && window.cvPlaying) window.cvPause();
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // =========================================================
+    // TAB 1: RACE CONDITION
+    // =========================================================
+    (function () {
+      const INCREMENTS = 3;
+      const modeButtons = root.querySelectorAll('.race-mode-btn');
+      const stepABtn = document.getElementById('raceStepA');
+      const stepBBtn = document.getElementById('raceStepB');
+      const demoBtn = document.getElementById('raceDemoBtn');
+      const resetBtn = document.getElementById('raceResetBtn');
+      const counterEl = document.getElementById('raceCounter');
+      const lockIndicator = document.getElementById('raceLockIndicator');
+      const lockHolderEl = document.getElementById('raceLockHolder');
+      const cardA = document.getElementById('raceCardA');
+      const cardB = document.getElementById('raceCardB');
+      const phaseA = document.getElementById('racePhaseA');
+      const phaseB = document.getElementById('racePhaseB');
+      const localA = document.getElementById('raceLocalA');
+      const localB = document.getElementById('raceLocalB');
+      const explainEl = document.getElementById('raceExplain');
+      const logEl = document.getElementById('raceLog');
+      const resultBanner = document.getElementById('raceResultBanner');
+
+      let mode = 'nosync';
+      let counter, lockHolder, threads, demoQueue, demoTimer;
+
+      function resetState() {
+        counter = 0;
+        lockHolder = null;
+        threads = {
+          A: { local: null, phase: 'acquire', done: 0, blocked: false },
+          B: { local: null, phase: 'acquire', done: 0, blocked: false },
+        };
+        demoQueue = null;
+        clearTimeout(demoTimer);
+        logEl.innerHTML = '';
+        resultBanner.style.display = 'none';
+        render();
+        explainEl.textContent = 'Click "Step Thread A" or "Step Thread B" to advance that thread by one micro-instruction. You control the exact order the two threads interleave.';
+      }
+
+      function isDone(t) { return threads[t].done >= INCREMENTS; }
+      function bothDone() { return isDone('A') && isDone('B'); }
+
+      function phaseLabel(t) {
+        const th = threads[t];
+        if (isDone(t)) return 'finished';
+        if (mode === 'mutex' && th.phase === 'acquire') return th.blocked ? 'BLOCKED (waiting for lock)' : 'acquiring lock';
+        if (th.phase === 'read' || (mode === 'nosync' && th.phase === 'acquire')) return 'about to read';
+        if (th.phase === 'inc') return 'about to increment local';
+        if (th.phase === 'write') return 'about to write back';
+        return th.phase;
+      }
+
+      function step(t) {
+        const th = threads[t];
+        if (isDone(t)) { logTo(logEl, t + ': already finished all ' + INCREMENTS + ' increments.', t.toLowerCase()); return; }
+
+        if (mode === 'mutex' && th.phase === 'acquire') {
+          if (lockHolder === null) {
+            lockHolder = t;
+            th.phase = 'read';
+            th.blocked = false;
+            logTo(logEl, t + ': acquires the mutex.', t.toLowerCase());
+            explainEl.textContent = t + ' now holds the mutex and can safely read/modify/write the counter.';
+          } else {
+            th.blocked = true;
+            logTo(logEl, t + ': BLOCKED trying to acquire the mutex (held by ' + lockHolder + ').', 'bad');
+            explainEl.textContent = t + ' can\'t proceed at all until ' + lockHolder + ' releases the mutex. This is exactly what prevents the two threads\' read/inc/write from ever interleaving.';
+          }
+          render();
+          return;
+        }
+        th.blocked = false;
+
+        if (th.phase === 'read' || (mode === 'nosync' && th.phase === 'acquire')) {
+          th.local = counter;
+          th.phase = 'inc';
+          logTo(logEl, t + ': reads counter (' + counter + ') into its own local copy.', t.toLowerCase());
+          explainEl.textContent = t + ' just copied the CURRENT shared value (' + counter + ') into its own private local variable. Nothing shared has changed yet.';
+        } else if (th.phase === 'inc') {
+          th.local = th.local + 1;
+          th.phase = 'write';
+          logTo(logEl, t + ': increments its local copy to ' + th.local + ' (still private, counter is untouched).', t.toLowerCase());
+          explainEl.textContent = t + ' incremented its OWN local copy to ' + th.local + '. The shared counter hasn\'t been touched yet -- if the other thread read the counter before this write happens, it has no idea this is coming.';
+        } else if (th.phase === 'write') {
+          const before = counter;
+          counter = th.local;
+          th.done++;
+          logTo(logEl, t + ': writes counter = ' + th.local + ' (counter was ' + before + ' just before this write).', th.local <= before && mode === 'nosync' ? 'bad' : t.toLowerCase());
+          if (mode === 'nosync' && th.local <= before) {
+            explainEl.textContent = t + ' just overwrote the counter with ' + th.local + ', clobbering the value ' + before + ' that was there -- including any increment the OTHER thread already applied. That is a lost update.';
+          } else {
+            explainEl.textContent = t + ' wrote its incremented value (' + th.local + ') back to the shared counter.';
+          }
+          if (mode === 'mutex') {
+            lockHolder = null;
+            th.phase = 'acquire';
+            logTo(logEl, t + ': releases the mutex.', t.toLowerCase());
+          } else {
+            th.phase = 'read';
+          }
+        }
+        render();
+        if (bothDone()) finish();
+      }
+
+      function finish() {
+        const expected = INCREMENTS * 2;
+        resultBanner.style.display = 'block';
+        if (counter === expected) {
+          resultBanner.className = 'ts-result-banner ok';
+          resultBanner.textContent = 'Final counter = ' + counter + ' -- correct! (expected ' + expected + ')';
+        } else {
+          resultBanner.className = 'ts-result-banner bug';
+          resultBanner.textContent = 'Final counter = ' + counter + ' -- WRONG! Expected ' + expected + '. ' + (expected - counter) + ' increment(s) got lost.';
+        }
+      }
+
+      function render() {
+        counterEl.textContent = counter;
+        lockIndicator.style.display = mode === 'mutex' ? 'block' : 'none';
+        lockHolderEl.textContent = lockHolder || 'free';
+        cardA.classList.toggle('blocked', threads.A.blocked);
+        cardB.classList.toggle('blocked', threads.B.blocked);
+        phaseA.textContent = phaseLabel('A');
+        phaseB.textContent = phaseLabel('B');
+        phaseA.classList.toggle('hot', threads.A.phase === 'write' && !isDone('A'));
+        phaseB.classList.toggle('hot', threads.B.phase === 'write' && !isDone('B'));
+        localA.textContent = threads.A.local === null ? '--' : threads.A.local;
+        localB.textContent = threads.B.local === null ? '--' : threads.B.local;
+        stepABtn.disabled = isDone('A');
+        stepBBtn.disabled = isDone('B');
+      }
+
+      function runDemo() {
+        resetState();
+        // mutex: any order is safe, so just alternate attempts generously long
+        // enough that both threads are guaranteed to finish all 3 increments
+        // (each increment takes 4 step()s -- acquire, read, inc, write+release
+        // -- and roughly half of any given thread's turns get spent blocked
+        // while the other holds the lock, so this is deliberately oversized).
+        // nosync: this exact 18-step sequence is verified (see race_sim_test.js)
+        // to lose precisely one increment via the classic overlapping-read bug,
+        // then finish the remaining increments cleanly.
+        const script = mode === 'mutex'
+          ? Array.from({ length: 80 }, (_, i) => (i % 2 === 0 ? 'A' : 'B'))
+          : ['A','B','A','A','B','B','A','A','A','B','B','B','A','A','A','B','B','B'];
+        let i = 0;
+        function tick() {
+          if (i >= script.length || bothDone()) return;
+          step(script[i]);
+          i++;
+          demoTimer = setTimeout(tick, 700);
+        }
+        logTo(logEl, '--- running scripted demo interleaving ---', 'warn');
+        tick();
+      }
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        resetState();
+      }));
+      stepABtn.addEventListener('click', () => step('A'));
+      stepBBtn.addEventListener('click', () => step('B'));
+      demoBtn.addEventListener('click', runDemo);
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: SEMAPHORE
+    // =========================================================
+    (function () {
+      const THREAD_IDS = ['T1', 'T2', 'T3', 'T4', 'T5'];
+      const nSlider = document.getElementById('semNSlider');
+      const nVal = document.getElementById('semNVal');
+      const playBtn = document.getElementById('semPlay');
+      const resetBtn = document.getElementById('semReset');
+      const slotsEl = document.getElementById('semSlots');
+      const threadsEl = document.getElementById('semThreads');
+      const logEl = document.getElementById('semLog');
+
+      let holders, queue, threadState, tickTimer;
+      window.semPlaying = false; // exposed so the tab-switcher can pause it
+
+      function N() { return parseInt(nSlider.value, 10); }
+
+      function resetState() {
+        holders = [];
+        queue = [];
+        threadState = {};
+        THREAD_IDS.forEach(id => {
+          // Everyone starts queued and waiting -- status must match that
+          // immediately, since the "idle -> waiting" transition in tick()
+          // only fires for threads that are NOT already in the queue array.
+          threadState[id] = { status: 'waiting', cooldown: 0 };
+          queue.push(id);
+        });
+        logEl.innerHTML = '';
+        render();
+      }
+
+      function render() {
+        slotsEl.innerHTML = '';
+        for (let i = 0; i < N(); i++) {
+          const d = document.createElement('div');
+          d.className = 'ts-slot' + (holders[i] ? ' filled' : '');
+          d.textContent = holders[i] ? '🔧' : '';
+          slotsEl.appendChild(d);
+        }
+        threadsEl.innerHTML = '';
+        THREAD_IDS.forEach(id => {
+          const st = threadState[id];
+          const chip = document.createElement('div');
+          chip.className = 'ts-thread-chip' + (st.status === 'holding' ? ' holding' : st.status === 'waiting' ? ' waiting' : '');
+          chip.textContent = id;
+          threadsEl.appendChild(chip);
+        });
+      }
+
+      function tick() {
+        // release holders whose cooldown expired
+        holders = holders.filter(id => {
+          const st = threadState[id];
+          st.holdTicks--;
+          if (st.holdTicks <= 0) {
+            st.status = 'idle';
+            st.cooldown = 1 + Math.floor(Math.random() * 3);
+            logTo(logEl, id + ' releases its slot.', 'warn');
+            return false;
+          }
+          return true;
+        });
+        // idle threads cool down, then join the queue
+        THREAD_IDS.forEach(id => {
+          const st = threadState[id];
+          if (st.status === 'idle') {
+            st.cooldown--;
+            if (st.cooldown <= 0 && !queue.includes(id) && !holders.includes(id)) {
+              queue.push(id);
+              st.status = 'waiting';
+              logTo(logEl, id + ' wants a slot.', 'b');
+            }
+          }
+        });
+        // fill free slots from the queue (FIFO)
+        while (holders.length < N() && queue.length > 0) {
+          const id = queue.shift();
+          holders.push(id);
+          threadState[id].status = 'holding';
+          threadState[id].holdTicks = 2 + Math.floor(Math.random() * 3);
+          logTo(logEl, id + ' acquires a slot (' + holders.length + '/' + N() + ' in use).', 'a');
+        }
+        render();
+      }
+
+      function play() {
+        if (window.semPlaying) return;
+        window.semPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        tickTimer = setInterval(tick, 900);
+      }
+      window.semPause = function () {
+        window.semPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearInterval(tickTimer);
+      };
+
+      nSlider.addEventListener('input', () => { nVal.textContent = nSlider.value; render(); });
+      playBtn.addEventListener('click', () => window.semPlaying ? window.semPause() : play());
+      resetBtn.addEventListener('click', () => { window.semPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 3: CONDITION VARIABLE
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.cv-mode-btn');
+      const playBtn = document.getElementById('cvPlay');
+      const resetBtn = document.getElementById('cvReset');
+      const producerIcon = document.getElementById('cvProducerIcon');
+      const consumerIcon = document.getElementById('cvConsumerIcon');
+      const consumerCaption = document.getElementById('cvConsumerCaption');
+      const queueBox = document.getElementById('cvQueueBox');
+      const producedEl = document.getElementById('cvProduced');
+      const consumedEl = document.getElementById('cvConsumed');
+      const checksEl = document.getElementById('cvChecks');
+      const logEl = document.getElementById('cvLog');
+
+      let mode = 'busy';
+      let queueLen, produced, consumed, checks, producerTimer, pollTimer;
+      window.cvPlaying = false;
+
+      function resetState() {
+        clearInterval(producerTimer);
+        clearInterval(pollTimer);
+        window.cvPlaying = false;
+        playBtn.textContent = '▶ Play';
+        queueLen = 0;
+        produced = 0;
+        consumed = 0;
+        checks = 0;
+        logEl.innerHTML = '';
+        renderQueue();
+        producedEl.textContent = '0';
+        consumedEl.textContent = '0';
+        checksEl.textContent = '0';
+        consumerIcon.textContent = mode === 'busy' ? '🔁' : '😴';
+        consumerCaption.textContent = mode === 'busy' ? 'Consumer (polling)' : 'Consumer (asleep)';
+      }
+
+      function renderQueue() {
+        queueBox.textContent = queueLen === 0 ? '(empty)' : '🍕'.repeat(Math.min(queueLen, 8));
+      }
+
+      function produce() {
+        queueLen++;
+        produced++;
+        producedEl.textContent = produced;
+        renderQueue();
+        producerIcon.textContent = '🍕';
+        setTimeout(() => { producerIcon.textContent = '👨‍🍳'; }, 300);
+        if (mode === 'notify') {
+          logTo(logEl, 'Producer makes a pizza and rings the doorbell (notify_one).', 'a');
+          consumerIcon.textContent = '🔔';
+          wakeAndConsume();
+        } else {
+          logTo(logEl, 'Producer makes a pizza. (Nothing to notify -- consumer never sleeps.)', 'a');
+        }
+      }
+
+      function wakeAndConsume() {
+        setTimeout(() => {
+          checks++;
+          checksEl.textContent = checks;
+          if (queueLen > 0) {
+            queueLen--;
+            consumed++;
+            consumedEl.textContent = consumed;
+            renderQueue();
+            logTo(logEl, 'Consumer wakes up, sees a pizza, eats it, goes back to sleep.', 'b');
+          }
+          consumerIcon.textContent = '😴';
+        }, 250);
+      }
+
+      function busyPoll() {
+        checks++;
+        checksEl.textContent = checks;
+        if (queueLen > 0) {
+          queueLen--;
+          consumed++;
+          consumedEl.textContent = consumed;
+          renderQueue();
+          consumerIcon.textContent = '🍕';
+          logTo(logEl, 'Consumer\'s poll finds a pizza -- eats it.', 'b');
+          setTimeout(() => { consumerIcon.textContent = '🔁'; }, 200);
+        }
+      }
+
+      function play() {
+        if (window.cvPlaying) return;
+        window.cvPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        producerTimer = setInterval(produce, 2500 + Math.random() * 1500);
+        if (mode === 'busy') {
+          pollTimer = setInterval(busyPoll, 80);
+        }
+      }
+      window.cvPause = function () {
+        window.cvPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearInterval(producerTimer);
+        clearInterval(pollTimer);
+      };
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        window.cvPause();
+        resetState();
+      }));
+      playBtn.addEventListener('click', () => window.cvPlaying ? window.cvPause() : play());
+      resetBtn.addEventListener('click', () => { window.cvPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 4: DEADLOCK
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.dl-mode-btn');
+      const stepABtn = document.getElementById('dlStepA');
+      const stepBBtn = document.getElementById('dlStepB');
+      const demoBtn = document.getElementById('dlDemoBtn');
+      const resetBtn = document.getElementById('dlResetBtn');
+      const holder1El = document.getElementById('dlHolder1');
+      const holder2El = document.getElementById('dlHolder2');
+      const cardA = document.getElementById('dlCardA');
+      const cardB = document.getElementById('dlCardB');
+      const phaseA = document.getElementById('dlPhaseA');
+      const phaseB = document.getElementById('dlPhaseB');
+      const explainEl = document.getElementById('dlExplain');
+      const logEl = document.getElementById('dlLog');
+      const banner = document.getElementById('dlBanner');
+
+      let mode = 'inconsistent';
+      let scripts, holder, progress, done, demoTimer;
+
+      function resetState() {
+        scripts = {
+          A: ['L1', 'L2'],
+          B: mode === 'inconsistent' ? ['L2', 'L1'] : ['L1', 'L2'],
+        };
+        holder = { L1: null, L2: null };
+        progress = { A: 0, B: 0 };
+        done = { A: false, B: false };
+        clearTimeout(demoTimer);
+        logEl.innerHTML = '';
+        banner.style.display = 'none';
+        render();
+        explainEl.textContent = mode === 'inconsistent'
+          ? 'Thread A takes Lock 1 then Lock 2. Thread B takes Lock 2 then Lock 1. Step them so each grabs one lock, then try to have both take their second lock.'
+          : 'Both threads always take Lock 1 first, then Lock 2. Try every order you can think of -- you cannot make this deadlock.';
+      }
+
+      function wants(t) { return scripts[t][progress[t]]; }
+
+      function step(t) {
+        if (done[t]) { logTo(logEl, t + ': already finished.', t.toLowerCase()); return; }
+        const need = wants(t);
+        if (holder[need] === null) {
+          holder[need] = t;
+          progress[t]++;
+          logTo(logEl, t + ' acquires ' + need + '.', t.toLowerCase());
+          if (progress[t] >= scripts[t].length) {
+            done[t] = true;
+            if (holder.L1 === t) holder.L1 = null;
+            if (holder.L2 === t) holder.L2 = null;
+            logTo(logEl, t + ' finishes and releases everything it holds.', t.toLowerCase());
+          }
+        } else if (holder[need] === t) {
+          // shouldn't happen given the scripts, but guard anyway
+        } else {
+          logTo(logEl, t + ' BLOCKED waiting for ' + need + ' (held by ' + holder[need] + ').', 'bad');
+        }
+        render();
+        checkDeadlock();
+      }
+
+      function checkDeadlock() {
+        if (done.A || done.B) return;
+        const aNeeds = wants('A'), bNeeds = wants('B');
+        if (holder[aNeeds] === 'B' && holder[bNeeds] === 'A') {
+          banner.style.display = 'block';
+          banner.className = 'ts-deadlock-banner dead';
+          banner.textContent = 'DEADLOCK: A holds ' + (aNeeds === 'L1' ? 'L2' : 'L1') + ' and wants ' + aNeeds + '; B holds ' + (bNeeds === 'L1' ? 'L2' : 'L1') + ' and wants ' + bNeeds + '. Neither can ever proceed.';
+          stepABtn.disabled = true;
+          stepBBtn.disabled = true;
+          explainEl.textContent = 'This is the deadly embrace: each thread holds exactly what the other one needs next, and neither will ever release anything because neither can finish. This is why lock ordering matters.';
+          logTo(logEl, 'DEADLOCK DETECTED -- both threads permanently stuck.', 'bad');
+        }
+      }
+
+      function render() {
+        holder1El.textContent = holder.L1 || 'free';
+        holder1El.className = 'ts-lock-holder' + (holder.L1 ? ' ' + holder.L1.toLowerCase() : '');
+        holder2El.textContent = holder.L2 || 'free';
+        holder2El.className = 'ts-lock-holder' + (holder.L2 ? ' ' + holder.L2.toLowerCase() : '');
+        phaseA.textContent = done.A ? 'finished' : 'wants ' + wants('A') + (holder[wants('A')] && holder[wants('A')] !== 'A' ? ' (blocked)' : '');
+        phaseB.textContent = done.B ? 'finished' : 'wants ' + wants('B') + (holder[wants('B')] && holder[wants('B')] !== 'B' ? ' (blocked)' : '');
+        cardA.classList.toggle('blocked', !done.A && holder[wants('A')] && holder[wants('A')] !== 'A');
+        cardB.classList.toggle('blocked', !done.B && holder[wants('B')] && holder[wants('B')] !== 'B');
+        const deadlocked = banner.style.display === 'block';
+        stepABtn.disabled = done.A || deadlocked;
+        stepBBtn.disabled = done.B || deadlocked;
+      }
+
+      function runDemo() {
+        resetState();
+        const script = mode === 'inconsistent' ? ['A', 'B', 'A', 'B'] : ['A', 'B', 'A', 'B', 'A', 'B'];
+        let i = 0;
+        function tick() {
+          if (i >= script.length) return;
+          if (banner.style.display === 'block') return;
+          if (done.A && done.B) return;
+          step(script[i]);
+          i++;
+          demoTimer = setTimeout(tick, 800);
+        }
+        logTo(logEl, '--- running scripted interleaving ---', 'warn');
+        tick();
+      }
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        resetState();
+      }));
+      stepABtn.addEventListener('click', () => step('A'));
+      stepBBtn.addEventListener('click', () => step('B'));
+      demoBtn.addEventListener('click', runDemo);
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>
