@@ -26,6 +26,7 @@ down and coming back to.
    image_formats
    threads_processes_synchronization
    openssl_guide
+   proc_filesystem
 
 Quick Navigation
 -----------------
@@ -86,3 +87,6 @@ Quick Navigation
    * - :doc:`openssl_guide`
      - Encryption, hashing, and certificates, plus practical OpenSSL commands
      - symmetric/asymmetric crypto, TLS, x509 certs, ``openssl`` CLI
+   * - :doc:`proc_filesystem`
+     - The virtual /proc filesystem -- process info, system stats, tuning knobs
+     - ``/proc/PID``, ``/proc/cpuinfo``, ``/proc/meminfo``, ``/proc/sys``
