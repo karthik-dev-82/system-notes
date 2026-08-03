@@ -34,6 +34,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
+| 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
 
 ---
 
@@ -93,13 +94,15 @@ system-notes/
         ├── docker_packet_journey_interactive.rst
         ├── threads_sync_interactive.rst
         ├── consistent_hashing_interactive.rst
+        ├── proc_filesystem_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
             ├── tcp_congestion_widget.html
             ├── docker_packet_journey_widget.html
             ├── threads_sync_widget.html
-            └── consistent_hash_widget.html
+            ├── consistent_hash_widget.html
+            └── proc_explorer_widget.html
 
 ```
 

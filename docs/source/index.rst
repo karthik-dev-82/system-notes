@@ -33,6 +33,7 @@ down and coming back to.
    docker_packet_journey_interactive
    threads_sync_interactive
    consistent_hashing_interactive
+   proc_filesystem_interactive
 
 Quick Navigation
 -----------------
@@ -114,3 +115,6 @@ Quick Navigation
    * - :doc:`consistent_hashing_interactive`
      - Interactive consistent hashing ring -- add/remove servers and watch what actually moves
      - hash ring, virtual nodes, reshuffling, load balancing
+   * - :doc:`proc_filesystem_interactive`
+     - Live /proc explorer -- click any path and watch it get generated on demand
+     - /proc/PID, meminfo, loadavg, uptime, process lifecycle

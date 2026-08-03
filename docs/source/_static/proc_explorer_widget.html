@@ -1,0 +1,530 @@
+<div class="pfviz-root" id="pfWidget">
+  <style>
+    #pfWidget {
+      --pf-bg: #0f172a;
+      --pf-panel: #16213e;
+      --pf-border: #2a3655;
+      --pf-text: #e2e8f0;
+      --pf-muted: #94a3b8;
+      --pf-accent: #38bdf8;
+      --pf-good: #4ade80;
+      --pf-warn: #fbbf24;
+      --pf-bad: #f87171;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pf-bg);
+      color: var(--pf-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pfWidget * { box-sizing: border-box; }
+    #pfWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pfWidget .pf-sub { color: var(--pf-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pf-topbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      background: var(--pf-panel);
+      border: 1px solid var(--pf-border);
+      border-radius: 10px;
+      padding: 10px 16px;
+      margin-bottom: 16px;
+      min-width: 900px;
+      font-size: 0.82rem;
+    }
+    .pf-topbar b { color: #fff; font-family: ui-monospace, monospace; }
+    .pf-btn { background: var(--pf-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .pf-btn.secondary { background: transparent; color: var(--pf-text); border: 1px solid var(--pf-border); }
+    .pf-btn.small { padding: 4px 9px; font-size: 0.7rem; }
+    .pf-btn.danger { background: var(--pf-bad); color: #2a0a0a; }
+    .pf-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .pf-main { display: flex; gap: 16px; flex-wrap: wrap; min-width: 900px; }
+    .pf-left { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 14px; }
+    .pf-right { flex: 1.5; min-width: 440px; }
+
+    .pf-box { background: var(--pf-panel); border: 1px solid var(--pf-border); border-radius: 10px; padding: 12px 14px; }
+    .pf-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pf-muted); margin-bottom: 8px; }
+
+    .pf-proc-row {
+      display: flex; align-items: center; gap: 8px; padding: 6px 8px; border-radius: 6px; cursor: pointer;
+      font-size: 0.8rem; border: 1px solid transparent;
+    }
+    .pf-proc-row:hover { background: #1c2b4d; }
+    .pf-proc-row.selected { border-color: var(--pf-accent); background: #16233f; }
+    .pf-proc-pid { width: 46px; color: var(--pf-muted); font-family: ui-monospace, monospace; }
+    .pf-proc-name { flex: 1; font-weight: 700; }
+    .pf-proc-state { width: 26px; text-align: center; font-family: ui-monospace, monospace; font-weight: 800; border-radius: 4px; }
+    .pf-proc-state.R { color: var(--pf-good); }
+    .pf-proc-state.S { color: var(--pf-accent); }
+    .pf-proc-state.D { color: var(--pf-warn); }
+    .pf-proc-rss { width: 70px; text-align: right; font-family: ui-monospace, monospace; color: var(--pf-muted); }
+
+    .pf-path-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+    .pf-path-btn { background: #1c2b4d; color: var(--pf-text); border: 1px solid var(--pf-border); border-radius: 6px; padding: 6px 10px; font-size: 0.76rem; font-family: ui-monospace, monospace; cursor: pointer; }
+    .pf-path-btn:hover { border-color: var(--pf-accent); }
+    .pf-path-btn.active { background: var(--pf-accent); color: #041322; border-color: var(--pf-accent); }
+
+    .pf-terminal {
+      background: #0a1128;
+      border: 1px solid var(--pf-border);
+      border-radius: 8px;
+      padding: 14px;
+      font-family: ui-monospace, monospace;
+      font-size: 0.8rem;
+      line-height: 1.6;
+      min-height: 260px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .pf-terminal .prompt { color: var(--pf-good); }
+    .pf-terminal .cmd { color: #fff; }
+    .pf-terminal .ls-line { color: var(--pf-muted); }
+    .pf-terminal .ls-size { color: var(--pf-warn); font-weight: 700; }
+    .pf-terminal .out { color: var(--pf-text); }
+    .pf-terminal .dim { color: var(--pf-muted); }
+    .pf-terminal .reading { color: var(--pf-accent); font-style: italic; }
+
+    .pf-explain { font-size: 0.85rem; line-height: 1.5; margin-top: 10px; }
+
+    .pf-log { height: 110px; overflow-y: auto; font-size: 0.72rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pf-log div { color: var(--pf-muted); }
+    .pf-log div.spawn { color: var(--pf-good); }
+    .pf-log div.exit { color: var(--pf-bad); }
+
+    details.pf-notes {
+      margin-top: 14px;
+      background: var(--pf-panel);
+      border: 1px solid var(--pf-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 900px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.pf-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.pf-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--pf-muted); }
+    details.pf-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--pf-accent); }
+  </style>
+
+  <h3>Live /proc Explorer</h3>
+  <div class="pf-sub">A small simulated system with real processes that spawn and exit on their own. Click any path below and watch it get generated fresh, right now -- not read from anywhere.</div>
+
+  <div class="pf-topbar">
+    <div>System uptime: <b id="pfUptime">0d 00:00:00</b></div>
+    <div>Processes alive: <b id="pfAliveCount">0</b></div>
+    <button class="pf-btn secondary" id="pfPauseBtn">⏸ Pause process churn</button>
+  </div>
+
+  <div class="pf-main">
+    <div class="pf-left">
+      <div class="pf-box">
+        <div class="pf-panel-title">Processes (click one, then pick a path below)</div>
+        <div id="pfProcList"></div>
+      </div>
+      <div class="pf-box">
+        <div class="pf-panel-title">Paths to explore</div>
+        <div class="pf-path-btns" id="pfSystemPaths">
+          <button class="pf-path-btn" data-path="cpuinfo">/proc/cpuinfo</button>
+          <button class="pf-path-btn" data-path="meminfo">/proc/meminfo</button>
+          <button class="pf-path-btn" data-path="uptime">/proc/uptime</button>
+          <button class="pf-path-btn" data-path="loadavg">/proc/loadavg</button>
+        </div>
+        <div class="pf-path-btns" id="pfProcPaths" style="margin-top:8px;">
+          <span class="dim" id="pfProcPathsHint" style="font-size:0.76rem; color:var(--pf-muted);">Select a process above to see its paths.</span>
+        </div>
+      </div>
+      <div class="pf-box">
+        <div class="pf-panel-title">Event log</div>
+        <div class="pf-log" id="pfLog"></div>
+      </div>
+    </div>
+    <div class="pf-right">
+      <div class="pf-box">
+        <div class="pf-panel-title" id="pfCurrentPathLabel">Terminal</div>
+        <div class="pf-terminal" id="pfTerminal">Click a path on the left to read it.</div>
+        <div class="pf-explain" id="pfExplain"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="pf-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>Every number in this widget really is recomputed at the moment you click, from this page's own
+        simulated system state -- click the same file twice a few seconds apart (especially
+        <code>/proc/uptime</code> or <code>/proc/meminfo</code> while processes are spawning and exiting) and
+        you'll get different numbers both times. That's the entire point: real <code>/proc</code> files work
+        the same way, generated by the kernel at read time, never sitting on disk in between.</li>
+      <li>The one thing this demo can't show you is the file's reported size actually being <code>0</code> in
+        a real terminal's <code>ls -l</code> -- rendering that authentically needs a monospace directory
+        listing, which is exactly what the <code>ls -l</code> line above each result reproduces. Try it for
+        real: <code>ls -lh /proc/cpuinfo</code> on any Linux box will show a real byte count of <code>0</code>
+        right next to a modification time, for a file that then prints a full page of text when you
+        <code>cat</code> it.</li>
+      <li><code>/proc/loadavg</code>'s "total processes" count here is scaled up to look like a real system's
+        (typically hundreds, between kernel threads and ordinary processes) -- this demo only names a handful
+        for clarity, but the running-count portion is always accurate to what's actually alive in the
+        simulation at that moment.</li>
+      <li>Killing a process here removes its <code>/proc/PID</code> entry instantly, for the same reason a
+        real one disappears the moment a process exits: there's no file to keep around, because it was never
+        stored anywhere in the first place -- it was a live view into a process that no longer exists.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const MEM_TOTAL_KB = 16384000;
+    const BASELINE_KB = 1500000;
+    const BUFFERS_KB = 512000;
+    const CACHED_KB = 4096000;
+    const SWAP_TOTAL_KB = 8192000;
+    const CORES = 4;
+
+    const POOL = [
+      { name: 'sshd', rss: 5400, lang: 'C' },
+      { name: 'bash', rss: 4800, lang: 'C' },
+      { name: 'nginx', rss: 9600, lang: 'C' },
+      { name: 'python3', rss: 28000, lang: 'python' },
+      { name: 'postgres', rss: 45000, lang: 'C' },
+      { name: 'node', rss: 62000, lang: 'js' },
+      { name: 'cron', rss: 2100, lang: 'C' },
+    ];
+    const STATES = ['R', 'S', 'S', 'S', 'D']; // mostly sleeping, sometimes running/blocked
+
+    const procListEl = document.getElementById('pfProcList');
+    const procPathsEl = document.getElementById('pfProcPaths');
+    const procPathsHint = document.getElementById('pfProcPathsHint');
+    const systemPathBtns = document.querySelectorAll('#pfSystemPaths .pf-path-btn');
+    const terminalEl = document.getElementById('pfTerminal');
+    const explainEl = document.getElementById('pfExplain');
+    const currentPathLabel = document.getElementById('pfCurrentPathLabel');
+    const uptimeEl = document.getElementById('pfUptime');
+    const aliveCountEl = document.getElementById('pfAliveCount');
+    const pauseBtn = document.getElementById('pfPauseBtn');
+    const logEl = document.getElementById('pfLog');
+
+    let uptimeSeconds = 164682.03; // a real value observed on a real long-running box
+    let idleSeconds = uptimeSeconds * (CORES - 0.15); // idle time is summed across all cores
+    let nextPid = 742;
+    let alive = new Map();
+    let selectedPid = null;
+    let selectedPath = null; // e.g. 'status', 'cmdline', 'fd', or a system path string
+    let churnPaused = false;
+    let readRequestSeq = 0; // invalidates any in-flight "reading..." render, see readingThen()
+    let churnTimer, uptimeTimer;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function fmtUptime(s) {
+      const days = Math.floor(s / 86400);
+      const hrs = Math.floor((s % 86400) / 3600);
+      const mins = Math.floor((s % 3600) / 60);
+      const secs = Math.floor(s % 60);
+      return days + 'd ' + String(hrs).padStart(2, '0') + ':' + String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+    }
+
+    function spawnOne(nameHint) {
+      const spec = nameHint ? POOL.find(p => p.name === nameHint) : POOL[Math.floor(Math.random() * POOL.length)];
+      if (!spec) return null;
+      if ([...alive.values()].some(p => p.name === spec.name)) return null; // one of each at a time
+      const pid = nextPid++;
+      const proc = {
+        pid,
+        name: spec.name,
+        rss: spec.rss + Math.floor(Math.random() * 400 - 200),
+        state: STATES[Math.floor(Math.random() * STATES.length)],
+        cmdline: cmdlineFor(spec.name, pid),
+        fds: fdsFor(spec.name),
+        startedAtUptime: uptimeSeconds,
+      };
+      alive.set(pid, proc);
+      return proc;
+    }
+
+    function cmdlineFor(name, pid) {
+      switch (name) {
+        case 'sshd': return '/usr/sbin/sshd-D';
+        case 'bash': return '-bash';
+        case 'nginx': return 'nginx: worker process';
+        case 'python3': return '/usr/bin/python3/home/user/app.py';
+        case 'postgres': return '/usr/lib/postgresql/16/bin/postgres-D/var/lib/postgresql/data';
+        case 'node': return '/usr/bin/node/home/user/server.js';
+        case 'cron': return '/usr/sbin/cron-f';
+        default: return '/usr/bin/' + name;
+      }
+    }
+    function fdsFor(name) {
+      const base = [
+        { fd: 0, target: '/dev/pts/0' },
+        { fd: 1, target: '/dev/pts/0' },
+        { fd: 2, target: '/dev/pts/0' },
+      ];
+      if (name === 'nginx') return [...base.slice(1), { fd: 3, target: 'socket:[8842]' }, { fd: 4, target: '/var/log/nginx/access.log' }];
+      if (name === 'postgres') return [{ fd: 3, target: '/var/lib/postgresql/data/base/16394/2610' }, { fd: 4, target: 'socket:[9213]' }];
+      if (name === 'python3') return [...base, { fd: 3, target: '/home/user/app.py' }];
+      return base;
+    }
+
+    // Shared cleanup whenever the currently-selected process disappears,
+    // whether the user clicked "kill" or it exited on its own via churn --
+    // both paths must leave the terminal in the same honest state instead
+    // of silently showing stale data for a process that no longer exists.
+    function clearSelectionIfDead(pid) {
+      if (selectedPid !== pid) return;
+      selectedPid = null;
+      selectedPath = null;
+      readRequestSeq++; // invalidate any pending "reading..." render for the process that just died
+      renderProcPaths();
+      terminalEl.textContent = 'That process just exited -- /proc/' + pid + ' no longer exists. Pick another process or a system-wide path.';
+      explainEl.textContent = '';
+      currentPathLabel.textContent = 'Terminal';
+    }
+
+    function killProcess(pid) {
+      const p = alive.get(pid);
+      if (!p) return;
+      alive.delete(pid);
+      log(p.name + ' (PID ' + pid + ') exited -- /proc/' + pid + ' is gone.', 'exit');
+      clearSelectionIfDead(pid);
+      renderProcList();
+    }
+
+    function churnTick() {
+      uptimeSeconds += 6;
+      idleSeconds += 6 * (CORES - (alive.size / (POOL.length + 1)));
+      const roll = Math.random();
+      const candidates = [...alive.keys()];
+      if (candidates.length > 2 && roll < 0.35) {
+        const victim = candidates[Math.floor(Math.random() * candidates.length)];
+        const p = alive.get(victim);
+        alive.delete(victim);
+        log(p.name + ' (PID ' + victim + ') exited on its own.', 'exit');
+        clearSelectionIfDead(victim);
+      } else if (alive.size < POOL.length && roll > 0.4) {
+        const p = spawnOne();
+        if (p) log('New process: ' + p.name + ' (PID ' + p.pid + ') started.', 'spawn');
+      }
+      renderProcList();
+    }
+
+    function renderProcList() {
+      aliveCountEl.textContent = alive.size;
+      procListEl.innerHTML = '';
+      [...alive.values()].sort((a, b) => a.pid - b.pid).forEach(p => {
+        const row = document.createElement('div');
+        row.className = 'pf-proc-row' + (p.pid === selectedPid ? ' selected' : '');
+        row.innerHTML =
+          '<span class="pf-proc-pid">' + p.pid + '</span>' +
+          '<span class="pf-proc-name">' + p.name + '</span>' +
+          '<span class="pf-proc-state ' + p.state + '">' + p.state + '</span>' +
+          '<span class="pf-proc-rss">' + p.rss.toLocaleString() + ' kB</span>' +
+          '<button class="pf-btn small danger" data-kill="' + p.pid + '">kill</button>';
+        row.addEventListener('click', (e) => {
+          if (e.target.dataset.kill) return;
+          selectedPid = p.pid;
+          selectedPath = null;
+          renderProcList();
+          renderProcPaths();
+        });
+        procListEl.appendChild(row);
+      });
+      procListEl.querySelectorAll('[data-kill]').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          killProcess(parseInt(btn.dataset.kill, 10));
+        });
+      });
+    }
+
+    function renderProcPaths() {
+      if (selectedPid === null || !alive.has(selectedPid)) {
+        procPathsEl.innerHTML = '';
+        procPathsEl.appendChild(procPathsHint);
+        return;
+      }
+      procPathsEl.innerHTML = '';
+      const pid = selectedPid;
+      [['status', '/proc/' + pid + '/status'], ['cmdline', '/proc/' + pid + '/cmdline'], ['fd', '/proc/' + pid + '/fd/']].forEach(([key, label]) => {
+        const btn = document.createElement('button');
+        btn.className = 'pf-path-btn' + (selectedPath === key ? ' active' : '');
+        btn.textContent = label;
+        btn.addEventListener('click', () => showPath(key, pid));
+        procPathsEl.appendChild(btn);
+      });
+    }
+
+    // If the user clicks a second path before the first one's "reading..."
+    // delay finishes, the first click's render must not be allowed to fire
+    // later and clobber whatever the second click already displayed --
+    // each call gets its own token (readRequestSeq, declared above), and a
+    // stale one is a silent no-op.
+    function readingThen(pathLabel, renderFn) {
+      currentPathLabel.textContent = pathLabel;
+      terminalEl.innerHTML = '<span class="reading">reading ' + pathLabel + ' ...</span>';
+      const myRequest = ++readRequestSeq;
+      setTimeout(() => {
+        if (myRequest !== readRequestSeq) return; // superseded by a later click
+        renderFn();
+      }, 350);
+    }
+
+    function showPath(key, pid) {
+      selectedPath = key;
+      systemPathBtns.forEach(b => b.classList.remove('active'));
+      renderProcPaths();
+      const p = alive.get(pid);
+      if (!p) return;
+
+      if (key === 'status') {
+        readingThen('/proc/' + pid + '/status', () => {
+          const stateWord = { R: 'R (running)', S: 'S (sleeping, interruptible)', D: 'D (uninterruptible sleep)' }[p.state] || p.state;
+          const lsLine = lsLine1('/proc/' + pid + '/status');
+          terminalEl.innerHTML =
+            lsLine +
+            '<span class="prompt">$ </span><span class="cmd">cat /proc/' + pid + '/status</span>\n' +
+            '<span class="out">Name:\t' + p.name + '\n' +
+            'State:\t' + stateWord + '\n' +
+            'Pid:\t' + pid + '\n' +
+            'PPid:\t1\n' +
+            'Threads:\t' + (1 + (p.name === 'nginx' || p.name === 'postgres' ? 4 : 0)) + '\n' +
+            'VmRSS:\t' + p.rss.toLocaleString() + ' kB</span>';
+          explainEl.innerHTML = 'This is generated fresh from the process\'s CURRENT state -- <code>VmRSS</code> and <code>State</code> can differ the next time you read it, because the process is actually still running.';
+        });
+      } else if (key === 'cmdline') {
+        readingThen('/proc/' + pid + '/cmdline', () => {
+          const lsLine = lsLine1('/proc/' + pid + '/cmdline');
+          terminalEl.innerHTML =
+            lsLine +
+            '<span class="prompt">$ </span><span class="cmd">cat /proc/' + pid + '/cmdline</span>\n' +
+            '<span class="out">' + p.cmdline + '</span>';
+          explainEl.textContent = 'No spaces between arguments on purpose -- cmdline separates them with NUL bytes, and most terminals just render those as nothing.';
+        });
+      } else if (key === 'fd') {
+        readingThen('/proc/' + pid + '/fd/', () => {
+          const lsLine = lsLine1('/proc/' + pid + '/fd', true);
+          const rows = p.fds.map(f => f.fd + ' -> ' + f.target).join('\n');
+          terminalEl.innerHTML =
+            lsLine +
+            '<span class="prompt">$ </span><span class="cmd">ls -l /proc/' + pid + '/fd/</span>\n' +
+            '<span class="out">' + rows + '</span>';
+          explainEl.textContent = 'These are the actual open file descriptors for this process right now -- this is exactly how you\'d find out "who has this file open" on a real system.';
+        });
+      }
+    }
+
+    function lsLine1(path, isDir) {
+      return '<span class="ls-line">-r--r--r-- 1 root root <span class="ls-size">0</span> ' + timeLabel() + ' ' + path + (isDir ? '/' : '') + '</span>\n';
+    }
+    function timeLabel() {
+      const h = new Date().getHours().toString().padStart(2, '0');
+      const m = new Date().getMinutes().toString().padStart(2, '0');
+      return 'Jan  1 ' + h + ':' + m;
+    }
+
+    function currentMeminfo() {
+      const usedByProcs = [...alive.values()].reduce((a, p) => a + p.rss, 0);
+      const memFree = MEM_TOTAL_KB - BASELINE_KB - BUFFERS_KB - CACHED_KB - usedByProcs;
+      const memAvailable = memFree + BUFFERS_KB + Math.floor(CACHED_KB * 0.9);
+      return { memFree, memAvailable, usedByProcs };
+    }
+    function currentLoadavg() {
+      const target = Math.max(0.02, (alive.size) / CORES);
+      const l1 = (target + (Math.random() * 0.2 - 0.1)).toFixed(2);
+      const l5 = (target * 0.9 + (Math.random() * 0.1 - 0.05)).toFixed(2);
+      const l15 = (target * 0.75 + (Math.random() * 0.06 - 0.03)).toFixed(2);
+      const runningNow = Math.max(1, Math.round(alive.size * (0.2 + Math.random() * 0.3)));
+      const totalProcs = 420 + alive.size * 6 + Math.floor(Math.random() * 20);
+      const lastPid = nextPid - 1;
+      return { l1, l5, l15, runningNow, totalProcs, lastPid };
+    }
+
+    function showSystemPath(path, btn) {
+      selectedPath = path;
+      systemPathBtns.forEach(b => b.classList.toggle('active', b === btn));
+      selectedPid = null;
+      renderProcList();
+      renderProcPaths();
+
+      if (path === 'cpuinfo') {
+        readingThen('/proc/cpuinfo', () => {
+          terminalEl.innerHTML =
+            lsLine1('/proc/cpuinfo') +
+            '<span class="prompt">$ </span><span class="cmd">cat /proc/cpuinfo</span>\n' +
+            '<span class="out">processor\t: 0\n' +
+            'vendor_id\t: GenuineIntel\n' +
+            'model name\t: Intel(R) Core(TM) i7-9750H\n' +
+            'cpu cores\t: ' + CORES + '\n' +
+            'cpu MHz\t\t: 2600.000\n' +
+            'flags\t\t: fpu vme sse sse2 avx avx2 ...</span>';
+          explainEl.textContent = 'This one barely changes call to call -- the CPU\'s identity is fixed hardware, unlike the other files here. It\'s still generated fresh every read, it just doesn\'t have much reason to differ.';
+        });
+      } else if (path === 'meminfo') {
+        readingThen('/proc/meminfo', () => {
+          const m = currentMeminfo();
+          terminalEl.innerHTML =
+            lsLine1('/proc/meminfo') +
+            '<span class="prompt">$ </span><span class="cmd">cat /proc/meminfo</span>\n' +
+            '<span class="out">MemTotal:\t' + MEM_TOTAL_KB.toLocaleString() + ' kB\n' +
+            'MemFree:\t' + m.memFree.toLocaleString() + ' kB\n' +
+            'MemAvailable:\t' + m.memAvailable.toLocaleString() + ' kB\n' +
+            'Buffers:\t' + BUFFERS_KB.toLocaleString() + ' kB\n' +
+            'Cached:\t\t' + CACHED_KB.toLocaleString() + ' kB\n' +
+            'SwapTotal:\t' + SWAP_TOTAL_KB.toLocaleString() + ' kB\n' +
+            'SwapFree:\t' + SWAP_TOTAL_KB.toLocaleString() + ' kB</span>';
+          explainEl.innerHTML = '<code>MemFree</code> right now reflects ' + alive.size + ' live process(es) using ' + m.usedByProcs.toLocaleString() + ' kB combined. Kill a process (or wait for one to spawn) and read this again -- the number moves.';
+        });
+      } else if (path === 'uptime') {
+        readingThen('/proc/uptime', () => {
+          terminalEl.innerHTML =
+            lsLine1('/proc/uptime') +
+            '<span class="prompt">$ </span><span class="cmd">cat /proc/uptime</span>\n' +
+            '<span class="out">' + uptimeSeconds.toFixed(2) + ' ' + idleSeconds.toFixed(2) + '</span>';
+          explainEl.textContent = 'First number: seconds since boot. Second: idle time summed across all ' + CORES + ' cores -- that\'s why it\'s so much bigger than the uptime itself, not a typo.';
+        });
+      } else if (path === 'loadavg') {
+        readingThen('/proc/loadavg', () => {
+          const l = currentLoadavg();
+          terminalEl.innerHTML =
+            lsLine1('/proc/loadavg') +
+            '<span class="prompt">$ </span><span class="cmd">cat /proc/loadavg</span>\n' +
+            '<span class="out">' + l.l1 + ' ' + l.l5 + ' ' + l.l15 + ' ' + l.runningNow + '/' + l.totalProcs + ' ' + l.lastPid + '</span>';
+          explainEl.textContent = 'This machine is simulated with ' + CORES + ' cores, so a load of ' + CORES + '.0 would mean fully busy. Right now there are ' + alive.size + ' named process(es) alive in this demo (the total-process count is scaled up to look like a real system, which always has far more processes than the handful shown here).';
+        });
+      }
+    }
+
+    systemPathBtns.forEach(btn => btn.addEventListener('click', () => showSystemPath(btn.dataset.path, btn)));
+
+    pauseBtn.addEventListener('click', () => {
+      churnPaused = !churnPaused;
+      pauseBtn.textContent = churnPaused ? '▶ Resume process churn' : '⏸ Pause process churn';
+    });
+
+    // seed initial processes
+    ['sshd', 'bash', 'nginx'].forEach(n => spawnOne(n));
+    log('System started. ' + alive.size + ' processes alive.', 'spawn');
+    renderProcList();
+    renderProcPaths();
+
+    uptimeTimer = setInterval(() => {
+      uptimeSeconds += 1;
+      idleSeconds += (CORES - (alive.size / (POOL.length + 1)));
+      uptimeEl.textContent = fmtUptime(uptimeSeconds);
+    }, 1000);
+    uptimeEl.textContent = fmtUptime(uptimeSeconds);
+
+    churnTimer = setInterval(() => { if (!churnPaused) churnTick(); }, 6000);
+  })();
+  </script>
+</div>
