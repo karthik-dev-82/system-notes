@@ -24,6 +24,7 @@ down and coming back to.
    base64_encoding
    databases_postgresql_mongodb_redis
    image_formats
+   threads_processes_synchronization
 
 Quick Navigation
 -----------------
@@ -78,3 +79,6 @@ Quick Navigation
    * - :doc:`image_formats`
      - SVG vs. PNG vs. JPEG, and when to use each
      - vector vs. raster, transparency, lossy/lossless compression
+   * - :doc:`threads_processes_synchronization`
+     - Threads, processes, and synchronization primitives in C++
+     - mutex, semaphore, condition variable, deadlock, race conditions

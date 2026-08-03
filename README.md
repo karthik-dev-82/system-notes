@@ -25,6 +25,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔠 **[Base64 Encoding](docs/source/base64_encoding.rst)** | Base64, ASCII, URL encoding, and hex, explained with analogies | Base64 alphabet, percent-encoding, MIME attachments, hex colors |
 | 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
+| 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
 
 ---
 
@@ -74,7 +75,8 @@ system-notes/
         ├── unicode_utf8_encoding.rst
         ├── base64_encoding.rst
         ├── databases_postgresql_mongodb_redis.rst
-        └── image_formats.rst
+        ├── image_formats.rst
+        └── threads_processes_synchronization.rst
 
 ```
 
