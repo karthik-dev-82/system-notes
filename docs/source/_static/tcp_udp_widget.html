@@ -208,6 +208,9 @@
     <label>Packet loss rate: <span id="lossVal">20%</span>
       <input type="range" id="lossSlider" min="0" max="60" value="20">
     </label>
+    <label>Animation speed: <span id="speedVal">0.4x</span>
+      <input type="range" id="speedSlider" min="0.2" max="2" step="0.1" value="0.4">
+    </label>
     <button class="nv-btn" id="sendBtn">Send 8 Packets</button>
     <button class="nv-btn secondary" id="resetBtn">Reset</button>
   </div>
@@ -258,6 +261,8 @@
     const resetBtn = document.getElementById('resetBtn');
     const lossSlider = document.getElementById('lossSlider');
     const lossVal = document.getElementById('lossVal');
+    const speedSlider = document.getElementById('speedSlider');
+    const speedVal = document.getElementById('speedVal');
     const modeButtons = root.querySelectorAll('.mode-btn');
     const modeNote = document.getElementById('modeNote');
     const statTime = document.getElementById('statTime');
@@ -358,20 +363,26 @@
 
     function lossRate() { return parseInt(lossSlider.value, 10) / 100; }
 
+    // Speed is a playback-speed multiplier, same convention as a video
+    // player: 1x = original pace, 0.4x = original pace stretched out
+    // to 2.5x the duration (slower), 2x = twice as fast.
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
     function runHandshake(done) {
       log('Starting 3-way handshake...', 'info');
       const w = laneWidth();
       const p1 = spawnPacket('SYN', 'nv-handshake');
-      flyTo(p1, 108 + w, 500, () => {
+      flyTo(p1, 108 + w, scaled(500), () => {
         log('SYN sent', 'good');
         p1.remove();
         const p2 = spawnPacket('SYN-ACK', 'nv-handshake');
         p2.style.left = (108 + w) + 'px';
-        flyTo(p2, 108, 500, () => {
+        flyTo(p2, 108, scaled(500), () => {
           log('SYN-ACK received', 'good');
           p2.remove();
           const p3 = spawnPacket('ACK', 'nv-handshake');
-          flyTo(p3, 108 + w, 400, () => {
+          flyTo(p3, 108 + w, scaled(400), () => {
             log('ACK sent -- connection established!', 'good');
             p3.remove();
             done();
@@ -382,7 +393,7 @@
 
     function sendOnePacket(i, isRetry) {
       const w = laneWidth();
-      const duration = 700 + Math.random() * 300;
+      const duration = scaled(700 + Math.random() * 300);
       const lost = Math.random() < lossRate();
       const label = String(i);
       const pkt = spawnPacket(label);
@@ -393,10 +404,10 @@
       flyTo(pkt, 108 + travelDistance, lost ? duration * (travelDistance / w) : duration, () => {
         if (lost) {
           pkt.classList.add('nv-lost');
-          after(250, () => pkt.remove());
+          after(scaled(250), () => pkt.remove());
           if (mode === 'tcp') {
             log('Packet #' + i + ' LOST -- detected, will resend', 'bad');
-            after(500, () => {
+            after(scaled(500), () => {
               retx++;
               statRetx.textContent = retx;
               sendOnePacket(i, true);
@@ -415,7 +426,7 @@
             log('Packet #' + i + ' delivered -- ACK sent back', 'good');
             const ack = spawnPacket('✓', 'nv-ack');
             ack.style.left = (108 + w) + 'px';
-            flyTo(ack, 108, 350, () => ack.remove());
+            flyTo(ack, 108, scaled(350), () => ack.remove());
           } else {
             log('Packet #' + i + ' delivered', 'good');
           }
@@ -462,7 +473,7 @@
 
       const beginSending = () => {
         for (let i = 1; i <= N; i++) {
-          after((i - 1) * 550, () => sendOnePacket(i, false));
+          after(scaled((i - 1) * 550), () => sendOnePacket(i, false));
         }
       };
 
@@ -475,6 +486,7 @@
     }
 
     lossSlider.addEventListener('input', () => { lossVal.textContent = lossSlider.value + '%'; });
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
     modeButtons.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
     sendBtn.addEventListener('click', start);
     resetBtn.addEventListener('click', reset);
