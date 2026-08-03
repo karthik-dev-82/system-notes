@@ -1,0 +1,380 @@
+<div class="chviz-root" id="chWidget">
+  <style>
+    #chWidget {
+      --ch-bg: #0f172a;
+      --ch-panel: #16213e;
+      --ch-border: #2a3655;
+      --ch-text: #e2e8f0;
+      --ch-muted: #94a3b8;
+      --ch-key: #64748b;
+      --ch-new: #f87171;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ch-bg);
+      color: var(--ch-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #chWidget * { box-sizing: border-box; }
+    #chWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #chWidget .ch-sub { color: var(--ch-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ch-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--ch-panel);
+      border: 1px solid var(--ch-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 900px;
+    }
+    .ch-controls label { font-size: 0.8rem; color: var(--ch-muted); display: flex; align-items: center; gap: 8px; }
+    .ch-controls input[type="range"] { width: 120px; accent-color: #38bdf8; }
+    .ch-btn { background: #38bdf8; color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ch-btn.secondary { background: transparent; color: var(--ch-text); border: 1px solid var(--ch-border); }
+    .ch-btn.danger { background: var(--ch-new); color: #2a0a0a; }
+    .ch-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .ch-main { display: flex; gap: 16px; flex-wrap: wrap; min-width: 900px; }
+    .ch-ring-panel { flex: 1.3; min-width: 420px; background: var(--ch-panel); border: 1px solid var(--ch-border); border-radius: 10px; padding: 14px; display: flex; justify-content: center; }
+    .ch-side { flex: 1; min-width: 340px; display: flex; flex-direction: column; gap: 14px; }
+    .ch-box { background: var(--ch-panel); border: 1px solid var(--ch-border); border-radius: 10px; padding: 12px 14px; }
+    .ch-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ch-muted); margin-bottom: 8px; }
+
+    .ch-compare-row { display: flex; gap: 10px; }
+    .ch-compare-col { flex: 1; text-align: center; border-radius: 8px; padding: 10px 6px; }
+    .ch-compare-col.naive { background: rgba(248,113,113,0.12); }
+    .ch-compare-col.consistent { background: rgba(74,222,128,0.12); }
+    .ch-compare-pct { font-size: 1.7rem; font-weight: 800; font-family: ui-monospace, monospace; }
+    .ch-compare-col.naive .ch-compare-pct { color: var(--ch-new); }
+    .ch-compare-col.consistent .ch-compare-pct { color: #4ade80; }
+    .ch-compare-caption { font-size: 0.72rem; color: var(--ch-muted); margin-top: 4px; }
+
+    .ch-load-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.78rem; }
+    .ch-load-label { width: 76px; flex-shrink: 0; font-family: ui-monospace, monospace; }
+    .ch-load-bar-bg { flex: 1; height: 14px; background: #0a1128; border-radius: 4px; overflow: hidden; }
+    .ch-load-bar-fill { height: 100%; border-radius: 4px; transition: width 0.4s; }
+    .ch-load-count { width: 30px; text-align: right; font-family: ui-monospace, monospace; }
+
+    .ch-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .ch-log div { color: var(--ch-muted); }
+    .ch-log div.add { color: #4ade80; }
+    .ch-log div.remove { color: var(--ch-new); }
+    .ch-log div.info { color: #38bdf8; }
+
+    svg.ch-ring { width: 100%; max-width: 420px; height: auto; }
+    .ch-server-dot { stroke: #0f172a; stroke-width: 2; }
+    .ch-server-label { font-size: 11px; font-weight: 700; fill: #fff; }
+    .ch-key-dot { fill: var(--ch-key); opacity: 0.85; }
+    .ch-key-dot.moved { animation: chPulse 1.2s ease-out; }
+    @keyframes chPulse {
+      0% { r: 3; opacity: 1; }
+      40% { r: 8; opacity: 1; }
+      100% { r: 3; opacity: 0.85; }
+    }
+    .ch-arc { fill: none; stroke-width: 22; opacity: 0.14; }
+    .ch-ring-line { fill: none; stroke: var(--ch-border); stroke-width: 2; }
+
+    details.ch-notes {
+      margin-top: 14px;
+      background: var(--ch-panel);
+      border: 1px solid var(--ch-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      min-width: 900px;
+      font-size: 0.85rem;
+      line-height: 1.6;
+    }
+    details.ch-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ch-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ch-muted); }
+    details.ch-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: #38bdf8; }
+  </style>
+
+  <h3>Consistent Hashing: Watch the Ring</h3>
+  <div class="ch-sub">Servers and keys both land on the same ring by hashing their names. Every key belongs to whichever server is next, going clockwise. Add or remove a server and watch exactly how few keys actually move.</div>
+
+  <div class="ch-controls">
+    <button class="ch-btn" id="chAddBtn">+ Add Server</button>
+    <button class="ch-btn danger" id="chRemoveBtn">− Remove Last Server</button>
+    <label>Virtual nodes per server: <span id="chVNodeVal">1</span>
+      <input type="range" id="chVNodeSlider" min="1" max="30" step="1" value="1">
+    </label>
+    <button class="ch-btn secondary" id="chResetBtn">Reset</button>
+  </div>
+
+  <div class="ch-main">
+    <div class="ch-ring-panel">
+      <svg class="ch-ring" viewBox="0 0 420 420" id="chSvg"></svg>
+    </div>
+    <div class="ch-side">
+      <div class="ch-box">
+        <div class="ch-panel-title">This event, compared</div>
+        <div class="ch-compare-row" id="chCompareRow">
+          <div class="ch-compare-col naive">
+            <div class="ch-compare-pct" id="chNaivePct">--</div>
+            <div class="ch-compare-caption">of keys would move with naive modulo hashing (key_hash % N, recomputed for everyone)</div>
+          </div>
+          <div class="ch-compare-col consistent">
+            <div class="ch-compare-pct" id="chConsistentPct">--</div>
+            <div class="ch-compare-caption">of keys actually moved on this ring, just now</div>
+          </div>
+        </div>
+      </div>
+      <div class="ch-box">
+        <div class="ch-panel-title">Keys per server</div>
+        <div id="chLoadBars"></div>
+      </div>
+      <div class="ch-box">
+        <div class="ch-panel-title">Event log</div>
+        <div class="ch-log" id="chLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ch-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The rule for finding a key's server is always the same: walk clockwise from the key's position
+        until you hit the first server point. That's the entire algorithm -- everything else (virtual nodes,
+        rebalancing) is about making that rule behave well, not changing the rule itself.</li>
+      <li>Try the virtual-node slider at <code>1</code> a few times via Reset -- notice the "keys per server"
+        distribution can be quite lopsided depending on where the servers' single points happen to land. That's
+        real, not a bug: with one point per server, whichever server happens to own the largest arc gets the
+        most keys, purely by chance of where its hash landed. Turning virtual nodes up spreads each server
+        across many small arcs instead of one big one, and the total (the sum of many small, mostly-averaging-out
+        arcs) balances out far more reliably. This is exactly the caveat mentioned on the main
+        <a href="hash_load_balancer.html">Hash Load Balancer</a> page.</li>
+      <li>The "naive modulo" percentage shown after each add/remove isn't a fixed number -- it's recomputed live
+        for the exact same key set and the exact same before/after server count, so it's a fair, direct,
+        apples-to-apples comparison against what actually happened on the ring.</li>
+      <li>Real systems (Cassandra, DynamoDB-style partitioning, many CDNs and client-side sharding libraries) use
+        this exact idea, almost always with virtual nodes, sometimes numbering in the hundreds per physical
+        node specifically to keep the load-balance tight even as nodes are added and removed over the system's
+        lifetime.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const RING_SIZE = 100000;
+
+    function fnv1aHash(str) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return (h >>> 0);
+    }
+    function ringPos(str) { return fnv1aHash(str) % RING_SIZE; }
+
+    function buildRing(servers, vnodes) {
+      const points = [];
+      servers.forEach(srv => {
+        for (let v = 0; v < vnodes; v++) points.push({ pos: ringPos(srv + '#' + v), server: srv });
+      });
+      points.sort((a, b) => a.pos - b.pos);
+      return points;
+    }
+    function assign(keyPos, ringPoints) {
+      for (const p of ringPoints) if (p.pos >= keyPos) return p.server;
+      return ringPoints[0].server;
+    }
+    function assignAll(keys, ringPoints) {
+      const map = {};
+      keys.forEach(k => { map[k] = assign(ringPos(k), ringPoints); });
+      return map;
+    }
+    function naiveModuloReshufflePct(keys, serversBefore, serversAfter) {
+      let moved = 0;
+      keys.forEach(k => {
+        const h = ringPos(k);
+        const before = serversBefore[h % serversBefore.length];
+        const after = serversAfter[h % serversAfter.length];
+        if (before !== after) moved++;
+      });
+      return moved / keys.length;
+    }
+
+    const KEYS = Array.from({ length: 28 }, (_, i) => 'user' + (i + 1));
+    const COLORS = ['#4ade80', '#38bdf8', '#c084fc', '#fbbf24', '#fb7185', '#2dd4bf', '#a3e635', '#f472b6'];
+
+    const svg = document.getElementById('chSvg');
+    const addBtn = document.getElementById('chAddBtn');
+    const removeBtn = document.getElementById('chRemoveBtn');
+    const resetBtn = document.getElementById('chResetBtn');
+    const vnodeSlider = document.getElementById('chVNodeSlider');
+    const vnodeVal = document.getElementById('chVNodeVal');
+    const naivePctEl = document.getElementById('chNaivePct');
+    const consistentPctEl = document.getElementById('chConsistentPct');
+    const loadBarsEl = document.getElementById('chLoadBars');
+    const logEl = document.getElementById('chLog');
+
+    let servers, vnodes, assignments, serverColor, nextServerLetter;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function colorFor(server) {
+      if (!serverColor[server]) {
+        serverColor[server] = COLORS[Object.keys(serverColor).length % COLORS.length];
+      }
+      return serverColor[server];
+    }
+
+    function resetState() {
+      servers = ['ServerA', 'ServerB', 'ServerC'];
+      serverColor = {};
+      servers.forEach(colorFor);
+      nextServerLetter = 68; // 'D'
+      vnodes = parseInt(vnodeSlider.value, 10);
+      const ring = buildRing(servers, vnodes);
+      assignments = assignAll(KEYS, ring);
+      logEl.innerHTML = '';
+      naivePctEl.textContent = '--';
+      consistentPctEl.textContent = '--';
+      log('Ring reset with 3 servers and ' + KEYS.length + ' keys.', 'info');
+      render([]);
+      updateRemoveDisabled();
+    }
+
+    function updateRemoveDisabled() {
+      removeBtn.disabled = servers.length <= 1;
+    }
+
+    function angleFor(pos) { return (pos / RING_SIZE) * Math.PI * 2 - Math.PI / 2; }
+    function pointOnRing(pos, radius) {
+      const a = angleFor(pos);
+      return { x: 210 + radius * Math.cos(a), y: 210 + radius * Math.sin(a) };
+    }
+
+    function render(movedKeys) {
+      const ring = buildRing(servers, vnodes);
+      svg.innerHTML = '';
+
+      // ring circle
+      const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      circle.setAttribute('cx', 210); circle.setAttribute('cy', 210); circle.setAttribute('r', 150);
+      circle.setAttribute('class', 'ch-ring-line');
+      svg.appendChild(circle);
+
+      // owned arcs (only draw the PRIMARY point per server -- v=0 -- as a
+      // labelled marker; draw all virtual-node points as small ticks so the
+      // ring visibly gets denser as the slider increases)
+      ring.forEach(p => {
+        const outer = pointOnRing(p.pos, 150);
+        const tick = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        tick.setAttribute('cx', outer.x); tick.setAttribute('cy', outer.y); tick.setAttribute('r', 4);
+        tick.setAttribute('fill', colorFor(p.server));
+        tick.setAttribute('class', 'ch-server-dot');
+        svg.appendChild(tick);
+      });
+
+      // primary server labels (one per physical server, using its v=0 point)
+      servers.forEach(srv => {
+        const pos = ringPos(srv + '#0');
+        const outer = pointOnRing(pos, 178);
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', outer.x); text.setAttribute('y', outer.y);
+        text.setAttribute('text-anchor', 'middle');
+        text.setAttribute('class', 'ch-server-label');
+        text.setAttribute('fill', colorFor(srv));
+        text.textContent = srv.replace('Server', '');
+        svg.appendChild(text);
+      });
+
+      // keys
+      KEYS.forEach(k => {
+        const pos = ringPos(k);
+        const p = pointOnRing(pos, 120);
+        const dot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        dot.setAttribute('cx', p.x); dot.setAttribute('cy', p.y); dot.setAttribute('r', 3);
+        dot.setAttribute('class', 'ch-key-dot' + (movedKeys.includes(k) ? ' moved' : ''));
+        dot.setAttribute('fill', colorFor(assignments[k]));
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = k + ' -> ' + assignments[k];
+        dot.appendChild(title);
+        svg.appendChild(dot);
+      });
+
+      renderLoadBars();
+    }
+
+    function renderLoadBars() {
+      const counts = {};
+      servers.forEach(s => counts[s] = 0);
+      Object.values(assignments).forEach(s => counts[s] = (counts[s] || 0) + 1);
+      loadBarsEl.innerHTML = '';
+      servers.forEach(s => {
+        const row = document.createElement('div');
+        row.className = 'ch-load-row';
+        const pct = (counts[s] / KEYS.length) * 100;
+        row.innerHTML =
+          '<div class="ch-load-label">' + s.replace('Server', 'Srv ') + '</div>' +
+          '<div class="ch-load-bar-bg"><div class="ch-load-bar-fill" style="width:' + pct + '%; background:' + colorFor(s) + ';"></div></div>' +
+          '<div class="ch-load-count">' + counts[s] + '</div>';
+        loadBarsEl.appendChild(row);
+      });
+    }
+
+    function reassignAndAnimate(newServers, eventLabel, eventCls) {
+      const before = assignments;
+      const ring = buildRing(newServers, vnodes);
+      const after = assignAll(KEYS, ring);
+      const moved = KEYS.filter(k => before[k] !== after[k]);
+
+      const naivePct = naiveModuloReshufflePct(KEYS, servers, newServers);
+      const consistentPct = moved.length / KEYS.length;
+      naivePctEl.textContent = (naivePct * 100).toFixed(0) + '%';
+      consistentPctEl.textContent = (consistentPct * 100).toFixed(0) + '%';
+
+      servers = newServers;
+      assignments = after;
+      log(eventLabel + ' -- ' + moved.length + '/' + KEYS.length + ' keys moved (' + (consistentPct * 100).toFixed(0) + '%). Naive modulo would have moved ' + (naivePct * 100).toFixed(0) + '%.', eventCls);
+      if (moved.length > 0) {
+        log('Moved: ' + moved.join(', '), eventCls);
+      }
+      render(moved);
+      updateRemoveDisabled();
+    }
+
+    function addServer() {
+      const name = 'Server' + String.fromCharCode(nextServerLetter);
+      nextServerLetter++;
+      log('Adding ' + name + '...', 'add');
+      reassignAndAnimate([...servers, name], 'Added ' + name, 'add');
+    }
+
+    function removeServer() {
+      if (servers.length <= 1) return;
+      const removed = servers[servers.length - 1];
+      log('Removing ' + removed + '...', 'remove');
+      reassignAndAnimate(servers.slice(0, -1), 'Removed ' + removed, 'remove');
+    }
+
+    addBtn.addEventListener('click', addServer);
+    removeBtn.addEventListener('click', removeServer);
+    resetBtn.addEventListener('click', resetState);
+    vnodeSlider.addEventListener('input', () => {
+      vnodeVal.textContent = vnodeSlider.value;
+      vnodes = parseInt(vnodeSlider.value, 10);
+      const ring = buildRing(servers, vnodes);
+      assignments = assignAll(KEYS, ring);
+      log('Virtual nodes per server set to ' + vnodes + '.', 'info');
+      render([]);
+    });
+
+    resetState();
+  })();
+  </script>
+</div>

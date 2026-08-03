@@ -32,6 +32,7 @@ down and coming back to.
    tcp_congestion_control_interactive
    docker_packet_journey_interactive
    threads_sync_interactive
+   consistent_hashing_interactive
 
 Quick Navigation
 -----------------
@@ -110,3 +111,6 @@ Quick Navigation
    * - :doc:`threads_sync_interactive`
      - Interactive threads & synchronization -- step through race conditions and deadlock yourself
      - mutex, semaphore, condition variable, race condition, deadlock
+   * - :doc:`consistent_hashing_interactive`
+     - Interactive consistent hashing ring -- add/remove servers and watch what actually moves
+     - hash ring, virtual nodes, reshuffling, load balancing

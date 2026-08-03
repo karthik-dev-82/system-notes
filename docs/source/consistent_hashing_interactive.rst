@@ -1,0 +1,54 @@
+Consistent Hashing: Watch the Ring
+========================================
+
+:doc:`hash_load_balancer` establishes the numbers: going from 3 to 4
+servers reshuffles 75% of users under naive modulo hashing, but only
+about 25% under consistent hashing. This page is the mechanism behind
+that second number, made visible -- a real ring, with real servers and
+keys placed on it by hashing their names, where you can add and remove
+servers yourself and watch exactly which keys move.
+
+Play With It
+------------------
+
+Both servers and keys are placed on the same ring by hashing their
+names down to a position on it. Every key belongs to whichever server
+comes next going clockwise. Add a server and watch only the keys in
+its new slice of the ring move to it; remove one and watch only its
+former keys get picked up by whoever's next -- everyone else on the
+ring never even notices.
+
+.. raw:: html
+   :file: _static/consistent_hash_widget.html
+
+Reading the Comparison Panel
+------------------------------------
+
+Every time you add or remove a server, the panel on the right computes
+*two* numbers for that exact same event, on the exact same set of
+keys: what naive modulo hashing (``key_hash % server_count``,
+recomputed from scratch) would have done, versus what actually
+happened on the ring. That's not a canned statistic -- it's the same
+comparison from :doc:`hash_load_balancer` recomputed live, so you can
+watch the gap between the two approaches hold up under server counts
+and events you chose yourself, not just the one worked example in the
+text.
+
+Why the Virtual-Node Slider Matters
+--------------------------------------------
+
+Set virtual nodes to 1 and hit Reset a few times: the "keys per
+server" bars can come out quite lopsided, purely because of where each
+server's single ring position happened to land -- one server might
+own a huge arc, another a tiny sliver, entirely by chance of the hash.
+That's not a flaw in the demo; it's the real, documented weakness of a
+naive one-point-per-server ring. Turn virtual nodes up and each server
+gets spread across many small arcs instead of one big one, and the
+totals balance out far more reliably -- the same fix real systems
+(Cassandra, DynamoDB-style partitioning, most CDNs) actually use, often
+with virtual node counts in the hundreds per physical server.
+
+See :doc:`hash_load_balancer` for the modulo-hashing walkthrough this
+page builds on, including the exact 75%-vs-25% figures and the
+production use cases (sticky sessions, cache routing, CDN edge
+selection) that make any of this matter in the first place.
