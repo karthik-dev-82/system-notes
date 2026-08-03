@@ -300,6 +300,15 @@
       { id: 'hostnic',   label: 'Host NIC',                 icon: '🖧', side: 'host' },
       { id: 'external',  label: 'Internet / Server',        icon: '☁️', side: 'host' },
     ];
+
+    // The "external" station means a different real-world thing depending on
+    // direction -- a server the container is calling out to (outbound) vs. a
+    // client calling in from somewhere on the internet (inbound). Reusing the
+    // same cloud icon/label for both was confusing, so swap it per mode.
+    const EXTERNAL_VISUAL = {
+      outbound: { icon: '☁️', label: 'Internet Server (google.com)' },
+      inbound:  { icon: '💻', label: "External Client (someone's browser)" },
+    };
     const HUB_SUBS = ['pre', 'route', 'fwd', 'post'];
     const HUB_SUB_LABEL = { pre: 'PRE', route: 'ROUTE', fwd: 'FWD', post: 'POST' };
 
@@ -484,9 +493,10 @@
             '</div>' +
             '<div class="pj-label">' + m.label + '</div>';
         } else {
+          const visual = m.id === 'external' ? EXTERNAL_VISUAL[mode] : m;
           el.innerHTML =
-            '<div class="pj-box">' + m.icon + '</div>' +
-            '<div class="pj-label">' + m.label + '</div>';
+            '<div class="pj-box">' + visual.icon + '</div>' +
+            '<div class="pj-label">' + visual.label + '</div>';
         }
         track.appendChild(el);
       });
@@ -626,6 +636,7 @@
       if (playing) pause();
       mode = m;
       modeButtons.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      buildTrack();
       reset();
     }
 
