@@ -35,6 +35,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
 | 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
+| 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
+| 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
 
 ---
 
@@ -95,6 +97,8 @@ system-notes/
         ├── threads_sync_interactive.rst
         ├── consistent_hashing_interactive.rst
         ├── proc_filesystem_interactive.rst
+        ├── linux_fs_basics_interactive.rst
+        ├── overlayfs_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
@@ -102,7 +106,9 @@ system-notes/
             ├── docker_packet_journey_widget.html
             ├── threads_sync_widget.html
             ├── consistent_hash_widget.html
-            └── proc_explorer_widget.html
+            ├── proc_explorer_widget.html
+            ├── linux_fs_basics_widget.html
+            └── overlayfs_widget.html
 
 ```
 

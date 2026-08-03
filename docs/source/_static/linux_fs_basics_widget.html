@@ -1,0 +1,483 @@
+<div class="lfviz-root" id="lfWidget">
+  <style>
+    #lfWidget {
+      --lf-bg: #0f172a;
+      --lf-panel: #16213e;
+      --lf-border: #2a3655;
+      --lf-text: #e2e8f0;
+      --lf-muted: #94a3b8;
+      --lf-good: #4ade80;
+      --lf-bad: #f87171;
+      --lf-warn: #fbbf24;
+      --lf-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--lf-bg);
+      color: var(--lf-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #lfWidget * { box-sizing: border-box; }
+    #lfWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #lfWidget h4 { margin: 0 0 10px; font-size: 0.9rem; color: #fff; }
+    #lfWidget .lf-sub { color: var(--lf-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .lf-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 820px; }
+    .lf-tab { background: var(--lf-panel); color: var(--lf-muted); border: 1px solid var(--lf-border); border-radius: 8px; padding: 9px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .lf-tab.active { background: var(--lf-accent); color: #041322; border-color: var(--lf-accent); }
+    .lf-panel { display: none; }
+    .lf-panel.active { display: block; }
+
+    .lf-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--lf-panel); border: 1px solid var(--lf-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 820px; }
+    .lf-btn { background: var(--lf-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .lf-btn.secondary { background: transparent; color: var(--lf-text); border: 1px solid var(--lf-border); }
+    .lf-btn.danger { background: var(--lf-bad); color: #2a0a0a; }
+    .lf-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .lf-main { display: flex; gap: 16px; flex-wrap: wrap; min-width: 820px; }
+    .lf-col { flex: 1; min-width: 340px; }
+    .lf-box { background: var(--lf-panel); border: 1px solid var(--lf-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .lf-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--lf-muted); margin-bottom: 8px; }
+
+    /* --- Tab A: inodes --- */
+    .lf-dirent-row { display: flex; align-items: center; gap: 10px; padding: 7px 8px; border-radius: 6px; font-size: 0.82rem; font-family: ui-monospace, monospace; }
+    .lf-dirent-row.gone { opacity: 0.35; text-decoration: line-through; }
+    .lf-dirent-name { flex: 1; font-weight: 700; }
+    .lf-dirent-arrow { color: var(--lf-muted); }
+    .lf-dirent-inode { color: var(--lf-accent); }
+    .lf-dirent-row.symlink .lf-dirent-inode { color: var(--lf-warn); }
+
+    .lf-inode-card { border: 2px solid var(--lf-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; font-size: 0.8rem; }
+    .lf-inode-card.file { border-color: var(--lf-accent); }
+    .lf-inode-card.symlink { border-color: var(--lf-warn); }
+    .lf-inode-card.freed { opacity: 0.4; border-style: dashed; }
+    .lf-inode-title { font-weight: 800; font-family: ui-monospace, monospace; margin-bottom: 4px; }
+    .lf-inode-title .file { color: var(--lf-accent); }
+    .lf-inode-row { color: var(--lf-muted); }
+    .lf-inode-row b { color: #fff; }
+
+    /* --- Tab B: mounting --- */
+    .lf-tree-node { border-left: 2px dashed var(--lf-border); margin-left: 12px; padding-left: 14px; }
+    .lf-tree-root { margin-left: 0; padding-left: 0; border-left: none; }
+    .lf-tree-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 6px; font-size: 0.82rem; font-family: ui-monospace, monospace; margin: 2px 0; cursor: pointer; }
+    .lf-tree-item:hover { background: #1c2b4d; }
+    .lf-tree-item.selected { outline: 1px solid var(--lf-accent); }
+    .lf-fstype-badge { font-size: 0.62rem; font-weight: 800; padding: 1px 6px; border-radius: 8px; text-transform: uppercase; }
+    .lf-fstype-badge.ext4 { background: #1e3a2f; color: var(--lf-good); }
+    .lf-fstype-badge.proc { background: #3a2c08; color: var(--lf-warn); }
+    .lf-fstype-badge.tmpfs { background: #1e2a4a; color: var(--lf-accent); }
+    .lf-fstype-badge.vfat { background: #3a1e2f; color: #f472b6; }
+
+    .lf-vfs-trace { font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.7; }
+    .lf-vfs-trace .step { display: block; padding: 3px 0; }
+    .lf-vfs-trace .arrow { color: var(--lf-muted); }
+    .lf-vfs-trace .hit { color: var(--lf-good); font-weight: 700; }
+
+    .lf-log { height: 130px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .lf-log div { color: var(--lf-muted); }
+    .lf-log div.good { color: var(--lf-good); }
+    .lf-log div.bad { color: var(--lf-bad); }
+    .lf-log div.warn { color: var(--lf-warn); }
+
+    .lf-explain { font-size: 0.85rem; line-height: 1.5; }
+
+    details.lf-notes {
+      margin-top: 14px; background: var(--lf-panel); border: 1px solid var(--lf-border); border-radius: 10px;
+      padding: 12px 16px; min-width: 820px; font-size: 0.85rem; line-height: 1.6;
+    }
+    details.lf-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.lf-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--lf-muted); }
+    details.lf-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--lf-accent); }
+  </style>
+
+  <h3>How Linux Filesystems Work</h3>
+  <div class="lf-sub">Two ideas underneath everything else: a file is really just a number (an inode), and the directory tree you see is actually several different filesystems stitched together at mount points.</div>
+
+  <div class="lf-tabs">
+    <button class="lf-tab active" data-tab="inodes">1. Inodes &amp; Links</button>
+    <button class="lf-tab" data-tab="mount">2. Mounting &amp; the VFS</button>
+  </div>
+
+  <!-- ============ TAB A: INODES ============ -->
+  <div class="lf-panel active" id="lf-panel-inodes">
+    <div class="lf-controls">
+      <button class="lf-btn" id="lfHardlinkBtn">ln report.txt backup.txt</button>
+      <button class="lf-btn" id="lfSymlinkBtn">ln -s report.txt shortcut.txt</button>
+      <button class="lf-btn danger" id="lfRmBtn">rm report.txt</button>
+      <button class="lf-btn secondary" id="lfResetInodesBtn">Reset</button>
+    </div>
+    <div class="lf-main">
+      <div class="lf-col">
+        <div class="lf-box">
+          <div class="lf-panel-title">Directory entries (names)</div>
+          <div id="lfDirents"></div>
+        </div>
+        <div class="lf-box">
+          <div class="lf-panel-title">Try reading each name</div>
+          <div class="lf-controls" style="min-width:0; margin-bottom:0;">
+            <button class="lf-btn secondary" data-cat="report.txt">cat report.txt</button>
+            <button class="lf-btn secondary" data-cat="backup.txt">cat backup.txt</button>
+            <button class="lf-btn secondary" data-cat="shortcut.txt">cat shortcut.txt</button>
+          </div>
+          <div class="lf-explain" id="lfCatResult" style="margin-top:10px;"></div>
+        </div>
+      </div>
+      <div class="lf-col">
+        <div class="lf-box">
+          <div class="lf-panel-title">Inodes (the actual files)</div>
+          <div id="lfInodes"></div>
+        </div>
+        <div class="lf-box">
+          <div class="lf-panel-title">Event log</div>
+          <div class="lf-log" id="lfInodeLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB B: MOUNTING / VFS ============ -->
+  <div class="lf-panel" id="lf-panel-mount">
+    <div class="lf-controls">
+      <button class="lf-btn" id="lfMountProcBtn">Mount procfs at /proc</button>
+      <button class="lf-btn" id="lfMountTmpBtn">Mount tmpfs at /tmp</button>
+      <button class="lf-btn" id="lfMountUsbBtn">Mount vfat (USB) at /mnt</button>
+      <button class="lf-btn danger" id="lfUnmountBtn" disabled>Unmount selected</button>
+      <button class="lf-btn secondary" id="lfResetMountBtn">Reset</button>
+    </div>
+    <div class="lf-main">
+      <div class="lf-col">
+        <div class="lf-box">
+          <div class="lf-panel-title">The directory tree (click a mount point to select it)</div>
+          <div id="lfTree"></div>
+        </div>
+      </div>
+      <div class="lf-col">
+        <div class="lf-box">
+          <div class="lf-panel-title">Try reading a path through the VFS</div>
+          <div class="lf-controls" style="min-width:0; margin-bottom:10px;">
+            <button class="lf-btn secondary" data-vfscat="/home/user/notes.txt">cat /home/user/notes.txt</button>
+            <button class="lf-btn secondary" data-vfscat="/proc/cpuinfo">cat /proc/cpuinfo</button>
+            <button class="lf-btn secondary" data-vfscat="/tmp/cache.dat">cat /tmp/cache.dat</button>
+            <button class="lf-btn secondary" data-vfscat="/mnt/photo.jpg">cat /mnt/photo.jpg</button>
+          </div>
+          <div class="lf-vfs-trace" id="lfVfsTrace">Pick a path above.</div>
+        </div>
+        <div class="lf-box">
+          <div class="lf-panel-title">Event log</div>
+          <div class="lf-log" id="lfMountLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="lf-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>A directory is itself basically just a file whose content is a list of (name, inode number) pairs.
+        That's what a "directory entry" is -- so <code>ls</code> is really reading a small file and printing
+        the names it finds, and <code>rm</code> is really just deleting one of those pairs.</li>
+      <li>Hard links can't cross filesystems (a hard link is genuinely a second name for the same inode
+        number, and inode numbers are only unique within one filesystem) and can't point at directories on
+        most systems (to keep the directory tree from becoming a graph with cycles). Symlinks have neither
+        restriction, since a symlink is just a file containing a path string -- it doesn't know or care what
+        filesystem that path resolves through.</li>
+      <li>The VFS (virtual filesystem switch) is the reason <code>open()</code>, <code>read()</code>,
+        <code>write()</code>, and <code>close()</code> work identically whether the file is on a spinning
+        disk, in RAM (<code>tmpfs</code>), doesn't physically exist at all (<code>procfs</code>, see
+        <a href="proc_filesystem_interactive.html">the live /proc explorer</a>), or is on another machine
+        entirely (NFS). Every filesystem type implements the same handful of operations the VFS expects, and userspace
+        code never has to know which one it's actually talking to.</li>
+      <li>Mounting something over a non-empty directory doesn't delete what was there -- it just becomes
+        unreachable until you unmount. This demo's /mnt example (try it in the Mounting tab) is exactly that:
+        the file that was already at that path reappears the instant you unmount, completely unchanged.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('lfWidget');
+
+    // ---------- Tab switching ----------
+    const tabs = root.querySelectorAll('.lf-tab');
+    const panels = { inodes: document.getElementById('lf-panel-inodes'), mount: document.getElementById('lf-panel-mount') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // =========================================================
+    // TAB A: INODES, HARD LINKS, SYMLINKS
+    // =========================================================
+    (function () {
+      const direntsEl = document.getElementById('lfDirents');
+      const inodesEl = document.getElementById('lfInodes');
+      const logEl = document.getElementById('lfInodeLog');
+      const catResultEl = document.getElementById('lfCatResult');
+      const hardlinkBtn = document.getElementById('lfHardlinkBtn');
+      const symlinkBtn = document.getElementById('lfSymlinkBtn');
+      const rmBtn = document.getElementById('lfRmBtn');
+      const resetBtn = document.getElementById('lfResetInodesBtn');
+      const catBtns = root.querySelectorAll('[data-cat]');
+
+      let nextInode, inodes, dirEntries;
+
+      function resetState() {
+        nextInode = 501;
+        inodes = new Map();
+        dirEntries = new Map();
+        const id = nextInode++;
+        inodes.set(id, { type: 'file', linkCount: 1, content: 'Q3 revenue: $482,000' });
+        dirEntries.set('report.txt', id);
+        logEl.innerHTML = '';
+        catResultEl.textContent = '';
+        logTo(logEl, 'Created report.txt (inode ' + id + ', link count 1).', 'good');
+        hardlinkBtn.disabled = false;
+        symlinkBtn.disabled = false;
+        rmBtn.disabled = false;
+        render();
+      }
+
+      function render() {
+        direntsEl.innerHTML = '';
+        dirEntries.forEach((id, name) => {
+          const inode = inodes.get(id);
+          const row = document.createElement('div');
+          row.className = 'lf-dirent-row' + (inode && inode.type === 'symlink' ? ' symlink' : '');
+          row.innerHTML = '<span class="lf-dirent-name">' + name + '</span><span class="lf-dirent-arrow">-></span><span class="lf-dirent-inode">inode ' + id + (inode && inode.type === 'symlink' ? ' (symlink data: "' + inode.target + '")' : '') + '</span>';
+          direntsEl.appendChild(row);
+        });
+        // show removed names too, greyed out, for the ones we know were removed
+        removedNames.forEach(name => {
+          const row = document.createElement('div');
+          row.className = 'lf-dirent-row gone';
+          row.innerHTML = '<span class="lf-dirent-name">' + name + '</span><span class="lf-dirent-arrow">-> (removed)</span>';
+          direntsEl.appendChild(row);
+        });
+
+        inodesEl.innerHTML = '';
+        const seen = new Set();
+        dirEntries.forEach(id => seen.add(id));
+        [...seen].sort((a, b) => a - b).forEach(id => {
+          const inode = inodes.get(id);
+          const card = document.createElement('div');
+          card.className = 'lf-inode-card ' + inode.type;
+          card.innerHTML =
+            '<div class="lf-inode-title">inode ' + id + ' (' + inode.type + ')</div>' +
+            '<div class="lf-inode-row">Link count: <b>' + inode.linkCount + '</b></div>' +
+            '<div class="lf-inode-row">Content: <b>' + (inode.type === 'symlink' ? 'path string "' + inode.target + '"' : inode.content) + '</b></div>';
+          inodesEl.appendChild(card);
+        });
+        deletedInodeIds.forEach(id => {
+          const card = document.createElement('div');
+          card.className = 'lf-inode-card freed';
+          card.innerHTML = '<div class="lf-inode-title">inode ' + id + ' -- freed</div><div class="lf-inode-row">Link count reached 0. Data is gone.</div>';
+          inodesEl.appendChild(card);
+        });
+
+        hardlinkBtn.disabled = dirEntries.has('backup.txt') || !dirEntries.has('report.txt');
+        symlinkBtn.disabled = dirEntries.has('shortcut.txt');
+        rmBtn.disabled = !dirEntries.has('report.txt');
+      }
+
+      let removedNames = [];
+      let deletedInodeIds = [];
+
+      function createHardLink(existingName, newName) {
+        const id = dirEntries.get(existingName);
+        const inode = inodes.get(id);
+        inode.linkCount++;
+        dirEntries.set(newName, id);
+        logTo(logEl, 'ln ' + existingName + ' ' + newName + ': new directory entry, SAME inode ' + id + '. Link count now ' + inode.linkCount + '.', 'good');
+        render();
+      }
+
+      function createSymlink(newName, targetName) {
+        const id = nextInode++;
+        inodes.set(id, { type: 'symlink', linkCount: 1, target: targetName });
+        dirEntries.set(newName, id);
+        logTo(logEl, 'ln -s ' + targetName + ' ' + newName + ': brand NEW inode ' + id + ' whose content is just the text "' + targetName + '". Not the same inode as ' + targetName + '.', 'warn');
+        render();
+      }
+
+      function removeName(name) {
+        const id = dirEntries.get(name);
+        dirEntries.delete(name);
+        removedNames.push(name);
+        const inode = inodes.get(id);
+        inode.linkCount--;
+        logTo(logEl, 'rm ' + name + ': directory entry removed, inode ' + id + ' link count now ' + inode.linkCount + '.', 'warn');
+        if (inode.linkCount <= 0) {
+          inodes.delete(id);
+          deletedInodeIds.push(id);
+          logTo(logEl, 'inode ' + id + ' link count hit 0 -- data actually freed now.', 'bad');
+        }
+        render();
+      }
+
+      function readName(name) {
+        if (!dirEntries.has(name)) {
+          catResultEl.innerHTML = '<span style="color:var(--lf-bad)">cat: ' + name + ': No such file or directory</span>';
+          return;
+        }
+        const id = dirEntries.get(name);
+        const inode = inodes.get(id);
+        if (inode.type === 'file') {
+          catResultEl.innerHTML = '<b>' + name + '</b> (inode ' + id + ') -> <span style="color:var(--lf-good)">' + inode.content + '</span>';
+        } else {
+          if (!dirEntries.has(inode.target)) {
+            catResultEl.innerHTML = '<b>' + name + '</b> is a symlink to "' + inode.target + '" -- <span style="color:var(--lf-bad)">that name no longer exists. Dangling symlink.</span>';
+          } else {
+            const targetId = dirEntries.get(inode.target);
+            const targetInode = inodes.get(targetId);
+            catResultEl.innerHTML = '<b>' + name + '</b> is a symlink -> resolves to <b>' + inode.target + '</b> (inode ' + targetId + ') -> <span style="color:var(--lf-good)">' + targetInode.content + '</span>';
+          }
+        }
+      }
+
+      hardlinkBtn.addEventListener('click', () => createHardLink('report.txt', 'backup.txt'));
+      symlinkBtn.addEventListener('click', () => createSymlink('shortcut.txt', 'report.txt'));
+      rmBtn.addEventListener('click', () => removeName('report.txt'));
+      resetBtn.addEventListener('click', () => { removedNames = []; deletedInodeIds = []; resetState(); });
+      catBtns.forEach(btn => btn.addEventListener('click', () => readName(btn.dataset.cat)));
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB B: MOUNTING & THE VFS
+    // =========================================================
+    (function () {
+      const treeEl = document.getElementById('lfTree');
+      const traceEl = document.getElementById('lfVfsTrace');
+      const logEl = document.getElementById('lfMountLog');
+      const mountProcBtn = document.getElementById('lfMountProcBtn');
+      const mountTmpBtn = document.getElementById('lfMountTmpBtn');
+      const mountUsbBtn = document.getElementById('lfMountUsbBtn');
+      const unmountBtn = document.getElementById('lfUnmountBtn');
+      const resetBtn = document.getElementById('lfResetMountBtn');
+      const vfsCatBtns = root.querySelectorAll('[data-vfscat]');
+
+      const FS_INFO = {
+        ext4: { label: 'ext4 (real disk)', how: 'reads real data blocks from the physical disk' },
+        proc: { label: 'procfs (kernel-generated)', how: 'the kernel generates this content on the spot -- nothing is stored' },
+        tmpfs: { label: 'tmpfs (RAM-backed)', how: 'reads straight from RAM -- gone on reboot, nothing ever touches a disk' },
+        vfat: { label: 'vfat (USB drive)', how: 'reads data blocks from the removable USB drive' },
+      };
+
+      let mounts; // path -> fstype, plus what's hidden underneath
+      let hiddenAtMnt; // content that was at /mnt before something got mounted there
+      let selected = null;
+
+      function resetState() {
+        mounts = { '/': 'ext4' };
+        hiddenAtMnt = 'readme.txt (part of the root ext4 filesystem)';
+        selected = null;
+        logEl.innerHTML = '';
+        logTo(logEl, 'Only / (ext4) is mounted. /proc, /tmp, and /mnt are just empty directories on the root filesystem so far.', 'good');
+        traceEl.textContent = 'Pick a path above.';
+        updateButtons();
+        render();
+      }
+
+      function updateButtons() {
+        mountProcBtn.disabled = !!mounts['/proc'];
+        mountTmpBtn.disabled = !!mounts['/tmp'];
+        mountUsbBtn.disabled = !!mounts['/mnt'];
+        // /home is selectable (to show it's just an ordinary directory) but
+        // was never actually mounted with anything, so it must not be
+        // unmountable -- only real mount points (tracked in `mounts`) can be.
+        unmountBtn.disabled = !selected || selected === '/' || !mounts[selected];
+      }
+
+      function render() {
+        const paths = [
+          { path: '/', label: '/', depth: 0 },
+          { path: '/home', label: 'home/', depth: 1 },
+          { path: '/proc', label: 'proc/', depth: 1 },
+          { path: '/tmp', label: 'tmp/', depth: 1 },
+          { path: '/mnt', label: 'mnt/', depth: 1 },
+        ];
+        treeEl.innerHTML = '';
+        paths.forEach(p => {
+          const fstype = mounts[p.path];
+          const row = document.createElement('div');
+          row.className = 'lf-tree-item' + (selected === p.path ? ' selected' : '');
+          row.style.marginLeft = (p.depth * 16) + 'px';
+          row.innerHTML = p.label + (fstype ? ' <span class="lf-fstype-badge ' + fstype + '">' + fstype + '</span>' : (p.path === '/mnt' && hiddenAtMnt ? ' <span style="color:var(--lf-muted); font-size:0.75rem;">(contains ' + hiddenAtMnt.split(' ')[0] + ')</span>' : ''));
+          if (p.path !== '/') {
+            row.addEventListener('click', () => { selected = (selected === p.path ? null : p.path); updateButtons(); render(); });
+          }
+          treeEl.appendChild(row);
+        });
+      }
+
+      function mount(path, fstype, label) {
+        if (path === '/mnt' && !mounts['/mnt']) {
+          logTo(logEl, '/mnt already contained ' + hiddenAtMnt + ' -- mounting over it does NOT delete it, just hides it while mounted.', 'warn');
+        }
+        mounts[path] = fstype;
+        logTo(logEl, 'Mounted ' + label + ' at ' + path + '. Anything under ' + path + ' now goes through the ' + fstype + ' driver instead of ext4.', 'good');
+        updateButtons();
+        render();
+      }
+
+      function unmount(path) {
+        const fstype = mounts[path];
+        delete mounts[path];
+        logTo(logEl, 'Unmounted ' + path + ' (' + fstype + ').' + (path === '/mnt' ? ' ' + hiddenAtMnt + ' reappears, completely unchanged.' : ' It reverts to being an ordinary empty directory on the root ext4 filesystem.'), 'warn');
+        selected = null;
+        updateButtons();
+        render();
+      }
+
+      const SPECIAL_DIRS = { '/proc': 'procfs', '/tmp': 'tmpfs', '/mnt': 'a USB drive' };
+
+      function vfsCat(path) {
+        // "/" always matches everything (it's the fallback for anything not
+        // covered by a more specific mount); a deeper mount matches only if
+        // the path is under it. Longest match wins, same rule the real VFS uses.
+        const matchingMounts = Object.keys(mounts).filter(m => m === '/' || path === m || path.startsWith(m + '/'));
+        const mountPoint = matchingMounts.sort((a, b) => b.length - a.length)[0];
+        const fstype = mounts[mountPoint];
+        const info = FS_INFO[fstype];
+
+        const specialDir = Object.keys(SPECIAL_DIRS).find(d => path.startsWith(d + '/'));
+        if (specialDir && mountPoint === '/') {
+          traceEl.innerHTML =
+            '<span class="step">$ cat ' + path + '</span>' +
+            '<span class="step arrow">-> VFS receives the request</span>' +
+            '<span class="step arrow">-> longest matching mount point right now: <b>/</b> (ext4) -- ' + specialDir + ' is not mounted yet</span>' +
+            '<span class="step">-> on a real system this path would not exist yet. Try mounting ' + SPECIAL_DIRS[specialDir] + ' at ' + specialDir + ' first.</span>';
+          return;
+        }
+
+        traceEl.innerHTML =
+          '<span class="step">$ cat ' + path + '</span>' +
+          '<span class="step arrow">-> VFS receives the request</span>' +
+          '<span class="step arrow">-> longest matching mount point: <b>' + mountPoint + '</b></span>' +
+          '<span class="step hit">-> routed to the ' + info.label + ' driver</span>' +
+          '<span class="step">-> ' + info.how + '</span>';
+      }
+
+      mountProcBtn.addEventListener('click', () => mount('/proc', 'proc', 'procfs'));
+      mountTmpBtn.addEventListener('click', () => mount('/tmp', 'tmpfs', 'tmpfs'));
+      mountUsbBtn.addEventListener('click', () => mount('/mnt', 'vfat', 'a vfat USB drive'));
+      unmountBtn.addEventListener('click', () => { if (selected) unmount(selected); });
+      resetBtn.addEventListener('click', resetState);
+      vfsCatBtns.forEach(btn => btn.addEventListener('click', () => vfsCat(btn.dataset.vfscat)));
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>

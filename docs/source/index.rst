@@ -34,6 +34,8 @@ down and coming back to.
    threads_sync_interactive
    consistent_hashing_interactive
    proc_filesystem_interactive
+   linux_fs_basics_interactive
+   overlayfs_interactive
 
 Quick Navigation
 -----------------
@@ -118,3 +120,9 @@ Quick Navigation
    * - :doc:`proc_filesystem_interactive`
      - Live /proc explorer -- click any path and watch it get generated on demand
      - /proc/PID, meminfo, loadavg, uptime, process lifecycle
+   * - :doc:`linux_fs_basics_interactive`
+     - Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on
+     - inodes, hard links, symlinks, mount points, VFS
+   * - :doc:`overlayfs_interactive`
+     - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
+     - lowerdir, upperdir, merged view, copy-up, whiteouts
