@@ -1,0 +1,450 @@
+<div class="up-root" id="upWidget">
+  <style>
+    #upWidget {
+      --up-bg: #0f172a;
+      --up-panel: #16213e;
+      --up-border: #2a3655;
+      --up-text: #e2e8f0;
+      --up-muted: #94a3b8;
+      --up-a: #4ade80;
+      --up-b: #38bdf8;
+      --up-bad: #f87171;
+      --up-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--up-bg);
+      color: var(--up-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #upWidget * { box-sizing: border-box; }
+    #upWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #upWidget .up-sub { color: var(--up-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .up-topbar {
+      display: flex; align-items: center; gap: 10px;
+      background: var(--up-panel); border: 1px solid var(--up-border); border-radius: 8px;
+      padding: 8px 14px; margin-bottom: 14px; min-width: 780px; font-size: 0.8rem; color: var(--up-muted);
+    }
+    .up-topbar input[type="range"] { width: 130px; accent-color: var(--up-b); }
+
+    .up-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 780px; }
+    .up-tab { background: var(--up-panel); color: var(--up-muted); border: 1px solid var(--up-border); border-radius: 8px; padding: 9px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .up-tab.active { background: var(--up-b); color: #041322; border-color: var(--up-b); }
+    .up-panel { display: none; }
+    .up-panel.active { display: block; }
+
+    .up-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--up-panel); border: 1px solid var(--up-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 780px; }
+    .up-toggle { display: inline-flex; border: 1px solid var(--up-border); border-radius: 8px; overflow: hidden; }
+    .up-toggle button { background: transparent; color: var(--up-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .up-toggle button.active { background: var(--up-warn); color: #2a1c00; }
+    .up-btn { background: var(--up-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .up-btn.secondary { background: transparent; color: var(--up-text); border: 1px solid var(--up-border); }
+    .up-btn.refused { background: transparent; color: var(--up-bad); border: 2px dashed var(--up-bad); }
+    .up-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .up-stage { background: var(--up-panel); border: 1px solid var(--up-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 780px; }
+
+    .up-code { background: #0a1128; border: 1px solid var(--up-border); border-radius: 8px; padding: 10px 0; margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6; }
+    .up-code-line { padding: 1px 14px; color: var(--up-muted); white-space: pre; }
+    .up-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--up-b); padding-left: 11px; }
+    .up-code-line.hl.bad-hl { background: rgba(248,113,113,0.16); border-left-color: var(--up-bad); }
+    .up-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--up-a); }
+
+    .up-vars-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .up-var-box { width: 180px; border: 2px solid var(--up-border); background: #10182e; border-radius: 8px; padding: 10px; text-align: center; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .up-var-box .name { font-weight: 800; color: #fff; margin-bottom: 4px; }
+    .up-var-box.owns { border-color: var(--up-b); }
+    .up-var-box.empty { border-style: dashed; color: var(--up-muted); }
+
+    .up-heap-block { display: inline-block; border: 2px solid var(--up-b); background: #10182e; border-radius: 8px; padding: 10px 18px; font-family: ui-monospace, monospace; font-size: 0.85rem; }
+    .up-heap-block.freed { border-color: var(--up-muted); opacity: 0.5; }
+    .up-heap-block.leaked { border-color: var(--up-warn); }
+    .up-heap-row { text-align: center; margin-bottom: 8px; }
+
+    .up-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .up-banner.bad { background: rgba(248,113,113,0.18); color: var(--up-bad); }
+    .up-banner.ok { background: rgba(74,222,128,0.12); color: var(--up-a); }
+
+    .up-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 780px; }
+    .up-explain-panel, .up-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .up-explain-panel { flex: 1.4; }
+    .up-box { background: var(--up-panel); border: 1px solid var(--up-border); border-radius: 10px; padding: 12px 14px; }
+    .up-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--up-muted); margin-bottom: 8px; }
+    .up-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .up-log div { color: var(--up-muted); }
+    .up-log div.ok { color: var(--up-a); }
+    .up-log div.bad { color: var(--up-bad); font-weight: 700; }
+    .up-log div.warn { color: var(--up-warn); }
+
+    details.up-notes { margin-top: 14px; background: var(--up-panel); border: 1px solid var(--up-border); border-radius: 10px; padding: 12px 16px; min-width: 780px; font-size: 0.85rem; line-height: 1.6; }
+    details.up-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.up-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--up-muted); }
+    details.up-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--up-b); }
+  </style>
+
+  <h3>unique_ptr: Play With It</h3>
+  <div class="up-sub">Exclusive ownership, enforced by the compiler: exactly one unique_ptr owns a given block at a time, and its destructor deletes that block automatically -- on every exit path, not just the ones you remembered to handle.</div>
+
+  <div class="up-topbar">
+    <label>Playback speed: <span id="upSpeedVal">1x</span></label>
+    <input type="range" id="upSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+  </div>
+
+  <div class="up-tabs">
+    <button class="up-tab active" data-tab="cleanup">1. Automatic Cleanup</button>
+    <button class="up-tab" data-tab="move">2. Move Transfers Ownership</button>
+  </div>
+
+  <!-- ============ TAB 1: AUTOMATIC CLEANUP ============ -->
+  <div class="up-panel active" id="panel-cleanup">
+    <div class="up-controls">
+      <div class="up-toggle">
+        <button class="cl-mode-btn active" data-mode="raw">Raw Pointer (Bug)</button>
+        <button class="cl-mode-btn" data-mode="unique">unique_ptr (Fix)</button>
+      </div>
+      <button class="up-btn" id="clEarlyBtn">Run: Early-Return Path</button>
+      <button class="up-btn" id="clNormalBtn">Run: Normal Path</button>
+      <button class="up-btn secondary" id="clResetBtn">Reset</button>
+    </div>
+    <div class="up-stage">
+      <div class="up-code" id="clCodeRaw">
+        <div class="up-code-line" data-line="1">void process_raw(bool fail_early) {</div>
+        <div class="up-code-line" data-line="2">    int* p = new int(42);</div>
+        <div class="up-code-line" data-line="3">    if (fail_early) {</div>
+        <div class="up-code-line" data-line="4">        return;          // p never freed on this path</div>
+        <div class="up-code-line" data-line="5">    }</div>
+        <div class="up-code-line" data-line="6">    delete p;</div>
+        <div class="up-code-line" data-line="7">}</div>
+      </div>
+      <div class="up-code" id="clCodeUnique" style="display:none;">
+        <div class="up-code-line" data-line="1">void process_unique(bool fail_early) {</div>
+        <div class="up-code-line" data-line="2">    auto p = std::make_unique&lt;int&gt;(42);</div>
+        <div class="up-code-line" data-line="3">    if (fail_early) {</div>
+        <div class="up-code-line" data-line="4">        return;          // p's destructor STILL runs here</div>
+        <div class="up-code-line" data-line="5">    }</div>
+        <div class="up-code-line" data-line="6">    // no delete needed -- destructor runs when p goes out of scope</div>
+        <div class="up-code-line" data-line="7">}</div>
+      </div>
+      <div class="up-heap-row" id="clHeapRow"></div>
+      <div class="up-banner" id="clBanner" style="display:none;"></div>
+    </div>
+    <div class="up-panels">
+      <div class="up-explain-panel">
+        <div class="up-box">
+          <div class="up-panel-title">What's happening right now</div>
+          <div id="clExplain">Pick a mode, then run either path. Watch what happens to the heap block when the function returns early -- that's the entire difference this tab exists to show.</div>
+        </div>
+      </div>
+      <div class="up-side-panel-col">
+        <div class="up-box">
+          <div class="up-panel-title">Event log</div>
+          <div class="up-log" id="clLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: MOVE OWNERSHIP ============ -->
+  <div class="up-panel" id="panel-move">
+    <div class="up-controls">
+      <button class="up-btn" id="mvCreateBtn">Create p1 (owns a new block)</button>
+      <button class="up-btn" id="mvMoveBtn" disabled>Move p1 -&gt; p2</button>
+      <button class="up-btn refused" id="mvCopyBtn" disabled>Copy p1 -&gt; p3</button>
+      <button class="up-btn" id="mvDestroyP1Btn" disabled>Destroy p1 (scope exit)</button>
+      <button class="up-btn" id="mvDestroyP2Btn" disabled>Destroy p2 (scope exit)</button>
+      <button class="up-btn secondary" id="mvResetBtn">Reset</button>
+    </div>
+    <div class="up-stage">
+      <div class="up-code" id="mvCode">
+        <div class="up-code-line" data-line="1">auto p1 = std::make_unique&lt;int&gt;(42);</div>
+        <div class="up-code-line" data-line="2">auto p2 = std::move(p1);   // ownership transfers -- p1 is now empty</div>
+        <div class="up-code-line" data-line="3">auto p3 = p1;              // COMPILE ERROR -- unique_ptr has no copy constructor</div>
+      </div>
+      <div class="up-vars-row">
+        <div class="up-var-box empty" id="mvP1Box"><div class="name">p1</div><div id="mvP1State">(not created)</div></div>
+        <div class="up-var-box empty" id="mvP2Box"><div class="name">p2</div><div id="mvP2State">(not created)</div></div>
+      </div>
+      <div class="up-heap-row" id="mvHeapRow"></div>
+      <div class="up-banner" id="mvBanner" style="display:none;"></div>
+    </div>
+    <div class="up-panels">
+      <div class="up-explain-panel">
+        <div class="up-box">
+          <div class="up-panel-title">What's happening right now</div>
+          <div id="mvExplain">Create p1, then move it into p2. Notice the heap block itself never moves or copies -- only which variable owns it changes. Try "Copy p1 -&gt; p3" to see why that's refused outright.</div>
+        </div>
+      </div>
+      <div class="up-side-panel-col">
+        <div class="up-box">
+          <div class="up-panel-title">Event log</div>
+          <div class="up-log" id="mvLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="up-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The mechanism behind "automatic cleanup" is nothing exotic -- it's the same stack-unwinding/destructor machinery every local object gets. <code>unique_ptr</code> just wraps a raw pointer and does exactly one useful thing in its own destructor: <code>delete</code> whatever it currently owns (or nothing, if it's empty). It isn't magic, it's a very small class using a mechanism that's always been there.</li>
+      <li>The "Copy p1 -&gt; p3" button is disabled because that line genuinely does not compile in real C++ -- <code>unique_ptr</code>'s copy constructor is explicitly deleted (<code>unique_ptr(const unique_ptr&amp;) = delete;</code>). This isn't a runtime check; the compiler refuses to build code that tries it, which is exactly the point: "two owners of one block" becomes structurally impossible to write instead of a bug you have to remember to avoid.</li>
+      <li><code>std::move</code> doesn't move anything by itself -- it's just a cast that tells the compiler "treat this as movable." The actual transfer happens in <code>unique_ptr</code>'s move constructor, which copies the raw pointer into the new object and sets the old object's pointer to <code>nullptr</code>. That's genuinely all a move is here: one pointer copy plus one pointer reset, versus a raw pointer's copy which would leave two variables pointing at the same block with no ownership rule at all.</li>
+      <li>This tab is the direct fix for both bugs on the <a href="cpp_memory_interactive.html">previous page</a>: the heap-leak tab's "forgot to call delete on one exit path" and the use-after-free tab's "two raw pointers, no ownership rule" are exactly the two failure modes <code>unique_ptr</code> makes structurally unreachable -- one by construction (RAII), the other by the compiler (deleted copy constructor).</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('upWidget');
+
+    const speedSlider = document.getElementById('upSpeedSlider');
+    const speedVal = document.getElementById('upSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.up-tab');
+    const panels = { cleanup: document.getElementById('panel-cleanup'), move: document.getElementById('panel-move') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.up-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('bad-hl', isTarget && kind === 'bad');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    // =========================================================
+    // TAB 1: AUTOMATIC CLEANUP -- raw pointer (bug) vs unique_ptr (fix)
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.cl-mode-btn');
+      const earlyBtn = document.getElementById('clEarlyBtn');
+      const normalBtn = document.getElementById('clNormalBtn');
+      const resetBtn = document.getElementById('clResetBtn');
+      const codeRaw = document.getElementById('clCodeRaw');
+      const codeUnique = document.getElementById('clCodeUnique');
+      const heapRow = document.getElementById('clHeapRow');
+      const banner = document.getElementById('clBanner');
+      const explainEl = document.getElementById('clExplain');
+      const logEl = document.getElementById('clLog');
+
+      let mode = 'raw';
+
+      function activeCode() { return mode === 'raw' ? codeRaw : codeUnique; }
+
+      function resetState() {
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeRaw.style.display = mode === 'raw' ? 'block' : 'none';
+        codeUnique.style.display = mode === 'unique' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = 'Pick a mode, then run either path. Watch what happens to the heap block when the function returns early -- that\'s the entire difference this tab exists to show.';
+        heapRow.innerHTML = '';
+      }
+
+      function run(failEarly) {
+        const codeEl = activeCode();
+        heapRow.innerHTML = '';
+        const block = document.createElement('div');
+        block.className = 'up-heap-block';
+        block.textContent = 'h1: value=42';
+        heapRow.appendChild(block);
+
+        highlightLine(codeEl, 2, 'ok'); // allocation line -- line 2 in both code blocks
+
+        if (mode === 'raw') {
+          if (failEarly) {
+            logTo(logEl, 'fail_early=true -- return on line 4 -- "delete p;" on line 6 never executes.', 'bad');
+            highlightLine(codeEl, 4, 'bad');
+            block.classList.add('leaked');
+            banner.style.display = 'block';
+            banner.className = 'up-banner bad';
+            banner.textContent = 'LEAKED: this path returns before delete p; ever runs.';
+            explainEl.textContent = 'The early return skips right over "delete p;" -- there is nothing automatic about a raw pointer\'s cleanup, so any exit path that doesn\'t explicitly reach the delete leaks.';
+          } else {
+            logTo(logEl, 'fail_early=false -- falls through to "delete p;" on line 6.', 'ok');
+            highlightLine(codeEl, 6, 'ok');
+            block.classList.add('freed');
+            banner.style.display = 'block';
+            banner.className = 'up-banner ok';
+            banner.textContent = 'Freed correctly -- but only because this path happened to reach delete p.';
+            explainEl.textContent = 'This path is fine, but only by construction -- it works because delete p sits on the one path that runs. Add a second early return anywhere above it and you have a new leak to remember to fix.';
+          }
+        } else {
+          if (failEarly) {
+            logTo(logEl, 'fail_early=true -- return on line 4 -- but p\'s destructor runs as part of leaving scope, right there.', 'ok');
+            highlightLine(codeEl, 4, 'ok');
+            block.classList.add('freed');
+            banner.style.display = 'block';
+            banner.className = 'up-banner ok';
+            banner.textContent = 'Freed correctly -- the destructor ran automatically on this exit path too.';
+            explainEl.textContent = 'Nothing in the source code explicitly frees anything on this path -- and nothing needs to. Leaving scope (however you leave it) is what triggers p\'s destructor.';
+          } else {
+            logTo(logEl, 'fail_early=false -- p goes out of scope at the closing brace -- destructor runs there instead.', 'ok');
+            highlightLine(codeEl, 7, 'ok');
+            block.classList.add('freed');
+            banner.style.display = 'block';
+            banner.className = 'up-banner ok';
+            banner.textContent = 'Freed correctly -- same guarantee, different exit point.';
+            explainEl.textContent = 'Same outcome as the early-return path, for the same reason: it doesn\'t matter WHERE the function exits, only that leaving scope always runs the destructor.';
+          }
+        }
+      }
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        resetState();
+      }));
+      earlyBtn.addEventListener('click', () => run(true));
+      normalBtn.addEventListener('click', () => run(false));
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: MOVE TRANSFERS OWNERSHIP
+    // =========================================================
+    (function () {
+      const createBtn = document.getElementById('mvCreateBtn');
+      const moveBtn = document.getElementById('mvMoveBtn');
+      const copyBtn = document.getElementById('mvCopyBtn');
+      const destroyP1Btn = document.getElementById('mvDestroyP1Btn');
+      const destroyP2Btn = document.getElementById('mvDestroyP2Btn');
+      const resetBtn = document.getElementById('mvResetBtn');
+      const codeEl = document.getElementById('mvCode');
+      const p1Box = document.getElementById('mvP1Box');
+      const p2Box = document.getElementById('mvP2Box');
+      const p1State = document.getElementById('mvP1State');
+      const p2State = document.getElementById('mvP2State');
+      const heapRow = document.getElementById('mvHeapRow');
+      const banner = document.getElementById('mvBanner');
+      const explainEl = document.getElementById('mvExplain');
+      const logEl = document.getElementById('mvLog');
+
+      let heap, owners; // owners.p1 / owners.p2 -> 'h1' | null
+
+      function resetState() {
+        heap = {};
+        owners = { p1: undefined, p2: undefined }; // undefined = not created yet; null = created-then-emptied
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, null);
+        explainEl.textContent = 'Create p1, then move it into p2. Notice the heap block itself never moves or copies -- only which variable owns it changes. Try "Copy p1 -> p3" to see why that\'s refused outright.';
+        createBtn.disabled = false;
+        moveBtn.disabled = true;
+        copyBtn.disabled = true;
+        destroyP1Btn.disabled = true;
+        destroyP2Btn.disabled = true;
+        render();
+      }
+
+      function render() {
+        function renderVar(box, stateEl, name, val) {
+          if (val === undefined) {
+            box.className = 'up-var-box empty';
+            stateEl.textContent = '(not created)';
+          } else if (val === null) {
+            box.className = 'up-var-box empty';
+            stateEl.textContent = 'empty (moved-from)';
+          } else {
+            box.className = 'up-var-box owns';
+            stateEl.textContent = 'owns ' + val;
+          }
+        }
+        renderVar(p1Box, p1State, 'p1', owners.p1);
+        renderVar(p2Box, p2State, 'p2', owners.p2);
+
+        heapRow.innerHTML = '';
+        Object.keys(heap).forEach(id => {
+          const el = document.createElement('div');
+          el.className = 'up-heap-block' + (heap[id].freed ? ' freed' : '');
+          el.textContent = id + ': value=' + heap[id].value + (heap[id].freed ? ' (freed)' : ' (alive)');
+          heapRow.appendChild(el);
+        });
+      }
+
+      function doCreate() {
+        heap.h1 = { value: 42, freed: false };
+        owners.p1 = 'h1';
+        logTo(logEl, 'p1 = make_unique<int>(42) -- p1 now owns h1.', 'ok');
+        highlightLine(codeEl, 1, 'ok');
+        createBtn.disabled = true;
+        moveBtn.disabled = false;
+        copyBtn.disabled = false;
+        destroyP1Btn.disabled = false;
+        render();
+      }
+
+      function doMove() {
+        owners.p2 = owners.p1;
+        owners.p1 = null;
+        logTo(logEl, 'std::move(p1) into p2 -- p2 now owns h1, p1 is empty. The block itself did not move.', 'ok');
+        highlightLine(codeEl, 2, 'ok');
+        moveBtn.disabled = true;
+        destroyP1Btn.disabled = false;
+        destroyP2Btn.disabled = false;
+        explainEl.textContent = 'p2 now holds the exact same address p1 held a moment ago. p1 is not "half-owning" anything -- it is fully empty, exactly like a freshly default-constructed unique_ptr.';
+        render();
+      }
+
+      function doCopy() {
+        logTo(logEl, 'auto p3 = p1;  -- COMPILE ERROR: use of deleted function unique_ptr(const unique_ptr&).', 'bad');
+        highlightLine(codeEl, 3, 'bad');
+        banner.style.display = 'block';
+        banner.className = 'up-banner bad';
+        banner.textContent = 'Refused at compile time -- unique_ptr has no copy constructor. There is no runtime bug to demonstrate because this code cannot exist.';
+        explainEl.textContent = 'This isn\'t a rule you have to remember to follow -- the compiler enforces it. "Two unique_ptrs, one block" is not a state this type can ever be in.';
+      }
+
+      function destroyVar(varName) {
+        const blockId = owners[varName];
+        if (blockId) {
+          heap[blockId].freed = true;
+          logTo(logEl, varName + ' goes out of scope -- it owned ' + blockId + ', so its destructor frees it now.', 'ok');
+          banner.style.display = 'block';
+          banner.className = 'up-banner ok';
+          banner.textContent = blockId + ' freed via ' + varName + '\'s destructor.';
+        } else if (blockId === null) {
+          logTo(logEl, varName + ' goes out of scope -- it was already empty (moved-from), so this is a safe no-op.', 'ok');
+          banner.style.display = 'block';
+          banner.className = 'up-banner ok';
+          banner.textContent = varName + ' was empty -- destructor runs, does nothing, definitely does not double-free.';
+        }
+        owners[varName] = null;
+        if (varName === 'p1') destroyP1Btn.disabled = true; else destroyP2Btn.disabled = true;
+        moveBtn.disabled = true;
+        copyBtn.disabled = true;
+        render();
+      }
+
+      createBtn.addEventListener('click', doCreate);
+      moveBtn.addEventListener('click', doMove);
+      copyBtn.addEventListener('click', doCopy);
+      destroyP1Btn.addEventListener('click', () => destroyVar('p1'));
+      destroyP2Btn.addEventListener('click', () => destroyVar('p2'));
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>

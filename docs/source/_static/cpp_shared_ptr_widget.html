@@ -1,0 +1,477 @@
+<div class="sp-root" id="spWidget">
+  <style>
+    #spWidget {
+      --sp-bg: #0f172a;
+      --sp-panel: #16213e;
+      --sp-border: #2a3655;
+      --sp-text: #e2e8f0;
+      --sp-muted: #94a3b8;
+      --sp-a: #4ade80;
+      --sp-b: #38bdf8;
+      --sp-bad: #f87171;
+      --sp-warn: #fbbf24;
+      --sp-purple: #c084fc;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--sp-bg);
+      color: var(--sp-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #spWidget * { box-sizing: border-box; }
+    #spWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #spWidget .sp-sub { color: var(--sp-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .sp-topbar { display: flex; align-items: center; gap: 10px; background: var(--sp-panel); border: 1px solid var(--sp-border); border-radius: 8px; padding: 8px 14px; margin-bottom: 14px; min-width: 780px; font-size: 0.8rem; color: var(--sp-muted); }
+    .sp-topbar input[type="range"] { width: 130px; accent-color: var(--sp-b); }
+
+    .sp-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 780px; }
+    .sp-tab { background: var(--sp-panel); color: var(--sp-muted); border: 1px solid var(--sp-border); border-radius: 8px; padding: 9px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .sp-tab.active { background: var(--sp-b); color: #041322; border-color: var(--sp-b); }
+    .sp-panel { display: none; }
+    .sp-panel.active { display: block; }
+
+    .sp-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--sp-panel); border: 1px solid var(--sp-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 780px; }
+    .sp-toggle { display: inline-flex; border: 1px solid var(--sp-border); border-radius: 8px; overflow: hidden; }
+    .sp-toggle button { background: transparent; color: var(--sp-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .sp-toggle button.active { background: var(--sp-warn); color: #2a1c00; }
+    .sp-btn { background: var(--sp-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .sp-btn.secondary { background: transparent; color: var(--sp-text); border: 1px solid var(--sp-border); }
+    .sp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .sp-stage { background: var(--sp-panel); border: 1px solid var(--sp-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 780px; }
+
+    .sp-code { background: #0a1128; border: 1px solid var(--sp-border); border-radius: 8px; padding: 10px 0; margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6; }
+    .sp-code-line { padding: 1px 14px; color: var(--sp-muted); white-space: pre; }
+    .sp-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--sp-b); padding-left: 11px; }
+    .sp-code-line.hl.bad-hl { background: rgba(248,113,113,0.16); border-left-color: var(--sp-bad); }
+    .sp-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--sp-a); }
+
+    .sp-block-row { text-align: center; margin-bottom: 14px; }
+    .sp-block { display: inline-block; border: 2px solid var(--sp-b); background: #10182e; border-radius: 10px; padding: 12px 20px; font-family: ui-monospace, monospace; }
+    .sp-block.freed { border-color: var(--sp-muted); opacity: 0.5; }
+    .sp-block .refcount { font-size: 1.6rem; font-weight: 800; color: #fff; }
+    .sp-block .label { font-size: 0.72rem; color: var(--sp-muted); }
+
+    .sp-handles-row { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-bottom: 8px; }
+    .sp-handle { border: 2px solid var(--sp-a); background: rgba(74,222,128,0.12); border-radius: 8px; padding: 6px 12px; font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--sp-a); }
+
+    .sp-cycle-row { display: flex; gap: 30px; justify-content: center; align-items: center; margin-bottom: 14px; flex-wrap: wrap; }
+    .sp-cycle-block { border: 2px solid var(--sp-purple); background: #10182e; border-radius: 10px; padding: 12px 20px; text-align: center; font-family: ui-monospace, monospace; min-width: 140px; }
+    .sp-cycle-block.freed { border-color: var(--sp-muted); opacity: 0.45; }
+    .sp-cycle-block .name { font-weight: 800; color: var(--sp-purple); margin-bottom: 4px; }
+    .sp-cycle-block .rc { font-size: 1.3rem; font-weight: 800; color: #fff; }
+    .sp-cycle-arrow { font-size: 1.3rem; color: var(--sp-muted); text-align: center; }
+
+    .sp-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .sp-banner.bad { background: rgba(248,113,113,0.18); color: var(--sp-bad); }
+    .sp-banner.ok { background: rgba(74,222,128,0.12); color: var(--sp-a); }
+
+    .sp-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 780px; }
+    .sp-explain-panel, .sp-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .sp-explain-panel { flex: 1.4; }
+    .sp-box { background: var(--sp-panel); border: 1px solid var(--sp-border); border-radius: 10px; padding: 12px 14px; }
+    .sp-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sp-muted); margin-bottom: 8px; }
+    .sp-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .sp-log div { color: var(--sp-muted); }
+    .sp-log div.ok { color: var(--sp-a); }
+    .sp-log div.bad { color: var(--sp-bad); font-weight: 700; }
+    .sp-log div.warn { color: var(--sp-warn); }
+
+    details.sp-notes { margin-top: 14px; background: var(--sp-panel); border: 1px solid var(--sp-border); border-radius: 10px; padding: 12px 16px; min-width: 780px; font-size: 0.85rem; line-height: 1.6; }
+    details.sp-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.sp-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--sp-muted); }
+    details.sp-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--sp-b); }
+  </style>
+
+  <h3>shared_ptr: Play With It</h3>
+  <div class="sp-sub">Shared ownership via reference counting: any number of shared_ptrs can own the same block, and it's only freed once the LAST one is gone. That flexibility has a real cost -- see the second tab for the classic way it bites back.</div>
+
+  <div class="sp-topbar">
+    <label>Playback speed: <span id="spSpeedVal">1x</span></label>
+    <input type="range" id="spSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+  </div>
+
+  <div class="sp-tabs">
+    <button class="sp-tab active" data-tab="refcount">1. Reference Counting</button>
+    <button class="sp-tab" data-tab="cycle">2. Circular Reference (the classic gotcha)</button>
+  </div>
+
+  <!-- ============ TAB 1: REFERENCE COUNTING ============ -->
+  <div class="sp-panel active" id="panel-refcount">
+    <div class="sp-controls">
+      <button class="sp-btn" id="rcCreateBtn">a = make_shared&lt;int&gt;(100)</button>
+      <button class="sp-btn" id="rcCopyBBtn" disabled>b = a  (copy)</button>
+      <button class="sp-btn" id="rcCopyCBtn" disabled>c = a  (copy)</button>
+      <button class="sp-btn secondary" id="rcDestroyABtn" disabled>Destroy a</button>
+      <button class="sp-btn secondary" id="rcDestroyBBtn" disabled>Destroy b</button>
+      <button class="sp-btn secondary" id="rcDestroyCBtn" disabled>Destroy c</button>
+      <button class="sp-btn secondary" id="rcResetBtn">Reset</button>
+    </div>
+    <div class="sp-stage">
+      <div class="sp-code" id="rcCode">
+        <div class="sp-code-line" data-line="1">auto a = std::make_shared&lt;int&gt;(100);   // refcount = 1</div>
+        <div class="sp-code-line" data-line="2">auto b = a;                             // copy -- refcount++</div>
+        <div class="sp-code-line" data-line="3">auto c = a;                             // copy -- refcount++</div>
+        <div class="sp-code-line" data-line="4">// ... handles destroyed one at a time ...</div>
+        <div class="sp-code-line" data-line="5">// block is freed only when refcount reaches 0</div>
+      </div>
+      <div class="sp-block-row" id="rcBlockRow"></div>
+      <div class="sp-handles-row" id="rcHandlesRow"></div>
+      <div class="sp-banner" id="rcBanner" style="display:none;"></div>
+    </div>
+    <div class="sp-panels">
+      <div class="sp-explain-panel">
+        <div class="sp-box">
+          <div class="sp-panel-title">What's happening right now</div>
+          <div id="rcExplain">Create a, then copy it into b and c. Destroy them in any order you like -- the block only actually frees on whichever destruction happens to be the last one.</div>
+        </div>
+      </div>
+      <div class="sp-side-panel-col">
+        <div class="sp-box">
+          <div class="sp-panel-title">Event log</div>
+          <div class="sp-log" id="rcLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: CIRCULAR REFERENCE ============ -->
+  <div class="sp-panel" id="panel-cycle">
+    <div class="sp-controls">
+      <div class="sp-toggle">
+        <button class="cy-mode-btn active" data-mode="bug">Both shared_ptr (Bug)</button>
+        <button class="cy-mode-btn" data-mode="fix">B's back-ref is weak_ptr (Fix)</button>
+      </div>
+      <button class="sp-btn" id="cyCreateBtn">Create A and B (external handles)</button>
+      <button class="sp-btn" id="cyLinkBtn" disabled>Link A-&gt;B and B-&gt;A</button>
+      <button class="sp-btn secondary" id="cyDestroyABtn" disabled>Destroy external handle to A</button>
+      <button class="sp-btn secondary" id="cyDestroyBBtn" disabled>Destroy external handle to B</button>
+      <button class="sp-btn secondary" id="cyResetBtn">Reset</button>
+    </div>
+    <div class="sp-stage">
+      <div class="sp-code" id="cyCodeBug">
+        <div class="sp-code-line" data-line="1">struct Node { shared_ptr&lt;Node&gt; next; shared_ptr&lt;Node&gt; prev; };</div>
+        <div class="sp-code-line" data-line="2">A-&gt;next = B;   // A holds a strong ref to B</div>
+        <div class="sp-code-line" data-line="3">B-&gt;prev = A;   // B holds a strong ref back to A -- CYCLE</div>
+      </div>
+      <div class="sp-code" id="cyCodeFix" style="display:none;">
+        <div class="sp-code-line" data-line="1">struct Node { shared_ptr&lt;Node&gt; next; weak_ptr&lt;Node&gt; prev; };</div>
+        <div class="sp-code-line" data-line="2">A-&gt;next = B;   // A holds a strong ref to B</div>
+        <div class="sp-code-line" data-line="3">B-&gt;prev = A;   // B holds a WEAK ref back -- no cycle</div>
+      </div>
+      <div class="sp-cycle-row">
+        <div class="sp-cycle-block" id="cyABlock"><div class="name">A</div><div class="rc" id="cyARc">--</div><div class="label">refcount</div></div>
+        <div class="sp-cycle-arrow">&#8646;</div>
+        <div class="sp-cycle-block" id="cyBBlock"><div class="name">B</div><div class="rc" id="cyBRc">--</div><div class="label">refcount</div></div>
+      </div>
+      <div class="sp-banner" id="cyBanner" style="display:none;"></div>
+    </div>
+    <div class="sp-panels">
+      <div class="sp-explain-panel">
+        <div class="sp-box">
+          <div class="sp-panel-title">What's happening right now</div>
+          <div id="cyExplain">Create A and B, link them to each other, then destroy BOTH external handles. In bug mode, watch neither refcount ever reach zero. Flip to fix mode and try the exact same sequence.</div>
+        </div>
+      </div>
+      <div class="sp-side-panel-col">
+        <div class="sp-box">
+          <div class="sp-panel-title">Event log</div>
+          <div class="sp-log" id="cyLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="sp-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The reference count isn't stored in the object being managed -- <code>make_shared</code> allocates a small "control block" alongside it that holds the strong count, a separate weak count (for <code>weak_ptr</code>), and a deleter. Copying a <code>shared_ptr</code> copies the pointer to that control block and atomically increments its count; destroying one decrements it. This is also why <code>make_shared</code> is generally preferred over <code>shared_ptr&lt;T&gt;(new T(...))</code> -- it can allocate the object and its control block in one heap allocation instead of two.</li>
+      <li>The increments and decrements are atomic specifically so that <code>shared_ptr</code> is safe to copy and destroy from multiple threads at once -- a real, load-bearing guarantee, not an implementation detail. What's <i>not</i> automatically thread-safe is the pointed-to object itself; two threads can safely both hold a copy of the same <code>shared_ptr</code>, but mutating <code>*ptr</code> concurrently still needs its own synchronization. See <a href="threads_sync_interactive.html">the threads &amp; synchronization page</a> for that half of the picture.</li>
+      <li>The cycle in tab 2 is not a contrived example -- it's the single most common way real programs leak memory with <code>shared_ptr</code>: any bidirectional relationship (parent/child trees where children also point back to their parent, doubly-linked structures, observer patterns where the subject holds refs back to observers) creates exactly this shape unless one direction is deliberately made a <code>weak_ptr</code>. The rule of thumb: the "owning" direction is <code>shared_ptr</code>, the "referencing back" direction is <code>weak_ptr</code>.</li>
+      <li><code>weak_ptr</code> can't be dereferenced directly -- you call <code>.lock()</code> on it, which returns a real (temporary) <code>shared_ptr</code> if the object is still alive, or an empty one if it's already been destroyed. That's the other half of what makes it safe for back-references: it can observe whether the object is still there without ever keeping it alive on its own.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('spWidget');
+
+    const speedSlider = document.getElementById('spSpeedSlider');
+    const speedVal = document.getElementById('spSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.sp-tab');
+    const panels = { refcount: document.getElementById('panel-refcount'), cycle: document.getElementById('panel-cycle') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.sp-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('bad-hl', isTarget && kind === 'bad');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    // =========================================================
+    // TAB 1: REFERENCE COUNTING
+    // =========================================================
+    (function () {
+      const createBtn = document.getElementById('rcCreateBtn');
+      const copyBBtn = document.getElementById('rcCopyBBtn');
+      const copyCBtn = document.getElementById('rcCopyCBtn');
+      const destroyABtn = document.getElementById('rcDestroyABtn');
+      const destroyBBtn = document.getElementById('rcDestroyBBtn');
+      const destroyCBtn = document.getElementById('rcDestroyCBtn');
+      const resetBtn = document.getElementById('rcResetBtn');
+      const codeEl = document.getElementById('rcCode');
+      const blockRow = document.getElementById('rcBlockRow');
+      const handlesRow = document.getElementById('rcHandlesRow');
+      const banner = document.getElementById('rcBanner');
+      const explainEl = document.getElementById('rcExplain');
+      const logEl = document.getElementById('rcLog');
+
+      let block, handles; // handles: { a: bool, b: bool, c: bool } -- true = alive
+
+      function resetState() {
+        block = { value: 100, refcount: 0, freed: false, created: false };
+        handles = { a: false, b: false, c: false };
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        highlightLine(codeEl, 0, null);
+        explainEl.textContent = 'Create a, then copy it into b and c. Destroy them in any order you like -- the block only actually frees on whichever destruction happens to be the last one.';
+        createBtn.disabled = false;
+        copyBBtn.disabled = true;
+        copyCBtn.disabled = true;
+        destroyABtn.disabled = true;
+        destroyBBtn.disabled = true;
+        destroyCBtn.disabled = true;
+        render();
+      }
+
+      function render() {
+        blockRow.innerHTML = '';
+        if (block.created) {
+          const el = document.createElement('div');
+          el.className = 'sp-block' + (block.freed ? ' freed' : '');
+          el.innerHTML = '<div class="refcount">refcount = ' + block.refcount + '</div><div class="label">h1: value=' + block.value + (block.freed ? ' (freed)' : ' (alive)') + '</div>';
+          blockRow.appendChild(el);
+        }
+        handlesRow.innerHTML = '';
+        ['a', 'b', 'c'].forEach(name => {
+          if (handles[name]) {
+            const el = document.createElement('div');
+            el.className = 'sp-handle';
+            el.textContent = name + ' -> h1';
+            handlesRow.appendChild(el);
+          }
+        });
+      }
+
+      function doCreate() {
+        block.created = true;
+        block.refcount = 1;
+        handles.a = true;
+        logTo(logEl, 'a = make_shared<int>(100) -- refcount = 1.', 'ok');
+        highlightLine(codeEl, 1, 'ok');
+        createBtn.disabled = true;
+        copyBBtn.disabled = false;
+        copyCBtn.disabled = false;
+        destroyABtn.disabled = false;
+        render();
+      }
+
+      function doCopy(name, line) {
+        block.refcount++;
+        handles[name] = true;
+        logTo(logEl, name + ' = a -- refcount ' + (block.refcount - 1) + ' -> ' + block.refcount + '.', 'ok');
+        highlightLine(codeEl, line, 'ok');
+        if (name === 'b') { copyBBtn.disabled = true; destroyBBtn.disabled = false; }
+        if (name === 'c') { copyCBtn.disabled = true; destroyCBtn.disabled = false; }
+        render();
+      }
+
+      function doDestroy(name, btn) {
+        handles[name] = false;
+        block.refcount--;
+        btn.disabled = true;
+        highlightLine(codeEl, 4, null);
+        if (block.refcount === 0) {
+          block.freed = true;
+          logTo(logEl, 'Destroy ' + name + ' -- refcount -> 0 -- block freed.', 'bad');
+          banner.style.display = 'block';
+          banner.className = 'sp-banner bad';
+          banner.textContent = 'refcount reached 0 -- the block is freed now, via ' + name + '\'s destructor.';
+          explainEl.textContent = name + ' happened to be the LAST handle standing, so its destructor is the one that actually frees the block. Reset and try destroying them in a different order -- a different handle will be "the last one" instead, and the block will still only free exactly once.';
+        } else {
+          logTo(logEl, 'Destroy ' + name + ' -- refcount -> ' + block.refcount + ' -- block still alive.', 'ok');
+          explainEl.textContent = 'refcount dropped but hasn\'t hit 0 yet -- other handles still own this block, so nothing is freed.';
+        }
+        render();
+      }
+
+      createBtn.addEventListener('click', doCreate);
+      copyBBtn.addEventListener('click', () => doCopy('b', 2));
+      copyCBtn.addEventListener('click', () => doCopy('c', 3));
+      destroyABtn.addEventListener('click', () => doDestroy('a', destroyABtn));
+      destroyBBtn.addEventListener('click', () => doDestroy('b', destroyBBtn));
+      destroyCBtn.addEventListener('click', () => doDestroy('c', destroyCBtn));
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: CIRCULAR REFERENCE -- bug (both shared_ptr) vs fix (weak_ptr back-ref)
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.cy-mode-btn');
+      const createBtn = document.getElementById('cyCreateBtn');
+      const linkBtn = document.getElementById('cyLinkBtn');
+      const destroyABtn = document.getElementById('cyDestroyABtn');
+      const destroyBBtn = document.getElementById('cyDestroyBBtn');
+      const resetBtn = document.getElementById('cyResetBtn');
+      const codeBug = document.getElementById('cyCodeBug');
+      const codeFix = document.getElementById('cyCodeFix');
+      const aBlockEl = document.getElementById('cyABlock');
+      const bBlockEl = document.getElementById('cyBBlock');
+      const aRcEl = document.getElementById('cyARc');
+      const bRcEl = document.getElementById('cyBRc');
+      const banner = document.getElementById('cyBanner');
+      const explainEl = document.getElementById('cyExplain');
+      const logEl = document.getElementById('cyLog');
+
+      let mode = 'bug';
+      let blocks, extHandles;
+
+      function activeCode() { return mode === 'bug' ? codeBug : codeFix; }
+
+      function resetState() {
+        blocks = { A: { refcount: 0, freed: false, hasLinkToB: false, hasLinkToA: false }, B: { refcount: 0, freed: false, hasLinkToA: false } };
+        extHandles = { A: false, B: false };
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeBug.style.display = mode === 'bug' ? 'block' : 'none';
+        codeFix.style.display = mode === 'fix' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = 'Create A and B, link them to each other, then destroy BOTH external handles. In bug mode, watch neither refcount ever reach zero. Flip to fix mode and try the exact same sequence.';
+        createBtn.disabled = false;
+        linkBtn.disabled = true;
+        destroyABtn.disabled = true;
+        destroyBBtn.disabled = true;
+        render();
+      }
+
+      function render() {
+        aBlockEl.className = 'sp-cycle-block' + (blocks.A.freed ? ' freed' : '');
+        bBlockEl.className = 'sp-cycle-block' + (blocks.B.freed ? ' freed' : '');
+        aRcEl.textContent = blocks.A.freed ? 'freed' : blocks.A.refcount;
+        bRcEl.textContent = blocks.B.freed ? 'freed' : blocks.B.refcount;
+      }
+
+      function doCreate() {
+        blocks.A.refcount = 1;
+        blocks.B.refcount = 1;
+        extHandles.A = true;
+        extHandles.B = true;
+        logTo(logEl, 'External handles created: A (refcount=1), B (refcount=1).', 'ok');
+        createBtn.disabled = true;
+        linkBtn.disabled = false;
+        destroyABtn.disabled = false;
+        destroyBBtn.disabled = false;
+        render();
+      }
+
+      function doLink() {
+        blocks.B.refcount++;
+        blocks.A.hasLinkToB = true;
+        highlightLine(activeCode(), 2, 'ok');
+        logTo(logEl, 'A->next = B -- B refcount -> ' + blocks.B.refcount + '.', 'ok');
+
+        if (mode === 'bug') {
+          blocks.A.refcount++;
+          logTo(logEl, 'B->prev = A (shared_ptr) -- A refcount -> ' + blocks.A.refcount + '.  This is the cycle.', 'bad');
+          highlightLine(activeCode(), 3, 'bad');
+        } else {
+          logTo(logEl, 'B->prev = A (weak_ptr) -- A refcount UNCHANGED, still ' + blocks.A.refcount + '.', 'ok');
+          highlightLine(activeCode(), 3, 'ok');
+        }
+        blocks.B.hasLinkToA = true;
+        linkBtn.disabled = true;
+        explainEl.textContent = mode === 'bug'
+          ? 'Both A and B now hold a strong reference to each other, on top of their external handles. Destroy both external handles next and watch what does NOT happen.'
+          : 'A holds a strong (shared_ptr) reference to B, but B only holds a weak, non-owning reference back to A. Destroy both external handles next and compare to bug mode.';
+        render();
+      }
+
+      function maybeFree(name) {
+        if (blocks[name].refcount === 0 && !blocks[name].freed) {
+          blocks[name].freed = true;
+          logTo(logEl, name + ' refcount reached 0 -- freed.', 'ok');
+          if (name === 'A' && blocks.A.hasLinkToB) {
+            blocks.B.refcount--;
+            logTo(logEl, 'Freeing A releases its strong ref to B -- B refcount -> ' + blocks.B.refcount + '.', 'ok');
+            maybeFree('B');
+          }
+          if (name === 'B' && blocks.B.hasLinkToA && mode === 'bug') {
+            blocks.A.refcount--;
+            logTo(logEl, 'Freeing B releases its strong ref to A -- A refcount -> ' + blocks.A.refcount + '.', 'ok');
+            maybeFree('A');
+          }
+        }
+      }
+
+      function doDestroyExternal(name, btn) {
+        extHandles[name] = false;
+        blocks[name].refcount--;
+        btn.disabled = true;
+        logTo(logEl, 'External handle to ' + name + ' destroyed -- refcount -> ' + blocks[name].refcount + '.', null);
+        maybeFree(name);
+        render();
+
+        if (!extHandles.A && !extHandles.B) {
+          banner.style.display = 'block';
+          if (blocks.A.freed && blocks.B.freed) {
+            banner.className = 'sp-banner ok';
+            banner.textContent = 'Both freed -- no leak. The weak back-reference never kept either object alive.';
+            explainEl.textContent = 'Once both external handles were gone, A had exactly one real owner (nothing, now) and freed -- which released its strong ref to B, which then had no owners left either and freed too. No leak.';
+          } else {
+            banner.className = 'sp-banner bad';
+            banner.textContent = 'LEAK: both external handles are gone, but A (refcount=' + blocks.A.refcount + ') and B (refcount=' + blocks.B.refcount + ') are still "alive," referencing only each other.';
+            explainEl.textContent = 'Nobody outside this pair can reach A or B anymore -- they are unreachable garbage from the program\'s point of view -- but their refcounts are still 1 each, because they\'re each other\'s last owner. Neither will ever be freed. Switch to fix mode and repeat the exact same steps.';
+          }
+        }
+      }
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        resetState();
+      }));
+      createBtn.addEventListener('click', doCreate);
+      linkBtn.addEventListener('click', doLink);
+      destroyABtn.addEventListener('click', () => doDestroyExternal('A', destroyABtn));
+      destroyBBtn.addEventListener('click', () => doDestroyExternal('B', destroyBBtn));
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>

@@ -38,6 +38,7 @@ down and coming back to.
    linux_fs_basics_interactive
    overlayfs_interactive
    cpp_memory_interactive
+   cpp_raii_smart_pointers_interactive
    python_sequences_interactive
    python_hashing_interactive
    network_interfaces_interactive
@@ -137,6 +138,9 @@ Quick Navigation
    * - :doc:`cpp_memory_interactive`
      - Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free
      - stack frames, heap allocation, raw pointers, undefined behavior
+   * - :doc:`cpp_raii_smart_pointers_interactive`
+     - Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak
+     - RAII, unique_ptr, shared_ptr, weak_ptr, reference counting
    * - :doc:`python_sequences_interactive`
      - Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source
      - dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks
