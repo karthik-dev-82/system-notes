@@ -1,0 +1,268 @@
+<div class="pq-root" id="pqWidget">
+  <style>
+    #pqWidget {
+      --pq-bg: #0f172a;
+      --pq-panel: #16213e;
+      --pq-border: #2a3655;
+      --pq-text: #e2e8f0;
+      --pq-muted: #94a3b8;
+      --pq-a: #4ade80;
+      --pq-b: #38bdf8;
+      --pq-bad: #f87171;
+      --pq-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pq-bg);
+      color: var(--pq-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pqWidget * { box-sizing: border-box; }
+    #pqWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pqWidget .pq-sub { color: var(--pq-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pq-controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--pq-panel); border: 1px solid var(--pq-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 700px;
+    }
+    .pq-controls label { font-size: 0.8rem; color: var(--pq-muted); display: flex; align-items: center; gap: 8px; }
+    .pq-controls input[type="range"] { width: 120px; accent-color: var(--pq-b); }
+    .pq-toggle { display: inline-flex; border: 1px solid var(--pq-border); border-radius: 8px; overflow: hidden; }
+    .pq-toggle button { background: transparent; color: var(--pq-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .pq-toggle button.active { background: var(--pq-warn); color: #2a1c00; }
+    .pq-btn { background: var(--pq-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .pq-btn.secondary { background: transparent; color: var(--pq-text); border: 1px solid var(--pq-border); }
+
+    .pq-stage { background: var(--pq-panel); border: 1px solid var(--pq-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .pq-code {
+      background: #0a1128; border: 1px solid var(--pq-border); border-radius: 8px; padding: 10px 0;
+      margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6;
+    }
+    .pq-code-line { padding: 1px 14px; color: var(--pq-muted); white-space: pre; }
+    .pq-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--pq-b); padding-left: 11px; }
+    .pq-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--pq-warn); }
+    .pq-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--pq-a); }
+
+    .pq-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--pq-muted); }
+    .pq-counter-row b { color: #fff; font-size: 1.15rem; font-family: ui-monospace, monospace; }
+
+    .pq-array-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; min-height: 54px; align-items: flex-end; }
+    .pq-slot {
+      width: 42px; height: 42px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700;
+      border: 2px solid var(--pq-b); background: #10182e; color: var(--pq-text);
+      position: relative; flex-shrink: 0;
+    }
+    .pq-slot.empty { border: 2px dashed var(--pq-border); color: var(--pq-border); background: transparent; }
+    .pq-slot.shifted { border-color: var(--pq-warn); background: rgba(251,191,36,0.18); }
+
+    .pq-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .pq-explain-panel, .pq-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .pq-explain-panel { flex: 1.4; }
+    .pq-box { background: var(--pq-panel); border: 1px solid var(--pq-border); border-radius: 10px; padding: 12px 14px; }
+    .pq-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pq-muted); margin-bottom: 8px; }
+    .pq-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pq-log div { color: var(--pq-muted); }
+    .pq-log div.ok { color: var(--pq-a); }
+    .pq-log div.bad { color: var(--pq-bad); font-weight: 700; }
+  </style>
+
+  <h3>Queue vs Deque: Play With It</h3>
+  <div class="pq-sub">Same enqueue cost either way. The front operation is where a plain list and a real deque genuinely diverge.</div>
+
+  <div class="pq-controls">
+    <label>Speed: <span id="pqSpeedVal">1x</span>
+      <input type="range" id="pqSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <div class="pq-toggle">
+      <button class="q-mode-btn active" data-mode="list">list (bad)</button>
+      <button class="q-mode-btn" data-mode="deque">collections.deque (good)</button>
+    </div>
+    <button class="pq-btn" id="qEnqueue">Enqueue</button>
+    <button class="pq-btn" id="qDequeue">Dequeue</button>
+    <button class="pq-btn" id="qPlay">&#9654; Play (scripted demo)</button>
+    <button class="pq-btn secondary" id="qReset">Reset</button>
+  </div>
+  <div class="pq-stage">
+    <div class="pq-code" id="qCodeList">
+      <div class="pq-code-line" data-line="1">queue = []</div>
+      <div class="pq-code-line" data-line="2">queue.append(x)   # enqueue -- O(1)</div>
+      <div class="pq-code-line" data-line="3">queue.pop(0)      # dequeue -- O(n): shifts every remaining element left</div>
+    </div>
+    <div class="pq-code" id="qCodeDeque" style="display:none;">
+      <div class="pq-code-line" data-line="1">from collections import deque</div>
+      <div class="pq-code-line" data-line="2">queue = deque()</div>
+      <div class="pq-code-line" data-line="3">queue.append(x)      # enqueue -- O(1)</div>
+      <div class="pq-code-line" data-line="4">queue.popleft()      # dequeue -- O(1): no shifting, ever</div>
+    </div>
+    <div class="pq-counter-row">
+      <div>queue length: <b id="qLen">0</b></div>
+      <div>total element-shifts so far: <b id="qShifts">0</b></div>
+    </div>
+    <div class="pq-array-row" id="qArray"></div>
+  </div>
+  <div class="pq-panels">
+    <div class="pq-explain-panel">
+      <div class="pq-box">
+        <div class="pq-panel-title">What's happening right now</div>
+        <div id="qExplain">Enqueue always appends to the right end -- O(1) either way. The difference is dequeuing from the front. Watch the shift counter: in list mode it climbs every single dequeue; in deque mode it never moves, because deque is a doubly-linked chain of blocks with genuine O(1) access at both ends.</div>
+      </div>
+    </div>
+    <div class="pq-side-panel-col">
+      <div class="pq-box">
+        <div class="pq-panel-title">Event log</div>
+        <div class="pq-log" id="qLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const root = document.getElementById('pqWidget');
+
+    const speedSlider = document.getElementById('pqSpeedSlider');
+    const speedVal = document.getElementById('pqSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.pq-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('warn-hl', isTarget && kind === 'warn');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    const modeButtons = root.querySelectorAll('.q-mode-btn');
+    const enqueueBtn = document.getElementById('qEnqueue');
+    const dequeueBtn = document.getElementById('qDequeue');
+    const playBtn = document.getElementById('qPlay');
+    const resetBtn = document.getElementById('qReset');
+    const codeList = document.getElementById('qCodeList');
+    const codeDeque = document.getElementById('qCodeDeque');
+    const arrayEl = document.getElementById('qArray');
+    const lenEl = document.getElementById('qLen');
+    const shiftsEl = document.getElementById('qShifts');
+    const explainEl = document.getElementById('qExplain');
+    const logEl = document.getElementById('qLog');
+
+    let mode = 'list';
+    let items, totalShifts, nextVal, timer;
+    let playing = false;
+
+    function activeCode() { return mode === 'list' ? codeList : codeDeque; }
+
+    function resetState() {
+      items = [];
+      totalShifts = 0;
+      nextVal = 1;
+      clearTimeout(timer);
+      logEl.innerHTML = '';
+      codeList.style.display = mode === 'list' ? 'block' : 'none';
+      codeDeque.style.display = mode === 'deque' ? 'block' : 'none';
+      highlightLine(activeCode(), 0, null);
+      explainEl.textContent = 'Enqueue always appends to the right end -- O(1) either way. The difference is dequeuing from the front. Watch the shift counter: in list mode it climbs every single dequeue; in deque mode it never moves.';
+      render();
+    }
+
+    function doEnqueue() {
+      items.push(nextVal);
+      logTo(logEl, 'enqueue(' + nextVal + ') -- append to the right end, O(1).', 'ok');
+      highlightLine(activeCode(), mode === 'list' ? 2 : 3, 'ok');
+      nextVal++;
+      render();
+    }
+
+    function doDequeue() {
+      if (items.length === 0) { logTo(logEl, 'dequeue on an empty queue -- nothing to do.', 'bad'); return; }
+      const front = items[0];
+      if (mode === 'list') {
+        const shiftCount = items.length - 1;
+        items.shift();
+        totalShifts += shiftCount;
+        shiftsEl.textContent = totalShifts;
+        logTo(logEl, 'pop(0) -> ' + front + ' -- shifted the remaining ' + shiftCount + ' element(s) left. O(n).', 'bad');
+        highlightLine(activeCode(), 3, 'warn');
+        explainEl.textContent = 'pop(0) removes index 0, but a Python list is one contiguous block -- everything after index 0 has to slide left by one to close the gap. That cost grows with queue length.';
+        flashAll();
+      } else {
+        items.shift(); // model-only removal; deque.popleft() never shifts other elements
+        logTo(logEl, 'popleft() -> ' + front + ' -- O(1), nothing else moves.', 'ok');
+        highlightLine(activeCode(), 4, 'ok');
+        explainEl.textContent = 'popleft() just detaches the front element from its block. No other element’s position changes, so the cost is constant no matter how long the queue is.';
+      }
+      render();
+    }
+
+    function flashAll() {
+      arrayEl.querySelectorAll('.pq-slot').forEach(el => el.classList.add('shifted'));
+      setTimeout(() => arrayEl.querySelectorAll('.pq-slot').forEach(el => el.classList.remove('shifted')), scaled(450));
+    }
+
+    function render() {
+      lenEl.textContent = items.length;
+      shiftsEl.textContent = totalShifts;
+      arrayEl.innerHTML = '';
+      items.forEach(v => {
+        const el = document.createElement('div');
+        el.className = 'pq-slot';
+        el.textContent = v;
+        arrayEl.appendChild(el);
+      });
+      if (items.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'pq-slot empty';
+        empty.textContent = '';
+        arrayEl.appendChild(empty);
+      }
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      const script = ['e', 'e', 'e', 'd', 'e', 'd', 'd', 'e', 'e', 'd'];
+      let i = 0;
+      function tick() {
+        if (i >= script.length) { pause(); return; }
+        if (script[i] === 'e') doEnqueue(); else doDequeue();
+        i++;
+        timer = setTimeout(tick, scaled(700));
+      }
+      tick();
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play (scripted demo)';
+      clearTimeout(timer);
+    }
+
+    modeButtons.forEach(b => b.addEventListener('click', () => {
+      modeButtons.forEach(x => x.classList.toggle('active', x === b));
+      mode = b.dataset.mode;
+      pause();
+      resetState();
+    }));
+    enqueueBtn.addEventListener('click', doEnqueue);
+    dequeueBtn.addEventListener('click', doDequeue);
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    resetBtn.addEventListener('click', () => { pause(); resetState(); });
+
+    resetState();
+  })();
+  </script>
+</div>

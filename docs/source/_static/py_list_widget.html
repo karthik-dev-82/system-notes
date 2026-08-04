@@ -1,0 +1,309 @@
+<div class="pl-root" id="plWidget">
+  <style>
+    #plWidget {
+      --pl-bg: #0f172a;
+      --pl-panel: #16213e;
+      --pl-border: #2a3655;
+      --pl-text: #e2e8f0;
+      --pl-muted: #94a3b8;
+      --pl-a: #4ade80;
+      --pl-b: #38bdf8;
+      --pl-bad: #f87171;
+      --pl-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pl-bg);
+      color: var(--pl-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #plWidget * { box-sizing: border-box; }
+    #plWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #plWidget .pl-sub { color: var(--pl-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pl-controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--pl-panel); border: 1px solid var(--pl-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 700px;
+    }
+    .pl-controls label { font-size: 0.8rem; color: var(--pl-muted); display: flex; align-items: center; gap: 8px; }
+    .pl-controls input[type="range"] { width: 120px; accent-color: var(--pl-b); }
+    .pl-btn { background: var(--pl-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .pl-btn.secondary { background: transparent; color: var(--pl-text); border: 1px solid var(--pl-border); }
+
+    .pl-stage { background: var(--pl-panel); border: 1px solid var(--pl-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .pl-code {
+      background: #0a1128; border: 1px solid var(--pl-border); border-radius: 8px; padding: 10px 0;
+      margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6;
+    }
+    .pl-code-line { padding: 1px 14px; color: var(--pl-muted); white-space: pre; }
+    .pl-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--pl-b); padding-left: 11px; }
+    .pl-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--pl-warn); }
+    .pl-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--pl-a); }
+
+    .pl-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--pl-muted); }
+    .pl-counter-row b { color: #fff; font-size: 1.15rem; font-family: ui-monospace, monospace; }
+
+    .pl-array-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; min-height: 54px; align-items: flex-end; }
+    .pl-slot {
+      width: 42px; height: 42px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700;
+      border: 2px solid var(--pl-b); background: #10182e; color: var(--pl-text);
+      position: relative; flex-shrink: 0;
+    }
+    .pl-slot.empty { border: 2px dashed var(--pl-border); color: var(--pl-border); background: transparent; }
+    .pl-slot.shifted { border-color: var(--pl-warn); background: rgba(251,191,36,0.18); }
+    .pl-slot-idx { position: absolute; top: -18px; font-size: 0.62rem; color: var(--pl-muted); }
+
+    .pl-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .pl-banner.bad { background: rgba(248,113,113,0.18); color: var(--pl-bad); }
+    .pl-banner.ok { background: rgba(74,222,128,0.12); color: var(--pl-a); }
+    .pl-banner.warn { background: rgba(251,191,36,0.15); color: var(--pl-warn); }
+
+    .pl-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .pl-explain-panel, .pl-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .pl-explain-panel { flex: 1.4; }
+    .pl-box { background: var(--pl-panel); border: 1px solid var(--pl-border); border-radius: 10px; padding: 12px 14px; }
+    .pl-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pl-muted); margin-bottom: 8px; }
+    .pl-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pl-log div { color: var(--pl-muted); }
+    .pl-log div.ok { color: var(--pl-a); }
+    .pl-log div.info { color: var(--pl-b); }
+    .pl-log div.bad { color: var(--pl-bad); font-weight: 700; }
+    .pl-log div.warn { color: var(--pl-warn); }
+  </style>
+
+  <h3>List: Play With It</h3>
+  <div class="pl-sub">Uses CPython's real, verified 3.11+ over-allocation growth formula and shrink-bypass rule -- not a textbook approximation.</div>
+
+  <div class="pl-controls">
+    <label>Speed: <span id="plSpeedVal">1x</span>
+      <input type="range" id="plSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button class="pl-btn" id="listAppend">Append</button>
+    <button class="pl-btn" id="listInsertFront">Insert at Front</button>
+    <button class="pl-btn" id="listPop">Pop</button>
+    <button class="pl-btn" id="listPlay">&#9654; Play (append x20)</button>
+    <button class="pl-btn secondary" id="listReset">Reset</button>
+  </div>
+  <div class="pl-stage">
+    <div class="pl-code" id="listCode">
+      <div class="pl-code-line" data-line="1">nums = []</div>
+      <div class="pl-code-line" data-line="2">&nbsp;</div>
+      <div class="pl-code-line" data-line="3">nums.append(x)      # O(1) amortized -- may trigger a resize</div>
+      <div class="pl-code-line" data-line="4">nums.insert(0, x)   # O(n) -- shifts every existing element right</div>
+      <div class="pl-code-line" data-line="5">nums.pop()          # O(1) amortized -- rarely triggers a shrink</div>
+    </div>
+    <div class="pl-counter-row">
+      <div>length: <b id="listLen">0</b></div>
+      <div>capacity: <b id="listCap">0</b></div>
+      <div>reserved (unused): <b id="listReserved">0</b></div>
+      <div>total elements shifted (lifetime): <b id="listShifts">0</b></div>
+    </div>
+    <div class="pl-array-row" id="listArray"></div>
+    <div class="pl-banner" id="listBanner" style="display:none;"></div>
+  </div>
+  <div class="pl-panels">
+    <div class="pl-explain-panel">
+      <div class="pl-box">
+        <div class="pl-panel-title">What's happening right now</div>
+        <div id="listExplain">Click Append repeatedly and watch the capacity (dashed slots) grow in jumps, not one at a time -- CPython over-allocates so most appends are O(1) with no copy at all. Click "Insert at Front" to see the one operation that's genuinely expensive: everything has to move.</div>
+      </div>
+    </div>
+    <div class="pl-side-panel-col">
+      <div class="pl-box">
+        <div class="pl-panel-title">Event log</div>
+        <div class="pl-log" id="listLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const speedSlider = document.getElementById('plSpeedSlider');
+    const speedVal = document.getElementById('plSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.pl-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('warn-hl', isTarget && kind === 'warn');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    const appendBtn = document.getElementById('listAppend');
+    const insertFrontBtn = document.getElementById('listInsertFront');
+    const popBtn = document.getElementById('listPop');
+    const playBtn = document.getElementById('listPlay');
+    const resetBtn = document.getElementById('listReset');
+    const codeEl = document.getElementById('listCode');
+    const arrayEl = document.getElementById('listArray');
+    const lenEl = document.getElementById('listLen');
+    const capEl = document.getElementById('listCap');
+    const reservedEl = document.getElementById('listReserved');
+    const shiftsEl = document.getElementById('listShifts');
+    const banner = document.getElementById('listBanner');
+    const explainEl = document.getElementById('listExplain');
+    const logEl = document.getElementById('listLog');
+
+    function newAllocated(newsize) {
+      return (newsize + (newsize >> 3) + 6) & ~3;
+    }
+
+    let items, allocated, totalShifts, nextVal, timer;
+    let playing = false;
+
+    function resetState() {
+      items = [];
+      allocated = 0;
+      totalShifts = 0;
+      nextVal = 1;
+      clearTimeout(timer);
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      highlightLine(codeEl, 0, null);
+      explainEl.textContent = 'Click Append repeatedly and watch the capacity (dashed slots) grow in jumps, not one at a time -- CPython over-allocates so most appends are O(1) with no copy at all. Click "Insert at Front" to see the one operation that\'s genuinely expensive: everything has to move.';
+      render();
+    }
+
+    function doAppend() {
+      const newsize = items.length + 1;
+      let resized = false;
+      if (newsize > allocated) {
+        const oldAlloc = allocated;
+        allocated = newAllocated(newsize);
+        resized = true;
+        banner.style.display = 'block';
+        banner.className = 'pl-banner warn';
+        banner.textContent = 'RESIZE: capacity ' + oldAlloc + ' -> ' + allocated + ' -- a new array is allocated and all ' + items.length + ' existing elements are copied over.';
+        logTo(logEl, 'append(' + nextVal + ') -- capacity too small, resized ' + oldAlloc + ' -> ' + allocated + ' (copied ' + items.length + ' elements).', 'warn');
+      } else {
+        banner.style.display = 'none';
+        logTo(logEl, 'append(' + nextVal + ') -- fits in existing capacity, O(1), no copy.', 'ok');
+      }
+      items.push(nextVal);
+      nextVal++;
+      highlightLine(codeEl, 3, resized ? 'warn' : 'ok');
+      explainEl.textContent = resized
+        ? 'This append did NOT fit in the reserved capacity, so CPython allocated a bigger array and copied every existing element into it. This is the expensive case -- but it happens rarely, geometrically less often as the list grows.'
+        : 'This append landed in capacity that was already reserved from an earlier resize -- no allocation, no copy, genuinely O(1).';
+      render();
+    }
+
+    function doInsertFront() {
+      const shiftCount = items.length;
+      const newsize = items.length + 1;
+      let resized = false;
+      if (newsize > allocated) {
+        const oldAlloc = allocated;
+        allocated = newAllocated(newsize);
+        resized = true;
+        logTo(logEl, 'insert(0, ' + nextVal + ') -- also needed a resize ' + oldAlloc + ' -> ' + allocated + '.', 'warn');
+      }
+      items.unshift(nextVal);
+      nextVal++;
+      totalShifts += shiftCount;
+      shiftsEl.textContent = totalShifts;
+      logTo(logEl, 'insert(0, x) -- shifted all ' + shiftCount + ' existing elements right by one. O(n), not O(1).', 'bad');
+      highlightLine(codeEl, 4, 'warn');
+      explainEl.textContent = 'insert(0, x) has no shortcut: every single existing element has to move one slot to the right to make room at index 0, no matter how much spare capacity there is. Compare the shift counter to how rarely append() actually copies anything.';
+      banner.style.display = 'block';
+      banner.className = 'pl-banner bad';
+      banner.textContent = 'insert(0, x): ' + shiftCount + ' element(s) shifted right, O(n).' + (resized ? ' (a resize also happened this time)' : '');
+      flashAll();
+      render();
+    }
+
+    function doPop() {
+      if (items.length === 0) { logTo(logEl, 'pop() on an empty list -- nothing to do.', 'bad'); return; }
+      const popped = items.pop();
+      const newsize = items.length;
+      let shrunk = false;
+      if (!(allocated >= newsize && newsize >= (allocated >> 1))) {
+        const oldAlloc = allocated;
+        allocated = newAllocated(newsize);
+        shrunk = true;
+        logTo(logEl, 'pop() -> ' + popped + ' -- length dropped below half of capacity, shrank ' + oldAlloc + ' -> ' + allocated + '.', 'warn');
+      } else {
+        logTo(logEl, 'pop() -> ' + popped + ' -- capacity unchanged (still well above half-full).', 'ok');
+      }
+      highlightLine(codeEl, 5, shrunk ? 'warn' : 'ok');
+      explainEl.textContent = shrunk
+        ? 'This pop dropped the length below half of the reserved capacity, so CPython actually shrank the array this time -- that\'s the uncommon case.'
+        : 'pop() just decremented the length. The reserved capacity is untouched -- CPython does NOT shrink on every pop, only once you drop below half of it.';
+      banner.style.display = 'none';
+      render();
+    }
+
+    function flashAll() {
+      arrayEl.querySelectorAll('.pl-slot:not(.empty)').forEach(el => el.classList.add('shifted'));
+      setTimeout(() => arrayEl.querySelectorAll('.pl-slot').forEach(el => el.classList.remove('shifted')), scaled(500));
+    }
+
+    function render() {
+      lenEl.textContent = items.length;
+      capEl.textContent = allocated;
+      reservedEl.textContent = allocated - items.length;
+      shiftsEl.textContent = totalShifts;
+      arrayEl.innerHTML = '';
+      for (let i = 0; i < allocated; i++) {
+        const el = document.createElement('div');
+        if (i < items.length) {
+          el.className = 'pl-slot';
+          el.textContent = items[i];
+        } else {
+          el.className = 'pl-slot empty';
+          el.textContent = '';
+        }
+        const idx = document.createElement('div');
+        idx.className = 'pl-slot-idx';
+        idx.textContent = i;
+        el.appendChild(idx);
+        arrayEl.appendChild(el);
+      }
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      let count = 0;
+      function tick() {
+        if (count >= 20) { pause(); return; }
+        doAppend();
+        count++;
+        timer = setTimeout(tick, scaled(500));
+      }
+      tick();
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play (append x20)';
+      clearTimeout(timer);
+    }
+
+    appendBtn.addEventListener('click', doAppend);
+    insertFrontBtn.addEventListener('click', doInsertFront);
+    popBtn.addEventListener('click', doPop);
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    resetBtn.addEventListener('click', () => { pause(); resetState(); });
+
+    resetState();
+  })();
+  </script>
+</div>

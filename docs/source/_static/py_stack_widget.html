@@ -1,0 +1,287 @@
+<div class="pk-root" id="pkWidget">
+  <style>
+    #pkWidget {
+      --pk-bg: #0f172a;
+      --pk-panel: #16213e;
+      --pk-border: #2a3655;
+      --pk-text: #e2e8f0;
+      --pk-muted: #94a3b8;
+      --pk-a: #4ade80;
+      --pk-b: #38bdf8;
+      --pk-bad: #f87171;
+      --pk-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pk-bg);
+      color: var(--pk-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pkWidget * { box-sizing: border-box; }
+    #pkWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pkWidget .pk-sub { color: var(--pk-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pk-controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--pk-panel); border: 1px solid var(--pk-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 700px;
+    }
+    .pk-controls label { font-size: 0.8rem; color: var(--pk-muted); display: flex; align-items: center; gap: 8px; }
+    .pk-controls input[type="range"] { width: 120px; accent-color: var(--pk-b); }
+    .pk-toggle { display: inline-flex; border: 1px solid var(--pk-border); border-radius: 8px; overflow: hidden; }
+    .pk-toggle button { background: transparent; color: var(--pk-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .pk-toggle button.active { background: var(--pk-warn); color: #2a1c00; }
+    .pk-btn { background: var(--pk-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .pk-btn.secondary { background: transparent; color: var(--pk-text); border: 1px solid var(--pk-border); }
+
+    .pk-stage { background: var(--pk-panel); border: 1px solid var(--pk-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .pk-code {
+      background: #0a1128; border: 1px solid var(--pk-border); border-radius: 8px; padding: 10px 0;
+      margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6;
+    }
+    .pk-code-line { padding: 1px 14px; color: var(--pk-muted); white-space: pre; }
+    .pk-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--pk-b); padding-left: 11px; }
+    .pk-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--pk-warn); }
+    .pk-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--pk-a); }
+
+    .pk-stack-col { display: flex; flex-direction: column-reverse; gap: 4px; align-items: flex-start; min-height: 220px; justify-content: flex-start; }
+    .pk-stack-plate {
+      width: 60px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-weight: 800; font-size: 1rem;
+      border: 2px solid var(--pk-a); background: rgba(74,222,128,0.12); color: var(--pk-a);
+    }
+
+    .pk-expr-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 16px; }
+    .pk-expr-char {
+      width: 30px; height: 34px; display: flex; align-items: center; justify-content: center;
+      font-family: ui-monospace, monospace; font-weight: 800; font-size: 1rem;
+      border-radius: 5px; background: #10182e; border: 2px solid var(--pk-border); color: var(--pk-muted);
+    }
+    .pk-expr-char.cursor { border-color: var(--pk-b); color: #fff; }
+    .pk-expr-char.done-ok { border-color: var(--pk-a); color: var(--pk-a); }
+    .pk-expr-char.done-bad { border-color: var(--pk-bad); color: var(--pk-bad); background: rgba(248,113,113,0.18); }
+
+    .pk-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .pk-banner.bad { background: rgba(248,113,113,0.18); color: var(--pk-bad); }
+    .pk-banner.ok { background: rgba(74,222,128,0.12); color: var(--pk-a); }
+
+    .pk-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .pk-explain-panel, .pk-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .pk-explain-panel { flex: 1.4; }
+    .pk-box { background: var(--pk-panel); border: 1px solid var(--pk-border); border-radius: 10px; padding: 12px 14px; }
+    .pk-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pk-muted); margin-bottom: 8px; }
+    .pk-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pk-log div { color: var(--pk-muted); }
+    .pk-log div.ok { color: var(--pk-a); }
+    .pk-log div.info { color: var(--pk-b); }
+    .pk-log div.bad { color: var(--pk-bad); font-weight: 700; }
+  </style>
+
+  <h3>Stack: Play With It</h3>
+  <div class="pk-sub">A stack is a list used one specific way: push and pop only ever touch the end. This demo uses that discipline to solve a real problem -- checking whether parentheses are balanced.</div>
+
+  <div class="pk-controls">
+    <label>Speed: <span id="pkSpeedVal">1x</span>
+      <input type="range" id="pkSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <div class="pk-toggle">
+      <button class="stk-expr-btn active" data-expr="(()())">(()())  -- balanced</button>
+      <button class="stk-expr-btn" data-expr="()()()">()()()  -- balanced</button>
+      <button class="stk-expr-btn" data-expr="((()">((()  -- unclosed</button>
+      <button class="stk-expr-btn" data-expr="())">())  -- extra close</button>
+    </div>
+    <button class="pk-btn" id="stkStep">Step</button>
+    <button class="pk-btn" id="stkPlay">&#9654; Play</button>
+    <button class="pk-btn secondary" id="stkReset">Reset</button>
+  </div>
+  <div class="pk-stage">
+    <div class="pk-code" id="stkCode">
+      <div class="pk-code-line" data-line="1">def is_balanced(expr: str) -> bool:</div>
+      <div class="pk-code-line" data-line="2">    stack = []</div>
+      <div class="pk-code-line" data-line="3">    for ch in expr:</div>
+      <div class="pk-code-line" data-line="4">        if ch == '(':</div>
+      <div class="pk-code-line" data-line="5">            stack.append(ch)</div>
+      <div class="pk-code-line" data-line="6">        elif ch == ')':</div>
+      <div class="pk-code-line" data-line="7">            if not stack:</div>
+      <div class="pk-code-line" data-line="8">                return False</div>
+      <div class="pk-code-line" data-line="9">            stack.pop()</div>
+      <div class="pk-code-line" data-line="10">    return not stack</div>
+    </div>
+    <div class="pk-expr-row" id="stkExprRow"></div>
+    <div style="flex:1; min-width:180px;">
+      <div class="pk-panel-title">Stack (top = most recently pushed)</div>
+      <div class="pk-stack-col" id="stkStack"></div>
+    </div>
+    <div class="pk-banner" id="stkBanner" style="display:none;"></div>
+  </div>
+  <div class="pk-panels">
+    <div class="pk-explain-panel">
+      <div class="pk-box">
+        <div class="pk-panel-title">What's happening right now</div>
+        <div id="stkExplain">Step through the expression one character at a time. Every '(' is pushed; every ')' pops the most recent unmatched '('. This is exactly how editors highlight matching brackets, and exactly what a JSON/XML/code parser does to check nesting is well-formed.</div>
+      </div>
+    </div>
+    <div class="pk-side-panel-col">
+      <div class="pk-box">
+        <div class="pk-panel-title">Event log</div>
+        <div class="pk-log" id="stkLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const root = document.getElementById('pkWidget');
+
+    const speedSlider = document.getElementById('pkSpeedSlider');
+    const speedVal = document.getElementById('pkSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.pk-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('warn-hl', isTarget && kind === 'warn');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    const exprButtons = root.querySelectorAll('.stk-expr-btn');
+    const stepBtn = document.getElementById('stkStep');
+    const playBtn = document.getElementById('stkPlay');
+    const resetBtn = document.getElementById('stkReset');
+    const codeEl = document.getElementById('stkCode');
+    const exprRowEl = document.getElementById('stkExprRow');
+    const stackEl = document.getElementById('stkStack');
+    const banner = document.getElementById('stkBanner');
+    const explainEl = document.getElementById('stkExplain');
+    const logEl = document.getElementById('stkLog');
+
+    let expr = '(()())';
+    let pos, stack, failed, timer;
+    let playing = false;
+
+    function resetState() {
+      pos = 0;
+      stack = [];
+      failed = false;
+      clearTimeout(timer);
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      highlightLine(codeEl, 0, null);
+      explainEl.textContent = 'Step through the expression one character at a time. Every ‘(’ is pushed; every ‘)’ pops the most recent unmatched ‘(’.';
+      renderExpr();
+      renderStack();
+    }
+
+    function advance() {
+      if (failed || pos >= expr.length) return;
+      const ch = expr[pos];
+      if (ch === '(') {
+        stack.push(pos);
+        logTo(logEl, "push '(' at position " + pos + ' -- depth now ' + stack.length, 'ok');
+        highlightLine(codeEl, 5, 'ok');
+        explainEl.textContent = "Saw '(' -- pushed. Depth is now " + stack.length + '.';
+      } else if (ch === ')') {
+        if (stack.length === 0) {
+          failed = true;
+          logTo(logEl, "pop on EMPTY stack at position " + pos + ' -- unmatched close.', 'bad');
+          highlightLine(codeEl, 8, 'warn');
+          explainEl.textContent = "This ')' has no '(' left to match -- the stack is already empty. Unbalanced.";
+          banner.style.display = 'block';
+          banner.className = 'pk-banner bad';
+          banner.textContent = 'Unbalanced: unmatched ’)’ at position ' + pos + ' with nothing on the stack to pop.';
+          pos++;
+          renderExpr();
+          return;
+        }
+        stack.pop();
+        logTo(logEl, "pop matching '(' for ')' at position " + pos + ' -- depth now ' + stack.length, 'info');
+        highlightLine(codeEl, 9, 'ok');
+        explainEl.textContent = "Saw ')' -- popped its matching '('. Depth is now " + stack.length + '.';
+      }
+      pos++;
+      if (pos >= expr.length) {
+        highlightLine(codeEl, 10, stack.length === 0 ? 'ok' : 'warn');
+        banner.style.display = 'block';
+        if (stack.length === 0) {
+          banner.className = 'pk-banner ok';
+          banner.textContent = 'Balanced! Every ‘(’ found its ‘)’ and the stack is empty.';
+          logTo(logEl, 'end of expression -- stack empty -- BALANCED.', 'ok');
+        } else {
+          banner.className = 'pk-banner bad';
+          banner.textContent = 'Unbalanced: ' + stack.length + ' unclosed ‘(’ left on the stack.';
+          logTo(logEl, 'end of expression -- ' + stack.length + ' unclosed paren(s) left -- UNBALANCED.', 'bad');
+        }
+      }
+      renderExpr();
+      renderStack();
+    }
+
+    function renderExpr() {
+      exprRowEl.innerHTML = '';
+      for (let i = 0; i < expr.length; i++) {
+        const el = document.createElement('div');
+        let cls = 'pk-expr-char';
+        if (i === pos && !failed && pos < expr.length) cls += ' cursor';
+        else if (i < pos) cls += (failed && i === pos - 1) ? ' done-bad' : ' done-ok';
+        el.className = cls;
+        el.textContent = expr[i];
+        exprRowEl.appendChild(el);
+      }
+    }
+
+    function renderStack() {
+      stackEl.innerHTML = '';
+      stack.forEach((openPos) => {
+        const el = document.createElement('div');
+        el.className = 'pk-stack-plate';
+        el.textContent = '( @' + openPos;
+        stackEl.appendChild(el);
+      });
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      function tick() {
+        if (failed || pos >= expr.length) { pause(); return; }
+        advance();
+        timer = setTimeout(tick, scaled(650));
+      }
+      tick();
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play';
+      clearTimeout(timer);
+    }
+
+    exprButtons.forEach(b => b.addEventListener('click', () => {
+      exprButtons.forEach(x => x.classList.toggle('active', x === b));
+      expr = b.dataset.expr;
+      pause();
+      resetState();
+    }));
+    stepBtn.addEventListener('click', advance);
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    resetBtn.addEventListener('click', () => { pause(); resetState(); });
+
+    resetState();
+  })();
+  </script>
+</div>

@@ -116,7 +116,9 @@ system-notes/
             ├── linux_fs_basics_widget.html
             ├── overlayfs_widget.html
             ├── cpp_memory_widget.html
-            ├── py_sequences_widget.html
+            ├── py_list_widget.html
+            ├── py_stack_widget.html
+            ├── py_queue_widget.html
             └── py_hashing_widget.html
 
 ```
