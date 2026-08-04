@@ -2,20 +2,19 @@ System Notes
 ===================
 
 A curated collection of reference guides and revision notes -- Linux
-internals, networking, containers, and whatever else is worth writing
-down and coming back to.
+internals, networking, containers, C++, Python, and whatever else is
+worth writing down and coming back to.
 
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: Guides
+   :caption: System Notes
 
    bashrc_reference
-   developer_commands
    system_monitoring_commands
+   developer_commands
    network_interfaces
    docker_dev_environment
-   spdlog_sinks_architecture
    linux_devices
    kernel_networking_docker_internals
    lidar_slam
@@ -37,16 +36,29 @@ down and coming back to.
    proc_filesystem_interactive
    linux_fs_basics_interactive
    overlayfs_interactive
+   network_interfaces_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: C++ Notes
+
+   spdlog_sinks_architecture
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
    cpp_move_semantics_interactive
    cpp_vtable_interactive
    cpp_exception_unwind_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Python Notes
+
    python_sequences_interactive
    python_hashing_interactive
-   network_interfaces_interactive
 
-Quick Navigation
+System Notes
 -----------------
 
 .. list-table::
@@ -72,9 +84,6 @@ Quick Navigation
    * - :doc:`docker_dev_environment`
      - How the ``development`` repo's Docker dev container is built
      - ``Dockerfile``, ``devcontainer.json``, ``docker-compose.yml``
-   * - :doc:`spdlog_sinks_architecture`
-     - spdlog logging architecture, sinks, and log levels
-     - ``spdlog``, sinks, formatters, log levels, rotation
    * - :doc:`linux_devices`
      - Block/char/network/terminal/pseudo devices, and USB layering
      - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
@@ -138,6 +147,24 @@ Quick Navigation
    * - :doc:`overlayfs_interactive`
      - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
      - lowerdir, upperdir, merged view, copy-up, whiteouts
+   * - :doc:`network_interfaces_interactive`
+     - Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation
+     - MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation
+
+C++ Notes
+-----------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`spdlog_sinks_architecture`
+     - spdlog logging architecture, sinks, and log levels
+     - ``spdlog``, sinks, formatters, log levels, rotation
    * - :doc:`cpp_memory_interactive`
      - Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free
      - stack frames, heap allocation, raw pointers, undefined behavior
@@ -153,12 +180,21 @@ Quick Navigation
    * - :doc:`cpp_exception_unwind_interactive`
      - Interactive exception unwinding -- RAII cleanup during unwind, and why a destructor must never throw
      - stack unwinding, RAII, std::terminate, noexcept
+
+Python Notes
+-----------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`python_sequences_interactive`
      - Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source
      - dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks
    * - :doc:`python_hashing_interactive`
      - Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra
      - hash tables, open addressing, insertion order, union/intersection/difference
-   * - :doc:`network_interfaces_interactive`
-     - Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation
-     - MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation

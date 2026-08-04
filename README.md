@@ -9,6 +9,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 
 ## 📚 Quick Navigation Index
 
+### System Notes
+
 | Reference Guide | Primary Focus | Key Utilities Covered |
 | --- | --- | --- |
 | 🖥️ **[.bashrc Reference](docs/source/bashrc_reference.rst)** | Shell setup, aliases & functions | `.bashrc`, aliases, `__setprompt`, `ssh-agent` |
@@ -16,7 +18,6 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | ⚡ **[Developer Commands](docs/source/developer_commands.rst)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
 | 🐳 **[Docker Dev Environment](docs/source/docker_dev_environment.rst)** | How the `development` repo's Docker dev container is built | `Dockerfile`, `devcontainer.json`, `docker-compose.yml` |
-| 📝 **[spdlog Sinks & Architecture](docs/source/spdlog_sinks_architecture.rst)** | spdlog logging architecture, sinks, and log levels | `spdlog`, sinks, formatters, log levels, rotation |
 | 🔌 **[Linux Devices](docs/source/linux_devices.rst)** | Block/char/network/terminal/pseudo devices, and USB layering | `/dev`, `lsblk`, `ttyACM`/`ttyUSB`, `udevadm`, PTYs |
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
@@ -38,14 +39,25 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
 | 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
 | 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
+| 🎮 **[Network Interfaces (Interactive)](docs/source/network_interfaces_interactive.rst)** | Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation | MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation |
+
+### C++ Notes
+
+| Reference Guide | Primary Focus | Key Utilities Covered |
+| --- | --- | --- |
+| 📝 **[spdlog Sinks & Architecture](docs/source/spdlog_sinks_architecture.rst)** | spdlog logging architecture, sinks, and log levels | `spdlog`, sinks, formatters, log levels, rotation |
 | 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
 | 🎮 **[C++ RAII & Smart Pointers (Interactive)](docs/source/cpp_raii_smart_pointers_interactive.rst)** | Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak | RAII, unique_ptr, shared_ptr, weak_ptr, reference counting |
 | 🎮 **[C++ Move Semantics (Interactive)](docs/source/cpp_move_semantics_interactive.rst)** | Interactive move semantics -- copy vs move construction cost, made countable | move constructor, std::move, moved-from state, noexcept |
 | 🎮 **[C++ Virtual Functions & vtables (Interactive)](docs/source/cpp_vtable_interactive.rst)** | Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak | vtable, vptr, dynamic dispatch, virtual destructor |
 | 🎮 **[C++ Exception Unwinding (Interactive)](docs/source/cpp_exception_unwind_interactive.rst)** | Interactive exception unwinding -- RAII cleanup during unwind, and why a destructor must never throw | stack unwinding, RAII, std::terminate, noexcept |
+
+### Python Notes
+
+| Reference Guide | Primary Focus | Key Utilities Covered |
+| --- | --- | --- |
 | 🎮 **[Python Sequences (Interactive)](docs/source/python_sequences_interactive.rst)** | Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source | dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks |
 | 🎮 **[Python Hashing (Interactive)](docs/source/python_hashing_interactive.rst)** | Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra | hash tables, open addressing, insertion order, union/intersection/difference |
-| 🎮 **[Network Interfaces (Interactive)](docs/source/network_interfaces_interactive.rst)** | Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation | MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation |
 
 ---
 
