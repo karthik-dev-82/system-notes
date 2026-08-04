@@ -41,6 +41,7 @@ down and coming back to.
    cpp_raii_smart_pointers_interactive
    cpp_move_semantics_interactive
    cpp_vtable_interactive
+   cpp_exception_unwind_interactive
    python_sequences_interactive
    python_hashing_interactive
    network_interfaces_interactive
@@ -149,6 +150,9 @@ Quick Navigation
    * - :doc:`cpp_vtable_interactive`
      - Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak
      - vtable, vptr, dynamic dispatch, virtual destructor
+   * - :doc:`cpp_exception_unwind_interactive`
+     - Interactive exception unwinding -- RAII cleanup during unwind, and why a destructor must never throw
+     - stack unwinding, RAII, std::terminate, noexcept
    * - :doc:`python_sequences_interactive`
      - Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source
      - dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks

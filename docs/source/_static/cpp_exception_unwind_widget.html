@@ -1,0 +1,497 @@
+<div class="ew-root" id="ewWidget">
+  <style>
+    #ewWidget {
+      --ew-bg: #0f172a;
+      --ew-panel: #16213e;
+      --ew-border: #2a3655;
+      --ew-text: #e2e8f0;
+      --ew-muted: #94a3b8;
+      --ew-a: #4ade80;
+      --ew-b: #38bdf8;
+      --ew-bad: #f87171;
+      --ew-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ew-bg);
+      color: var(--ew-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ewWidget * { box-sizing: border-box; }
+    #ewWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ewWidget .ew-sub { color: var(--ew-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ew-topbar { display: flex; align-items: center; gap: 10px; background: var(--ew-panel); border: 1px solid var(--ew-border); border-radius: 8px; padding: 8px 14px; margin-bottom: 14px; min-width: 800px; font-size: 0.8rem; color: var(--ew-muted); }
+    .ew-topbar input[type="range"] { width: 130px; accent-color: var(--ew-b); }
+
+    .ew-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 800px; }
+    .ew-tab { background: var(--ew-panel); color: var(--ew-muted); border: 1px solid var(--ew-border); border-radius: 8px; padding: 9px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .ew-tab.active { background: var(--ew-b); color: #041322; border-color: var(--ew-b); }
+    .ew-panel { display: none; }
+    .ew-panel.active { display: block; }
+
+    .ew-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--ew-panel); border: 1px solid var(--ew-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 800px; }
+    .ew-toggle { display: inline-flex; border: 1px solid var(--ew-border); border-radius: 8px; overflow: hidden; }
+    .ew-toggle button { background: transparent; color: var(--ew-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .ew-toggle button.active { background: var(--ew-warn); color: #2a1c00; }
+    .ew-btn { background: var(--ew-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ew-btn.secondary { background: transparent; color: var(--ew-text); border: 1px solid var(--ew-border); }
+    .ew-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .ew-stage { background: var(--ew-panel); border: 1px solid var(--ew-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; min-width: 800px; }
+
+    .ew-code { background: #0a1128; border: 1px solid var(--ew-border); border-radius: 8px; padding: 10px 0; margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.6; }
+    .ew-code-line { padding: 1px 14px; color: var(--ew-muted); white-space: pre; }
+    .ew-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--ew-b); padding-left: 11px; }
+    .ew-code-line.hl.bad-hl { background: rgba(248,113,113,0.16); border-left-color: var(--ew-bad); }
+    .ew-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--ew-a); }
+
+    .ew-frame { border: 2px solid var(--ew-a); border-radius: 8px; padding: 8px 12px; margin-bottom: 8px; background: #10182e; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .ew-frame.popped { opacity: 0.3; border-style: dashed; border-color: var(--ew-warn); }
+    .ew-frame-title { font-weight: 800; color: var(--ew-a); }
+
+    .ew-resource-row { text-align: center; margin: 12px 0; }
+    .ew-resource-box { display: inline-block; border: 2px solid var(--ew-b); background: #10182e; border-radius: 8px; padding: 8px 18px; font-family: ui-monospace, monospace; font-size: 0.82rem; }
+    .ew-resource-box.closed { border-color: var(--ew-muted); opacity: 0.5; }
+    .ew-resource-box.leaked { border-color: var(--ew-warn); }
+
+    .ew-banner { text-align: center; padding: 12px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .ew-banner.bad { background: rgba(248,113,113,0.2); color: var(--ew-bad); }
+    .ew-banner.ok { background: rgba(74,222,128,0.12); color: var(--ew-a); }
+    .ew-banner.fatal { background: rgba(248,113,113,0.3); color: #fff; border: 2px solid var(--ew-bad); }
+
+    .ew-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 800px; }
+    .ew-explain-panel, .ew-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .ew-explain-panel { flex: 1.4; }
+    .ew-box { background: var(--ew-panel); border: 1px solid var(--ew-border); border-radius: 10px; padding: 12px 14px; }
+    .ew-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ew-muted); margin-bottom: 8px; }
+    .ew-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .ew-log div { color: var(--ew-muted); }
+    .ew-log div.ok { color: var(--ew-a); }
+    .ew-log div.bad { color: var(--ew-bad); font-weight: 700; }
+    .ew-log div.warn { color: var(--ew-warn); }
+
+    details.ew-notes { margin-top: 14px; background: var(--ew-panel); border: 1px solid var(--ew-border); border-radius: 10px; padding: 12px 16px; min-width: 800px; font-size: 0.85rem; line-height: 1.6; }
+    details.ew-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ew-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ew-muted); }
+    details.ew-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ew-b); }
+  </style>
+
+  <h3>Exception Unwinding Through Destructors: Play With It</h3>
+  <div class="ew-sub">When an exception is thrown, every stack frame between the throw and the matching catch gets destroyed on the way there -- automatically, in reverse order, exactly like a normal return. RAII cleanup happens for free; manual cleanup gets skipped.</div>
+
+  <div class="ew-topbar">
+    <label>Playback speed: <span id="ewSpeedVal">1x</span></label>
+    <input type="range" id="ewSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+  </div>
+
+  <div class="ew-tabs">
+    <button class="ew-tab active" data-tab="unwind">1. Stack Unwinding + RAII</button>
+    <button class="ew-tab" data-tab="terminate">2. Destructor Throws During Unwind</button>
+  </div>
+
+  <!-- ============ TAB 1: STACK UNWINDING ============ -->
+  <div class="ew-panel active" id="panel-unwind">
+    <div class="ew-controls">
+      <div class="ew-toggle">
+        <button class="uw-mode-btn active" data-mode="raw">Raw Handle (Bug)</button>
+        <button class="uw-mode-btn" data-mode="raii">RAII FileGuard (Fix)</button>
+      </div>
+      <button class="ew-btn" id="uwStep">Step</button>
+      <button class="ew-btn" id="uwPlay">&#9654; Play</button>
+      <button class="ew-btn secondary" id="uwReset">Reset</button>
+    </div>
+    <div class="ew-stage">
+      <div class="ew-code" id="uwCodeRaw">
+        <div class="ew-code-line" data-line="1">void process() {</div>
+        <div class="ew-code-line" data-line="2">    FILE* f = fopen("data.txt", "r");   // raw handle</div>
+        <div class="ew-code-line" data-line="3">    risky();                             // throws</div>
+        <div class="ew-code-line" data-line="4">    fclose(f);                           // never reached</div>
+        <div class="ew-code-line" data-line="5">}</div>
+      </div>
+      <div class="ew-code" id="uwCodeRaii" style="display:none;">
+        <div class="ew-code-line" data-line="1">void process() {</div>
+        <div class="ew-code-line" data-line="2">    FileGuard f("data.txt", "r");        // RAII wrapper</div>
+        <div class="ew-code-line" data-line="3">    risky();                             // throws</div>
+        <div class="ew-code-line" data-line="4">    // no fclose needed</div>
+        <div class="ew-code-line" data-line="5">}   // f's destructor runs during unwind -- closes the file</div>
+      </div>
+      <div id="uwStackCol"></div>
+      <div class="ew-resource-row" id="uwResourceRow"></div>
+      <div class="ew-banner" id="uwBanner" style="display:none;"></div>
+    </div>
+    <div class="ew-panels">
+      <div class="ew-explain-panel">
+        <div class="ew-box">
+          <div class="ew-panel-title">What's happening right now</div>
+          <div id="uwExplain">Step through main() calling process() calling risky(), which throws. Watch what happens to the file handle as the stack unwinds back to main()'s catch block.</div>
+        </div>
+      </div>
+      <div class="ew-side-panel-col">
+        <div class="ew-box">
+          <div class="ew-panel-title">Event log</div>
+          <div class="ew-log" id="uwLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: DESTRUCTOR THROWS DURING UNWIND ============ -->
+  <div class="ew-panel" id="panel-terminate">
+    <div class="ew-controls">
+      <div class="ew-toggle">
+        <button class="tm-mode-btn active" data-mode="throws">Destructor Throws (Bug)</button>
+        <button class="tm-mode-btn" data-mode="safe">Destructor Doesn't Throw (Fix)</button>
+      </div>
+      <button class="ew-btn" id="tmStep">Step</button>
+      <button class="ew-btn" id="tmPlay">&#9654; Play</button>
+      <button class="ew-btn secondary" id="tmReset">Reset</button>
+    </div>
+    <div class="ew-stage">
+      <div class="ew-code" id="tmCodeThrows">
+        <div class="ew-code-line" data-line="1">struct Guard {</div>
+        <div class="ew-code-line" data-line="2">    ~Guard() { if (!ok) throw std::runtime_error("cleanup failed"); }</div>
+        <div class="ew-code-line" data-line="3">};</div>
+        <div class="ew-code-line" data-line="4">void process() {</div>
+        <div class="ew-code-line" data-line="5">    Guard g;</div>
+        <div class="ew-code-line" data-line="6">    throw std::runtime_error("exception A");</div>
+        <div class="ew-code-line" data-line="7">}   // unwinding destroys g -- its destructor throws exception B</div>
+      </div>
+      <div class="ew-code" id="tmCodeSafe" style="display:none;">
+        <div class="ew-code-line" data-line="1">struct Guard {</div>
+        <div class="ew-code-line" data-line="2">    ~Guard() noexcept { /* cleanup that cannot throw */ }</div>
+        <div class="ew-code-line" data-line="3">};</div>
+        <div class="ew-code-line" data-line="4">void process() {</div>
+        <div class="ew-code-line" data-line="5">    Guard g;</div>
+        <div class="ew-code-line" data-line="6">    throw std::runtime_error("exception A");</div>
+        <div class="ew-code-line" data-line="7">}   // unwinding destroys g -- destructor completes normally</div>
+      </div>
+      <div id="tmTimelineCol"></div>
+      <div class="ew-banner" id="tmBanner" style="display:none;"></div>
+    </div>
+    <div class="ew-panels">
+      <div class="ew-explain-panel">
+        <div class="ew-box">
+          <div class="ew-panel-title">What's happening right now</div>
+          <div id="tmExplain">Exception A is already propagating (unwinding is in progress) when Guard's destructor runs. Step through and see what happens if that destructor itself throws.</div>
+        </div>
+      </div>
+      <div class="ew-side-panel-col">
+        <div class="ew-box">
+          <div class="ew-panel-title">Event log</div>
+          <div class="ew-log" id="tmLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ew-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>Stack unwinding on an exception uses <i>exactly</i> the same machinery as a normal function return -- every local object's destructor runs, in reverse order of construction, as its frame is destroyed. This is the whole reason RAII works as a general-purpose cleanup strategy in C++ instead of just a convenience: there's no separate "cleanup path" to remember, because the normal-return path and the exception path both go through the same destructor calls.</li>
+      <li>This is the third page in this series to show the identical bug shape: a cleanup step written as an ordinary statement, placed after the code that might not reach it. The heap-leak tab on <a href="cpp_memory_interactive.html">the memory page</a> skipped it via an early return; the non-virtual-destructor tab on <a href="cpp_vtable_interactive.html">the vtables page</a> skipped it via a missing keyword; this page skips it via a thrown exception. RAII is the one fix that closes all three at once, because it doesn't depend on which path control takes -- only on the object's scope ending.</li>
+      <li>The <code>noexcept</code> on the "safe" destructor in tab 2 isn't just documentation -- if a function marked <code>noexcept</code> does throw anyway, the runtime calls <code>std::terminate()</code> immediately, before unwinding even starts. Marking destructors <code>noexcept</code> (which they are *by default* since C++11, unless a base or member's destructor isn't) turns "please don't throw from here" from a convention into something the compiler can reason about.</li>
+      <li>The reasoning behind "never let a destructor throw" isn't specific to double-exceptions in the abstract -- it's that a destructor generally can't know whether it's being called during normal scope exit or while another exception is already unwinding through it. Since the consequence of throwing in the second case is <code>std::terminate()</code> (immediate program abort, no stack unwinding, no catch block, nothing), and a destructor has no way to check which situation it's in, the only safe rule is unconditional: don't throw from a destructor, ever.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('ewWidget');
+
+    const speedSlider = document.getElementById('ewSpeedSlider');
+    const speedVal = document.getElementById('ewSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.ew-tab');
+    const panels = { unwind: document.getElementById('panel-unwind'), terminate: document.getElementById('panel-terminate') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+      if (t.dataset.tab !== 'unwind' && window.ewUwPlaying) window.ewUwPause();
+      if (t.dataset.tab !== 'terminate' && window.ewTmPlaying) window.ewTmPause();
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.ew-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('bad-hl', isTarget && kind === 'bad');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    // =========================================================
+    // TAB 1: STACK UNWINDING + RAII CLEANUP
+    // Step sequence mirrors the Node-verified runScenario() model exactly.
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.uw-mode-btn');
+      const stepBtn = document.getElementById('uwStep');
+      const playBtn = document.getElementById('uwPlay');
+      const resetBtn = document.getElementById('uwReset');
+      const codeRaw = document.getElementById('uwCodeRaw');
+      const codeRaii = document.getElementById('uwCodeRaii');
+      const stackColEl = document.getElementById('uwStackCol');
+      const resourceRowEl = document.getElementById('uwResourceRow');
+      const banner = document.getElementById('uwBanner');
+      const explainEl = document.getElementById('uwExplain');
+      const logEl = document.getElementById('uwLog');
+
+      let mode = 'raw';
+      let step, stack, resourceOpen, timer;
+      window.ewUwPlaying = false;
+
+      function activeCode() { return mode === 'raii' ? codeRaii : codeRaw; }
+
+      // step -> { line, kind, log, frameOp, explain }
+      function STEPS() {
+        return [
+          { line: 1, kind: null, log: 'enter process() -- new stack frame.', frameOp: 'push:process',
+            explain: 'main() calls process(). A new stack frame is created.' },
+          { line: 2, kind: null, log: mode === 'raii' ? 'FileGuard f(...) constructed -- owns the file handle.' : 'FILE* f = fopen(...) -- raw handle, no destructor.', frameOp: 'resource:open',
+            explain: mode === 'raii' ? 'f is a local RAII object. Its destructor is now guaranteed to run whenever this scope ends, no matter how.' : 'f is a plain pointer. Nothing will happen to it automatically when this scope ends -- fclose(f) has to be reached as a normal statement.' },
+          { line: 3, kind: null, log: 'enter risky() -- new stack frame.', frameOp: 'push:risky',
+            explain: 'process() calls risky().' },
+          { line: 3, kind: 'bad', log: 'risky() throws -- exception propagation begins.', frameOp: null,
+            explain: 'An exception is now in flight. Control will not return to risky() or continue past this call in process() -- the stack starts unwinding toward the nearest matching catch.' },
+          { line: null, kind: null, log: 'risky() frame destroyed (unwind).', frameOp: 'pop:risky',
+            explain: 'risky() had nothing local to clean up, so its frame is simply removed.' },
+          { line: mode === 'raii' ? 5 : 4, kind: mode === 'raii' ? 'ok' : 'bad',
+            log: mode === 'raii' ? "f's destructor runs during unwind -- file closed." : 'fclose(f); was never reached -- skipped entirely by the throw.',
+            frameOp: mode === 'raii' ? 'resource:close' : 'resource:leak',
+            explain: mode === 'raii' ? "Unwinding process()'s frame destroys f exactly like a normal return would -- its destructor runs unconditionally and closes the file." : 'The throw jumped straight past this line. There is no mechanism that runs it for you -- a raw handle has no destructor.' },
+          { line: null, kind: null, log: 'process() frame destroyed (unwind).', frameOp: 'pop:process',
+            explain: "process()'s frame is now gone too." },
+          { line: null, kind: mode === 'raii' ? 'ok' : 'bad', log: 'exception caught in main().', frameOp: 'caught',
+            explain: mode === 'raii' ? 'The exception is caught in main(), and thanks to RAII, the file was already closed correctly during unwinding -- no extra cleanup code needed anywhere.' : 'The exception is caught in main() -- but the file was never closed. The catch block has no way to know that, and no way to reach back and fix it.' },
+        ];
+      }
+
+      function resetState() {
+        step = 0;
+        stack = [{ name: 'main', popped: false }];
+        resourceOpen = null; // null = not opened yet
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeRaw.style.display = mode === 'raw' ? 'block' : 'none';
+        codeRaii.style.display = mode === 'raii' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = "Step through main() calling process() calling risky(), which throws. Watch what happens to the file handle as the stack unwinds back to main()'s catch block.";
+        stepBtn.disabled = false;
+        render();
+      }
+
+      function render() {
+        stackColEl.innerHTML = '';
+        stack.forEach(f => {
+          const el = document.createElement('div');
+          el.className = 'ew-frame' + (f.popped ? ' popped' : '');
+          el.innerHTML = '<div class="ew-frame-title">' + f.name + '()' + (f.popped ? ' -- destroyed' : '') + '</div>';
+          stackColEl.appendChild(el);
+        });
+        resourceRowEl.innerHTML = '';
+        if (resourceOpen !== null) {
+          const el = document.createElement('div');
+          el.className = 'ew-resource-box' + (resourceOpen ? '' : (mode === 'raii' ? ' closed' : ' leaked'));
+          el.textContent = resourceOpen ? 'data.txt: OPEN' : (mode === 'raii' ? 'data.txt: closed correctly' : 'data.txt: still open -- LEAKED handle');
+          resourceRowEl.appendChild(el);
+        }
+      }
+
+      function advance() {
+        const steps = STEPS();
+        if (step >= steps.length) return;
+        const s = steps[step];
+        if (s.line !== null) highlightLine(activeCode(), s.line, s.kind);
+        logTo(logEl, s.log, s.kind);
+        explainEl.textContent = s.explain;
+
+        if (s.frameOp === 'push:process') stack.push({ name: 'process', popped: false });
+        else if (s.frameOp === 'push:risky') stack.push({ name: 'risky', popped: false });
+        else if (s.frameOp === 'pop:risky' || s.frameOp === 'pop:process') {
+          // mark the topmost still-live frame as a permanent ghost -- no
+          // removal, no timer, so rapid Step clicks can never race a
+          // pending removal against the next pop's own array lookup
+          for (let i = stack.length - 1; i >= 0; i--) {
+            if (!stack[i].popped) { stack[i].popped = true; break; }
+          }
+        } else if (s.frameOp === 'resource:open') resourceOpen = true;
+        else if (s.frameOp === 'resource:close') resourceOpen = false;
+        else if (s.frameOp === 'resource:leak') { /* resourceOpen stays true -- that IS the leak */ }
+        else if (s.frameOp === 'caught') {
+          banner.style.display = 'block';
+          banner.className = 'ew-banner ' + (mode === 'raii' ? 'ok' : 'bad');
+          banner.textContent = mode === 'raii'
+            ? 'Caught in main() -- resource correctly closed during unwinding. No leak.'
+            : 'Caught in main() -- but the file handle leaked. The exception was handled; the resource was not.';
+        }
+
+        render();
+        step++;
+        stepBtn.disabled = step >= steps.length;
+      }
+
+      function play() {
+        if (window.ewUwPlaying) return;
+        window.ewUwPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (step >= STEPS().length) { window.ewUwPause(); return; }
+          advance();
+          timer = setTimeout(tick, scaled(1100));
+        }
+        tick();
+      }
+      window.ewUwPause = function () {
+        window.ewUwPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearTimeout(timer);
+      };
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        window.ewUwPause();
+        resetState();
+      }));
+      stepBtn.addEventListener('click', advance);
+      playBtn.addEventListener('click', () => window.ewUwPlaying ? window.ewUwPause() : play());
+      resetBtn.addEventListener('click', () => { window.ewUwPause(); resetState(); });
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: DESTRUCTOR THROWS DURING UNWIND -> std::terminate()
+    // Step sequence mirrors the Node-verified runDoubleThrow() model exactly.
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.tm-mode-btn');
+      const stepBtn = document.getElementById('tmStep');
+      const playBtn = document.getElementById('tmPlay');
+      const resetBtn = document.getElementById('tmReset');
+      const codeThrows = document.getElementById('tmCodeThrows');
+      const codeSafe = document.getElementById('tmCodeSafe');
+      const timelineEl = document.getElementById('tmTimelineCol');
+      const banner = document.getElementById('tmBanner');
+      const explainEl = document.getElementById('tmExplain');
+      const logEl = document.getElementById('tmLog');
+
+      let mode = 'throws';
+      let step, timeline, timer;
+      window.ewTmPlaying = false;
+
+      function activeCode() { return mode === 'throws' ? codeThrows : codeSafe; }
+
+      function STEPS() {
+        return [
+          { line: 6, kind: 'bad', log: 'throw std::runtime_error("exception A") -- unwinding begins.',
+            item: 'Exception A thrown -- propagating',
+            explain: "process() throws exception A. The runtime starts unwinding process()'s frame to find a matching catch." },
+          { line: 7, kind: null, log: "Unwinding reaches g's scope -- its destructor is about to run.",
+            item: "Destroying local object 'g' during unwind",
+            explain: "As part of destroying process()'s frame, g -- a local object -- has its destructor called. This is completely normal so far." },
+          mode === 'throws'
+            ? { line: 2, kind: 'bad', log: "Guard::~Guard() throws exception B -- while exception A is still propagating.", item: 'Destructor throws exception B',
+                explain: 'Two exceptions are now in flight at the same time: A (still unwinding) and B (just thrown from the destructor). The C++ runtime has no defined way to handle that.' }
+            : { line: 2, kind: 'ok', log: 'Guard::~Guard() completes normally.', item: 'Destructor completes normally',
+                explain: 'g is destroyed cleanly. Exception A is still the only exception in flight, so unwinding simply continues.' },
+        ];
+      }
+
+      function resetState() {
+        step = 0;
+        timeline = [];
+        clearTimeout(timer);
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeThrows.style.display = mode === 'throws' ? 'block' : 'none';
+        codeSafe.style.display = mode === 'safe' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = "Exception A is already propagating (unwinding is in progress) when Guard's destructor runs. Step through and see what happens if that destructor itself throws.";
+        stepBtn.disabled = false;
+        render();
+      }
+
+      function render() {
+        timelineEl.innerHTML = '';
+        timeline.forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'ew-frame';
+          el.textContent = item;
+          timelineEl.appendChild(el);
+        });
+      }
+
+      function advance() {
+        const steps = STEPS();
+        if (step >= steps.length) return;
+        const s = steps[step];
+        highlightLine(activeCode(), s.line, s.kind);
+        logTo(logEl, s.log, s.kind);
+        explainEl.textContent = s.explain;
+        timeline.push(s.item);
+        render();
+
+        step++;
+        if (step >= steps.length) {
+          stepBtn.disabled = true;
+          banner.style.display = 'block';
+          if (mode === 'throws') {
+            banner.className = 'ew-banner fatal';
+            banner.textContent = 'std::terminate() called -- the program aborts immediately. Neither exception is ever caught.';
+          } else {
+            banner.className = 'ew-banner ok';
+            banner.textContent = 'Unwinding continues normally -- exception A goes on to reach its catch block, exactly as intended.';
+          }
+        } else {
+          stepBtn.disabled = false;
+        }
+      }
+
+      function play() {
+        if (window.ewTmPlaying) return;
+        window.ewTmPlaying = true;
+        playBtn.textContent = '⏸ Pause';
+        function tick() {
+          if (step >= STEPS().length) { window.ewTmPause(); return; }
+          advance();
+          timer = setTimeout(tick, scaled(1200));
+        }
+        tick();
+      }
+      window.ewTmPause = function () {
+        window.ewTmPlaying = false;
+        playBtn.textContent = '▶ Play';
+        clearTimeout(timer);
+      };
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        window.ewTmPause();
+        resetState();
+      }));
+      stepBtn.addEventListener('click', advance);
+      playBtn.addEventListener('click', () => window.ewTmPlaying ? window.ewTmPause() : play());
+      resetBtn.addEventListener('click', () => { window.ewTmPause(); resetState(); });
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>
