@@ -40,6 +40,7 @@ down and coming back to.
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
    cpp_move_semantics_interactive
+   cpp_vtable_interactive
    python_sequences_interactive
    python_hashing_interactive
    network_interfaces_interactive
@@ -145,6 +146,9 @@ Quick Navigation
    * - :doc:`cpp_move_semantics_interactive`
      - Interactive move semantics -- copy vs move construction cost, made countable
      - move constructor, std::move, moved-from state, noexcept
+   * - :doc:`cpp_vtable_interactive`
+     - Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak
+     - vtable, vptr, dynamic dispatch, virtual destructor
    * - :doc:`python_sequences_interactive`
      - Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source
      - dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks

@@ -1,0 +1,431 @@
+<div class="vt-root" id="vtWidget">
+  <style>
+    #vtWidget {
+      --vt-bg: #0f172a;
+      --vt-panel: #16213e;
+      --vt-border: #2a3655;
+      --vt-text: #e2e8f0;
+      --vt-muted: #94a3b8;
+      --vt-a: #4ade80;
+      --vt-b: #38bdf8;
+      --vt-bad: #f87171;
+      --vt-warn: #fbbf24;
+      --vt-purple: #c084fc;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--vt-bg);
+      color: var(--vt-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #vtWidget * { box-sizing: border-box; }
+    #vtWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #vtWidget .vt-sub { color: var(--vt-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .vt-topbar { display: flex; align-items: center; gap: 10px; background: var(--vt-panel); border: 1px solid var(--vt-border); border-radius: 8px; padding: 8px 14px; margin-bottom: 14px; min-width: 800px; font-size: 0.8rem; color: var(--vt-muted); }
+    .vt-topbar input[type="range"] { width: 130px; accent-color: var(--vt-b); }
+
+    .vt-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; min-width: 800px; }
+    .vt-tab { background: var(--vt-panel); color: var(--vt-muted); border: 1px solid var(--vt-border); border-radius: 8px; padding: 9px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .vt-tab.active { background: var(--vt-b); color: #041322; border-color: var(--vt-b); }
+    .vt-panel { display: none; }
+    .vt-panel.active { display: block; }
+
+    .vt-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--vt-panel); border: 1px solid var(--vt-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 800px; }
+    .vt-toggle { display: inline-flex; border: 1px solid var(--vt-border); border-radius: 8px; overflow: hidden; }
+    .vt-toggle button { background: transparent; color: var(--vt-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .vt-toggle button.active { background: var(--vt-warn); color: #2a1c00; }
+    .vt-btn { background: var(--vt-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .vt-btn.secondary { background: transparent; color: var(--vt-text); border: 1px solid var(--vt-border); }
+
+    .vt-stage { background: var(--vt-panel); border: 1px solid var(--vt-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; min-width: 800px; }
+
+    .vt-code { background: #0a1128; border: 1px solid var(--vt-border); border-radius: 8px; padding: 10px 0; margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.6; }
+    .vt-code-line { padding: 1px 14px; color: var(--vt-muted); white-space: pre; }
+    .vt-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--vt-b); padding-left: 11px; }
+    .vt-code-line.hl.bad-hl { background: rgba(248,113,113,0.16); border-left-color: var(--vt-bad); }
+    .vt-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--vt-a); }
+
+    .vt-vtables-row { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 16px; }
+    .vt-vtable { border: 2px solid var(--vt-purple); background: #10182e; border-radius: 8px; padding: 10px 14px; min-width: 150px; text-align: center; font-family: ui-monospace, monospace; font-size: 0.76rem; }
+    .vt-vtable .cls { font-weight: 800; color: var(--vt-purple); margin-bottom: 6px; }
+    .vt-vtable .slot { border: 1px solid var(--vt-border); border-radius: 5px; padding: 4px 8px; margin-top: 4px; }
+    .vt-vtable.lit .slot { border-color: var(--vt-warn); background: rgba(251,191,36,0.18); }
+
+    .vt-object-row { text-align: center; margin-bottom: 12px; }
+    .vt-object-box { display: inline-block; border: 2px solid var(--vt-b); background: #10182e; border-radius: 8px; padding: 10px 20px; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .vt-object-box.freed { border-color: var(--vt-muted); opacity: 0.5; }
+
+    .vt-heap-row { text-align: center; margin-bottom: 8px; }
+    .vt-heap-block { display: inline-block; border: 2px solid var(--vt-b); background: #10182e; border-radius: 8px; padding: 8px 16px; font-family: ui-monospace, monospace; font-size: 0.8rem; }
+    .vt-heap-block.freed { border-color: var(--vt-muted); opacity: 0.5; }
+    .vt-heap-block.leaked { border-color: var(--vt-warn); }
+
+    .vt-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .vt-banner.bad { background: rgba(248,113,113,0.18); color: var(--vt-bad); }
+    .vt-banner.ok { background: rgba(74,222,128,0.12); color: var(--vt-a); }
+
+    .vt-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 800px; }
+    .vt-explain-panel, .vt-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .vt-explain-panel { flex: 1.4; }
+    .vt-box { background: var(--vt-panel); border: 1px solid var(--vt-border); border-radius: 10px; padding: 12px 14px; }
+    .vt-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--vt-muted); margin-bottom: 8px; }
+    .vt-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .vt-log div { color: var(--vt-muted); }
+    .vt-log div.ok { color: var(--vt-a); }
+    .vt-log div.bad { color: var(--vt-bad); font-weight: 700; }
+    .vt-log div.warn { color: var(--vt-warn); }
+
+    details.vt-notes { margin-top: 14px; background: var(--vt-panel); border: 1px solid var(--vt-border); border-radius: 10px; padding: 12px 16px; min-width: 800px; font-size: 0.85rem; line-height: 1.6; }
+    details.vt-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.vt-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--vt-muted); }
+    details.vt-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--vt-b); }
+  </style>
+
+  <h3>Virtual Functions &amp; vtables: Play With It</h3>
+  <div class="vt-sub">Every polymorphic object carries a hidden pointer to its OWN class's vtable -- regardless of what type of pointer you're holding it through. That one fact explains both correct dynamic dispatch and the classic non-virtual-destructor bug.</div>
+
+  <div class="vt-topbar">
+    <label>Playback speed: <span id="vtSpeedVal">1x</span></label>
+    <input type="range" id="vtSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+  </div>
+
+  <div class="vt-tabs">
+    <button class="vt-tab active" data-tab="dispatch">1. Virtual Dispatch</button>
+    <button class="vt-tab" data-tab="dtor">2. Non-Virtual Destructor (the classic bug)</button>
+  </div>
+
+  <!-- ============ TAB 1: VIRTUAL DISPATCH ============ -->
+  <div class="vt-panel active" id="panel-dispatch">
+    <div class="vt-controls">
+      <div class="vt-toggle">
+        <button class="di-mode-btn" data-mode="nonvirtual">Non-Virtual (Bug)</button>
+        <button class="di-mode-btn active" data-mode="virtual">Virtual (Correct)</button>
+      </div>
+      <button class="vt-btn" id="diDogBtn">Base* p = new Dog(); p-&gt;speak();</button>
+      <button class="vt-btn" id="diCatBtn">Base* p = new Cat(); p-&gt;speak();</button>
+      <button class="vt-btn secondary" id="diResetBtn">Reset</button>
+    </div>
+    <div class="vt-stage">
+      <div class="vt-code" id="diCodeVirtual">
+        <div class="vt-code-line" data-line="1">struct Base   { virtual void speak() { std::cout &lt;&lt; "Base::speak\n"; } };</div>
+        <div class="vt-code-line" data-line="2">struct Dog : Base { void speak() override { std::cout &lt;&lt; "Dog::speak\n"; } };</div>
+        <div class="vt-code-line" data-line="3">struct Cat : Base { void speak() override { std::cout &lt;&lt; "Cat::speak\n"; } };</div>
+        <div class="vt-code-line" data-line="4">&nbsp;</div>
+        <div class="vt-code-line" data-line="5">Base* p = new Dog();</div>
+        <div class="vt-code-line" data-line="6">p-&gt;speak();   // dispatches through p's vptr -- calls Dog::speak</div>
+      </div>
+      <div class="vt-code" id="diCodeNonVirtual" style="display:none;">
+        <div class="vt-code-line" data-line="1">struct Base   { void speak() { std::cout &lt;&lt; "Base::speak\n"; } };  // NOT virtual</div>
+        <div class="vt-code-line" data-line="2">struct Dog : Base { void speak() { std::cout &lt;&lt; "Dog::speak\n"; } };</div>
+        <div class="vt-code-line" data-line="3">struct Cat : Base { void speak() { std::cout &lt;&lt; "Cat::speak\n"; } };</div>
+        <div class="vt-code-line" data-line="4">&nbsp;</div>
+        <div class="vt-code-line" data-line="5">Base* p = new Dog();</div>
+        <div class="vt-code-line" data-line="6">p-&gt;speak();   // resolved at COMPILE TIME from p's type (Base*) -- calls Base::speak</div>
+      </div>
+      <div class="vt-vtables-row" id="diVtables"></div>
+      <div class="vt-object-row" id="diObjectRow"></div>
+      <div class="vt-banner" id="diBanner" style="display:none;"></div>
+    </div>
+    <div class="vt-panels">
+      <div class="vt-explain-panel">
+        <div class="vt-box">
+          <div class="vt-panel-title">What's happening right now</div>
+          <div id="diExplain">Create a Dog or Cat, store it through a Base pointer, and call speak(). Compare what "virtual" and "non-virtual" actually resolve to.</div>
+        </div>
+      </div>
+      <div class="vt-side-panel-col">
+        <div class="vt-box">
+          <div class="vt-panel-title">Event log</div>
+          <div class="vt-log" id="diLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ TAB 2: NON-VIRTUAL DESTRUCTOR ============ -->
+  <div class="vt-panel" id="panel-dtor">
+    <div class="vt-controls">
+      <div class="vt-toggle">
+        <button class="dt-mode-btn active" data-mode="nonvirtual">Non-Virtual Destructor (Bug)</button>
+        <button class="dt-mode-btn" data-mode="virtual">Virtual Destructor (Fix)</button>
+      </div>
+      <button class="vt-btn" id="dtCreateBtn">Base* p = new Derived();</button>
+      <button class="vt-btn" id="dtDeleteBtn" disabled>delete p;</button>
+      <button class="vt-btn secondary" id="dtResetBtn">Reset</button>
+    </div>
+    <div class="vt-stage">
+      <div class="vt-code" id="dtCodeNonVirtual">
+        <div class="vt-code-line" data-line="1">struct Base {</div>
+        <div class="vt-code-line" data-line="2">    ~Base() { std::cout &lt;&lt; "Base::~Base\n"; }   // NOT virtual</div>
+        <div class="vt-code-line" data-line="3">};</div>
+        <div class="vt-code-line" data-line="4">struct Derived : Base {</div>
+        <div class="vt-code-line" data-line="5">    int* resource = new int(99);</div>
+        <div class="vt-code-line" data-line="6">    ~Derived() { delete resource; std::cout &lt;&lt; "Derived::~Derived\n"; }</div>
+        <div class="vt-code-line" data-line="7">};</div>
+        <div class="vt-code-line" data-line="8">Base* p = new Derived();</div>
+        <div class="vt-code-line" data-line="9">delete p;   // only Base::~Base runs -- Derived::~Derived is SKIPPED</div>
+      </div>
+      <div class="vt-code" id="dtCodeVirtual" style="display:none;">
+        <div class="vt-code-line" data-line="1">struct Base {</div>
+        <div class="vt-code-line" data-line="2">    virtual ~Base() { std::cout &lt;&lt; "Base::~Base\n"; }</div>
+        <div class="vt-code-line" data-line="3">};</div>
+        <div class="vt-code-line" data-line="4">struct Derived : Base {</div>
+        <div class="vt-code-line" data-line="5">    int* resource = new int(99);</div>
+        <div class="vt-code-line" data-line="6">    ~Derived() { delete resource; std::cout &lt;&lt; "Derived::~Derived\n"; }</div>
+        <div class="vt-code-line" data-line="7">};</div>
+        <div class="vt-code-line" data-line="8">Base* p = new Derived();</div>
+        <div class="vt-code-line" data-line="9">delete p;   // dispatches through the vptr -- Derived::~Derived runs, then Base::~Base</div>
+      </div>
+      <div class="vt-object-row" id="dtObjectRow"></div>
+      <div class="vt-heap-row" id="dtHeapRow"></div>
+      <div class="vt-banner" id="dtBanner" style="display:none;"></div>
+    </div>
+    <div class="vt-panels">
+      <div class="vt-explain-panel">
+        <div class="vt-box">
+          <div class="vt-panel-title">What's happening right now</div>
+          <div id="dtExplain">Create a Derived object (it allocates its own heap resource), store it through a Base*, then delete it. Watch which destructor(s) actually run.</div>
+        </div>
+      </div>
+      <div class="vt-side-panel-col">
+        <div class="vt-box">
+          <div class="vt-panel-title">Event log</div>
+          <div class="vt-log" id="dtLog"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <details class="vt-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The vtable and vptr aren't in the C++ standard at all -- the standard only mandates the <i>behavior</i> (a virtual call dispatches based on the object's real type). Vtables are simply how every major compiler (GCC, Clang, MSVC) actually implements that behavior: one shared table of function-pointer slots per polymorphic class, and one hidden pointer per object -- typically the first few bytes of the object itself -- pointing at its class's table.</li>
+      <li>The object's vptr is set during construction and never depends on how you're currently referring to the object. That's the entire mechanism in one sentence: a <code>Dog</code> object's vptr points at <code>Dog</code>'s vtable the instant it's constructed, whether you access it through a <code>Dog*</code>, a <code>Base*</code>, or a <code>Base&amp;</code> -- which is exactly why virtual dispatch through a base pointer still reaches the derived override.</li>
+      <li>Tab 2's bug is real, cited undefined behavior, not a style nitpick: the C++ standard explicitly calls out that deleting an object through a pointer to a base class with a non-virtual destructor, when the object's actual type is a derived class, is undefined. In practice this usually means exactly what the demo shows (the derived part silently never gets destroyed) rather than a crash -- which is what makes it dangerous: it can ship and run for a long time before anyone notices the leak.</li>
+      <li>The fix is one word for a real reason: any class meant to be deleted polymorphically (through a base pointer) needs <code>virtual ~Base() {}</code> -- even if the destructor's body is empty. This is why so many base-class style guides simply say "if a class has any virtual function, give it a virtual destructor too": it's cheap insurance against exactly this bug, and the cost (one vtable slot) is the same either way once the class is already polymorphic.</li>
+      <li>This connects directly to <a href="cpp_memory_interactive.html">the heap-leak page</a> and <a href="cpp_raii_smart_pointers_interactive.html">the RAII page</a> -- a skipped <code>Derived::~Derived()</code> is exactly the same shape of bug as forgetting <code>delete</code> on one code path, just triggered by a missing keyword on a base class instead of a missing line at a call site. <code>std::unique_ptr&lt;Base&gt;</code> doesn't fix this by itself either -- it still calls <code>delete</code> on the raw pointer it holds, so the base class still needs a virtual destructor for that deletion to be correct.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('vtWidget');
+
+    const speedSlider = document.getElementById('vtSpeedSlider');
+    const speedVal = document.getElementById('vtSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    const tabs = root.querySelectorAll('.vt-tab');
+    const panels = { dispatch: document.getElementById('panel-dispatch'), dtor: document.getElementById('panel-dtor') };
+    tabs.forEach(t => t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.toggle('active', x === t));
+      Object.keys(panels).forEach(k => panels[k].classList.toggle('active', k === t.dataset.tab));
+    }));
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.vt-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('bad-hl', isTarget && kind === 'bad');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    // =========================================================
+    // TAB 1: VIRTUAL DISPATCH
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.di-mode-btn');
+      const dogBtn = document.getElementById('diDogBtn');
+      const catBtn = document.getElementById('diCatBtn');
+      const resetBtn = document.getElementById('diResetBtn');
+      const codeVirtual = document.getElementById('diCodeVirtual');
+      const codeNonVirtual = document.getElementById('diCodeNonVirtual');
+      const vtablesEl = document.getElementById('diVtables');
+      const objectRowEl = document.getElementById('diObjectRow');
+      const banner = document.getElementById('diBanner');
+      const explainEl = document.getElementById('diExplain');
+      const logEl = document.getElementById('diLog');
+
+      const VTABLES = { Base: 'Base::speak', Dog: 'Dog::speak', Cat: 'Cat::speak' };
+      let mode = 'virtual';
+
+      function activeCode() { return mode === 'virtual' ? codeVirtual : codeNonVirtual; }
+
+      function resetState() {
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeVirtual.style.display = mode === 'virtual' ? 'block' : 'none';
+        codeNonVirtual.style.display = mode === 'nonvirtual' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = 'Create a Dog or Cat, store it through a Base pointer, and call speak(). Compare what "virtual" and "non-virtual" actually resolve to.';
+        objectRowEl.innerHTML = '';
+        renderVtables(null);
+      }
+
+      function renderVtables(litClass) {
+        vtablesEl.innerHTML = '';
+        ['Base', 'Dog', 'Cat'].forEach(cls => {
+          const el = document.createElement('div');
+          el.className = 'vt-vtable' + (cls === litClass ? ' lit' : '');
+          el.innerHTML = '<div class="cls">' + cls + "'s vtable</div><div class=\"slot\">speak -> " + VTABLES[cls] + '</div>';
+          vtablesEl.appendChild(el);
+        });
+      }
+
+      function createAndCall(className) {
+        highlightLine(activeCode(), 5, null);
+        objectRowEl.innerHTML = '';
+        const obj = document.createElement('div');
+        obj.className = 'vt-object-box';
+        obj.textContent = 'p -> [' + className + ' object] vptr -> ' + className + "'s vtable";
+        objectRowEl.appendChild(obj);
+        logTo(logEl, 'Base* p = new ' + className + '(); -- object\'s vptr points at ' + className + "'s own vtable, always.", null);
+
+        const called = mode === 'virtual' ? VTABLES[className] : VTABLES.Base;
+        renderVtables(mode === 'virtual' ? className : 'Base');
+        highlightLine(activeCode(), 6, mode === 'virtual' ? 'ok' : 'bad');
+
+        if (mode === 'virtual') {
+          logTo(logEl, 'p->speak() -- follows p\'s vptr to ' + className + '\'s vtable -- calls ' + called + '.', 'ok');
+          banner.style.display = 'block';
+          banner.className = 'vt-banner ok';
+          banner.textContent = 'Correct: ' + called + ' ran, even though p is declared as Base*.';
+          explainEl.textContent = 'The call dispatched through the object\'s OWN vtable, not through whatever type the pointer happens to be declared as. That\'s the entire point of virtual -- the pointer\'s static type stops mattering at the call site.';
+        } else {
+          logTo(logEl, 'p->speak() -- resolved at COMPILE TIME using p\'s declared type (Base*) -- calls ' + called + '.', 'bad');
+          banner.style.display = 'block';
+          banner.className = 'vt-banner bad';
+          banner.textContent = 'WRONG: ' + called + ' ran, even though p actually points at a ' + className + '.';
+          explainEl.textContent = 'Without virtual, the compiler never looks at the object\'s vptr at all -- it bakes in a call to Base::speak at compile time, because that\'s all it can see through a Base* declaration. The ' + className + '-specific behavior is unreachable through this pointer.';
+        }
+      }
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        resetState();
+      }));
+      dogBtn.addEventListener('click', () => createAndCall('Dog'));
+      catBtn.addEventListener('click', () => createAndCall('Cat'));
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+
+    // =========================================================
+    // TAB 2: NON-VIRTUAL DESTRUCTOR
+    // =========================================================
+    (function () {
+      const modeButtons = root.querySelectorAll('.dt-mode-btn');
+      const createBtn = document.getElementById('dtCreateBtn');
+      const deleteBtn = document.getElementById('dtDeleteBtn');
+      const resetBtn = document.getElementById('dtResetBtn');
+      const codeNonVirtual = document.getElementById('dtCodeNonVirtual');
+      const codeVirtual = document.getElementById('dtCodeVirtual');
+      const objectRowEl = document.getElementById('dtObjectRow');
+      const heapRowEl = document.getElementById('dtHeapRow');
+      const banner = document.getElementById('dtBanner');
+      const explainEl = document.getElementById('dtExplain');
+      const logEl = document.getElementById('dtLog');
+
+      let mode = 'nonvirtual';
+      let created, heapFreed, heapLeaked;
+
+      function activeCode() { return mode === 'virtual' ? codeVirtual : codeNonVirtual; }
+
+      function resetState() {
+        created = false;
+        heapFreed = false;
+        heapLeaked = false;
+        banner.style.display = 'none';
+        logEl.innerHTML = '';
+        codeNonVirtual.style.display = mode === 'nonvirtual' ? 'block' : 'none';
+        codeVirtual.style.display = mode === 'virtual' ? 'block' : 'none';
+        highlightLine(activeCode(), 0, null);
+        explainEl.textContent = 'Create a Derived object (it allocates its own heap resource), store it through a Base*, then delete it. Watch which destructor(s) actually run.';
+        createBtn.disabled = false;
+        deleteBtn.disabled = true;
+        render();
+      }
+
+      function render() {
+        objectRowEl.innerHTML = '';
+        if (created) {
+          const el = document.createElement('div');
+          el.className = 'vt-object-box' + (heapFreed ? ' freed' : '');
+          el.textContent = heapFreed ? 'p (destroyed)' : 'p -> [Derived object] vptr -> Derived\'s vtable';
+          objectRowEl.appendChild(el);
+        }
+        heapRowEl.innerHTML = '';
+        if (created) {
+          const el = document.createElement('div');
+          el.className = 'vt-heap-block' + (heapFreed && !heapLeaked ? ' freed' : '') + (heapLeaked ? ' leaked' : '');
+          el.textContent = 'resource: value=99' + (heapLeaked ? ' -- LEAKED' : (heapFreed ? ' (freed)' : ' (alive)'));
+          heapRowEl.appendChild(el);
+        }
+      }
+
+      function doCreate() {
+        created = true;
+        highlightLine(activeCode(), 8, null); // Base* p = new Derived(); -- line 8 in both code blocks
+        logTo(logEl, 'Base* p = new Derived(); -- Derived\'s constructor allocates its own resource (value=99).', null);
+        createBtn.disabled = true;
+        deleteBtn.disabled = false;
+        render();
+      }
+
+      function doDelete() {
+        highlightLine(activeCode(), 9, mode === 'virtual' ? 'ok' : 'bad');
+        if (mode === 'virtual') {
+          logTo(logEl, 'delete p; -- dispatches through the vptr -- Derived::~Derived() runs first...', 'ok');
+          logTo(logEl, '  Derived::~Derived() -- deletes resource.', 'ok');
+          logTo(logEl, '  Base::~Base() -- runs afterward, as always.', 'ok');
+          heapFreed = true;
+          heapLeaked = false;
+          banner.style.display = 'block';
+          banner.className = 'vt-banner ok';
+          banner.textContent = 'Correct: full destructor chain ran. Nothing leaked.';
+          explainEl.textContent = 'A virtual destructor makes delete dispatch exactly like any other virtual call -- through the object\'s real vtable -- so the derived part of the object is always cleaned up first, then the base part.';
+        } else {
+          logTo(logEl, 'delete p; -- NOT virtual, so this resolves at compile time to Base::~Base() only.', 'bad');
+          logTo(logEl, '  Base::~Base() runs.', null);
+          logTo(logEl, '  Derived::~Derived() -- NEVER CALLED. Its resource is never freed.', 'bad');
+          heapFreed = true; // the object's storage is deallocated either way -- but the resource IT owned is not
+          heapLeaked = true;
+          banner.style.display = 'block';
+          banner.className = 'vt-banner bad';
+          banner.textContent = 'LEAKED: Derived::~Derived() was skipped entirely -- its resource is unreachable now.';
+          explainEl.textContent = 'delete only knows p\'s STATIC type (Base*), and Base\'s destructor isn\'t virtual, so there\'s no dispatch through the vptr at all here -- the compiler bakes in a call to Base::~Base() only. This is real undefined behavior, not just "wasteful": the standard explicitly calls this case out.';
+        }
+        deleteBtn.disabled = true;
+        render();
+      }
+
+      modeButtons.forEach(b => b.addEventListener('click', () => {
+        modeButtons.forEach(x => x.classList.toggle('active', x === b));
+        mode = b.dataset.mode;
+        resetState();
+      }));
+      createBtn.addEventListener('click', doCreate);
+      deleteBtn.addEventListener('click', doDelete);
+      resetBtn.addEventListener('click', resetState);
+
+      resetState();
+    })();
+  })();
+  </script>
+</div>
