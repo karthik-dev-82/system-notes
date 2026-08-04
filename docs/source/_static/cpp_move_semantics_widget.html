@@ -1,0 +1,322 @@
+<div class="ms-root" id="msWidget">
+  <style>
+    #msWidget {
+      --ms-bg: #0f172a;
+      --ms-panel: #16213e;
+      --ms-border: #2a3655;
+      --ms-text: #e2e8f0;
+      --ms-muted: #94a3b8;
+      --ms-a: #4ade80;
+      --ms-b: #38bdf8;
+      --ms-bad: #f87171;
+      --ms-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ms-bg);
+      color: var(--ms-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #msWidget * { box-sizing: border-box; }
+    #msWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #msWidget .ms-sub { color: var(--ms-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ms-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--ms-panel); border: 1px solid var(--ms-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 800px; }
+    .ms-controls label { font-size: 0.8rem; color: var(--ms-muted); display: flex; align-items: center; gap: 8px; }
+    .ms-controls input[type="range"] { width: 110px; accent-color: var(--ms-b); }
+    .ms-toggle { display: inline-flex; border: 1px solid var(--ms-border); border-radius: 8px; overflow: hidden; }
+    .ms-toggle button { background: transparent; color: var(--ms-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .ms-toggle button.active { background: var(--ms-warn); color: #2a1c00; }
+    .ms-btn { background: var(--ms-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ms-btn.secondary { background: transparent; color: var(--ms-text); border: 1px solid var(--ms-border); }
+    .ms-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .ms-stage { background: var(--ms-panel); border: 1px solid var(--ms-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; min-width: 800px; }
+
+    .ms-code { background: #0a1128; border: 1px solid var(--ms-border); border-radius: 8px; padding: 10px 0; margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.6; }
+    .ms-code-line { padding: 1px 14px; color: var(--ms-muted); white-space: pre; }
+    .ms-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--ms-b); padding-left: 11px; }
+    .ms-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--ms-warn); }
+    .ms-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--ms-a); }
+
+    .ms-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; font-size: 0.85rem; color: var(--ms-muted); }
+    .ms-counter-row b { color: #fff; font-size: 1.15rem; font-family: ui-monospace, monospace; }
+
+    .ms-objects-row { display: flex; gap: 40px; justify-content: center; flex-wrap: wrap; }
+    .ms-object { min-width: 260px; }
+    .ms-object-title { text-align: center; font-weight: 800; color: #fff; margin-bottom: 6px; font-size: 0.85rem; }
+    .ms-object-arrid { text-align: center; font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--ms-muted); margin-bottom: 8px; }
+    .ms-array-row { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; min-height: 44px; }
+    .ms-slot { width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.78rem; font-weight: 700; border: 2px solid var(--ms-b); background: #10182e; color: var(--ms-text); }
+    .ms-slot.just-copied { border-color: var(--ms-warn); background: rgba(251,191,36,0.28); }
+    .ms-empty-note { text-align: center; color: var(--ms-muted); font-style: italic; font-size: 0.8rem; }
+
+    .ms-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 14px; }
+    .ms-banner.ok { background: rgba(74,222,128,0.12); color: var(--ms-a); }
+    .ms-banner.warn { background: rgba(251,191,36,0.15); color: var(--ms-warn); }
+
+    .ms-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 800px; }
+    .ms-explain-panel, .ms-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .ms-explain-panel { flex: 1.4; }
+    .ms-box { background: var(--ms-panel); border: 1px solid var(--ms-border); border-radius: 10px; padding: 12px 14px; }
+    .ms-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ms-muted); margin-bottom: 8px; }
+    .ms-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .ms-log div { color: var(--ms-muted); }
+    .ms-log div.ok { color: var(--ms-a); }
+    .ms-log div.warn { color: var(--ms-warn); }
+
+    details.ms-notes { margin-top: 14px; background: var(--ms-panel); border: 1px solid var(--ms-border); border-radius: 10px; padding: 12px 16px; min-width: 800px; font-size: 0.85rem; line-height: 1.6; }
+    details.ms-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ms-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ms-muted); }
+    details.ms-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ms-b); }
+  </style>
+
+  <h3>Move Semantics: Play With It</h3>
+  <div class="ms-sub">A Buffer owning a 5-element heap array. Construct a second Buffer from it two different ways, and watch exactly what work each one actually does.</div>
+
+  <div class="ms-controls">
+    <label>Speed: <span id="msSpeedVal">1x</span>
+      <input type="range" id="msSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <div class="ms-toggle">
+      <button class="ms-mode-btn active" data-mode="copy">Copy Constructor</button>
+      <button class="ms-mode-btn" data-mode="move">Move Constructor</button>
+    </div>
+    <button class="ms-btn" id="msConstructBtn">Construct dest from source</button>
+    <button class="ms-btn secondary" id="msResetBtn">Reset</button>
+  </div>
+
+  <div class="ms-stage">
+    <div class="ms-code" id="msCodeCopy">
+      <div class="ms-code-line" data-line="1">Buffer(const Buffer&amp; other) : size(other.size) {</div>
+      <div class="ms-code-line" data-line="2">    data = new int[size];             // NEW allocation</div>
+      <div class="ms-code-line" data-line="3">    for (size_t i = 0; i &lt; size; i++)</div>
+      <div class="ms-code-line" data-line="4">        data[i] = other.data[i];      // copy EVERY element, O(n)</div>
+      <div class="ms-code-line" data-line="5">}                                       // 'other' is untouched</div>
+    </div>
+    <div class="ms-code" id="msCodeMove" style="display:none;">
+      <div class="ms-code-line" data-line="1">Buffer(Buffer&amp;&amp; other) noexcept</div>
+      <div class="ms-code-line" data-line="2">    : data(other.data), size(other.size) {   // steal the pointer</div>
+      <div class="ms-code-line" data-line="3">    other.data = nullptr;              // source is emptied</div>
+      <div class="ms-code-line" data-line="4">    other.size = 0;</div>
+      <div class="ms-code-line" data-line="5">}                                       // no allocation, no element copies</div>
+    </div>
+
+    <div class="ms-counter-row">
+      <div>allocations: <b id="msAllocCount">0</b></div>
+      <div>element copies: <b id="msCopyCount">0</b></div>
+    </div>
+
+    <div class="ms-objects-row">
+      <div class="ms-object">
+        <div class="ms-object-title">source</div>
+        <div class="ms-object-arrid" id="msSourceArrId">array id: arr1</div>
+        <div class="ms-array-row" id="msSourceArray"></div>
+      </div>
+      <div class="ms-object">
+        <div class="ms-object-title">dest</div>
+        <div class="ms-object-arrid" id="msDestArrId">(not constructed yet)</div>
+        <div class="ms-array-row" id="msDestArray"></div>
+      </div>
+    </div>
+    <div class="ms-banner" id="msBanner" style="display:none;"></div>
+  </div>
+
+  <div class="ms-panels">
+    <div class="ms-explain-panel">
+      <div class="ms-box">
+        <div class="ms-panel-title">What's happening right now</div>
+        <div id="msExplain">Pick Copy or Move, then click "Construct dest from source." Watch the allocation and element-copy counters -- that's the entire performance difference, made countable.</div>
+      </div>
+    </div>
+    <div class="ms-side-panel-col">
+      <div class="ms-box">
+        <div class="ms-panel-title">Event log</div>
+        <div class="ms-log" id="msLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ms-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><code>std::move</code> is not a verb -- it doesn't move anything by itself. It's exactly one thing: a cast (<code>static_cast&lt;Buffer&amp;&amp;&gt;(source)</code>) that tells the compiler "you're allowed to treat this as movable." Nothing happens to <code>source</code> at the moment you call it -- the actual theft of the pointer only happens when that cast result is bound to a move constructor's (or move assignment's) parameter, which is why this widget's log always shows the cast and the construction as two separate facts.</li>
+      <li>The move constructor here is marked <code>noexcept</code> on purpose, and it's not just documentation -- standard containers like <code>std::vector</code> check for it. If a type's move constructor might throw, a growing <code>vector</code> will fall back to the (slower, but exception-safe) copy constructor when reallocating, specifically to avoid ending up with some elements moved and others not if an exception hits partway through. A non-throwing move constructor is what unlocks the fast path.</li>
+      <li>"Moved-from" doesn't mean "destroyed" -- <code>source</code> is still a perfectly real, live object after being moved from; it's just been left holding nothing (<code>nullptr</code>, size 0, in this Buffer's case). The C++ standard's actual guarantee for standard-library types is only "valid but unspecified state" -- safe to destroy or reassign, but its contents shouldn't be assumed. A well-written custom type, like this one, can promise something more specific (here: empty).</li>
+      <li>This is the same underlying mechanism as <a href="cpp_unique_ptr_widget.html">unique_ptr's move</a> -- <code>unique_ptr</code> is really just a Buffer that owns exactly one object instead of an array, with the same "steal the pointer, null the source" move constructor. Move semantics generalize past smart pointers to any type that owns a resource -- file handles, sockets, and any RAII wrapper follow the identical pattern.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('msWidget');
+
+    const speedSlider = document.getElementById('msSpeedSlider');
+    const speedVal = document.getElementById('msSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function highlightLine(codeEl, lineNum, kind) {
+      codeEl.querySelectorAll('.ms-code-line').forEach(l => {
+        const isTarget = parseInt(l.dataset.line, 10) === lineNum;
+        l.classList.toggle('hl', isTarget);
+        l.classList.toggle('warn-hl', isTarget && kind === 'warn');
+        l.classList.toggle('ok-hl', isTarget && kind === 'ok');
+      });
+    }
+
+    const modeButtons = root.querySelectorAll('.ms-mode-btn');
+    const constructBtn = document.getElementById('msConstructBtn');
+    const resetBtn = document.getElementById('msResetBtn');
+    const codeCopy = document.getElementById('msCodeCopy');
+    const codeMove = document.getElementById('msCodeMove');
+    const allocCountEl = document.getElementById('msAllocCount');
+    const copyCountEl = document.getElementById('msCopyCount');
+    const sourceArrIdEl = document.getElementById('msSourceArrId');
+    const destArrIdEl = document.getElementById('msDestArrId');
+    const sourceArrayEl = document.getElementById('msSourceArray');
+    const destArrayEl = document.getElementById('msDestArray');
+    const banner = document.getElementById('msBanner');
+    const explainEl = document.getElementById('msExplain');
+    const logEl = document.getElementById('msLog');
+
+    const VALUES = [10, 20, 30, 40, 50];
+    let mode = 'copy';
+    let source, dest, allocCount, copyCount, timer, constructing;
+
+    function activeCode() { return mode === 'copy' ? codeCopy : codeMove; }
+
+    function resetState() {
+      source = { arrId: 'arr1', values: VALUES.slice() };
+      dest = null;
+      allocCount = 0;
+      copyCount = 0;
+      constructing = false;
+      clearTimeout(timer);
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      codeCopy.style.display = mode === 'copy' ? 'block' : 'none';
+      codeMove.style.display = mode === 'move' ? 'block' : 'none';
+      highlightLine(activeCode(), 0, null);
+      explainEl.textContent = 'Pick Copy or Move, then click "Construct dest from source." Watch the allocation and element-copy counters -- that\'s the entire performance difference, made countable.';
+      constructBtn.disabled = false;
+      render();
+    }
+
+    function render() {
+      allocCountEl.textContent = allocCount;
+      copyCountEl.textContent = copyCount;
+
+      sourceArrIdEl.textContent = source.values === null ? '(empty -- moved from)' : 'array id: ' + source.arrId;
+      sourceArrayEl.innerHTML = '';
+      if (source.values === null) {
+        const note = document.createElement('div');
+        note.className = 'ms-empty-note';
+        note.textContent = 'data = nullptr, size = 0';
+        sourceArrayEl.appendChild(note);
+      } else {
+        source.values.forEach(v => {
+          const el = document.createElement('div');
+          el.className = 'ms-slot';
+          el.textContent = v;
+          sourceArrayEl.appendChild(el);
+        });
+      }
+
+      destArrIdEl.textContent = dest ? 'array id: ' + dest.arrId : '(not constructed yet)';
+      destArrayEl.innerHTML = '';
+      if (dest) {
+        dest.values.forEach(v => {
+          const el = document.createElement('div');
+          el.className = 'ms-slot';
+          el.textContent = v;
+          destArrayEl.appendChild(el);
+        });
+      }
+    }
+
+    function doConstructCopy() {
+      allocCount = 1;
+      const newArrId = 'arr2';
+      dest = { arrId: newArrId, values: [] };
+      logTo(logEl, 'data = new int[size]  -- new array ' + newArrId + ' allocated.', 'warn');
+      highlightLine(activeCode(), 2, 'warn');
+      render();
+
+      let i = 0;
+      function copyNext() {
+        if (i >= source.values.length) {
+          highlightLine(activeCode(), 5, 'ok');
+          banner.style.display = 'block';
+          banner.className = 'ms-banner warn';
+          banner.textContent = 'Copy complete: 1 allocation + ' + copyCount + ' element copies. source is completely untouched.';
+          explainEl.textContent = 'Every element was individually copied into a brand new array -- source is fully intact afterward, which is exactly the point of a copy, but it cost real work proportional to the buffer\'s size.';
+          constructBtn.disabled = false;
+          constructing = false;
+          return;
+        }
+        dest.values.push(source.values[i]);
+        copyCount++;
+        logTo(logEl, 'data[' + i + '] = other.data[' + i + '];  -- copy #' + copyCount, null);
+        highlightLine(activeCode(), 4, 'warn');
+        render();
+        const slots = destArrayEl.querySelectorAll('.ms-slot');
+        const justAdded = slots[slots.length - 1];
+        if (justAdded) {
+          justAdded.classList.add('just-copied');
+          setTimeout(() => justAdded.classList.remove('just-copied'), scaled(300));
+        }
+        i++;
+        timer = setTimeout(copyNext, scaled(350));
+      }
+      copyNext();
+    }
+
+    function doConstructMove() {
+      logTo(logEl, 'std::move(source) -- just a cast to Buffer&&. Nothing has happened to source yet.', null);
+      timer = setTimeout(() => {
+        dest = { arrId: source.arrId, values: source.values };
+        source = { arrId: source.arrId, values: null };
+        logTo(logEl, 'Move constructor runs: dest.data = other.data (steals ' + dest.arrId + '); other.data = nullptr.', 'ok');
+        highlightLine(activeCode(), 4, 'ok');
+        banner.style.display = 'block';
+        banner.className = 'ms-banner ok';
+        banner.textContent = 'Move complete: 0 allocations, 0 element copies. dest now owns the exact array source used to own.';
+        explainEl.textContent = 'dest\'s array id is identical to source\'s original array id -- nothing was copied, only a pointer changed hands. source is left empty, not destroyed -- it\'s still a valid object, just with nothing in it.';
+        constructBtn.disabled = false;
+        constructing = false;
+        render();
+      }, scaled(500));
+    }
+
+    function doConstruct() {
+      if (constructing || dest) return;
+      constructing = true;
+      constructBtn.disabled = true;
+      banner.style.display = 'none';
+      if (mode === 'copy') doConstructCopy(); else doConstructMove();
+    }
+
+    modeButtons.forEach(b => b.addEventListener('click', () => {
+      modeButtons.forEach(x => x.classList.toggle('active', x === b));
+      mode = b.dataset.mode;
+      resetState();
+    }));
+    constructBtn.addEventListener('click', doConstruct);
+    resetBtn.addEventListener('click', resetState);
+
+    resetState();
+  })();
+  </script>
+</div>

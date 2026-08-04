@@ -39,6 +39,7 @@ down and coming back to.
    overlayfs_interactive
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
+   cpp_move_semantics_interactive
    python_sequences_interactive
    python_hashing_interactive
    network_interfaces_interactive
@@ -141,6 +142,9 @@ Quick Navigation
    * - :doc:`cpp_raii_smart_pointers_interactive`
      - Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak
      - RAII, unique_ptr, shared_ptr, weak_ptr, reference counting
+   * - :doc:`cpp_move_semantics_interactive`
+     - Interactive move semantics -- copy vs move construction cost, made countable
+     - move constructor, std::move, moved-from state, noexcept
    * - :doc:`python_sequences_interactive`
      - Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source
      - dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks
