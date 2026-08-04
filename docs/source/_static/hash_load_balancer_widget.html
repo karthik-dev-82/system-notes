@@ -1,0 +1,326 @@
+<div class="hlb-root" id="hlbWidget">
+  <style>
+    #hlbWidget {
+      --hlb-bg: #0f172a;
+      --hlb-panel: #16213e;
+      --hlb-border: #2a3655;
+      --hlb-text: #e2e8f0;
+      --hlb-muted: #94a3b8;
+      --hlb-a: #4ade80;
+      --hlb-b: #38bdf8;
+      --hlb-bad: #f87171;
+      --hlb-warn: #fbbf24;
+      --hlb-purple: #c084fc;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--hlb-bg);
+      color: var(--hlb-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #hlbWidget * { box-sizing: border-box; }
+    #hlbWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #hlbWidget h4 { margin: 0 0 10px; font-size: 0.95rem; color: #fff; }
+    #hlbWidget .hlb-sub { color: var(--hlb-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .hlb-naive-badge {
+      display: inline-block; background: rgba(251,191,36,0.15); color: var(--hlb-warn);
+      border: 1px solid var(--hlb-warn); border-radius: 6px; padding: 4px 10px;
+      font-size: 0.75rem; font-weight: 800; margin-bottom: 16px;
+    }
+
+    .hlb-controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--hlb-panel); border: 1px solid var(--hlb-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 820px;
+    }
+    .hlb-controls label { font-size: 0.8rem; color: var(--hlb-muted); display: flex; align-items: center; gap: 8px; }
+    .hlb-controls input[type="range"] { width: 120px; accent-color: var(--hlb-b); }
+    .hlb-btn { background: var(--hlb-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .hlb-btn.secondary { background: transparent; color: var(--hlb-text); border: 1px solid var(--hlb-border); }
+    .hlb-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .hlb-stage { background: var(--hlb-panel); border: 1px solid var(--hlb-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; min-width: 820px; }
+
+    .hlb-client-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-bottom: 20px; }
+    .hlb-client {
+      width: 78px; padding: 8px 4px; border-radius: 8px; text-align: center; cursor: pointer;
+      border: 2px solid var(--hlb-border); background: #10182e; color: var(--hlb-muted);
+      font-size: 0.68rem; font-family: ui-monospace, monospace;
+    }
+    .hlb-client .icon { font-size: 1.3rem; }
+    .hlb-client .ip { color: var(--hlb-text); margin-top: 2px; }
+    .hlb-client .last { margin-top: 3px; font-weight: 800; }
+    .hlb-client.active { border-color: var(--hlb-b); background: rgba(56,189,248,0.15); }
+    .hlb-client.flip { border-color: var(--hlb-warn); }
+
+    .hlb-flow-line { text-align: center; margin-bottom: 14px; }
+    .hlb-flow-box {
+      display: inline-block; background: #0a1128; border: 1px solid var(--hlb-border); border-radius: 8px;
+      padding: 8px 16px; font-family: ui-monospace, monospace; font-size: 0.78rem; color: var(--hlb-text);
+      min-width: 380px;
+    }
+
+    .hlb-lb-row { text-align: center; margin-bottom: 20px; }
+    .hlb-lb-box {
+      display: inline-block; border: 2px solid var(--hlb-purple); background: rgba(192,132,252,0.12);
+      border-radius: 10px; padding: 10px 22px; font-weight: 800; color: var(--hlb-purple); font-size: 0.9rem;
+    }
+    .hlb-lb-box.active { background: rgba(192,132,252,0.3); }
+    .hlb-lb-formula { font-size: 0.72rem; color: var(--hlb-muted); font-family: ui-monospace, monospace; margin-top: 4px; }
+
+    .hlb-server-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .hlb-server {
+      width: 170px; border: 2px solid var(--hlb-a); background: #10182e; border-radius: 10px; padding: 12px; text-align: center;
+    }
+    .hlb-server.hit { border-color: var(--hlb-warn); background: rgba(251,191,36,0.15); }
+    .hlb-server .name { font-weight: 800; color: var(--hlb-a); margin-bottom: 6px; }
+    .hlb-server .count { font-size: 1.6rem; font-weight: 800; font-family: ui-monospace, monospace; color: #fff; }
+    .hlb-server .bar-track { height: 8px; background: #0a1128; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+    .hlb-server .bar-fill { height: 100%; background: var(--hlb-a); width: 0%; }
+
+    .hlb-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 820px; margin-top: 14px; }
+    .hlb-explain-panel, .hlb-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .hlb-explain-panel { flex: 1.4; }
+    .hlb-box { background: var(--hlb-panel); border: 1px solid var(--hlb-border); border-radius: 10px; padding: 12px 14px; }
+    .hlb-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--hlb-muted); margin-bottom: 8px; }
+    .hlb-log { height: 170px; overflow-y: auto; font-size: 0.72rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .hlb-log div { color: var(--hlb-muted); }
+    .hlb-log div.ok { color: var(--hlb-a); }
+    .hlb-log div.warn { color: var(--hlb-warn); }
+
+    details.hlb-notes {
+      margin-top: 14px; background: var(--hlb-panel); border: 1px solid var(--hlb-border); border-radius: 10px;
+      padding: 12px 16px; min-width: 820px; font-size: 0.85rem; line-height: 1.6;
+    }
+    details.hlb-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.hlb-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--hlb-muted); }
+    details.hlb-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--hlb-b); }
+  </style>
+
+  <h3>Hash Load Balancer: Play With It</h3>
+  <div class="hlb-sub">10 clients, 3 servers, one hash load balancer (HLB) in between. Click a client to send a request and watch which server it lands on -- then click it again and watch what happens to a NEW connection from the SAME client.</div>
+  <div class="hlb-naive-badge">Using NAIVE MODULO hashing for this demo: server = hash(flow) % 3 -- see the notes below for why real systems plan around this</div>
+
+  <div class="hlb-controls">
+    <label>Speed: <span id="hlbSpeedVal">1x</span>
+      <input type="range" id="hlbSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button class="hlb-btn" id="hlbResend" disabled>Resend Last Flow (identical tuple)</button>
+    <button class="hlb-btn" id="hlbPlay">&#9654; Play (random traffic)</button>
+    <button class="hlb-btn secondary" id="hlbReset">Reset</button>
+  </div>
+
+  <div class="hlb-stage">
+    <div class="hlb-panel-title" style="text-align:center; margin-bottom:8px;">10 Clients -- click one to send a request (a new connection = a new source port = a new flow)</div>
+    <div class="hlb-client-row" id="hlbClients"></div>
+
+    <div class="hlb-flow-line">
+      <div class="hlb-flow-box" id="hlbFlowBox">(click a client to construct a flow)</div>
+    </div>
+
+    <div class="hlb-lb-row">
+      <div class="hlb-lb-box" id="hlbLbBox">Hash Load Balancer</div>
+      <div class="hlb-lb-formula">server_index = hash(srcip, srcport, dstip, dstport, proto) % 3</div>
+    </div>
+
+    <div class="hlb-server-row" id="hlbServers"></div>
+  </div>
+
+  <div class="hlb-panels">
+    <div class="hlb-explain-panel">
+      <div class="hlb-box">
+        <div class="hlb-panel-title">What's happening right now</div>
+        <div id="hlbExplain">Click any client above to send a request. Each click opens a NEW connection (a fresh, random source port), which means it's a genuinely different flow every time -- even from the same client.</div>
+      </div>
+    </div>
+    <div class="hlb-side-panel-col">
+      <div class="hlb-box">
+        <div class="hlb-panel-title">Flow log</div>
+        <div class="hlb-log" id="hlbLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="hlb-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>What's a "flow"?</b> A flow is the standard 5-tuple that uniquely identifies one connection: <code>(source IP, destination IP, source port, destination port, protocol)</code>. Two packets belong to the same flow if and only if all five values match. This matters here because every NEW connection -- even from the exact same client, to the exact same server -- gets a fresh, essentially random source port from the OS, which makes it a genuinely different flow with a genuinely different hash.</li>
+      <li>This is why clicking the same client twice can send its two requests to two <i>different</i> servers: flow-hash load balancing gives you <b>connection-level</b> stickiness (this one TCP connection stays on one server for its whole lifetime), not <b>user-level</b> stickiness (the same human, across multiple separate connections, staying on one server). The "Resend Last Flow" button demonstrates the connection-level guarantee directly -- same 5-tuple in, same server out, every time.</li>
+      <li>Real HTTP-aware load balancers that need actual user/session stickiness typically hash (or read) something at the application layer instead -- a session cookie, a client-supplied user ID -- specifically because it doesn't change every time the OS picks a new ephemeral port. See <a href="hash_load_balancer.html">the conceptual Hash Load Balancer guide</a> for that use case.</li>
+      <li>The hash function used in this demo is a small illustrative one, chosen only for reproducibility. Real load balancers and routers commonly use CRC32, a Toeplitz hash (used by NIC hardware for RSS -- receive-side scaling), or similar -- the specific algorithm matters far less than the property this whole demo is about: same input, same output, every time.</li>
+      <li>The "naive" in naive modulo hashing isn't about the hash function -- it's about <code>% number_of_servers</code> specifically. Add or remove a server and the modulus changes, which silently reroutes a large fraction of all existing flows even though nothing about those flows changed. See <a href="consistent_hashing_interactive.html">the consistent hashing page</a> for the fix -- it's the very next page after this one for a reason.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('hlbWidget');
+
+    const speedSlider = document.getElementById('hlbSpeedSlider');
+    const speedVal = document.getElementById('hlbSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // Illustrative deterministic hash -- NOT a real production hash function.
+    function demoHash(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) {
+        h = (Math.imul(h, 31) + str.charCodeAt(i)) | 0;
+      }
+      return h >>> 0;
+    }
+
+    const SERVER_NAMES = ['Server A', 'Server B', 'Server C'];
+    const NUM_CLIENTS = 10;
+    const DST_IP = '203.0.113.10';
+    const DST_PORT = 443;
+    const PROTO = 'TCP';
+
+    const clientsEl = document.getElementById('hlbClients');
+    const serversEl = document.getElementById('hlbServers');
+    const flowBoxEl = document.getElementById('hlbFlowBox');
+    const lbBoxEl = document.getElementById('hlbLbBox');
+    const resendBtn = document.getElementById('hlbResend');
+    const playBtn = document.getElementById('hlbPlay');
+    const resetBtn = document.getElementById('hlbReset');
+    const explainEl = document.getElementById('hlbExplain');
+    const logEl = document.getElementById('hlbLog');
+
+    let serverCounts, clientLastServer, lastFlow, timer;
+    let playing = false;
+
+    function clientIp(i) { return '10.0.0.' + (i + 1); }
+    function flowKey(f) { return f.srcIp + ':' + f.srcPort + '-' + f.dstIp + ':' + f.dstPort + '-' + f.proto; }
+    function routeFlow(f) { return demoHash(flowKey(f)) % 3; }
+
+    function resetState() {
+      serverCounts = [0, 0, 0];
+      clientLastServer = new Array(NUM_CLIENTS).fill(null);
+      lastFlow = null;
+      clearTimeout(timer);
+      resendBtn.disabled = true;
+      logEl.innerHTML = '';
+      flowBoxEl.textContent = '(click a client to construct a flow)';
+      explainEl.textContent = 'Click any client above to send a request. Each click opens a NEW connection (a fresh, random source port), which means it\'s a genuinely different flow every time -- even from the same client.';
+      renderClients();
+      renderServers();
+    }
+
+    function sendFromClient(clientIdx) {
+      const flow = {
+        srcIp: clientIp(clientIdx),
+        srcPort: 1024 + Math.floor(Math.random() * 60000),
+        dstIp: DST_IP,
+        dstPort: DST_PORT,
+        proto: PROTO,
+      };
+      routeAndRender(flow, clientIdx);
+    }
+
+    function resendLastFlow() {
+      if (!lastFlow) return;
+      routeAndRender({ ...lastFlow.flow }, lastFlow.clientIdx, true);
+    }
+
+    function routeAndRender(flow, clientIdx, isResend) {
+      const server = routeFlow(flow);
+      const prevServer = clientLastServer[clientIdx];
+      flowBoxEl.textContent = flow.srcIp + ':' + flow.srcPort + ' -> ' + flow.dstIp + ':' + flow.dstPort + ' (' + flow.proto + ')';
+
+      const logMsg = (isResend ? '[RESEND] ' : '') + 'Client ' + (clientIdx + 1) + ' (' + flow.srcIp + ':' + flow.srcPort + ') -- hash % 3 = ' + server + ' -> ' + SERVER_NAMES[server];
+      if (!isResend && prevServer !== null && prevServer !== server) {
+        logTo(logEl, logMsg + '  [different server than this client\'s last connection!]', 'warn');
+        explainEl.textContent = 'Client ' + (clientIdx + 1) + ' landed on ' + SERVER_NAMES[server] + ' this time, but was on ' + SERVER_NAMES[prevServer] + ' last time -- same client, but a NEW connection has a new source port, so it\'s a different flow with a different hash. This is exactly the connection-vs-user stickiness distinction.';
+      } else if (!isResend && prevServer === server && prevServer !== null) {
+        logTo(logEl, logMsg + '  (happened to match this client\'s last server)', 'ok');
+        explainEl.textContent = 'Landed on ' + SERVER_NAMES[server] + ' again -- but this is coincidence (3 servers, decent odds), not guaranteed the way resending the identical flow is.';
+      } else {
+        logTo(logEl, logMsg, isResend ? 'ok' : null);
+        if (isResend) explainEl.textContent = 'Same exact 5-tuple as before -- same hash, same server, guaranteed. This is the one guarantee flow hashing actually makes.';
+      }
+
+      serverCounts[server]++;
+      clientLastServer[clientIdx] = server;
+      lastFlow = { flow, clientIdx };
+      resendBtn.disabled = false;
+
+      renderClients(clientIdx);
+      renderServers(server);
+      flashRoute(clientIdx, server);
+    }
+
+    function flashRoute(clientIdx, server) {
+      lbBoxEl.classList.add('active');
+      setTimeout(() => lbBoxEl.classList.remove('active'), scaled(500));
+    }
+
+    function renderClients(justSentIdx) {
+      clientsEl.innerHTML = '';
+      for (let i = 0; i < NUM_CLIENTS; i++) {
+        const el = document.createElement('div');
+        el.className = 'hlb-client' + (i === justSentIdx ? ' active' : '');
+        const last = clientLastServer[i];
+        el.innerHTML = '<div class="icon">🖥️</div>' +
+          '<div class="ip">Client ' + (i + 1) + '</div>' +
+          '<div class="ip">' + clientIp(i) + '</div>' +
+          '<div class="last">' + (last === null ? '--' : SERVER_NAMES[last]) + '</div>';
+        el.addEventListener('click', () => { pause(); sendFromClient(i); });
+        clientsEl.appendChild(el);
+      }
+    }
+
+    function renderServers(justHitIdx) {
+      serversEl.innerHTML = '';
+      const total = serverCounts.reduce((a, b) => a + b, 0) || 1;
+      SERVER_NAMES.forEach((name, i) => {
+        const el = document.createElement('div');
+        el.className = 'hlb-server' + (i === justHitIdx ? ' hit' : '');
+        el.innerHTML = '<div class="name">' + name + '</div>' +
+          '<div class="count">' + serverCounts[i] + '</div>' +
+          '<div class="bar-track"><div class="bar-fill" style="width:' + Math.round((serverCounts[i] / total) * 100) + '%;"></div></div>';
+        serversEl.appendChild(el);
+        // capture this exact element for its own fade-out -- avoids a
+        // stale re-query-by-index clobbering a NEWER flash on rapid clicks
+        if (i === justHitIdx) {
+          setTimeout(() => el.classList.remove('hit'), scaled(500));
+        }
+      });
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      function tick() {
+        const idx = Math.floor(Math.random() * NUM_CLIENTS);
+        sendFromClient(idx);
+        timer = setTimeout(tick, scaled(900));
+      }
+      tick();
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play (random traffic)';
+      clearTimeout(timer);
+    }
+
+    resendBtn.addEventListener('click', () => { pause(); resendLastFlow(); });
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    resetBtn.addEventListener('click', () => { pause(); resetState(); });
+
+    resetState();
+  })();
+  </script>
+</div>

@@ -33,6 +33,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[TCP Congestion Control (Interactive)](docs/source/tcp_congestion_control_interactive.rst)** | Interactive TCP congestion control -- drive the cwnd sawtooth yourself | slow start, congestion avoidance, fast retransmit, timeout, ssthresh |
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
+| 🎮 **[Hash Load Balancer (Interactive)](docs/source/hash_load_balancer_interactive.rst)** | Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is | flow 5-tuple, hash % N, connection vs. user stickiness |
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
 | 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
 | 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
@@ -98,6 +99,7 @@ system-notes/
         ├── tcp_congestion_control_interactive.rst
         ├── docker_packet_journey_interactive.rst
         ├── threads_sync_interactive.rst
+        ├── hash_load_balancer_interactive.rst
         ├── consistent_hashing_interactive.rst
         ├── proc_filesystem_interactive.rst
         ├── linux_fs_basics_interactive.rst
@@ -111,6 +113,7 @@ system-notes/
             ├── tcp_congestion_widget.html
             ├── docker_packet_journey_widget.html
             ├── threads_sync_widget.html
+            ├── hash_load_balancer_widget.html
             ├── consistent_hash_widget.html
             ├── proc_explorer_widget.html
             ├── linux_fs_basics_widget.html

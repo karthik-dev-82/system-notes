@@ -32,6 +32,7 @@ down and coming back to.
    tcp_congestion_control_interactive
    docker_packet_journey_interactive
    threads_sync_interactive
+   hash_load_balancer_interactive
    consistent_hashing_interactive
    proc_filesystem_interactive
    linux_fs_basics_interactive
@@ -117,6 +118,9 @@ Quick Navigation
    * - :doc:`threads_sync_interactive`
      - Interactive threads & synchronization -- step through race conditions and deadlock yourself
      - mutex, semaphore, condition variable, race condition, deadlock
+   * - :doc:`hash_load_balancer_interactive`
+     - Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is
+     - flow 5-tuple, hash % N, connection vs. user stickiness
    * - :doc:`consistent_hashing_interactive`
      - Interactive consistent hashing ring -- add/remove servers and watch what actually moves
      - hash ring, virtual nodes, reshuffling, load balancing
