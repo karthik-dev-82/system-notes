@@ -41,6 +41,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
 | 🎮 **[Python Sequences (Interactive)](docs/source/python_sequences_interactive.rst)** | Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source | dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks |
 | 🎮 **[Python Hashing (Interactive)](docs/source/python_hashing_interactive.rst)** | Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra | hash tables, open addressing, insertion order, union/intersection/difference |
+| 🎮 **[Network Interfaces (Interactive)](docs/source/network_interfaces_interactive.rst)** | Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation | MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation |
 
 ---
 
@@ -107,6 +108,7 @@ system-notes/
         ├── cpp_memory_interactive.rst
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
+        ├── network_interfaces_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
@@ -122,7 +124,10 @@ system-notes/
             ├── py_list_widget.html
             ├── py_stack_widget.html
             ├── py_queue_widget.html
-            └── py_hashing_widget.html
+            ├── py_hashing_widget.html
+            ├── net_bridge_widget.html
+            ├── net_tuntap_widget.html
+            └── net_vlan_widget.html
 
 ```
 

@@ -1,0 +1,323 @@
+<div class="nb-root" id="nbWidget">
+  <style>
+    #nbWidget {
+      --nb-bg: #0f172a;
+      --nb-panel: #16213e;
+      --nb-border: #2a3655;
+      --nb-text: #e2e8f0;
+      --nb-muted: #94a3b8;
+      --nb-a: #4ade80;
+      --nb-b: #38bdf8;
+      --nb-bad: #f87171;
+      --nb-warn: #fbbf24;
+      --nb-orange: #fb923c;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--nb-bg);
+      color: var(--nb-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #nbWidget * { box-sizing: border-box; }
+    #nbWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #nbWidget .nb-sub { color: var(--nb-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .nb-controls {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      background: var(--nb-panel); border: 1px solid var(--nb-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 800px;
+    }
+    .nb-controls label { font-size: 0.8rem; color: var(--nb-muted); display: flex; align-items: center; gap: 8px; }
+    .nb-controls input[type="range"] { width: 110px; accent-color: var(--nb-b); }
+    .nb-btn { background: var(--nb-b); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .nb-btn.secondary { background: transparent; color: var(--nb-text); border: 1px solid var(--nb-border); }
+    .nb-btn.step { background: var(--nb-orange); }
+    .nb-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .nb-stage { background: var(--nb-panel); border: 1px solid var(--nb-border); border-radius: 10px; padding: 20px; margin-bottom: 14px; min-width: 800px; }
+
+    .nb-topo { display: flex; flex-direction: column; align-items: center; gap: 14px; margin-bottom: 18px; }
+    .nb-ports-row { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+    .nb-port {
+      width: 130px; border: 2px solid var(--nb-border); background: #10182e; border-radius: 8px;
+      padding: 10px; text-align: center; font-family: ui-monospace, monospace; font-size: 0.74rem;
+    }
+    .nb-port .icon { font-size: 1.4rem; }
+    .nb-port .name { color: #fff; font-weight: 800; margin: 4px 0 2px; }
+    .nb-port .mac { color: var(--nb-muted); }
+    .nb-port.tx { border-color: var(--nb-b); background: rgba(56,189,248,0.15); }
+    .nb-port.rx { border-color: var(--nb-a); background: rgba(74,222,128,0.15); }
+
+    .nb-bridge-box {
+      border: 2px solid var(--nb-orange); background: rgba(251,146,60,0.12); border-radius: 10px;
+      padding: 10px 26px; font-weight: 800; color: var(--nb-orange); font-size: 0.9rem;
+    }
+    .nb-bridge-box.active { background: rgba(251,146,60,0.32); }
+
+    .nb-mac-table { width: 100%; border-collapse: collapse; font-family: ui-monospace, monospace; font-size: 0.76rem; }
+    .nb-mac-table th, .nb-mac-table td { border: 1px solid var(--nb-border); padding: 5px 9px; text-align: left; }
+    .nb-mac-table th { color: var(--nb-muted); font-weight: 600; }
+    .nb-mac-table td.updated { background: rgba(251,191,36,0.18); }
+
+    .nb-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
+    .nb-banner.ok { background: rgba(74,222,128,0.12); color: var(--nb-a); }
+    .nb-banner.warn { background: rgba(251,191,36,0.15); color: var(--nb-warn); }
+
+    .nb-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 800px; }
+    .nb-explain-panel, .nb-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .nb-explain-panel { flex: 1.3; }
+    .nb-box { background: var(--nb-panel); border: 1px solid var(--nb-border); border-radius: 10px; padding: 12px 14px; }
+    .nb-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nb-muted); margin-bottom: 8px; }
+    .nb-log { height: 150px; overflow-y: auto; font-size: 0.72rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .nb-log div { color: var(--nb-muted); }
+    .nb-log div.ok { color: var(--nb-a); }
+    .nb-log div.warn { color: var(--nb-warn); }
+
+    details.nb-notes {
+      margin-top: 14px; background: var(--nb-panel); border: 1px solid var(--nb-border); border-radius: 10px;
+      padding: 12px 16px; min-width: 800px; font-size: 0.85rem; line-height: 1.6;
+    }
+    details.nb-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.nb-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--nb-muted); }
+    details.nb-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--nb-b); }
+  </style>
+
+  <h3>Bridge Interfaces: Play With It</h3>
+  <div class="nb-sub">docker0 (or any Linux bridge) is a real Layer-2 software switch: it learns which MAC address lives behind which port, and forwards accordingly. Step through a realistic sequence of frames and watch the MAC table fill in live.</div>
+
+  <div class="nb-controls">
+    <label>Speed: <span id="nbSpeedVal">1x</span>
+      <input type="range" id="nbSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button class="nb-btn step" id="nbStep">Next Step</button>
+    <button class="nb-btn" id="nbPlay">&#9654; Play (run full sequence)</button>
+    <button class="nb-btn secondary" id="nbReset">Reset</button>
+  </div>
+
+  <div class="nb-stage">
+    <div class="nb-topo">
+      <div class="nb-ports-row" id="nbPorts"></div>
+      <div class="nb-bridge-box" id="nbBridgeBox">docker0 (Bridge)</div>
+    </div>
+    <table class="nb-mac-table">
+      <thead><tr><th>MAC Address</th><th>Learned Port</th></tr></thead>
+      <tbody id="nbMacTableBody"></tbody>
+    </table>
+    <div class="nb-banner" id="nbBanner" style="display:none;"></div>
+  </div>
+
+  <div class="nb-panels">
+    <div class="nb-explain-panel">
+      <div class="nb-box">
+        <div class="nb-panel-title">What's happening right now</div>
+        <div id="nbExplain">Click "Next Step" to send the first frame -- C1 broadcasting an ARP request. Since the bridge has no idea where anyone is yet, watch what it has to do.</div>
+      </div>
+    </div>
+    <div class="nb-side-panel-col">
+      <div class="nb-box">
+        <div class="nb-panel-title">Event log</div>
+        <div class="nb-log" id="nbLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="nb-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>This is genuinely how a Linux bridge works, not a simplification for teaching -- <code>docker0</code>, <code>br0</code>, and every other Linux bridge device really do maintain a MAC learning table (visible with <code>bridge fdb show</code>) and really do forward exactly this way: unicast if the destination is known, flood if it's unknown or broadcast.</li>
+      <li>A real bridge also <b>ages out</b> table entries it hasn't seen traffic from in a while (300 seconds by default on Linux) -- not modeled here, but it's why a device that's been silent for a long time gets flooded-to again the next time something tries to reach it, until it speaks up and gets relearned.</li>
+      <li>The "move" step in this demo mirrors something that happens for real: a container restarts and gets a fresh veth pair, or a physical machine gets plugged into a different switch port. The bridge doesn't need to be told anything -- it just relearns the MAC on whatever port it next sees traffic from, and silently updates the table.</li>
+      <li>This learn-and-forward behavior is <i>exactly</i> what a real hardware Ethernet switch does -- a Linux bridge is a software implementation of the same idea, which is why Docker can give every container a virtual "port" on a virtual "switch" (<code>docker0</code>) and have real Ethernet semantics (including broadcast, ARP, and MAC-based delivery) just work.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('nbWidget');
+
+    const speedSlider = document.getElementById('nbSpeedSlider');
+    const speedVal = document.getElementById('nbSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    const BROADCAST = 'ff:ff:ff:ff:ff:ff';
+    const DEVICES = {
+      'AA:01': { name: 'C1', icon: '📦', port: 'veth-c1' },
+      'AA:02': { name: 'C2', icon: '📦', port: 'veth-c2' },
+      'AA:03': { name: 'C3', icon: '📦', port: 'veth-c3' },
+      'AA:04': { name: 'Host', icon: '🖥️', port: 'eth0' },
+    };
+    const PORT_ORDER = ['veth-c1', 'veth-c2', 'veth-c3', 'eth0'];
+
+    const stepBtn = document.getElementById('nbStep');
+    const playBtn = document.getElementById('nbPlay');
+    const resetBtn = document.getElementById('nbReset');
+    const portsEl = document.getElementById('nbPorts');
+    const bridgeBoxEl = document.getElementById('nbBridgeBox');
+    const macTableBody = document.getElementById('nbMacTableBody');
+    const banner = document.getElementById('nbBanner');
+    const explainEl = document.getElementById('nbExplain');
+    const logEl = document.getElementById('nbLog');
+
+    // scripted sequence -- matches the Node-verified bridge model exactly
+    const SCRIPT = [
+      { type: 'frame', src: 'AA:01', dst: BROADCAST, arrivalPort: 'veth-c1',
+        desc: 'C1 broadcasts an ARP request ("who has 172.17.0.2?")' },
+      { type: 'frame', src: 'AA:02', dst: 'AA:01', arrivalPort: 'veth-c2',
+        desc: 'C2 replies directly to C1' },
+      { type: 'frame', src: 'AA:03', dst: BROADCAST, arrivalPort: 'veth-c3',
+        desc: 'C3 broadcasts (its own ARP request)' },
+      { type: 'frame', src: 'AA:04', dst: 'AA:01', arrivalPort: 'eth0',
+        desc: 'Host sends a packet directly to C1' },
+      { type: 'move', mac: 'AA:01', newPort: 'eth0',
+        desc: 'C1 restarts with a fresh veth pair -- its traffic now arrives via a different bridge port' },
+      { type: 'frame', src: 'AA:01', dst: 'AA:02', arrivalPort: 'eth0',
+        desc: 'C1 (reconnected) sends to C2 again' },
+    ];
+
+    let macTable, step, timer;
+    let playing = false;
+
+    function resetState() {
+      macTable = {}; // mac -> port
+      step = 0;
+      clearTimeout(timer);
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Click "Next Step" to send the first frame -- C1 broadcasting an ARP request. Since the bridge has no idea where anyone is yet, watch what it has to do.';
+      renderPorts();
+      renderMacTable();
+      stepBtn.disabled = false;
+      playBtn.disabled = false;
+    }
+
+    function renderPorts(txMac, rxPorts) {
+      portsEl.innerHTML = '';
+      Object.keys(DEVICES).forEach(mac => {
+        const d = DEVICES[mac];
+        const el = document.createElement('div');
+        let cls = 'nb-port';
+        if (mac === txMac) cls += ' tx';
+        else if (rxPorts && rxPorts.includes(d.port)) cls += ' rx';
+        el.className = cls;
+        el.innerHTML = '<div class="icon">' + d.icon + '</div>' +
+          '<div class="name">' + d.name + '</div>' +
+          '<div class="mac">' + mac + '<br>via ' + d.port + '</div>';
+        portsEl.appendChild(el);
+      });
+    }
+
+    function renderMacTable(justUpdatedMac) {
+      macTableBody.innerHTML = '';
+      Object.keys(macTable).forEach(mac => {
+        const tr = document.createElement('tr');
+        const nameLabel = DEVICES[mac] ? DEVICES[mac].name + ' (' + mac + ')' : mac;
+        tr.innerHTML = '<td' + (mac === justUpdatedMac ? ' class="updated"' : '') + '>' + nameLabel + '</td>' +
+          '<td' + (mac === justUpdatedMac ? ' class="updated"' : '') + '>' + macTable[mac] + '</td>';
+        macTableBody.appendChild(tr);
+      });
+      if (Object.keys(macTable).length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="2" style="color:var(--nb-muted); font-style:italic;">(empty -- bridge hasn\'t seen any traffic yet)</td>';
+        macTableBody.appendChild(tr);
+      }
+    }
+
+    function doStep() {
+      if (step >= SCRIPT.length) return;
+      const action = SCRIPT[step];
+
+      if (action.type === 'move') {
+        DEVICES[action.mac].port = action.newPort;
+        logTo(logEl, action.desc, 'warn');
+        explainEl.textContent = action.desc + '. The bridge itself does nothing yet -- it only updates its table the next time it actually sees a frame from this MAC.';
+        banner.style.display = 'block';
+        banner.className = 'nb-banner warn';
+        banner.textContent = 'Topology change: C1 will appear on a new port next time it transmits.';
+        renderPorts();
+        step++;
+        stepBtn.disabled = step >= SCRIPT.length;
+        return;
+      }
+
+      const { src, dst, arrivalPort, desc } = action;
+      const prevPort = macTable[src];
+      macTable[src] = arrivalPort;
+      const relearned = prevPort !== undefined && prevPort !== arrivalPort;
+
+      let outPorts, isFlood;
+      if (dst === BROADCAST) {
+        isFlood = true;
+        outPorts = PORT_ORDER.filter(p => p !== arrivalPort);
+      } else if (macTable[dst] !== undefined) {
+        isFlood = false;
+        outPorts = [macTable[dst]];
+      } else {
+        isFlood = true;
+        outPorts = PORT_ORDER.filter(p => p !== arrivalPort);
+      }
+
+      bridgeBoxEl.classList.add('active');
+      setTimeout(() => bridgeBoxEl.classList.remove('active'), scaled(500));
+
+      renderPorts(src, outPorts);
+      renderMacTable(src);
+
+      const dstLabel = dst === BROADCAST ? 'BROADCAST' : (DEVICES[dst] ? DEVICES[dst].name : dst);
+      logTo(logEl, desc + ' -- ' + (isFlood ? 'FLOOD to ' + outPorts.length + ' port(s)' : 'UNICAST to ' + outPorts[0]) + (relearned ? ' [relearned: ' + src + ' moved from ' + prevPort + ' -> ' + arrivalPort + ']' : ''), isFlood ? 'warn' : 'ok');
+
+      if (isFlood && dst !== BROADCAST) {
+        explainEl.textContent = dstLabel + ' isn\'t in the MAC table yet, so the bridge has no choice but to flood this frame out every other port -- exactly like a brand-new switch would.';
+      } else if (isFlood) {
+        explainEl.textContent = 'Broadcast frames ALWAYS flood, regardless of what the bridge already knows -- that\'s what makes broadcast broadcast.';
+      } else if (relearned) {
+        explainEl.textContent = src + ' just showed up on a different port than last time -- the bridge silently updated its table and delivered correctly to the NEW location.';
+      } else {
+        explainEl.textContent = dstLabel + ' is already in the MAC table, so the bridge sends this frame to exactly one port -- no flooding, no wasted bandwidth on the other ports.';
+      }
+
+      step++;
+      stepBtn.disabled = step >= SCRIPT.length;
+      if (step >= SCRIPT.length) {
+        banner.style.display = 'block';
+        banner.className = 'nb-banner ok';
+        banner.textContent = 'Sequence complete -- the MAC table above reflects everything the bridge has learned.';
+      }
+    }
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      function tick() {
+        if (step >= SCRIPT.length) { pause(); return; }
+        doStep();
+        timer = setTimeout(tick, scaled(1400));
+      }
+      tick();
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Play (run full sequence)';
+      clearTimeout(timer);
+    }
+
+    stepBtn.addEventListener('click', doStep);
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+    resetBtn.addEventListener('click', () => { pause(); resetState(); });
+
+    resetState();
+  })();
+  </script>
+</div>

@@ -40,6 +40,7 @@ down and coming back to.
    cpp_memory_interactive
    python_sequences_interactive
    python_hashing_interactive
+   network_interfaces_interactive
 
 Quick Navigation
 -----------------
@@ -142,3 +143,6 @@ Quick Navigation
    * - :doc:`python_hashing_interactive`
      - Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra
      - hash tables, open addressing, insertion order, union/intersection/difference
+   * - :doc:`network_interfaces_interactive`
+     - Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation
+     - MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation

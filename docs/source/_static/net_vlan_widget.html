@@ -1,0 +1,263 @@
+<div class="nv-root" id="nvWidget">
+  <style>
+    #nvWidget {
+      --nv-bg: #0f172a;
+      --nv-panel: #16213e;
+      --nv-border: #2a3655;
+      --nv-text: #e2e8f0;
+      --nv-muted: #94a3b8;
+      --nv-a: #4ade80;
+      --nv-b: #38bdf8;
+      --nv-bad: #f87171;
+      --nv-warn: #fbbf24;
+      --nv-lavender: #c084fc;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--nv-bg);
+      color: var(--nv-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #nvWidget * { box-sizing: border-box; }
+    #nvWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #nvWidget .nv-sub { color: var(--nv-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .nv-controls {
+      display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+      background: var(--nv-panel); border: 1px solid var(--nv-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 800px;
+    }
+    .nv-controls label { font-size: 0.8rem; color: var(--nv-muted); display: flex; align-items: center; gap: 8px; }
+    .nv-controls input[type="range"] { width: 110px; accent-color: var(--nv-b); }
+    .nv-btn { background: var(--nv-b); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .nv-btn.secondary { background: transparent; color: var(--nv-text); border: 1px solid var(--nv-border); }
+    .nv-btn.v10 { background: var(--nv-b); }
+    .nv-btn.v20 { background: var(--nv-warn); }
+    .nv-btn.v30 { background: var(--nv-lavender); }
+
+    .nv-stage { background: var(--nv-panel); border: 1px solid var(--nv-border); border-radius: 10px; padding: 20px; margin-bottom: 14px; min-width: 800px; }
+
+    .nv-frame-diagram { display: flex; gap: 2px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+    .nv-frame-field {
+      border: 2px solid var(--nv-border); background: #10182e; border-radius: 5px; padding: 7px 10px;
+      font-family: ui-monospace, monospace; font-size: 0.68rem; text-align: center; color: var(--nv-muted);
+    }
+    .nv-frame-field.tag { border-color: var(--nv-warn); background: rgba(251,191,36,0.18); color: var(--nv-warn); font-weight: 800; }
+
+    .nv-trunk-row { text-align: center; margin-bottom: 18px; }
+    .nv-trunk-box {
+      display: inline-block; border: 2px dashed var(--nv-muted); border-radius: 8px; padding: 8px 30px;
+      font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--nv-muted);
+    }
+    .nv-trunk-box.active { border-color: var(--nv-warn); color: var(--nv-warn); border-style: solid; }
+
+    .nv-vlan-groups { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+    .nv-vlan-group { border-radius: 10px; padding: 12px; min-width: 190px; border: 2px solid var(--nv-border); }
+    .nv-vlan-group.v10 { border-color: var(--nv-b); }
+    .nv-vlan-group.v20 { border-color: var(--nv-warn); }
+    .nv-vlan-group.v30 { border-color: var(--nv-lavender); }
+    .nv-vlan-group .title { font-weight: 800; margin-bottom: 8px; text-align: center; font-size: 0.8rem; }
+    .nv-vlan-group.v10 .title { color: var(--nv-b); }
+    .nv-vlan-group.v20 .title { color: var(--nv-warn); }
+    .nv-vlan-group.v30 .title { color: var(--nv-lavender); }
+    .nv-device { border: 1px solid var(--nv-border); background: #10182e; border-radius: 6px; padding: 6px 8px; margin-bottom: 6px; font-family: ui-monospace, monospace; font-size: 0.74rem; }
+    .nv-device.recv { border-color: var(--nv-a); background: rgba(74,222,128,0.2); }
+    .nv-device.sender { border-color: #fff; }
+
+    .nv-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 14px; }
+    .nv-banner.ok { background: rgba(74,222,128,0.12); color: var(--nv-a); }
+    .nv-banner.warn { background: rgba(251,191,36,0.15); color: var(--nv-warn); }
+
+    .nv-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 800px; }
+    .nv-explain-panel, .nv-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .nv-explain-panel { flex: 1.3; }
+    .nv-box { background: var(--nv-panel); border: 1px solid var(--nv-border); border-radius: 10px; padding: 12px 14px; }
+    .nv-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nv-muted); margin-bottom: 8px; }
+    .nv-log { height: 150px; overflow-y: auto; font-size: 0.72rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .nv-log div { color: var(--nv-muted); }
+    .nv-log div.ok { color: var(--nv-a); }
+    .nv-log div.warn { color: var(--nv-warn); }
+
+    details.nv-notes {
+      margin-top: 14px; background: var(--nv-panel); border: 1px solid var(--nv-border); border-radius: 10px;
+      padding: 12px 16px; min-width: 800px; font-size: 0.85rem; line-height: 1.6;
+    }
+    details.nv-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.nv-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--nv-muted); }
+    details.nv-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--nv-b); }
+  </style>
+
+  <h3>VLAN Interfaces: Play With It</h3>
+  <div class="nv-sub">One physical cable, three isolated virtual networks. Send a frame from any device and watch exactly who receives it -- and, just as importantly, who doesn't.</div>
+
+  <div class="nv-controls">
+    <label>Speed: <span id="nvSpeedVal">1x</span>
+      <input type="range" id="nvSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button class="nv-btn v10" id="nvSendLaptop">Laptop sends (VLAN 10)</button>
+    <button class="nv-btn v20" id="nvSendCamera">Camera1 sends (VLAN 20)</button>
+    <button class="nv-btn v30" id="nvSendGuest">Guest phone sends (VLAN 30)</button>
+    <button class="nv-btn secondary" id="nvReset">Reset</button>
+  </div>
+
+  <div class="nv-stage">
+    <div class="nv-panel-title" style="text-align:center;">Frame on the wire right now</div>
+    <div class="nv-frame-diagram" id="nvFrameDiagram"></div>
+
+    <div class="nv-trunk-row">
+      <div class="nv-trunk-box" id="nvTrunkBox">eth0 -- one physical cable (802.1Q trunk)</div>
+    </div>
+
+    <div class="nv-vlan-groups">
+      <div class="nv-vlan-group v10">
+        <div class="title">eth0.10 -- VLAN 10 (Family)</div>
+        <div class="nv-device" id="nvLaptop">💻 laptop</div>
+        <div class="nv-device" id="nvTablet">📱 tablet</div>
+      </div>
+      <div class="nv-vlan-group v20">
+        <div class="title">eth0.20 -- VLAN 20 (Cameras)</div>
+        <div class="nv-device" id="nvCamera1">📹 camera1</div>
+        <div class="nv-device" id="nvCamera2">📹 camera2</div>
+      </div>
+      <div class="nv-vlan-group v30">
+        <div class="title">eth0.30 -- VLAN 30 (Guest WiFi)</div>
+        <div class="nv-device" id="nvGuest">📱 guest-phone</div>
+      </div>
+    </div>
+    <div class="nv-banner" id="nvBanner" style="display:none;"></div>
+  </div>
+
+  <div class="nv-panels">
+    <div class="nv-explain-panel">
+      <div class="nv-box">
+        <div class="nv-panel-title">What's happening right now</div>
+        <div id="nvExplain">Click any "sends" button above. Every device shares the exact same physical cable (eth0) -- the 802.1Q tag is what keeps their traffic apart.</div>
+      </div>
+    </div>
+    <div class="nv-side-panel-col">
+      <div class="nv-box">
+        <div class="nv-panel-title">Event log</div>
+        <div class="nv-log" id="nvLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="nv-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>The extra field in a tagged frame is real and standardized: 802.1Q inserts a 4-byte tag right after the source MAC address -- a 2-byte TPID (Tag Protocol Identifier, always <code>0x8100</code> for 802.1Q) followed by a 2-byte TCI (Tag Control Information) that packs in a 3-bit priority, a 1-bit drop-eligible flag, and the 12-bit VLAN ID itself (which is why VLAN IDs top out at 4094, not some rounder number).</li>
+      <li>The physical NIC (<code>eth0</code>) never actually "contains" three separate networks -- it's one wire carrying frames that all happen to have a tag field. The <b>sub-interfaces</b> (<code>eth0.10</code>, <code>eth0.20</code>, <code>eth0.30</code>) are what do the actual demultiplexing: each one only accepts frames tagged with its own VLAN ID and strips the tag before handing the frame up the stack, so from an application's point of view each VLAN just looks like its own ordinary network interface.</li>
+      <li>Isolation here is a property of the tag, not of physical distance -- a guest device one inch from a security camera, both plugged into the same switch, still can't see the camera's traffic if they're on different VLANs and nothing is explicitly configured to route between them. That's the entire security value: segmentation without separate cabling.</li>
+      <li>Getting from "isolated" to "these VLANs can talk when we want them to" requires a device operating above Layer 2 -- a router, or an L3 switch -- explicitly configured to forward between the VLANs (often called "router-on-a-stick" when it's done over a single trunk link). Nothing in this demo does that on purpose: real isolation is the default, and crossing it is a deliberate configuration step.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('nvWidget');
+
+    const speedSlider = document.getElementById('nvSpeedSlider');
+    const speedVal = document.getElementById('nvSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    const DEVICES = {
+      laptop: { el: 'nvLaptop', vlan: 10, label: 'laptop' },
+      tablet: { el: 'nvTablet', vlan: 10, label: 'tablet' },
+      camera1: { el: 'nvCamera1', vlan: 20, label: 'camera1' },
+      camera2: { el: 'nvCamera2', vlan: 20, label: 'camera2' },
+      guest: { el: 'nvGuest', vlan: 30, label: 'guest-phone' },
+    };
+    const VLAN_NAMES = { 10: 'VLAN 10 (Family)', 20: 'VLAN 20 (Cameras)', 30: 'VLAN 30 (Guest WiFi)' };
+
+    const sendLaptopBtn = document.getElementById('nvSendLaptop');
+    const sendCameraBtn = document.getElementById('nvSendCamera');
+    const sendGuestBtn = document.getElementById('nvSendGuest');
+    const resetBtn = document.getElementById('nvReset');
+    const frameDiagramEl = document.getElementById('nvFrameDiagram');
+    const trunkBoxEl = document.getElementById('nvTrunkBox');
+    const banner = document.getElementById('nvBanner');
+    const explainEl = document.getElementById('nvExplain');
+    const logEl = document.getElementById('nvLog');
+
+    let timer;
+
+    function resetState() {
+      clearTimeout(timer);
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Click any "sends" button above. Every device shares the exact same physical cable (eth0) -- the 802.1Q tag is what keeps their traffic apart.';
+      renderFrameDiagram(null);
+      clearHighlights();
+    }
+
+    function renderFrameDiagram(vlan) {
+      frameDiagramEl.innerHTML = '';
+      const fields = [
+        { text: 'Dst MAC', tag: false },
+        { text: 'Src MAC', tag: false },
+      ];
+      if (vlan !== null) fields.push({ text: '802.1Q Tag\nTPID 0x8100\nVLAN ' + vlan, tag: true });
+      fields.push({ text: 'EtherType', tag: false }, { text: 'Payload', tag: false });
+      fields.forEach(f => {
+        const el = document.createElement('div');
+        el.className = 'nv-frame-field' + (f.tag ? ' tag' : '');
+        el.innerHTML = f.text.replace(/\n/g, '<br>');
+        frameDiagramEl.appendChild(el);
+      });
+    }
+
+    function clearHighlights() {
+      Object.values(DEVICES).forEach(d => {
+        const el = document.getElementById(d.el);
+        el.classList.remove('recv', 'sender');
+      });
+    }
+
+    function send(senderKey) {
+      const sender = DEVICES[senderKey];
+      clearHighlights();
+      renderFrameDiagram(sender.vlan);
+
+      document.getElementById(sender.el).classList.add('sender');
+      trunkBoxEl.classList.add('active');
+      setTimeout(() => trunkBoxEl.classList.remove('active'), scaled(600));
+
+      const recipients = Object.keys(DEVICES).filter(k => k !== senderKey && DEVICES[k].vlan === sender.vlan);
+      recipients.forEach(k => document.getElementById(DEVICES[k].el).classList.add('recv'));
+
+      const recipLabels = recipients.map(k => DEVICES[k].label);
+      logTo(logEl, sender.label + ' sends, tagged ' + VLAN_NAMES[sender.vlan] + ' -- delivered to: ' + (recipLabels.length ? recipLabels.join(', ') : '(nobody else on this VLAN)'), 'ok');
+
+      const others = Object.keys(DEVICES).filter(k => DEVICES[k].vlan !== sender.vlan);
+      if (others.length) {
+        logTo(logEl, '  NOT delivered to: ' + others.map(k => DEVICES[k].label + ' (VLAN ' + DEVICES[k].vlan + ')').join(', '), 'warn');
+      }
+
+      explainEl.textContent = sender.label + '\'s frame physically travels down the SAME wire every other device is on -- but only ' + (recipLabels.length ? recipLabels.join(' and ') : 'nobody') + ' actually receive it, because only their sub-interface is bound to VLAN ' + sender.vlan + '. Everyone else\'s NIC sees the tag doesn\'t match and discards it before it ever reaches an application.';
+
+      banner.style.display = 'block';
+      banner.className = 'nv-banner ok';
+      banner.textContent = 'Isolation held: VLAN ' + sender.vlan + ' traffic stayed on VLAN ' + sender.vlan + '.';
+    }
+
+    sendLaptopBtn.addEventListener('click', () => send('laptop'));
+    sendCameraBtn.addEventListener('click', () => send('camera1'));
+    sendGuestBtn.addEventListener('click', () => send('guest'));
+    resetBtn.addEventListener('click', resetState);
+
+    resetState();
+  })();
+  </script>
+</div>

@@ -1,0 +1,243 @@
+<div class="nt-root" id="ntWidget">
+  <style>
+    #ntWidget {
+      --nt-bg: #0f172a;
+      --nt-panel: #16213e;
+      --nt-border: #2a3655;
+      --nt-text: #e2e8f0;
+      --nt-muted: #94a3b8;
+      --nt-a: #4ade80;
+      --nt-b: #38bdf8;
+      --nt-bad: #f87171;
+      --nt-warn: #fbbf24;
+      --nt-pink: #f472b6;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--nt-bg);
+      color: var(--nt-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ntWidget * { box-sizing: border-box; }
+    #ntWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ntWidget .nt-sub { color: var(--nt-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .nt-controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--nt-panel); border: 1px solid var(--nt-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 16px; min-width: 800px;
+    }
+    .nt-controls label { font-size: 0.8rem; color: var(--nt-muted); display: flex; align-items: center; gap: 8px; }
+    .nt-controls input[type="range"] { width: 110px; accent-color: var(--nt-b); }
+    .nt-toggle { display: inline-flex; border: 1px solid var(--nt-border); border-radius: 8px; overflow: hidden; }
+    .nt-toggle button { background: transparent; color: var(--nt-muted); border: none; padding: 8px 16px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    .nt-toggle button.active { background: var(--nt-pink); color: #2a0e1c; }
+    .nt-btn { background: var(--nt-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .nt-btn.secondary { background: transparent; color: var(--nt-text); border: 1px solid var(--nt-border); }
+    .nt-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .nt-stage { background: var(--nt-panel); border: 1px solid var(--nt-border); border-radius: 10px; padding: 20px; margin-bottom: 14px; min-width: 800px; }
+
+    .nt-path-row { display: flex; align-items: center; justify-content: center; gap: 14px; flex-wrap: wrap; margin-bottom: 20px; }
+    .nt-path-box {
+      border: 2px solid var(--nt-border); background: #10182e; border-radius: 8px; padding: 12px 16px;
+      text-align: center; font-family: ui-monospace, monospace; font-size: 0.78rem; min-width: 130px;
+    }
+    .nt-path-box .icon { font-size: 1.5rem; }
+    .nt-path-box.active { border-color: var(--nt-pink); background: rgba(244,114,182,0.15); }
+    .nt-arrow { font-size: 1.4rem; color: var(--nt-muted); }
+
+    .nt-frame-diagram { display: flex; gap: 2px; justify-content: center; margin-bottom: 16px; flex-wrap: wrap; }
+    .nt-frame-field {
+      border: 2px solid var(--nt-border); background: #10182e; border-radius: 5px; padding: 8px 12px;
+      font-family: ui-monospace, monospace; font-size: 0.72rem; text-align: center; color: var(--nt-muted);
+    }
+    .nt-frame-field.eth { border-color: var(--nt-warn); background: rgba(251,191,36,0.18); color: var(--nt-warn); font-weight: 800; }
+    .nt-frame-field.ip { border-color: var(--nt-b); color: var(--nt-b); font-weight: 800; }
+
+    .nt-bridge-check { text-align: center; margin-top: 10px; }
+    .nt-bridge-btn { background: transparent; border: 2px dashed var(--nt-border); color: var(--nt-muted); border-radius: 8px; padding: 8px 18px; font-size: 0.8rem; cursor: pointer; font-weight: 700; }
+
+    .nt-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 12px; }
+    .nt-banner.ok { background: rgba(74,222,128,0.12); color: var(--nt-a); }
+    .nt-banner.bad { background: rgba(248,113,113,0.18); color: var(--nt-bad); }
+
+    .nt-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 800px; }
+    .nt-explain-panel, .nt-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .nt-explain-panel { flex: 1.3; }
+    .nt-box { background: var(--nt-panel); border: 1px solid var(--nt-border); border-radius: 10px; padding: 12px 14px; }
+    .nt-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--nt-muted); margin-bottom: 8px; }
+    .nt-log { height: 150px; overflow-y: auto; font-size: 0.72rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .nt-log div { color: var(--nt-muted); }
+    .nt-log div.ok { color: var(--nt-a); }
+    .nt-log div.bad { color: var(--nt-bad); font-weight: 700; }
+
+    details.nt-notes {
+      margin-top: 14px; background: var(--nt-panel); border: 1px solid var(--nt-border); border-radius: 10px;
+      padding: 12px 16px; min-width: 800px; font-size: 0.85rem; line-height: 1.6;
+    }
+    details.nt-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.nt-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--nt-muted); }
+    details.nt-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--nt-b); }
+  </style>
+
+  <h3>TUN/TAP Interfaces: Play With It</h3>
+  <div class="nt-sub">Same idea -- a virtual network device an application talks to directly -- but TUN and TAP hand the application completely different things. Toggle between them and watch the actual frame on the wire.</div>
+
+  <div class="nt-controls">
+    <label>Speed: <span id="ntSpeedVal">1x</span>
+      <input type="range" id="ntSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <div class="nt-toggle">
+      <button class="nt-mode-btn active" data-mode="tun">TUN (Layer 3)</button>
+      <button class="nt-mode-btn" data-mode="tap">TAP (Layer 2)</button>
+    </div>
+    <button class="nt-btn" id="ntSend">Send a Packet</button>
+    <button class="nt-btn secondary" id="ntReset">Reset</button>
+  </div>
+
+  <div class="nt-stage">
+    <div class="nt-path-row">
+      <div class="nt-path-box" id="ntAppBox"><div class="icon">🖥️</div>VPN App</div>
+      <div class="nt-arrow">&#8594;</div>
+      <div class="nt-path-box" id="ntDevBox"><div class="icon">🔌</div><span id="ntDevLabel">/dev/net/tun0</span></div>
+      <div class="nt-arrow">&#8594;</div>
+      <div class="nt-path-box" id="ntKernelBox"><div class="icon">🐧</div>Kernel Network Stack</div>
+    </div>
+
+    <div class="nt-panel-title" style="text-align:center;">What crosses the kernel boundary</div>
+    <div class="nt-frame-diagram" id="ntFrameDiagram"></div>
+
+    <div class="nt-bridge-check">
+      <button class="nt-bridge-btn" id="ntTryBridge">Try: attach this device to a bridge</button>
+    </div>
+    <div class="nt-banner" id="ntBanner" style="display:none;"></div>
+  </div>
+
+  <div class="nt-panels">
+    <div class="nt-explain-panel">
+      <div class="nt-box">
+        <div class="nt-panel-title">What's happening right now</div>
+        <div id="ntExplain">TUN mode is selected. Click "Send a Packet" to see exactly what the VPN application hands to the kernel -- then flip to TAP and send again to see what's different.</div>
+      </div>
+    </div>
+    <div class="nt-side-panel-col">
+      <div class="nt-box">
+        <div class="nt-panel-title">Event log</div>
+        <div class="nt-log" id="ntLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="nt-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>Both TUN and TAP are exposed to a userspace application through the exact same device node, <code>/dev/net/tun</code> -- which one you get is decided by a flag (<code>IFF_TUN</code> vs <code>IFF_TAP</code>) the application passes when it opens the device, not by anything different about the file itself.</li>
+      <li>Most VPN software (OpenVPN in its default mode, WireGuard) uses TUN specifically because a VPN only needs to move IP packets from one place to another -- there's no Ethernet segment to emulate, so carrying MAC headers over the tunnel would be pure overhead. TAP exists for the cases that genuinely need Layer 2: bridging a VM's virtual NIC into a real network, or emulating a physical Ethernet segment over a tunnel (bridged VPNs, some older enterprise setups).</li>
+      <li>"Can't be bridged" isn't a policy restriction on TUN -- it's a structural fact. A bridge's entire job is reading Ethernet frame headers (source/destination MAC) to learn and forward. A TUN device only ever produces bare IP packets with no MAC header at all, so there is nothing for a bridge to read. This is exactly the same bridge from <a href="net_bridge_widget.html">the Bridge Interfaces demo</a> -- it needs Ethernet framing to do its job, full stop.</li>
+      <li>The "kernel network stack" box in this demo is a simplification of a real, two-way path: an application also <i>reads</i> from the TUN/TAP device to receive packets/frames the kernel wants to send back out through it -- this demo only shows the direction VPN traffic usually gets discussed in (app -> kernel -> out to the tunnel).</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('ntWidget');
+
+    const speedSlider = document.getElementById('ntSpeedSlider');
+    const speedVal = document.getElementById('ntSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    const modeButtons = root.querySelectorAll('.nt-mode-btn');
+    const sendBtn = document.getElementById('ntSend');
+    const resetBtn = document.getElementById('ntReset');
+    const appBox = document.getElementById('ntAppBox');
+    const devBox = document.getElementById('ntDevBox');
+    const devLabel = document.getElementById('ntDevLabel');
+    const kernelBox = document.getElementById('ntKernelBox');
+    const frameDiagramEl = document.getElementById('ntFrameDiagram');
+    const tryBridgeBtn = document.getElementById('ntTryBridge');
+    const banner = document.getElementById('ntBanner');
+    const explainEl = document.getElementById('ntExplain');
+    const logEl = document.getElementById('ntLog');
+
+    let mode = 'tun';
+
+    function resetState() {
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      devLabel.textContent = mode === 'tun' ? '/dev/net/tun0' : '/dev/net/tap0';
+      [appBox, devBox, kernelBox].forEach(b => b.classList.remove('active'));
+      renderFrameDiagram();
+      explainEl.textContent = mode === 'tun'
+        ? 'TUN mode is selected. Click "Send a Packet" to see exactly what the VPN application hands to the kernel -- then flip to TAP and send again to see what\'s different.'
+        : 'TAP mode is selected. Click "Send a Packet" to see the extra fields TAP adds on top of what TUN sends.';
+    }
+
+    function renderFrameDiagram() {
+      frameDiagramEl.innerHTML = '';
+      const fields = mode === 'tun'
+        ? [{ text: 'IP Header', cls: 'ip' }, { text: 'Payload', cls: '' }]
+        : [{ text: 'Dst MAC', cls: 'eth' }, { text: 'Src MAC', cls: 'eth' }, { text: 'EtherType', cls: 'eth' }, { text: 'IP Header', cls: 'ip' }, { text: 'Payload', cls: '' }];
+      fields.forEach(f => {
+        const el = document.createElement('div');
+        el.className = 'nt-frame-field' + (f.cls ? ' ' + f.cls : '');
+        el.textContent = f.text;
+        frameDiagramEl.appendChild(el);
+      });
+    }
+
+    function doSend() {
+      [appBox, devBox, kernelBox].forEach((b, i) => {
+        setTimeout(() => b.classList.add('active'), scaled(i * 220));
+        setTimeout(() => b.classList.remove('active'), scaled(i * 220 + 500));
+      });
+      renderFrameDiagram();
+      if (mode === 'tun') {
+        logTo(logEl, 'App writes a raw IP packet to /dev/net/tun0 -- no Ethernet header at all.', 'ok');
+        explainEl.textContent = 'This is exactly what a VPN client does: it hands the kernel a plain IP packet. The kernel treats tun0 like a point-to-point IP link -- no MAC addresses are involved anywhere in this path.';
+      } else {
+        logTo(logEl, 'App writes a full Ethernet frame to /dev/net/tap0 -- MAC headers included.', 'ok');
+        explainEl.textContent = 'TAP hands the kernel a complete Ethernet frame, source and destination MAC included -- as if a real network card had received it. This is what lets a VM\'s virtual NIC behave exactly like a physical one.';
+      }
+      banner.style.display = 'none';
+    }
+
+    function tryBridge() {
+      if (mode === 'tap') {
+        banner.style.display = 'block';
+        banner.className = 'nt-banner ok';
+        banner.textContent = 'Success: tap0 attached to the bridge. TAP frames have MAC headers, so the bridge can learn from and forward them exactly like any other port.';
+        logTo(logEl, 'brctl addif br0 tap0 -- succeeded.', 'ok');
+      } else {
+        banner.style.display = 'block';
+        banner.className = 'nt-banner bad';
+        banner.textContent = 'Failed: tun0 has no Ethernet header for a bridge to read -- there is no MAC address to learn or forward on. TUN devices cannot be bridge members.';
+        logTo(logEl, 'brctl addif br0 tun0 -- refused: not an Ethernet device.', 'bad');
+      }
+    }
+
+    modeButtons.forEach(b => b.addEventListener('click', () => {
+      modeButtons.forEach(x => x.classList.toggle('active', x === b));
+      mode = b.dataset.mode;
+      resetState();
+    }));
+    sendBtn.addEventListener('click', doSend);
+    tryBridgeBtn.addEventListener('click', tryBridge);
+    resetBtn.addEventListener('click', resetState);
+
+    resetState();
+  })();
+  </script>
+</div>
