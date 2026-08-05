@@ -25,6 +25,7 @@ worth writing down and coming back to.
    kernel_networking_docker_internals
    lidar_slam
    ssh_secure_shell
+   utf8_encoding_interactive
    unicode_utf8_encoding
    base64_encoding
    databases_postgresql_mongodb_redis
@@ -114,6 +115,9 @@ System Notes
    * - :doc:`ssh_secure_shell`
      - How the SSH handshake, encryption, and key auth actually work
      - key exchange, host keys, password vs. key auth, tunneling
+   * - :doc:`utf8_encoding_interactive`
+     - Interactive UTF-8 encode/decode -- step through the real bit-slicing byte by byte, then run it backward
+     - code points, byte-length ranges, bit slicing, self-sync/resync
    * - :doc:`unicode_utf8_encoding`
      - How Unicode code points and UTF-8's variable-length encoding work
      - code points, planes, UTF-8 bit patterns, multi-byte characters

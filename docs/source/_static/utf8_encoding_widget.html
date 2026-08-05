@@ -1,0 +1,602 @@
+<div class="u8-root" id="u8Widget">
+  <style>
+    #u8Widget {
+      --u8-bg: #0f172a;
+      --u8-panel: #16213e;
+      --u8-border: #2a3655;
+      --u8-text: #e2e8f0;
+      --u8-muted: #94a3b8;
+      --u8-a: #4ade80;
+      --u8-b: #38bdf8;
+      --u8-bad: #f87171;
+      --u8-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--u8-bg);
+      color: var(--u8-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #u8Widget * { box-sizing: border-box; }
+    #u8Widget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #u8Widget h4 { margin: 0 0 10px; font-size: 0.95rem; color: #fff; }
+    #u8Widget .u8-sub { color: var(--u8-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .u8-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--u8-panel); border: 1px solid var(--u8-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 820px; }
+    .u8-controls label { font-size: 0.8rem; color: var(--u8-muted); display: flex; align-items: center; gap: 8px; }
+    .u8-controls input[type="range"] { width: 110px; accent-color: var(--u8-b); }
+    .u8-preset-btn { background: transparent; color: var(--u8-muted); border: 1px solid var(--u8-border); border-radius: 7px; padding: 6px 12px; font-size: 0.78rem; font-weight: 600; cursor: pointer; }
+    .u8-preset-btn.active { background: var(--u8-warn); color: #2a1c00; border-color: var(--u8-warn); }
+    .u8-custom-input { background: #0a1128; border: 1px solid var(--u8-border); color: var(--u8-text); border-radius: 7px; padding: 6px 10px; font-size: 0.82rem; width: 160px; }
+    .u8-btn { background: var(--u8-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .u8-btn.secondary { background: transparent; color: var(--u8-text); border: 1px solid var(--u8-border); }
+    .u8-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .u8-stage { background: var(--u8-panel); border: 1px solid var(--u8-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; min-width: 820px; }
+    .u8-section-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--u8-muted); margin-bottom: 12px; font-weight: 700; }
+
+    .u8-char-card { display: flex; align-items: center; gap: 22px; justify-content: center; padding: 10px 0 16px; }
+    .u8-glyph { font-size: 2.6rem; min-width: 70px; text-align: center; background: #0a1128; border: 2px solid var(--u8-b); border-radius: 10px; padding: 6px 10px; }
+    .u8-glyph.placeholder { color: var(--u8-muted); font-size: 1rem; }
+    .u8-cp-info div { font-family: ui-monospace, monospace; font-size: 0.85rem; margin-bottom: 4px; }
+    .u8-cp-info .u8-cp-hex { color: #fff; font-size: 1rem; font-weight: 700; }
+    .u8-cp-info .u8-cp-bin { color: var(--u8-b); letter-spacing: 0.04em; }
+
+    .u8-range-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; margin-bottom: 16px; font-family: ui-monospace, monospace; }
+    .u8-range-table th { text-align: left; color: var(--u8-muted); font-weight: 600; padding: 5px 10px; border-bottom: 1px solid var(--u8-border); font-family: -apple-system, sans-serif; text-transform: uppercase; font-size: 0.68rem; letter-spacing: 0.05em; }
+    .u8-range-table td { padding: 6px 10px; color: var(--u8-muted); border-bottom: 1px solid rgba(42,54,85,0.5); }
+    .u8-range-table tr.u8-range-active td { color: #fff; background: rgba(56,189,248,0.14); }
+    .u8-range-table tr.u8-range-active td:first-child { border-left: 3px solid var(--u8-b); }
+
+    .u8-byte-rows { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; min-height: 32px; }
+    .u8-byte-row { display: flex; align-items: center; gap: 10px; font-family: ui-monospace, monospace; font-size: 0.82rem; background: #0a1128; border: 1px solid var(--u8-border); border-radius: 6px; padding: 6px 10px; opacity: 0; transform: translateY(4px); transition: opacity 0.25s ease, transform 0.25s ease; }
+    .u8-byte-row.show { opacity: 1; transform: translateY(0); }
+    .u8-byte-row .u8-badge { font-size: 0.65rem; font-family: -apple-system, sans-serif; font-weight: 700; text-transform: uppercase; color: var(--u8-muted); min-width: 92px; }
+    .u8-byte-row .u8-bits { flex: 1; }
+    .u8-byte-row .u8-bits .prefix { color: var(--u8-warn); font-weight: 700; }
+    .u8-byte-row .u8-bits .data { color: var(--u8-a); }
+    .u8-byte-row .u8-hex { color: #fff; font-weight: 700; min-width: 40px; text-align: right; }
+
+    .u8-stream-label { font-size: 0.7rem; color: var(--u8-muted); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .u8-stream { display: flex; gap: 3px; flex-wrap: wrap; min-height: 40px; align-items: center; padding: 8px; background: #0a1128; border: 1px solid var(--u8-border); border-radius: 8px; }
+    .u8-chip { font-family: ui-monospace, monospace; font-size: 0.72rem; font-weight: 700; color: #04121f; border-radius: 5px; padding: 5px 6px; min-width: 30px; text-align: center; }
+    .u8-chip.u8-pos-current { outline: 2px solid #fff; outline-offset: 1px; }
+    .u8-empty-note { color: var(--u8-muted); font-style: italic; font-size: 0.78rem; padding: 4px 0; }
+
+    .u8-counters-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin: 14px 0; font-size: 0.85rem; color: var(--u8-muted); min-width: 820px; }
+    .u8-counters-row b { color: #fff; font-size: 1.1rem; font-family: ui-monospace, monospace; }
+
+    .u8-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 820px; margin-bottom: 14px; }
+    .u8-explain-panel, .u8-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .u8-explain-panel { flex: 1.4; }
+    .u8-box { background: var(--u8-panel); border: 1px solid var(--u8-border); border-radius: 10px; padding: 12px 14px; }
+    .u8-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--u8-muted); margin-bottom: 8px; }
+    .u8-log { height: 140px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .u8-log div { color: var(--u8-muted); }
+    .u8-log div.ok { color: var(--u8-a); }
+    .u8-log div.warn { color: var(--u8-warn); }
+
+    .u8-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 4px; }
+    .u8-banner.ok { background: rgba(74,222,128,0.12); color: var(--u8-a); }
+    .u8-banner.bad { background: rgba(248,113,113,0.12); color: var(--u8-bad); }
+
+    .u8-decode-section { display: none; }
+    .u8-decode-section.show { display: block; }
+
+    .u8-accumulator { font-family: ui-monospace, monospace; font-size: 0.95rem; letter-spacing: 0.06em; color: var(--u8-a); background: #0a1128; border: 1px solid var(--u8-border); border-radius: 8px; padding: 10px 14px; min-height: 20px; margin-bottom: 10px; word-break: break-all; }
+    .u8-accumulator .pending { color: var(--u8-muted); }
+
+    .u8-resync-box { margin-top: 10px; font-size: 0.82rem; line-height: 1.6; color: var(--u8-muted); background: #0a1128; border: 1px solid var(--u8-border); border-radius: 8px; padding: 12px 14px; }
+    .u8-resync-box b { color: #fff; }
+    .u8-resync-box code { color: var(--u8-b); }
+
+    details.u8-notes { margin-top: 4px; background: var(--u8-panel); border: 1px solid var(--u8-border); border-radius: 10px; padding: 12px 16px; min-width: 820px; font-size: 0.85rem; line-height: 1.6; }
+    details.u8-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.u8-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--u8-muted); }
+    details.u8-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--u8-b); }
+  </style>
+
+  <h3>UTF-8 &amp; Unicode: Play With It</h3>
+  <div class="u8-sub">Pick some text. Watch each character get converted to a code point, then watch the code point's bits get sliced into real UTF-8 bytes -- then run it backward and watch the byte stream decode itself back into text.</div>
+
+  <div class="u8-controls">
+    <span style="font-size:0.78rem;color:var(--u8-muted);">Text:</span>
+    <button class="u8-preset-btn" data-preset="0">Hi</button>
+    <button class="u8-preset-btn active" data-preset="1">A &eacute; &#20013; &#128512;</button>
+    <button class="u8-preset-btn" data-preset="2">Hello നമസ്കാരം</button>
+    <button class="u8-preset-btn" data-preset="3">&#127881;&#128512;&#128293;</button>
+    <input type="text" class="u8-custom-input" id="u8CustomInput" placeholder="or type your own..." maxlength="20">
+    <button class="u8-btn secondary" id="u8CustomBtn">Use text</button>
+    <label>Speed: <span id="u8SpeedVal">1x</span>
+      <input type="range" id="u8SpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+  </div>
+
+  <div class="u8-stage">
+    <div class="u8-section-title">1. Encoding -- text to bytes</div>
+
+    <div class="u8-char-card">
+      <div class="u8-glyph placeholder" id="u8Glyph">?</div>
+      <div class="u8-cp-info">
+        <div class="u8-cp-hex" id="u8CpHex">click "Encode Next Character" to start</div>
+        <div class="u8-cp-bin" id="u8CpBin"></div>
+      </div>
+    </div>
+
+    <table class="u8-range-table" id="u8RangeTable">
+      <thead><tr><th>Code point range</th><th>Lead byte pattern</th><th>Bytes needed</th></tr></thead>
+      <tbody>
+        <tr data-range="1"><td>U+0000 &ndash; U+007F</td><td>0xxxxxxx</td><td>1</td></tr>
+        <tr data-range="2"><td>U+0080 &ndash; U+07FF</td><td>110xxxxx</td><td>2</td></tr>
+        <tr data-range="3"><td>U+0800 &ndash; U+FFFF</td><td>1110xxxx</td><td>3</td></tr>
+        <tr data-range="4"><td>U+10000 &ndash; U+10FFFF</td><td>11110xxx</td><td>4</td></tr>
+      </tbody>
+    </table>
+
+    <div class="u8-byte-rows" id="u8ByteRows"></div>
+
+    <div class="u8-stream-label">Byte stream (encoded so far)</div>
+    <div class="u8-stream" id="u8EncodeStream"><div class="u8-empty-note">no bytes yet</div></div>
+
+    <div class="u8-controls" style="margin: 14px 0 0; min-width:0;">
+      <button class="u8-btn" id="u8NextCharBtn">Encode Next Character</button>
+      <button class="u8-btn" id="u8PlayBtn">Play All</button>
+      <button class="u8-btn secondary" id="u8ResetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="u8-counters-row">
+    <div>characters: <b id="u8CharCount">0</b> / <b id="u8CharTotal">0</b></div>
+    <div>UTF-8 bytes so far: <b id="u8ByteCount">0</b></div>
+    <div>fixed-width UTF-32 would need: <b id="u8Utf32Count">0</b></div>
+    <div>UTF-8 saved: <b id="u8SavedPct">0%</b></div>
+  </div>
+
+  <div class="u8-panels">
+    <div class="u8-explain-panel">
+      <div class="u8-box">
+        <div class="u8-panel-title">What's happening right now</div>
+        <div id="u8Explain">Choose a preset (or type your own text) and click "Encode Next Character." Each character's Unicode code point gets looked up, matched against a byte-length range, and sliced bit-by-bit into the actual bytes UTF-8 would store on disk.</div>
+      </div>
+    </div>
+    <div class="u8-side-panel-col">
+      <div class="u8-box">
+        <div class="u8-panel-title">Event log</div>
+        <div class="u8-log" id="u8Log"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="u8-decode-section" id="u8DecodeSection">
+    <div class="u8-stage">
+      <div class="u8-section-title">2. Decoding -- bytes back to text</div>
+
+      <div class="u8-stream-label">Same byte stream, read left to right</div>
+      <div class="u8-stream" id="u8DecodeStream"></div>
+
+      <div class="u8-box" style="margin-top:12px;">
+        <div class="u8-panel-title" id="u8DecodeLeadLabel">Current byte</div>
+        <div id="u8DecodeLeadInfo" style="font-family:ui-monospace,monospace;font-size:0.85rem;color:var(--u8-muted);">click "Decode Next Character" to start</div>
+      </div>
+
+      <div class="u8-panel-title" style="margin-top:12px;">Bits accumulated into the code point so far</div>
+      <div class="u8-accumulator" id="u8Accumulator"><span class="pending">(nothing yet)</span></div>
+
+      <div class="u8-char-card" style="padding-top:4px;">
+        <div class="u8-glyph placeholder" id="u8DecodedGlyph">?</div>
+        <div class="u8-cp-info">
+          <div class="u8-cp-hex" id="u8DecodedHex"></div>
+          <div id="u8DecodedMatch" style="font-size:0.8rem;"></div>
+        </div>
+      </div>
+
+      <div class="u8-banner" id="u8DecodeBanner" style="display:none;"></div>
+
+      <div class="u8-controls" style="margin: 4px 0 0; min-width:0;">
+        <button class="u8-btn" id="u8DecodeNextBtn">Decode Next Character</button>
+        <button class="u8-btn" id="u8DecodePlayBtn">Play All</button>
+        <button class="u8-btn secondary" id="u8ResyncBtn" style="display:none;">Simulate starting mid-stream</button>
+      </div>
+
+      <div class="u8-resync-box" id="u8ResyncBox" style="display:none;"></div>
+    </div>
+  </div>
+
+  <details class="u8-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Why this format self-syncs:</b> a continuation byte always looks like <code>10xxxxxx</code>, and no lead byte ever does -- so a decoder that starts reading in the middle of a multi-byte character (a truncated network read, a random file seek) instantly recognizes it landed mid-character and can skip forward to the next real boundary. No other variable-length scheme of the era had this property by construction.</li>
+      <li><b>ASCII is not just "compatible with" UTF-8 -- it's a strict subset.</b> Any valid ASCII file is already valid UTF-8, byte-for-byte, because every ASCII byte is &le; 0x7F and every UTF-8 single-byte character is defined as exactly that range. This is why UTF-8 could replace ASCII everywhere without a flag day.</li>
+      <li><b>Overlong encodings are illegal, on purpose.</b> The bits for <code>U+0041</code> ('A') technically fit inside a 2-byte template too, but a conformant decoder must reject that as invalid rather than accept it as an alternate spelling of 'A'. Early decoders that didn't enforce this were exploited to smuggle <code>../</code> and other filtered characters past security checks that only scanned for the 1-byte form.</li>
+      <li><b>JavaScript strings are UTF-16 internally, not UTF-8.</b> That's exactly why this widget iterates with code-point-aware logic instead of raw indexing: an emoji like &#128512; is one Unicode code point but <em>two</em> UTF-16 code units (a surrogate pair), so naive <code>string[i]</code> access would split it in half. Python 3 strings avoid this entirely by storing code points directly.</li>
+      <li>See <a href="unicode_utf8_encoding.html">Unicode and UTF-8 Encoding</a> for the full writeup this widget is built from, including the plane structure and a hand-worked multi-language example. See also <a href="base64_encoding.html">Base64 Encoding</a> for a different byte-to-text problem: making arbitrary binary safe to put in text-only channels.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('u8Widget');
+
+    const speedSlider = document.getElementById('u8SpeedSlider');
+    const speedVal = document.getElementById('u8SpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function logTo(el, msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // ---- verified UTF-8 core (matches Node's TextEncoder/TextDecoder byte-for-byte) ----
+    function encodeCodePointToBytes(cp) {
+      if (cp <= 0x7F) return [cp];
+      if (cp <= 0x7FF) return [0xC0 | (cp >> 6), 0x80 | (cp & 0x3F)];
+      if (cp <= 0xFFFF) return [0xE0 | (cp >> 12), 0x80 | ((cp >> 6) & 0x3F), 0x80 | (cp & 0x3F)];
+      return [0xF0 | (cp >> 18), 0x80 | ((cp >> 12) & 0x3F), 0x80 | ((cp >> 6) & 0x3F), 0x80 | (cp & 0x3F)];
+    }
+    function decodeBytesToCodePoint(bytes, start) {
+      const b0 = bytes[start];
+      let len, cp;
+      if ((b0 & 0x80) === 0x00) { len = 1; cp = b0; }
+      else if ((b0 & 0xE0) === 0xC0) { len = 2; cp = b0 & 0x1F; }
+      else if ((b0 & 0xF0) === 0xE0) { len = 3; cp = b0 & 0x0F; }
+      else if ((b0 & 0xF8) === 0xF0) { len = 4; cp = b0 & 0x07; }
+      else { return null; }
+      for (let i = 1; i < len; i++) {
+        const b = bytes[start + i];
+        if (b === undefined || (b & 0xC0) !== 0x80) return null;
+        cp = (cp << 6) | (b & 0x3F);
+      }
+      return { codePoint: cp, length: len };
+    }
+    function countLeadingOnes(byte) {
+      let n = 0;
+      for (let bit = 7; bit >= 0; bit--) {
+        if ((byte >> bit) & 1) n++; else break;
+      }
+      return n;
+    }
+    const PREFIX_LEN = { 1: 1, 2: 3, 3: 4, 4: 5 };
+    const CAPACITY_BITS = { 1: 7, 2: 11, 3: 16, 4: 21 };
+    function spaceEvery4(s) { return s.replace(/(.{4})/g, '$1 ').trim(); }
+
+    const PALETTE = ['#38bdf8', '#4ade80', '#fbbf24', '#f472b6', '#a78bfa', '#fb7185'];
+    function colorFor(idx) { return PALETTE[idx % PALETTE.length]; }
+
+    const PRESETS = ['Hi', 'A é 中 😀', 'Hello നമസ്കാരം', '🎉😀🔥'];
+
+    // ---- DOM refs ----
+    const glyphEl = document.getElementById('u8Glyph');
+    const cpHexEl = document.getElementById('u8CpHex');
+    const cpBinEl = document.getElementById('u8CpBin');
+    const rangeRows = document.querySelectorAll('#u8RangeTable tr[data-range]');
+    const byteRowsEl = document.getElementById('u8ByteRows');
+    const encodeStreamEl = document.getElementById('u8EncodeStream');
+    const nextCharBtn = document.getElementById('u8NextCharBtn');
+    const playBtn = document.getElementById('u8PlayBtn');
+    const resetBtn = document.getElementById('u8ResetBtn');
+    const charCountEl = document.getElementById('u8CharCount');
+    const charTotalEl = document.getElementById('u8CharTotal');
+    const byteCountEl = document.getElementById('u8ByteCount');
+    const utf32CountEl = document.getElementById('u8Utf32Count');
+    const savedPctEl = document.getElementById('u8SavedPct');
+    const explainEl = document.getElementById('u8Explain');
+    const logEl = document.getElementById('u8Log');
+    const customInput = document.getElementById('u8CustomInput');
+    const customBtn = document.getElementById('u8CustomBtn');
+    const presetBtns = root.querySelectorAll('.u8-preset-btn');
+
+    const decodeSection = document.getElementById('u8DecodeSection');
+    const decodeStreamEl = document.getElementById('u8DecodeStream');
+    const decodeLeadInfoEl = document.getElementById('u8DecodeLeadInfo');
+    const accumulatorEl = document.getElementById('u8Accumulator');
+    const decodedGlyphEl = document.getElementById('u8DecodedGlyph');
+    const decodedHexEl = document.getElementById('u8DecodedHex');
+    const decodedMatchEl = document.getElementById('u8DecodedMatch');
+    const decodeBanner = document.getElementById('u8DecodeBanner');
+    const decodeNextBtn = document.getElementById('u8DecodeNextBtn');
+    const decodePlayBtn = document.getElementById('u8DecodePlayBtn');
+    const resyncBtn = document.getElementById('u8ResyncBtn');
+    const resyncBox = document.getElementById('u8ResyncBox');
+
+    // ---- state ----
+    let chars, charIndex, encodedBytes, byteMeta, animating, playing, timer;
+    let decodePos, decodedIndex, decoding, decodePlaying, decodeTimer;
+
+    function loadText(text) {
+      chars = Array.from(text);
+      resetAll();
+    }
+
+    function resetAll() {
+      charIndex = 0;
+      encodedBytes = [];
+      byteMeta = [];
+      animating = false;
+      playing = false;
+      clearTimeout(timer);
+      resetDecode();
+      decodeSection.classList.remove('show');
+      resyncBtn.style.display = 'none';
+      resyncBox.style.display = 'none';
+
+      glyphEl.textContent = '?';
+      glyphEl.classList.add('placeholder');
+      cpHexEl.textContent = 'click "Encode Next Character" to start';
+      cpBinEl.textContent = '';
+      rangeRows.forEach(r => r.classList.remove('u8-range-active'));
+      byteRowsEl.innerHTML = '';
+      encodeStreamEl.innerHTML = '<div class="u8-empty-note">no bytes yet</div>';
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Choose a preset (or type your own text) and click "Encode Next Character." Each character’s Unicode code point gets looked up, matched against a byte-length range, and sliced bit-by-bit into the actual bytes UTF-8 would store on disk.';
+      nextCharBtn.disabled = false;
+      playBtn.disabled = false;
+      nextCharBtn.textContent = 'Encode Next Character';
+
+      charTotalEl.textContent = chars.length;
+      updateCounters();
+    }
+
+    function resetDecode() {
+      decodePos = 0;
+      decodedIndex = 0;
+      decoding = false;
+      decodePlaying = false;
+      clearTimeout(decodeTimer);
+      decodeStreamEl.innerHTML = '';
+      decodeLeadInfoEl.textContent = 'click "Decode Next Character" to start';
+      accumulatorEl.innerHTML = '<span class="pending">(nothing yet)</span>';
+      decodedGlyphEl.textContent = '?';
+      decodedGlyphEl.classList.add('placeholder');
+      decodedHexEl.textContent = '';
+      decodedMatchEl.textContent = '';
+      decodeBanner.style.display = 'none';
+      decodeNextBtn.disabled = false;
+      decodePlayBtn.disabled = false;
+    }
+
+    function updateCounters() {
+      charCountEl.textContent = charIndex;
+      byteCountEl.textContent = encodedBytes.length;
+      const utf32 = chars.length * 4;
+      utf32CountEl.textContent = utf32;
+      const pct = utf32 > 0 ? Math.round((1 - encodedBytes.length / utf32) * 100) : 0;
+      savedPctEl.textContent = (charIndex === 0 ? 0 : Math.max(pct, 0)) + '%';
+    }
+
+    function renderEncodeStream() {
+      if (byteMeta.length === 0) {
+        encodeStreamEl.innerHTML = '<div class="u8-empty-note">no bytes yet</div>';
+        return;
+      }
+      encodeStreamEl.innerHTML = '';
+      byteMeta.forEach(m => {
+        const chip = document.createElement('div');
+        chip.className = 'u8-chip';
+        chip.style.background = colorFor(m.charIdx);
+        chip.textContent = m.hex;
+        chip.title = 'char ' + (m.charIdx + 1) + (m.lead ? ' (lead byte)' : ' (continuation byte)');
+        encodeStreamEl.appendChild(chip);
+      });
+    }
+
+    function encodeNextChar() {
+      if (animating || charIndex >= chars.length) return;
+      animating = true;
+      nextCharBtn.disabled = true;
+      const ch = chars[charIndex];
+      const cp = ch.codePointAt(0);
+      const bytes = encodeCodePointToBytes(cp);
+      const byteCount = bytes.length;
+
+      glyphEl.textContent = ch;
+      glyphEl.classList.remove('placeholder');
+      const hexStr = 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+      cpHexEl.textContent = "'" + ch + "'  →  " + hexStr;
+      cpBinEl.textContent = 'binary: ' + spaceEvery4(cp.toString(2).padStart(CAPACITY_BITS[byteCount], '0'));
+      byteRowsEl.innerHTML = '';
+      rangeRows.forEach(r => r.classList.toggle('u8-range-active', parseInt(r.dataset.range, 10) === byteCount));
+      logTo(logEl, "Character '" + ch + "' → " + hexStr, null);
+
+      timer = setTimeout(() => {
+        logTo(logEl, hexStr + ' falls in the ' + byteCount + '-byte range → needs ' + byteCount + ' byte' + (byteCount > 1 ? 's' : '') + '.', null);
+        explainEl.textContent = "'" + ch + "' is code point " + hexStr + '. Its range determines the byte count (see the highlighted row) -- the bigger the number, the more bytes UTF-8 spends storing it.';
+        revealByte(ch, cp, bytes, byteCount, 0);
+      }, scaled(500));
+    }
+
+    function revealByte(ch, cp, bytes, byteCount, i) {
+      if (i >= byteCount) {
+        charIndex++;
+        updateCounters();
+        renderEncodeStream();
+        animating = false;
+        if (charIndex >= chars.length) {
+          nextCharBtn.disabled = true;
+          nextCharBtn.textContent = 'All characters encoded';
+          playBtn.disabled = true;
+          explainEl.textContent = 'All ' + chars.length + ' character(s) encoded into ' + encodedBytes.length + ' bytes. Scroll down to decode this exact byte stream back into text.';
+          decodeSection.classList.add('show');
+          initDecodeStream();
+          if (encodedBytes.length > chars.length) resyncBtn.style.display = '';
+          if (playing) playing = false;
+        } else {
+          nextCharBtn.disabled = false;
+          if (playing) timer = setTimeout(encodeNextChar, scaled(400));
+        }
+        return;
+      }
+      const byte = bytes[i];
+      const isLead = i === 0;
+      const bin8 = byte.toString(2).padStart(8, '0');
+      const prefix = bin8.slice(0, isLead ? PREFIX_LEN[byteCount] : 2);
+      const data = bin8.slice(isLead ? PREFIX_LEN[byteCount] : 2);
+      const hex = byte.toString(16).toUpperCase().padStart(2, '0');
+
+      const row = document.createElement('div');
+      row.className = 'u8-byte-row';
+      row.innerHTML = '<span class="u8-badge">byte ' + (i + 1) + (isLead ? ' (lead)' : ' (cont.)') + '</span>' +
+        '<span class="u8-bits"><span class="prefix">' + prefix + '</span><span class="data">' + data + '</span></span>' +
+        '<span class="u8-hex">0x' + hex + '</span>';
+      byteRowsEl.appendChild(row);
+      requestAnimationFrame(() => row.classList.add('show'));
+
+      logTo(logEl, 'byte ' + (i + 1) + ': ' + prefix + ' (marker) + ' + data + ' (data bits) = 0x' + hex, 'ok');
+      encodedBytes.push(byte);
+      byteMeta.push({ hex: hex, charIdx: charIndex, lead: isLead });
+      updateCounters();
+      renderEncodeStream();
+
+      timer = setTimeout(() => revealByte(ch, cp, bytes, byteCount, i + 1), scaled(450));
+    }
+
+    function playEncode() {
+      if (playing || charIndex >= chars.length) return;
+      playing = true;
+      playBtn.disabled = true;
+      encodeNextChar();
+    }
+
+    // ---- decode ----
+    function initDecodeStream() {
+      decodeStreamEl.innerHTML = '';
+      byteMeta.forEach((m, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'u8-chip';
+        chip.dataset.pos = i;
+        chip.style.background = colorFor(m.charIdx);
+        chip.textContent = m.hex;
+        decodeStreamEl.appendChild(chip);
+      });
+    }
+
+    function highlightDecodePos(from, to) {
+      const chips = decodeStreamEl.querySelectorAll('.u8-chip');
+      chips.forEach((c, i) => c.classList.toggle('u8-pos-current', i >= from && i < to));
+    }
+
+    function decodeNextChar() {
+      if (decoding || decodePos >= encodedBytes.length) return;
+      decoding = true;
+      decodeNextBtn.disabled = true;
+      const b0 = encodedBytes[decodePos];
+      const ones = countLeadingOnes(b0);
+      const info = decodeBytesToCodePoint(encodedBytes, decodePos);
+      const totalLen = info ? info.length : 1;
+
+      highlightDecodePos(decodePos, decodePos + totalLen);
+      const bin8 = b0.toString(2).padStart(8, '0');
+      const onesDesc = ones === 0 ? '0 leading 1s → this byte IS the whole character, 1 byte total.' : ones + ' leading 1s before the first 0 → ' + totalLen + ' bytes total, expect ' + (totalLen - 1) + ' continuation byte(s).';
+      decodeLeadInfoEl.textContent = 'byte at position ' + decodePos + ': ' + bin8 + '  —  ' + onesDesc;
+      logTo(logEl, 'decode: byte 0x' + b0.toString(16).toUpperCase().padStart(2, '0') + ' = ' + bin8 + ' → ' + onesDesc, null);
+
+      const prefixLen = totalLen === 1 ? 1 : PREFIX_LEN[totalLen];
+      let acc = bin8.slice(prefixLen);
+      accumulatorEl.textContent = acc;
+
+      accumulateNext(1, totalLen, acc);
+    }
+
+    function accumulateNext(i, totalLen, acc) {
+      if (i >= totalLen) {
+        const info = decodeBytesToCodePoint(encodedBytes, decodePos);
+        const cp = info.codePoint;
+        const hexStr = 'U+' + cp.toString(16).toUpperCase().padStart(4, '0');
+        const ch = String.fromCodePoint(cp);
+        decodedGlyphEl.textContent = ch;
+        decodedGlyphEl.classList.remove('placeholder');
+        decodedHexEl.textContent = hexStr;
+        const original = chars[decodedIndex];
+        const match = original === ch;
+        decodedMatchEl.textContent = match ? '✓ matches original character' : '✗ mismatch!';
+        decodedMatchEl.style.color = match ? 'var(--u8-a)' : 'var(--u8-bad)';
+        logTo(logEl, 'reassembled bits → ' + hexStr + " → '" + ch + "' " + (match ? '(correct)' : '(MISMATCH)'), match ? 'ok' : 'warn');
+        explainEl.textContent = 'Every continuation byte contributed exactly 6 data bits, most-significant chunk first -- concatenating them back in order rebuilds the original ' + acc.length + '-bit code point exactly.';
+
+        decodePos += totalLen;
+        decodedIndex++;
+        decoding = false;
+
+        if (decodePos >= encodedBytes.length) {
+          decodeNextBtn.disabled = true;
+          decodeNextBtn.textContent = 'All characters decoded';
+          decodePlayBtn.disabled = true;
+          decodeBanner.style.display = 'block';
+          decodeBanner.className = 'u8-banner ok';
+          decodeBanner.textContent = 'Round trip complete: all ' + chars.length + ' character(s) decoded back exactly.';
+          if (decodePlaying) decodePlaying = false;
+        } else {
+          decodeNextBtn.disabled = false;
+          if (decodePlaying) decodeTimer = setTimeout(decodeNextChar, scaled(500));
+        }
+        return;
+      }
+      decodeTimer = setTimeout(() => {
+        const b = encodedBytes[decodePos + i];
+        const bin8 = b.toString(2).padStart(8, '0');
+        const bits6 = bin8.slice(2);
+        acc += bits6;
+        accumulatorEl.textContent = acc;
+        logTo(logEl, 'continuation byte 0x' + b.toString(16).toUpperCase().padStart(2, '0') + ' = 10' + bits6 + ' → append ' + bits6, null);
+        accumulateNext(i + 1, totalLen, acc);
+      }, scaled(450));
+    }
+
+    function playDecode() {
+      if (decodePlaying || decodePos >= encodedBytes.length) return;
+      decodePlaying = true;
+      decodePlayBtn.disabled = true;
+      decodeNextChar();
+    }
+
+    function showResync() {
+      let pos = -1;
+      for (let i = 0; i < byteMeta.length; i++) {
+        if (!byteMeta[i].lead) { pos = i; break; }
+      }
+      if (pos === -1) return;
+      let resyncPos = pos;
+      while (resyncPos < byteMeta.length && !byteMeta[resyncPos].lead) resyncPos++;
+      const midByte = encodedBytes[pos].toString(2).padStart(8, '0');
+      resyncBox.style.display = 'block';
+      resyncBox.innerHTML =
+        '<b>Scenario:</b> a decoder starts reading at byte position ' + pos + ' instead of a real character boundary (e.g. a network chunk cut off mid-character).<br>' +
+        'Byte ' + pos + ' is <code>' + midByte + '</code> -- that starts with <code>10</code>, the continuation-byte pattern. <b>No valid character ever starts with <code>10</code></b>, so the decoder knows instantly it is out of sync -- ' +
+        'no need to guess or produce garbage output.<br>' +
+        'It skips forward one byte at a time until it finds a byte that is <b>not</b> <code>10xxxxxx</code> -- that happens at position ' + resyncPos + ' -- and resumes decoding correctly from there, only losing the one character it landed in the middle of.';
+      logTo(logEl, 'resync demo: byte ' + pos + ' looks like a continuation byte, not a valid start → decoder skips to byte ' + resyncPos + ' and recovers.', 'warn');
+    }
+
+    // ---- wire up ----
+    nextCharBtn.addEventListener('click', encodeNextChar);
+    playBtn.addEventListener('click', playEncode);
+    resetBtn.addEventListener('click', () => loadText(chars.join('')));
+    decodeNextBtn.addEventListener('click', decodeNextChar);
+    decodePlayBtn.addEventListener('click', playDecode);
+    resyncBtn.addEventListener('click', showResync);
+
+    presetBtns.forEach((btn, i) => {
+      btn.addEventListener('click', () => {
+        presetBtns.forEach(b => b.classList.toggle('active', b === btn));
+        customInput.value = '';
+        loadText(PRESETS[i]);
+      });
+    });
+    customBtn.addEventListener('click', () => {
+      const v = customInput.value.trim();
+      if (!v) return;
+      presetBtns.forEach(b => b.classList.remove('active'));
+      loadText(v);
+    });
+    customInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') customBtn.click(); });
+
+    loadText(PRESETS[1]);
+  })();
+  </script>
+</div>
