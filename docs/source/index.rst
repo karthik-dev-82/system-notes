@@ -24,6 +24,7 @@ worth writing down and coming back to.
    docker_packet_journey_interactive
    kernel_networking_docker_internals
    lidar_slam
+   ssh_secure_shell_interactive
    ssh_secure_shell
    utf8_encoding_interactive
    unicode_utf8_encoding
@@ -112,6 +113,9 @@ System Notes
    * - :doc:`lidar_slam`
      - LIDAR and SLAM for navigation where GPS doesn't work
      - point clouds, localization, mapping, autonomous vehicles
+   * - :doc:`ssh_secure_shell_interactive`
+     - Interactive SSH handshake -- a real toy-scale Diffie-Hellman exchange, host-key MITM detection, and both auth methods
+     - Diffie-Hellman, host key fingerprints, password vs. public-key auth
    * - :doc:`ssh_secure_shell`
      - How the SSH handshake, encryption, and key auth actually work
      - key exchange, host keys, password vs. key auth, tunneling

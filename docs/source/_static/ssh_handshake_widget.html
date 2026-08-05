@@ -1,0 +1,500 @@
+<div class="sh-root" id="sshWidget">
+  <style>
+    #sshWidget {
+      --sh-bg: #0f172a;
+      --sh-panel: #16213e;
+      --sh-border: #2a3655;
+      --sh-text: #e2e8f0;
+      --sh-muted: #94a3b8;
+      --sh-accent: #38bdf8;
+      --sh-good: #4ade80;
+      --sh-bad: #f87171;
+      --sh-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--sh-bg);
+      color: var(--sh-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #sshWidget * { box-sizing: border-box; }
+    #sshWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #sshWidget .sh-sub { color: var(--sh-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .sh-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--sh-panel); border: 1px solid var(--sh-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 840px; }
+    .sh-controls label { font-size: 0.8rem; color: var(--sh-muted); display: flex; align-items: center; gap: 8px; }
+    .sh-controls input[type="range"] { width: 110px; accent-color: var(--sh-accent); }
+    .sh-toggle { display: inline-flex; border: 1px solid var(--sh-border); border-radius: 8px; overflow: hidden; }
+    .sh-toggle button { background: transparent; color: var(--sh-muted); border: none; padding: 7px 12px; font-size: 0.76rem; font-weight: 600; cursor: pointer; }
+    .sh-toggle button.active { background: var(--sh-warn); color: #2a1c00; }
+    .sh-toggle button.active.bad { background: var(--sh-bad); color: #2a0505; }
+    .sh-btn { background: var(--sh-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .sh-btn.secondary { background: transparent; color: var(--sh-text); border: 1px solid var(--sh-border); }
+    .sh-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .sh-stage { position: relative; background: var(--sh-panel); border: 1px solid var(--sh-border); border-radius: 10px; height: 130px; margin-bottom: 4px; min-width: 840px; overflow: visible; }
+    .sh-node { position: absolute; top: 50%; transform: translateY(-50%); width: 92px; text-align: center; font-size: 0.75rem; color: var(--sh-muted); z-index: 2; }
+    .sh-node .sh-node-box { width: 64px; height: 64px; margin: 0 auto 6px; border-radius: 10px; background: #1e2a4a; border: 2px solid var(--sh-border); display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
+    .sh-client { left: 8px; }
+    .sh-server { right: 8px; }
+
+    .sh-lane { position: absolute; left: 112px; right: 112px; top: 50%; height: 2px; background: linear-gradient(90deg, var(--sh-border) 0%, var(--sh-border) 100%); background-size: 12px 2px; background-repeat: repeat-x; opacity: 0.6; }
+    .sh-lock { position: absolute; left: 50%; top: 14px; transform: translateX(-50%); font-size: 0.78rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; background: rgba(148,163,184,0.15); color: var(--sh-muted); z-index: 3; white-space: nowrap; }
+    .sh-lock.encrypted { background: rgba(74,222,128,0.16); color: var(--sh-good); }
+
+    .sh-packet { position: absolute; top: 50%; transform: translateY(-50%); max-width: 210px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 5px 10px; border-radius: 14px; background: var(--sh-accent); color: #041322; font-size: 0.68rem; font-weight: 700; font-family: ui-monospace, monospace; transition: left linear; z-index: 4; }
+    .sh-packet.warn { background: var(--sh-warn); color: #2a1c00; }
+    .sh-packet.good { background: var(--sh-good); color: #052e12; }
+    .sh-packet.enc { background: #64748b; color: #0a0f1c; }
+
+    .sh-private-row { display: flex; justify-content: space-between; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; min-width: 840px; }
+    .sh-private-box { background: var(--sh-panel); border: 1px solid var(--sh-border); border-radius: 10px; padding: 10px 14px; flex: 1; min-width: 300px; font-family: ui-monospace, monospace; font-size: 0.76rem; line-height: 1.7; color: var(--sh-muted); }
+    .sh-private-box .sh-private-title { font-family: -apple-system, sans-serif; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #fff; font-weight: 700; margin-bottom: 6px; }
+    .sh-private-box b { color: var(--sh-good); }
+    .sh-private-box .stale { color: var(--sh-muted); }
+
+    .sh-status-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; font-size: 0.85rem; color: var(--sh-muted); min-width: 840px; }
+    .sh-status-row b { color: #fff; }
+
+    .sh-banner { text-align: center; padding: 12px 14px; border-radius: 8px; font-weight: 700; margin-bottom: 14px; font-size: 0.85rem; line-height: 1.6; min-width: 840px; }
+    .sh-banner.ok { background: rgba(74,222,128,0.12); color: var(--sh-good); }
+    .sh-banner.bad { background: rgba(248,113,113,0.13); color: var(--sh-bad); text-align: left; white-space: pre-line; font-family: ui-monospace, monospace; }
+
+    .sh-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 840px; }
+    .sh-explain-panel, .sh-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .sh-explain-panel { flex: 1.3; }
+    .sh-box { background: var(--sh-panel); border: 1px solid var(--sh-border); border-radius: 10px; padding: 12px 14px; }
+    .sh-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sh-muted); margin-bottom: 8px; }
+    .sh-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .sh-log div { color: var(--sh-muted); }
+    .sh-log div.plain { color: var(--sh-warn); }
+    .sh-log div.cipher { color: #64748b; font-style: italic; }
+    .sh-log div.bad { color: var(--sh-bad); font-weight: 700; }
+
+    details.sh-notes { margin-top: 14px; background: var(--sh-panel); border: 1px solid var(--sh-border); border-radius: 10px; padding: 12px 16px; min-width: 840px; font-size: 0.85rem; line-height: 1.6; }
+    details.sh-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.sh-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--sh-muted); }
+    details.sh-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--sh-accent); }
+  </style>
+
+  <h3>SSH Handshake: Play With It</h3>
+  <div class="sh-sub">A real (toy-sized) Diffie&ndash;Hellman exchange runs before either side proves who they are &mdash; watch the eavesdropper's log to see exactly when the wire goes dark.</div>
+
+  <div class="sh-controls">
+    <span style="font-size:0.78rem;color:var(--sh-muted);">Host key:</span>
+    <div class="sh-toggle" id="shHostToggle">
+      <button class="sh-hostkey-btn" data-scenario="first">First connection</button>
+      <button class="sh-hostkey-btn active" data-scenario="known">Known host</button>
+      <button class="sh-hostkey-btn" data-scenario="changed">Key CHANGED</button>
+    </div>
+    <span style="font-size:0.78rem;color:var(--sh-muted);">Auth:</span>
+    <div class="sh-toggle" id="shAuthToggle">
+      <button class="sh-auth-btn active" data-auth="password">Password</button>
+      <button class="sh-auth-btn" data-auth="pubkey">Public Key</button>
+    </div>
+    <label>Speed: <span id="shSpeedVal">1x</span>
+      <input type="range" id="shSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button class="sh-btn" id="shStartBtn">Start Connection</button>
+    <button class="sh-btn secondary" id="shResetBtn">Reset</button>
+  </div>
+
+  <div class="sh-stage" id="shStage">
+    <div class="sh-node sh-client"><div class="sh-node-box">💻</div>Client</div>
+    <div class="sh-lane"></div>
+    <div class="sh-lock" id="shLock">🔓 Unencrypted</div>
+    <div class="sh-node sh-server"><div class="sh-node-box">🖥️</div>Server</div>
+  </div>
+
+  <div class="sh-private-row">
+    <div class="sh-private-box" id="shClientBox">
+      <div class="sh-private-title">Client's local state (never transmitted)</div>
+      <div>known_hosts entry: <span id="shKnownHosts" class="stale">(empty)</span></div>
+      <div>private a: <span id="shClientA" class="stale">?</span></div>
+      <div>computed shared secret: <span id="shClientSecret" class="stale">?</span></div>
+      <div id="shClientKeyLine" style="display:none;">private key: <span class="stale">d=7, n=33 (stays on this machine)</span></div>
+    </div>
+    <div class="sh-private-box" id="shServerBox">
+      <div class="sh-private-title">Server's local state (never transmitted)</div>
+      <div>host key fingerprint: <span id="shServerFp" class="stale">?</span></div>
+      <div>private b: <span id="shServerB" class="stale">?</span></div>
+      <div>computed shared secret: <span id="shServerSecret" class="stale">?</span></div>
+      <div id="shServerKeyLine" style="display:none;">authorized_keys entry: <span class="stale">e=3, n=33 (public half only)</span></div>
+    </div>
+  </div>
+
+  <div class="sh-status-row">
+    <div>Phase: <b id="shPhase">Idle</b></div>
+    <div>Wire state: <b id="shWireState">unencrypted</b></div>
+    <div>Result: <b id="shResult">&mdash;</b></div>
+  </div>
+
+  <div class="sh-banner" id="shBanner" style="display:none;"></div>
+
+  <div class="sh-panels">
+    <div class="sh-explain-panel">
+      <div class="sh-box">
+        <div class="sh-panel-title">What's happening right now</div>
+        <div id="shExplain">Pick a host-key scenario and an auth method, then click "Start Connection." Everything the client and server compute privately shows up in the two boxes above &mdash; everything that actually crosses the wire shows up in the eavesdropper's log on the right.</div>
+      </div>
+    </div>
+    <div class="sh-side-panel-col">
+      <div class="sh-box">
+        <div class="sh-panel-title">Eavesdropper's view (only what's on the wire)</div>
+        <div class="sh-log" id="shLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="sh-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>This widget's numbers are real math, just tiny.</b> <code>p=23, g=5</code> for Diffie&ndash;Hellman and <code>n=33, e=3, d=7</code> for the signature are small enough to brute-force by hand in seconds &mdash; that's exactly why real SSH uses primes hundreds of digits long (or elliptic-curve variants like Curve25519) instead. The *algorithm* shown here is the genuine one; only the key size is shrunk down to fit on screen.</li>
+      <li><b>The order matters:</b> key exchange (and the encrypted tunnel it produces) always finishes <em>before</em> authentication starts. That's true for both password and public-key auth -- your credentials are never the first secret to cross the wire, the shared session key is.</li>
+      <li><b>Host key checking is the part people click through without reading</b>, but it's the only defense against a machine-in-the-middle silently relaying (and reading) your entire session. A changed fingerprint on a host you've connected to before is a real warning sign -- run <code>ssh-keygen -R hostname</code> only after confirming with the server's actual admin that the key legitimately changed (a reinstall, a new host key rotation), not just to make the warning go away.</li>
+      <li><b>Public-key auth proves possession, not knowledge.</b> A password is a piece of knowledge that has to be transmitted (even if encrypted) to be checked. A signature proves you hold the private key without the private key -- or anything equivalent to it -- ever leaving your machine, which is why it can't be phished, leaked from a server-side breach, or reused if that one server is compromised.</li>
+      <li>See <a href="ssh_secure_shell.html">SSH: Your Secret Internet Tunnel</a> for the plain-language overview this widget is built from, and the TCP handshake that this whole exchange runs on top of.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('sshWidget');
+
+    const speedSlider = document.getElementById('shSpeedSlider');
+    const speedVal = document.getElementById('shSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+
+    function modpow(base, exp, mod) {
+      base = base % mod;
+      let result = 1;
+      while (exp > 0) {
+        if (exp & 1) result = (result * base) % mod;
+        exp = Math.floor(exp / 2);
+        base = (base * base) % mod;
+      }
+      return result;
+    }
+    function randInt(min, max) { return min + Math.floor(Math.random() * (max - min + 1)); }
+
+    const P = 23, G = 5;       // toy Diffie-Hellman parameters
+    const N = 33, E = 3, D = 7; // toy RSA-style signature key pair (client's)
+
+    const TRUSTED_FP = 'SHA256:7f:3c:9a:d1:2e:88:41:c0';
+    const CHANGED_FP = 'SHA256:b2:91:44:aa:77:0f:5d:63';
+
+    const stage = document.getElementById('shStage');
+    const lockEl = document.getElementById('shLock');
+    const logEl = document.getElementById('shLog');
+    const explainEl = document.getElementById('shExplain');
+    const bannerEl = document.getElementById('shBanner');
+    const phaseEl = document.getElementById('shPhase');
+    const wireStateEl = document.getElementById('shWireState');
+    const resultEl = document.getElementById('shResult');
+    const startBtn = document.getElementById('shStartBtn');
+    const resetBtn = document.getElementById('shResetBtn');
+    const hostBtns = root.querySelectorAll('.sh-hostkey-btn');
+    const authBtns = root.querySelectorAll('.sh-auth-btn');
+
+    const knownHostsEl = document.getElementById('shKnownHosts');
+    const clientAEl = document.getElementById('shClientA');
+    const clientSecretEl = document.getElementById('shClientSecret');
+    const clientKeyLine = document.getElementById('shClientKeyLine');
+    const serverFpEl = document.getElementById('shServerFp');
+    const serverBEl = document.getElementById('shServerB');
+    const serverSecretEl = document.getElementById('shServerSecret');
+    const serverKeyLine = document.getElementById('shServerKeyLine');
+
+    let hostScenario = 'known';
+    let authMethod = 'password';
+    let running = false;
+    let timers = [];
+
+    function after(ms, fn) {
+      const id = setTimeout(fn, ms);
+      timers.push(id);
+      return id;
+    }
+    function clearTimers() { timers.forEach(t => clearTimeout(t)); timers = []; }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function laneBounds() {
+      const w = stage.clientWidth;
+      return { left: 116, right: w - 116 };
+    }
+
+    function spawnPacket(label, cls, dir) {
+      const b = laneBounds();
+      const p = document.createElement('div');
+      p.className = 'sh-packet' + (cls ? ' ' + cls : '');
+      p.textContent = label;
+      p.style.left = (dir === 'c2s' ? b.left : b.right - 180) + 'px';
+      stage.appendChild(p);
+      return p;
+    }
+
+    function flyTo(el, dir, duration, onDone) {
+      const b = laneBounds();
+      const target = dir === 'c2s' ? (b.right - 180) : b.left;
+      el.style.transitionDuration = duration + 'ms';
+      requestAnimationFrame(() => { el.style.left = target + 'px'; });
+      after(duration, () => { el.remove(); if (onDone) onDone(); });
+    }
+
+    function setPhase(p) { phaseEl.textContent = p; }
+    function setWire(state) {
+      const encrypted = state === 'encrypted';
+      wireStateEl.textContent = state;
+      lockEl.textContent = encrypted ? '🔒 Encrypted' : '🔓 Unencrypted';
+      lockEl.classList.toggle('encrypted', encrypted);
+    }
+
+    function updateKnownHostsDisplay() {
+      if (hostScenario === 'first') {
+        knownHostsEl.textContent = '(empty -- never connected before)';
+        knownHostsEl.className = 'stale';
+      } else if (hostScenario === 'known') {
+        knownHostsEl.textContent = TRUSTED_FP + ' (matches)';
+        knownHostsEl.className = '';
+      } else {
+        knownHostsEl.textContent = TRUSTED_FP + ' (saved from a previous connection)';
+        knownHostsEl.className = '';
+      }
+    }
+
+    function resetVisuals() {
+      clearTimers();
+      running = false;
+      Array.from(stage.querySelectorAll('.sh-packet')).forEach(p => p.remove());
+      setWire('unencrypted');
+      setPhase('Idle');
+      resultEl.textContent = '—';
+      bannerEl.style.display = 'none';
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Pick a host-key scenario and an auth method, then click "Start Connection." Everything the client and server compute privately shows up in the two boxes above -- everything that actually crosses the wire shows up in the eavesdropper’s log on the right.';
+      clientAEl.textContent = '?'; clientAEl.className = 'stale';
+      clientSecretEl.textContent = '?'; clientSecretEl.className = 'stale';
+      serverBEl.textContent = '?'; serverBEl.className = 'stale';
+      serverSecretEl.textContent = '?'; serverSecretEl.className = 'stale';
+      serverFpEl.textContent = '?'; serverFpEl.className = 'stale';
+      clientKeyLine.style.display = authMethod === 'pubkey' ? '' : 'none';
+      serverKeyLine.style.display = authMethod === 'pubkey' ? '' : 'none';
+      updateKnownHostsDisplay();
+      startBtn.disabled = false;
+      startBtn.textContent = 'Start Connection';
+    }
+
+    function setHostScenario(s) {
+      if (running) return;
+      hostScenario = s;
+      hostBtns.forEach(b => b.classList.toggle('active', b.dataset.scenario === s));
+      hostBtns.forEach(b => b.classList.toggle('bad', b.dataset.scenario === 'changed' && b.classList.contains('active')));
+      resetVisuals();
+    }
+    function setAuthMethod(m) {
+      if (running) return;
+      authMethod = m;
+      authBtns.forEach(b => b.classList.toggle('active', b.dataset.auth === m));
+      resetVisuals();
+    }
+
+    // ---- the sequence ----
+    function start() {
+      if (running) return;
+      resetVisuals();
+      running = true;
+      startBtn.disabled = true;
+
+      setPhase('TCP connect');
+      log('TCP connection opened to server:22', null);
+      explainEl.textContent = 'Before any SSH bytes fly, a normal TCP connection opens to port 22 (see the TCP vs UDP page for that 3-way handshake). SSH itself starts on top of it.';
+
+      after(scaled(500), stepVersion);
+    }
+
+    function stepVersion() {
+      setPhase('Version exchange');
+      const p1 = spawnPacket('SSH-2.0-OpenSSH_9.6', 'warn', 'c2s');
+      log('plaintext: "SSH-2.0-OpenSSH_9.6" (client version)', 'plain');
+      flyTo(p1, 'c2s', scaled(600), () => {
+        const p2 = spawnPacket('SSH-2.0-OpenSSH_9.6', 'warn', 's2c');
+        log('plaintext: "SSH-2.0-OpenSSH_9.6" (server version)', 'plain');
+        explainEl.textContent = 'Both sides announce which SSH protocol version and software build they speak. Nothing secret here yet -- this is capability negotiation, not credentials.';
+        flyTo(p2, 's2c', scaled(600), stepKexinit);
+      });
+    }
+
+    function stepKexinit() {
+      setPhase('Algorithm negotiation');
+      const p1 = spawnPacket('KEXINIT: algorithms...', 'warn', 'c2s');
+      log('plaintext: KEXINIT (client’s supported algorithms list)', 'plain');
+      flyTo(p1, 'c2s', scaled(600), () => {
+        const p2 = spawnPacket('KEXINIT: algorithms...', 'warn', 's2c');
+        log('plaintext: KEXINIT (server’s supported algorithms list)', 'plain');
+        explainEl.textContent = 'Each side lists which key-exchange, cipher, and MAC algorithms it supports; both pick the strongest one they have in common. Still plaintext -- and still fine, since none of it is secret material.';
+        flyTo(p2, 's2c', scaled(600), stepDhInit);
+      });
+    }
+
+    let a, b, A, B;
+
+    function stepDhInit() {
+      setPhase('Diffie-Hellman exchange');
+      a = randInt(2, 19);
+      A = modpow(G, a, P);
+      clientAEl.textContent = a + ' (kept local)';
+      clientAEl.className = '';
+      const p1 = spawnPacket('DH_INIT: A=' + A, null, 'c2s');
+      log('sees A=' + A + ' (public params p=' + P + ', g=' + G + ' -- safe to know)', 'plain');
+      explainEl.textContent = 'The client picks a private random number "a" and computes A = g^a mod p, then sends only A. Recovering "a" from A means solving a discrete-log problem -- computationally infeasible at real key sizes (this toy p=23 is deliberately too small to be safe).';
+      flyTo(p1, 'c2s', scaled(700), stepDhReply);
+    }
+
+    function stepDhReply() {
+      b = randInt(2, 19);
+      B = modpow(G, b, P);
+      serverBEl.textContent = b + ' (kept local)';
+      serverBEl.className = '';
+      const fp = hostScenario === 'changed' ? CHANGED_FP : TRUSTED_FP;
+      serverFpEl.textContent = fp;
+      serverFpEl.className = '';
+      const p1 = spawnPacket('DH_REPLY: B=' + B + ' + host key', null, 's2c');
+      log('sees B=' + B + ', host key fingerprint=' + fp, 'plain');
+      explainEl.textContent = 'The server does the same with its own private "b", computing B = g^b mod p, and sends B back -- plus its host public key and a signature proving it owns the matching private half.';
+      flyTo(p1, 's2c', scaled(700), () => checkHostKey(fp));
+    }
+
+    function checkHostKey(fp) {
+      setPhase('Host key verification');
+      if (hostScenario === 'first') {
+        log('client: no known_hosts entry for this host yet', null);
+        explainEl.textContent = 'The authenticity of this host can’t be established from anything trusted yet -- a real client would prompt "are you sure you want to continue connecting (yes/no)?" here.';
+        after(scaled(700), () => {
+          log('client: (yes) -- trusting it on first use', 'plain');
+          knownHostsEl.textContent = fp + ' (just saved)';
+          knownHostsEl.className = '';
+          log('Permanently added host to known_hosts', null);
+          after(scaled(400), stepDeriveKeys);
+        });
+      } else if (hostScenario === 'known') {
+        log('client: fingerprint matches known_hosts -- continuing', null);
+        explainEl.textContent = 'The fingerprint the server just presented matches the one saved from a previous connection. No prompt needed -- this is the common case on every connection after the first.';
+        after(scaled(400), stepDeriveKeys);
+      } else {
+        failHostKey(fp);
+      }
+    }
+
+    function failHostKey(fp) {
+      setPhase('ABORTED');
+      setWire('unencrypted');
+      resultEl.textContent = 'Connection refused';
+      log('client: fingerprint ' + fp + ' does NOT match known_hosts entry ' + TRUSTED_FP, 'bad');
+      bannerEl.style.display = 'block';
+      bannerEl.className = 'sh-banner bad';
+      bannerEl.textContent =
+        '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n' +
+        '@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @\n' +
+        '@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\n' +
+        'Someone could be eavesdropping on you right now (man-in-the-middle attack)!\n' +
+        'It is also possible the host key was legitimately changed.\n' +
+        'Host key verification failed.';
+      explainEl.textContent = 'This fingerprint does not match the one saved from a previous connection to this exact host. SSH refuses to continue -- silently trusting it would defeat the entire point of checking in the first place. This is precisely the scenario host-key verification exists to catch.';
+      running = false;
+      startBtn.disabled = false;
+      startBtn.textContent = 'Try Again';
+    }
+
+    function stepDeriveKeys() {
+      const secretC = modpow(B, a, P);
+      const secretS = modpow(A, b, P);
+      clientSecretEl.innerHTML = '<b>' + secretC + '</b> (matches server -- never sent!)';
+      serverSecretEl.innerHTML = '<b>' + secretS + '</b> (matches client -- never sent!)';
+      log('sees NEWKEYS exchanged both ways -- content unreadable from here on', 'cipher');
+      explainEl.textContent = 'Both sides just independently computed the exact same shared secret (' + secretC + ') without ever transmitting it -- that’s the "agree on a secret code" step from the overview doc, made concrete with real numbers. A symmetric session key is derived from it, and NEWKEYS tells both sides to start encrypting.';
+      const p1 = spawnPacket('NEWKEYS', 'good', 'c2s');
+      flyTo(p1, 'c2s', scaled(400), () => {
+        const p2 = spawnPacket('NEWKEYS', 'good', 's2c');
+        flyTo(p2, 's2c', scaled(400), () => {
+          setWire('encrypted');
+          after(scaled(400), stepAuth);
+        });
+      });
+    }
+
+    function stepAuth() {
+      setPhase('Authentication (' + (authMethod === 'password' ? 'password' : 'public key') + ')');
+      if (authMethod === 'password') {
+        const p1 = spawnPacket('🔒 ~96 bytes', 'enc', 'c2s');
+        log('ciphertext blob (~96 bytes) -- cannot read: password auth request', 'cipher');
+        explainEl.textContent = 'The password does cross the wire, but only inside the tunnel from the previous step -- the eavesdropper sees nothing but opaque ciphertext. That protects it in transit, but the password itself still exists and can be guessed, phished, or reused elsewhere.';
+        flyTo(p1, 'c2s', scaled(700), () => {
+          const p2 = spawnPacket('🔒 AUTH OK', 'enc', 's2c');
+          log('ciphertext blob (~40 bytes) -- cannot read: auth result', 'cipher');
+          flyTo(p2, 's2c', scaled(600), stepSessionOpen);
+        });
+      } else {
+        clientKeyLine.style.display = '';
+        serverKeyLine.style.display = '';
+        const nonce = randInt(2, 30);
+        const p1 = spawnPacket('🔒 challenge', 'enc', 's2c');
+        log('ciphertext blob -- cannot read: auth challenge', 'cipher');
+        explainEl.textContent = 'The server picks a random challenge and asks the client to prove it holds the matching private key by signing it. The private key itself is never sent -- only a signature computed from it.';
+        flyTo(p1, 's2c', scaled(700), () => {
+          const sig = modpow(nonce, D, N);
+          log('client (locally, never sent): sig = ' + nonce + '^7 mod 33 = ' + sig, null);
+          const p2 = spawnPacket('🔒 signature', 'enc', 'c2s');
+          log('ciphertext blob -- cannot read: signature', 'cipher');
+          flyTo(p2, 'c2s', scaled(700), () => {
+            const verified = modpow(sig, E, N);
+            log('server (locally): ' + sig + '^3 mod 33 = ' + verified + ' -- matches challenge (' + nonce + ')', null);
+            const p3 = spawnPacket('🔒 AUTH OK', 'enc', 's2c');
+            log('ciphertext blob -- cannot read: auth result', 'cipher');
+            flyTo(p3, 's2c', scaled(600), stepSessionOpen);
+          });
+        });
+      }
+    }
+
+    function stepSessionOpen() {
+      setPhase('Session open');
+      resultEl.textContent = 'Connected';
+      bannerEl.style.display = 'block';
+      bannerEl.className = 'sh-banner ok';
+      bannerEl.textContent = authMethod === 'password'
+        ? 'Session established with password auth. Every command and response from here shares the exact same encrypted tunnel that key exchange built -- the eavesdropper never saw the password, only the ciphertext around it.'
+        : 'Session established with public-key auth. The private key never left the client -- only a signature did, and that signature can’t be replayed against a different future challenge.';
+      const p1 = spawnPacket('🔒 ls -la', 'enc', 'c2s');
+      log('ciphertext blob -- cannot read: shell command', 'cipher');
+      flyTo(p1, 'c2s', scaled(600), () => {
+        const p2 = spawnPacket('🔒 total 24 ...', 'enc', 's2c');
+        log('ciphertext blob -- cannot read: command output', 'cipher');
+        flyTo(p2, 's2c', scaled(600), () => {
+          explainEl.textContent = 'The interactive shell (and file transfers, and port forwarding, if used) all ride this same encrypted channel from now on -- nothing new needs to be negotiated per command.';
+          running = false;
+          startBtn.disabled = false;
+          startBtn.textContent = 'Run Again';
+        });
+      });
+    }
+
+    hostBtns.forEach(btn => btn.addEventListener('click', () => setHostScenario(btn.dataset.scenario)));
+    authBtns.forEach(btn => btn.addEventListener('click', () => setAuthMethod(btn.dataset.auth)));
+    startBtn.addEventListener('click', start);
+    resetBtn.addEventListener('click', resetVisuals);
+
+    resetVisuals();
+  })();
+  </script>
+</div>

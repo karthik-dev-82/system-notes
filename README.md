@@ -27,6 +27,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
+| 🎮 **[SSH Handshake (Interactive)](docs/source/ssh_secure_shell_interactive.rst)** | Interactive SSH handshake -- a real toy-scale Diffie-Hellman exchange, host-key MITM detection, and both auth methods | Diffie-Hellman, host key fingerprints, password vs. public-key auth |
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
 | 🎮 **[UTF-8 & Unicode (Interactive)](docs/source/utf8_encoding_interactive.rst)** | Interactive UTF-8 encode/decode -- step through the real bit-slicing byte by byte, then run it backward | code points, byte-length ranges, bit slicing, self-sync/resync |
 | 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
@@ -109,6 +110,7 @@ system-notes/
         ├── docker_packet_journey_interactive.rst
         ├── kernel_networking_docker_internals.rst
         ├── lidar_slam.rst
+        ├── ssh_secure_shell_interactive.rst
         ├── ssh_secure_shell.rst
         ├── utf8_encoding_interactive.rst
         ├── unicode_utf8_encoding.rst
@@ -155,6 +157,7 @@ system-notes/
             ├── net_bridge_widget.html
             ├── net_tuntap_widget.html
             ├── net_vlan_widget.html
+            ├── ssh_handshake_widget.html
             └── utf8_encoding_widget.html
 
 ```
