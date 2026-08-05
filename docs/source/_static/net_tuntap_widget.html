@@ -100,7 +100,7 @@
 
   <div class="nt-stage">
     <div class="nt-path-row">
-      <div class="nt-path-box" id="ntAppBox"><div class="icon">🖥️</div>VPN App</div>
+      <div class="nt-path-box" id="ntAppBox"><div class="icon" id="ntAppIcon">🖥️</div><span id="ntAppLabel">VPN App</span></div>
       <div class="nt-arrow">&#8594;</div>
       <div class="nt-path-box" id="ntDevBox"><div class="icon">🔌</div><span id="ntDevLabel">/dev/net/tun0</span></div>
       <div class="nt-arrow">&#8594;</div>
@@ -163,6 +163,8 @@
     const sendBtn = document.getElementById('ntSend');
     const resetBtn = document.getElementById('ntReset');
     const appBox = document.getElementById('ntAppBox');
+    const appIcon = document.getElementById('ntAppIcon');
+    const appLabel = document.getElementById('ntAppLabel');
     const devBox = document.getElementById('ntDevBox');
     const devLabel = document.getElementById('ntDevLabel');
     const kernelBox = document.getElementById('ntKernelBox');
@@ -178,11 +180,13 @@
       banner.style.display = 'none';
       logEl.innerHTML = '';
       devLabel.textContent = mode === 'tun' ? '/dev/net/tun0' : '/dev/net/tap0';
+      appIcon.textContent = mode === 'tun' ? '🖥️' : '💻';
+      appLabel.textContent = mode === 'tun' ? 'VPN App' : 'VM (vNIC driver)';
       [appBox, devBox, kernelBox].forEach(b => b.classList.remove('active'));
       renderFrameDiagram();
       explainEl.textContent = mode === 'tun'
-        ? 'TUN mode is selected. Click "Send a Packet" to see exactly what the VPN application hands to the kernel -- then flip to TAP and send again to see what\'s different.'
-        : 'TAP mode is selected. Click "Send a Packet" to see the extra fields TAP adds on top of what TUN sends.';
+        ? 'TUN mode is selected. Click "Send a Packet" to see exactly what a VPN application hands to the kernel -- then flip to TAP and send again to see what\'s different.'
+        : 'TAP mode is selected. Click "Send a Packet" to see what a VM\'s virtual NIC hands to the kernel instead -- a full Ethernet frame, not just an IP packet.';
     }
 
     function renderFrameDiagram() {
@@ -205,11 +209,11 @@
       });
       renderFrameDiagram();
       if (mode === 'tun') {
-        logTo(logEl, 'App writes a raw IP packet to /dev/net/tun0 -- no Ethernet header at all.', 'ok');
+        logTo(logEl, 'VPN app writes a raw IP packet to /dev/net/tun0 -- no Ethernet header at all.', 'ok');
         explainEl.textContent = 'This is exactly what a VPN client does: it hands the kernel a plain IP packet. The kernel treats tun0 like a point-to-point IP link -- no MAC addresses are involved anywhere in this path.';
       } else {
-        logTo(logEl, 'App writes a full Ethernet frame to /dev/net/tap0 -- MAC headers included.', 'ok');
-        explainEl.textContent = 'TAP hands the kernel a complete Ethernet frame, source and destination MAC included -- as if a real network card had received it. This is what lets a VM\'s virtual NIC behave exactly like a physical one.';
+        logTo(logEl, "VM's vNIC driver writes a full Ethernet frame to /dev/net/tap0 -- MAC headers included.", 'ok');
+        explainEl.textContent = 'TAP hands the kernel a complete Ethernet frame, source and destination MAC included -- as if a real network card had received it. This is what lets a VM\'s virtual NIC behave exactly like a physical one, not something a VPN app needs.';
       }
       banner.style.display = 'none';
     }
