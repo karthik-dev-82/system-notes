@@ -16,9 +16,15 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🖥️ **[.bashrc Reference](docs/source/bashrc_reference.rst)** | Shell setup, aliases & functions | `.bashrc`, aliases, `__setprompt`, `ssh-agent` |
 | 📊 **[System Monitoring Commands](docs/source/system_monitoring_commands.rst)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
 | ⚡ **[Developer Commands](docs/source/developer_commands.rst)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
+| 🎮 **[Network Interfaces (Interactive)](docs/source/network_interfaces_interactive.rst)** | Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation | MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation |
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
+| 🎮 **[TCP vs UDP (Interactive)](docs/source/tcp_udp_interactive.rst)** | Interactive TCP vs. UDP packet delivery -- play with loss and see the difference | handshake, retransmission, ordering, best-effort delivery |
+| 🎮 **[TCP Congestion Control (Interactive)](docs/source/tcp_congestion_control_interactive.rst)** | Interactive TCP congestion control -- drive the cwnd sawtooth yourself | slow start, congestion avoidance, fast retransmit, timeout, ssthresh |
 | 🐳 **[Docker Dev Environment](docs/source/docker_dev_environment.rst)** | How the `development` repo's Docker dev container is built | `Dockerfile`, `devcontainer.json`, `docker-compose.yml` |
 | 🔌 **[Linux Devices](docs/source/linux_devices.rst)** | Block/char/network/terminal/pseudo devices, and USB layering | `/dev`, `lsblk`, `ttyACM`/`ttyUSB`, `udevadm`, PTYs |
+| 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
+| 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
+| 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
@@ -26,20 +32,14 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔠 **[Base64 Encoding](docs/source/base64_encoding.rst)** | Base64, ASCII, URL encoding, and hex, explained with analogies | Base64 alphabet, percent-encoding, MIME attachments, hex colors |
 | 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
+| 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
 | 🔐 **[Complete Guide to OpenSSL](docs/source/openssl_guide.rst)** | Encryption, hashing, and certificates, plus practical OpenSSL commands | symmetric/asymmetric crypto, TLS, x509 certs, `openssl` CLI |
+| 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
 | 🪟 **[The /proc Filesystem](docs/source/proc_filesystem.rst)** | The virtual /proc filesystem -- process info, system stats, tuning knobs | `/proc/PID`, `/proc/cpuinfo`, `/proc/meminfo`, `/proc/sys` |
-| ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
-| 🎮 **[TCP vs UDP (Interactive)](docs/source/tcp_udp_interactive.rst)** | Interactive TCP vs. UDP packet delivery -- play with loss and see the difference | handshake, retransmission, ordering, best-effort delivery |
-| 🎮 **[TCP Congestion Control (Interactive)](docs/source/tcp_congestion_control_interactive.rst)** | Interactive TCP congestion control -- drive the cwnd sawtooth yourself | slow start, congestion avoidance, fast retransmit, timeout, ssthresh |
-| 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
-| 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🎮 **[Hash Load Balancer (Interactive)](docs/source/hash_load_balancer_interactive.rst)** | Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is | flow 5-tuple, hash % N, connection vs. user stickiness |
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
-| 🎮 **[Live /proc Explorer (Interactive)](docs/source/proc_filesystem_interactive.rst)** | Live /proc explorer -- click any path and watch it get generated on demand | /proc/PID, meminfo, loadavg, uptime, process lifecycle |
-| 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
-| 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
-| 🎮 **[Network Interfaces (Interactive)](docs/source/network_interfaces_interactive.rst)** | Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation | MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation |
+| ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
 
 ### C++ Notes
 
@@ -97,10 +97,15 @@ system-notes/
         ├── bashrc_reference.rst
         ├── system_monitoring_commands.rst
         ├── developer_commands.rst
+        ├── network_interfaces_interactive.rst
         ├── network_interfaces.rst
+        ├── tcp_udp_interactive.rst
+        ├── tcp_congestion_control_interactive.rst
         ├── docker_dev_environment.rst
-        ├── spdlog_sinks_architecture.rst
         ├── linux_devices.rst
+        ├── linux_fs_basics_interactive.rst
+        ├── overlayfs_interactive.rst
+        ├── docker_packet_journey_interactive.rst
         ├── kernel_networking_docker_internals.rst
         ├── lidar_slam.rst
         ├── ssh_secure_shell.rst
@@ -108,19 +113,15 @@ system-notes/
         ├── base64_encoding.rst
         ├── databases_postgresql_mongodb_redis.rst
         ├── image_formats.rst
+        ├── threads_sync_interactive.rst
         ├── threads_processes_synchronization.rst
         ├── openssl_guide.rst
+        ├── proc_filesystem_interactive.rst
         ├── proc_filesystem.rst
-        ├── hash_load_balancer.rst
-        ├── tcp_udp_interactive.rst
-        ├── tcp_congestion_control_interactive.rst
-        ├── docker_packet_journey_interactive.rst
-        ├── threads_sync_interactive.rst
         ├── hash_load_balancer_interactive.rst
         ├── consistent_hashing_interactive.rst
-        ├── proc_filesystem_interactive.rst
-        ├── linux_fs_basics_interactive.rst
-        ├── overlayfs_interactive.rst
+        ├── hash_load_balancer.rst
+        ├── spdlog_sinks_architecture.rst
         ├── cpp_memory_interactive.rst
         ├── cpp_raii_smart_pointers_interactive.rst
         ├── cpp_move_semantics_interactive.rst
@@ -128,7 +129,6 @@ system-notes/
         ├── cpp_exception_unwind_interactive.rst
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
-        ├── network_interfaces_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html

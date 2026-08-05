@@ -13,9 +13,15 @@ worth writing down and coming back to.
    bashrc_reference
    system_monitoring_commands
    developer_commands
+   network_interfaces_interactive
    network_interfaces
+   tcp_udp_interactive
+   tcp_congestion_control_interactive
    docker_dev_environment
    linux_devices
+   linux_fs_basics_interactive
+   overlayfs_interactive
+   docker_packet_journey_interactive
    kernel_networking_docker_internals
    lidar_slam
    ssh_secure_shell
@@ -23,20 +29,14 @@ worth writing down and coming back to.
    base64_encoding
    databases_postgresql_mongodb_redis
    image_formats
+   threads_sync_interactive
    threads_processes_synchronization
    openssl_guide
+   proc_filesystem_interactive
    proc_filesystem
-   hash_load_balancer
-   tcp_udp_interactive
-   tcp_congestion_control_interactive
-   docker_packet_journey_interactive
-   threads_sync_interactive
    hash_load_balancer_interactive
    consistent_hashing_interactive
-   proc_filesystem_interactive
-   linux_fs_basics_interactive
-   overlayfs_interactive
-   network_interfaces_interactive
+   hash_load_balancer
 
 .. toctree::
    :hidden:
@@ -78,15 +78,33 @@ System Notes
    * - :doc:`developer_commands`
      - Daily engineering workflows & tooling
      - ``docker``, ``git``, ``rsync``, ``aria2c``, ``find``, ``grep``
+   * - :doc:`network_interfaces_interactive`
+     - Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation
+     - MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation
    * - :doc:`network_interfaces`
      - Linux network interfaces, explained with analogies & diagrams
      - ``eth0``, ``lo``, ``veth``, ``docker0``, VLANs, TUN/TAP, NAT
+   * - :doc:`tcp_udp_interactive`
+     - Interactive TCP vs. UDP packet delivery -- play with loss and see the difference
+     - handshake, retransmission, ordering, best-effort delivery
+   * - :doc:`tcp_congestion_control_interactive`
+     - Interactive TCP congestion control -- drive the cwnd sawtooth yourself
+     - slow start, congestion avoidance, fast retransmit, timeout, ssthresh
    * - :doc:`docker_dev_environment`
      - How the ``development`` repo's Docker dev container is built
      - ``Dockerfile``, ``devcontainer.json``, ``docker-compose.yml``
    * - :doc:`linux_devices`
      - Block/char/network/terminal/pseudo devices, and USB layering
      - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
+   * - :doc:`linux_fs_basics_interactive`
+     - Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on
+     - inodes, hard links, symlinks, mount points, VFS
+   * - :doc:`overlayfs_interactive`
+     - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
+     - lowerdir, upperdir, merged view, copy-up, whiteouts
+   * - :doc:`docker_packet_journey_interactive`
+     - Interactive packet journey -- container, veth, docker0, netfilter, and back
+     - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack
    * - :doc:`kernel_networking_docker_internals`
      - Kernel networking stack, Docker internals, iptables, OverlayFS
      - netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2
@@ -108,48 +126,30 @@ System Notes
    * - :doc:`image_formats`
      - SVG vs. PNG vs. JPEG, and when to use each
      - vector vs. raster, transparency, lossy/lossless compression
+   * - :doc:`threads_sync_interactive`
+     - Interactive threads & synchronization -- step through race conditions and deadlock yourself
+     - mutex, semaphore, condition variable, race condition, deadlock
    * - :doc:`threads_processes_synchronization`
      - Threads, processes, and synchronization primitives in C++
      - mutex, semaphore, condition variable, deadlock, race conditions
    * - :doc:`openssl_guide`
      - Encryption, hashing, and certificates, plus practical OpenSSL commands
      - symmetric/asymmetric crypto, TLS, x509 certs, ``openssl`` CLI
+   * - :doc:`proc_filesystem_interactive`
+     - Live /proc explorer -- click any path and watch it get generated on demand
+     - /proc/PID, meminfo, loadavg, uptime, process lifecycle
    * - :doc:`proc_filesystem`
      - The virtual /proc filesystem -- process info, system stats, tuning knobs
      - ``/proc/PID``, ``/proc/cpuinfo``, ``/proc/meminfo``, ``/proc/sys``
-   * - :doc:`hash_load_balancer`
-     - Hash-based load balancing, sticky sessions, and consistent hashing
-     - modulo hashing, session affinity, CDN routing, reshuffling problem
-   * - :doc:`tcp_udp_interactive`
-     - Interactive TCP vs. UDP packet delivery -- play with loss and see the difference
-     - handshake, retransmission, ordering, best-effort delivery
-   * - :doc:`tcp_congestion_control_interactive`
-     - Interactive TCP congestion control -- drive the cwnd sawtooth yourself
-     - slow start, congestion avoidance, fast retransmit, timeout, ssthresh
-   * - :doc:`docker_packet_journey_interactive`
-     - Interactive packet journey -- container, veth, docker0, netfilter, and back
-     - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack
-   * - :doc:`threads_sync_interactive`
-     - Interactive threads & synchronization -- step through race conditions and deadlock yourself
-     - mutex, semaphore, condition variable, race condition, deadlock
    * - :doc:`hash_load_balancer_interactive`
      - Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is
      - flow 5-tuple, hash % N, connection vs. user stickiness
    * - :doc:`consistent_hashing_interactive`
      - Interactive consistent hashing ring -- add/remove servers and watch what actually moves
      - hash ring, virtual nodes, reshuffling, load balancing
-   * - :doc:`proc_filesystem_interactive`
-     - Live /proc explorer -- click any path and watch it get generated on demand
-     - /proc/PID, meminfo, loadavg, uptime, process lifecycle
-   * - :doc:`linux_fs_basics_interactive`
-     - Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on
-     - inodes, hard links, symlinks, mount points, VFS
-   * - :doc:`overlayfs_interactive`
-     - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
-     - lowerdir, upperdir, merged view, copy-up, whiteouts
-   * - :doc:`network_interfaces_interactive`
-     - Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation
-     - MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation
+   * - :doc:`hash_load_balancer`
+     - Hash-based load balancing, sticky sessions, and consistent hashing
+     - modulo hashing, session affinity, CDN routing, reshuffling problem
 
 C++ Notes
 -----------------
