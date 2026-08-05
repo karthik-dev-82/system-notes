@@ -158,7 +158,7 @@
       'AA:03': { name: 'C3', icon: '📦', port: 'veth-c3' },
       'AA:04': { name: 'Host', icon: '🖥️', port: 'eth0' },
     };
-    const PORT_ORDER = ['veth-c1', 'veth-c2', 'veth-c3', 'eth0'];
+    function currentPorts() { return Object.keys(DEVICES).map(mac => DEVICES[mac].port); }
 
     const stepBtn = document.getElementById('nbStep');
     const playBtn = document.getElementById('nbPlay');
@@ -180,10 +180,10 @@
         desc: 'C3 broadcasts (its own ARP request)' },
       { type: 'frame', src: 'AA:04', dst: 'AA:01', arrivalPort: 'eth0',
         desc: 'Host sends a packet directly to C1' },
-      { type: 'move', mac: 'AA:01', newPort: 'eth0',
-        desc: 'C1 restarts with a fresh veth pair -- its traffic now arrives via a different bridge port' },
-      { type: 'frame', src: 'AA:01', dst: 'AA:02', arrivalPort: 'eth0',
-        desc: 'C1 (reconnected) sends to C2 again' },
+      { type: 'move', mac: 'AA:01', newPort: 'veth-c4',
+        desc: 'C1 restarts with a fresh veth pair (veth-c4) -- its traffic now arrives via a different bridge port' },
+      { type: 'frame', src: 'AA:01', dst: 'AA:02', arrivalPort: 'veth-c4',
+        desc: 'C1 (reconnected via veth-c4) sends to C2 again' },
     ];
 
     let macTable, step, timer;
@@ -259,13 +259,13 @@
       let outPorts, isFlood;
       if (dst === BROADCAST) {
         isFlood = true;
-        outPorts = PORT_ORDER.filter(p => p !== arrivalPort);
+        outPorts = currentPorts().filter(p => p !== arrivalPort);
       } else if (macTable[dst] !== undefined) {
         isFlood = false;
         outPorts = [macTable[dst]];
       } else {
         isFlood = true;
-        outPorts = PORT_ORDER.filter(p => p !== arrivalPort);
+        outPorts = currentPorts().filter(p => p !== arrivalPort);
       }
 
       bridgeBoxEl.classList.add('active');
