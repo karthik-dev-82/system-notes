@@ -1,5 +1,5 @@
-Consistent Hashing: Watch the Ring
-========================================
+Consistent Hashing: Play With It
+================================
 
 :doc:`hash_load_balancer` establishes the numbers: going from 3 to 4
 servers reshuffles 75% of users under naive modulo hashing, but only

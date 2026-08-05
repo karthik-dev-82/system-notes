@@ -1,5 +1,5 @@
-Python Sequences: List, Stack, Queue & Deque
-===================================================
+Python Sequences: Play With It
+==============================
 
 ``list``, "stack", "queue" and ``deque`` all answer the same question
 -- *in what order do things come out?* -- but they differ in exactly

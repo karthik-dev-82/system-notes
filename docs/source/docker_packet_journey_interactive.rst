@@ -1,5 +1,5 @@
-A Packet's Journey: Container to Internet and Back
-========================================================
+Packet Journey: Play With It
+============================
 
 :doc:`network_interfaces` and :doc:`kernel_networking_docker_internals`
 cover the pieces of this individually -- veth pairs, the ``docker0``

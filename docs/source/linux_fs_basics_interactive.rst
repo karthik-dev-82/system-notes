@@ -1,5 +1,5 @@
-How Linux Filesystems Work
-================================
+Linux Filesystem Basics: Play With It
+=====================================
 
 Two ideas do almost all of the heavy lifting in how Linux thinks about
 files, and once they click, a lot of otherwise-confusing behavior

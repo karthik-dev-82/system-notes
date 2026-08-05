@@ -1,5 +1,5 @@
-OverlayFS: The Layers Trick
-=================================
+OverlayFS: Play With It
+=======================
 
 :doc:`linux_fs_basics_interactive` establishes that the VFS lets many
 different kinds of filesystem coexist under one directory tree.

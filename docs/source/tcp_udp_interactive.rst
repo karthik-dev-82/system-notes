@@ -1,5 +1,5 @@
-TCP vs. UDP: An Interactive Comparison
-============================================
+TCP vs. UDP: Play With It
+=========================
 
 TCP and UDP solve the same basic problem -- get data from one
 computer to another -- with opposite priorities. TCP guarantees every

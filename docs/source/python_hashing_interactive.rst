@@ -1,5 +1,5 @@
-Python Hashing: dict & set
-================================
+Python Hashing: Play With It
+============================
 
 ``dict`` and ``set`` both answer "is this here, and can I get it in
 O(1)?" using the same family of trick -- an *open-addressing hash
