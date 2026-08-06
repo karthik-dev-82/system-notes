@@ -30,6 +30,7 @@ worth writing down and coming back to.
    lidar_slam
    ssh_secure_shell_interactive
    ssh_secure_shell
+   tls_cert_chain_interactive
    utf8_encoding_interactive
    unicode_utf8_encoding
    base64_encoding
@@ -140,6 +141,9 @@ System Notes
    * - :doc:`ssh_secure_shell`
      - How the SSH handshake, encryption, and key auth actually work
      - key exchange, host keys, password vs. key auth, tunneling
+   * - :doc:`tls_cert_chain_interactive`
+     - Interactive TLS certificate chain -- real ECDSA signatures, four independent trust checks, break each one separately
+     - certificate chain, root/intermediate/leaf, trust store, hostname verification
    * - :doc:`utf8_encoding_interactive`
      - Interactive UTF-8 encode/decode -- step through the real bit-slicing byte by byte, then run it backward
      - code points, byte-length ranges, bit slicing, self-sync/resync

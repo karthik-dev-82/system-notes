@@ -1,0 +1,354 @@
+<div class="tc-root" id="tcWidget">
+  <style>
+    #tcWidget {
+      --tc-bg: #0f172a;
+      --tc-panel: #16213e;
+      --tc-border: #2a3655;
+      --tc-text: #e2e8f0;
+      --tc-muted: #94a3b8;
+      --tc-accent: #38bdf8;
+      --tc-good: #4ade80;
+      --tc-bad: #f87171;
+      --tc-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--tc-bg);
+      color: var(--tc-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #tcWidget * { box-sizing: border-box; }
+    #tcWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #tcWidget .tc-sub { color: var(--tc-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .tc-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--tc-panel); border: 1px solid var(--tc-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 980px; }
+    .tc-scenario-btn { background: transparent; color: var(--tc-muted); border: 1px solid var(--tc-border); border-radius: 6px; padding: 7px 12px; font-size: 0.76rem; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .tc-scenario-btn.active { background: var(--tc-accent); color: #041322; border-color: var(--tc-accent); }
+    .tc-host-row { display: flex; align-items: center; gap: 8px; margin-left: auto; font-size: 0.8rem; color: var(--tc-muted); }
+    .tc-host-row input { background: var(--tc-bg); color: var(--tc-text); border: 1px solid var(--tc-border); border-radius: 6px; padding: 6px 10px; font-family: ui-monospace, monospace; font-size: 0.78rem; width: 180px; }
+
+    .tc-body { display: flex; gap: 16px; min-width: 980px; }
+    .tc-chain-col { flex: 1 1 auto; display: flex; flex-direction: column; gap: 4px; }
+    .tc-side-col { width: 300px; flex: 0 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+    .tc-card { background: var(--tc-panel); border: 1px solid var(--tc-border); border-radius: 10px; padding: 12px 14px; }
+    .tc-card.bad { border-color: var(--tc-bad); }
+    .tc-card-title { font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .tc-tag { font-size: 0.62rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; text-transform: uppercase; letter-spacing: 0.03em; }
+    .tc-tag.ca { background: rgba(56,189,248,0.18); color: var(--tc-accent); }
+    .tc-tag.leaf { background: rgba(74,222,128,0.18); color: var(--tc-good); }
+    .tc-field { font-size: 0.72rem; color: var(--tc-muted); font-family: ui-monospace, monospace; line-height: 1.55; word-break: break-all; }
+    .tc-field b { color: var(--tc-text); font-weight: 600; }
+
+    .tc-link { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px 20px; font-size: 0.72rem; color: var(--tc-muted); }
+    .tc-link .tc-arrow { font-size: 1rem; }
+    .tc-link.ok { color: var(--tc-good); }
+    .tc-link.fail { color: var(--tc-bad); font-weight: 700; }
+
+    .tc-checklist { background: var(--tc-panel); border: 1px solid var(--tc-border); border-radius: 10px; padding: 14px; }
+    .tc-check-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; padding: 5px 0; border-bottom: 1px solid rgba(42,54,85,0.5); }
+    .tc-check-row:last-child { border-bottom: none; }
+    .tc-check-mark { font-weight: 700; }
+    .tc-check-mark.ok { color: var(--tc-good); }
+    .tc-check-mark.fail { color: var(--tc-bad); }
+
+    .tc-verdict { border-radius: 10px; padding: 14px; text-align: center; font-weight: 700; font-size: 0.95rem; }
+    .tc-verdict.ok { background: rgba(74,222,128,0.15); color: var(--tc-good); border: 1px solid rgba(74,222,128,0.4); }
+    .tc-verdict.fail { background: rgba(248,113,113,0.15); color: var(--tc-bad); border: 1px solid rgba(248,113,113,0.4); }
+    .tc-verdict-reason { font-weight: 400; font-size: 0.74rem; color: var(--tc-muted); margin-top: 6px; }
+
+    .tc-truststore { background: var(--tc-panel); border: 1px solid var(--tc-border); border-radius: 10px; padding: 12px 14px; font-size: 0.72rem; color: var(--tc-muted); }
+    .tc-truststore-title { font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+
+    .tc-note { font-size: 0.76rem; color: var(--tc-muted); line-height: 1.5; margin-top: 4px; }
+    .tc-loading { color: var(--tc-muted); font-size: 0.85rem; padding: 20px; }
+  </style>
+
+  <h3>TLS Certificate Chain: Play With It</h3>
+  <div class="tc-sub">Real ECDSA signatures (via the browser's Web Crypto API) chained leaf &rarr; intermediate &rarr; root. Break any one of four independent checks and watch trust fail for that reason, and only that reason.</div>
+
+  <div id="tcLoading" class="tc-loading">Generating real ECDSA keypairs and signing certificates&hellip;</div>
+  <div id="tcApp" style="display:none;">
+    <div class="tc-controls">
+      <button class="tc-scenario-btn" data-scenario="valid">Valid chain</button>
+      <button class="tc-scenario-btn" data-scenario="tampered">Tampered leaf</button>
+      <button class="tc-scenario-btn" data-scenario="rogue">Untrusted root (self-signed)</button>
+      <button class="tc-scenario-btn" data-scenario="expired">Expired certificate</button>
+      <div class="tc-host-row">
+        Browser requests:
+        <input type="text" id="tcHostInput" spellcheck="false" />
+      </div>
+    </div>
+
+    <div class="tc-body">
+      <div class="tc-chain-col" id="tcChainCol"></div>
+      <div class="tc-side-col">
+        <div class="tc-truststore">
+          <div class="tc-truststore-title">Trust store (pre-installed)</div>
+          <div id="tcTrustStore"></div>
+        </div>
+        <div class="tc-checklist" id="tcChecklist"></div>
+        <div class="tc-verdict" id="tcVerdict"></div>
+      </div>
+    </div>
+    <div class="tc-note" id="tcNote"></div>
+  </div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('tcWidget');
+    var subtle = window.crypto.subtle;
+    var ALGO = { name: 'ECDSA', namedCurve: 'P-256' };
+    var SIGN_ALGO = { name: 'ECDSA', hash: 'SHA-256' };
+    var YEAR = 365 * 24 * 3600 * 1000;
+
+    function ab2b64(buf) {
+      var bytes = new Uint8Array(buf);
+      var bin = '';
+      for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      return btoa(bin);
+    }
+    function b642ab(b64) {
+      var bin = atob(b64);
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes.buffer;
+    }
+
+    function genKeyPair() { return subtle.generateKey(ALGO, true, ['sign', 'verify']); }
+    function exportSpkiB64(publicKey) { return subtle.exportKey('spki', publicKey).then(ab2b64); }
+
+    function canonicalizeTbs(cert) {
+      return [
+        'subject=' + cert.subject,
+        'issuer=' + cert.issuer,
+        'notBefore=' + cert.notBefore,
+        'notAfter=' + cert.notAfter,
+        'isCA=' + cert.isCA,
+        'publicKeySpki=' + cert.publicKeySpki,
+        'san=' + (cert.san ? cert.san.join(',') : '')
+      ].join('|');
+    }
+    function encodeTbs(cert) { return new TextEncoder().encode(canonicalizeTbs(cert)); }
+
+    function signCert(issuerPrivateKey, certFields) {
+      return subtle.sign(SIGN_ALGO, issuerPrivateKey, encodeTbs(certFields)).then(function(sig) {
+        var out = {};
+        for (var k in certFields) out[k] = certFields[k];
+        out.signature = ab2b64(sig);
+        return out;
+      });
+    }
+    function importSpkiB64(spkiB64) {
+      return subtle.importKey('spki', b642ab(spkiB64), ALGO, true, ['verify']);
+    }
+    function verifyLinkSignature(cert, issuerPublicKey) {
+      return subtle.verify(SIGN_ALGO, issuerPublicKey, b642ab(cert.signature), encodeTbs(cert));
+    }
+
+    // chain: [leaf, intermediate?, root] (leaf first, self-signed root/rogue last)
+    function verifyChain(chain, trustStore, requestedHostname, nowMs) {
+      var linkResultsP = chain.map(function(cert, i) {
+        var issuerCert = i + 1 < chain.length ? chain[i + 1] : cert;
+        return importSpkiB64(issuerCert.publicKeySpki).then(function(issuerKey) {
+          return verifyLinkSignature(cert, issuerKey).then(function(ok) {
+            return { index: i, subject: cert.subject, issuer: cert.issuer, ok: ok };
+          });
+        });
+      });
+      return Promise.all(linkResultsP).then(function(linkResults) {
+        var sigChainValid = linkResults.every(function(r) { return r.ok; });
+        var topCert = chain[chain.length - 1];
+        var rootMatch = trustStore.filter(function(t) { return t.publicKeySpki === topCert.publicKeySpki; })[0];
+        var rootTrustedP = rootMatch
+          ? importSpkiB64(topCert.publicKeySpki).then(function(k) { return verifyLinkSignature(topCert, k); })
+          : Promise.resolve(false);
+        return rootTrustedP.then(function(rootTrusted) {
+          var notExpired = chain.every(function(c) { return nowMs >= c.notBefore && nowMs <= c.notAfter; });
+          var hostnameMatches = !!(chain[0].san && chain[0].san.indexOf(requestedHostname) !== -1);
+          var overallTrusted = sigChainValid && rootTrusted && notExpired && hostnameMatches;
+          return { linkResults: linkResults, sigChainValid: sigChainValid, rootTrusted: rootTrusted,
+                    notExpired: notExpired, hostnameMatches: hostnameMatches, overallTrusted: overallTrusted };
+        });
+      });
+    }
+
+    function fmtDate(ms) { return new Date(ms).toISOString().slice(0, 10); }
+    function fp(b64) { return b64.slice(0, 20) + '…'; }
+
+    var now = Date.now();
+    var scenarios = {}; // scenario name -> { chain, defaultHost }
+    var trustStore = [];
+    var state = { scenario: 'valid', hostname: 'example.com' };
+    var renderGen = 0;
+
+    var chainCol = document.getElementById('tcChainCol');
+    var trustEl = document.getElementById('tcTrustStore');
+    var checklistEl = document.getElementById('tcChecklist');
+    var verdictEl = document.getElementById('tcVerdict');
+    var noteEl = document.getElementById('tcNote');
+    var hostInput = document.getElementById('tcHostInput');
+
+    function buildPki() {
+      var rootKeys, interKeys, leafKeys, rootPub, interPub, leafPub, root, intermediate, leaf;
+      return genKeyPair().then(function(k) { rootKeys = k; return genKeyPair(); })
+        .then(function(k) { interKeys = k; return genKeyPair(); })
+        .then(function(k) { leafKeys = k; return exportSpkiB64(rootKeys.publicKey); })
+        .then(function(p) { rootPub = p; return exportSpkiB64(interKeys.publicKey); })
+        .then(function(p) { interPub = p; return exportSpkiB64(leafKeys.publicKey); })
+        .then(function(p) {
+          leafPub = p;
+          return signCert(rootKeys.privateKey, {
+            subject: 'Root CA', issuer: 'Root CA',
+            notBefore: now - 5 * YEAR, notAfter: now + 15 * YEAR,
+            isCA: true, publicKeySpki: rootPub, san: null
+          });
+        })
+        .then(function(r) {
+          root = r;
+          return signCert(rootKeys.privateKey, {
+            subject: 'Intermediate CA', issuer: 'Root CA',
+            notBefore: now - 3 * YEAR, notAfter: now + 7 * YEAR,
+            isCA: true, publicKeySpki: interPub, san: null
+          });
+        })
+        .then(function(i) {
+          intermediate = i;
+          return signCert(interKeys.privateKey, {
+            subject: 'example.com', issuer: 'Intermediate CA',
+            notBefore: now - 30 * 24 * 3600 * 1000, notAfter: now + 60 * 24 * 3600 * 1000,
+            isCA: false, publicKeySpki: leafPub, san: ['example.com', 'www.example.com']
+          });
+        })
+        .then(function(l) {
+          leaf = l;
+          trustStore = [{ publicKeySpki: rootPub, subject: 'Root CA' }];
+          scenarios.valid = { chain: [leaf, intermediate, root], defaultHost: 'example.com' };
+
+          var tamperedLeaf = {}; for (var k in leaf) tamperedLeaf[k] = leaf[k];
+          tamperedLeaf.san = ['evil.com'];
+          scenarios.tampered = { chain: [tamperedLeaf, intermediate, root], defaultHost: 'example.com' };
+
+          scenarios.expired = null; // filled below (needs its own signed cert)
+          scenarios.rogue = null;   // filled below (needs its own keypair)
+
+          return signCert(interKeys.privateKey, {
+            subject: 'example.com', issuer: 'Intermediate CA',
+            notBefore: now - 2 * YEAR, notAfter: now - 1 * YEAR,
+            isCA: false, publicKeySpki: leafPub, san: ['example.com', 'www.example.com']
+          });
+        })
+        .then(function(expiredLeaf) {
+          scenarios.expired = { chain: [expiredLeaf, intermediate, root], defaultHost: 'example.com' };
+          return genKeyPair();
+        })
+        .then(function(rogueKeys) {
+          return exportSpkiB64(rogueKeys.publicKey).then(function(roguePub) {
+            return signCert(rogueKeys.privateKey, {
+              subject: 'example.com', issuer: 'example.com',
+              notBefore: now - YEAR, notAfter: now + YEAR,
+              isCA: false, publicKeySpki: roguePub, san: ['example.com']
+            });
+          });
+        })
+        .then(function(rogue) {
+          scenarios.rogue = { chain: [rogue], defaultHost: 'example.com' };
+        });
+    }
+
+    function renderCard(cert, isBad) {
+      var kindTag = cert.isCA ? '<span class="tc-tag ca">CA</span>' : '<span class="tc-tag leaf">leaf</span>';
+      var sanLine = cert.san ? '<div class="tc-field"><b>SAN:</b> ' + cert.san.join(', ') + '</div>' : '';
+      return (
+        '<div class="tc-card' + (isBad ? ' bad' : '') + '">' +
+          '<div class="tc-card-title"><span>' + cert.subject + '</span>' + kindTag + '</div>' +
+          '<div class="tc-field"><b>Issuer:</b> ' + cert.issuer + '</div>' +
+          '<div class="tc-field"><b>Valid:</b> ' + fmtDate(cert.notBefore) + ' &rarr; ' + fmtDate(cert.notAfter) + '</div>' +
+          sanLine +
+          '<div class="tc-field"><b>Public key (SPKI):</b> ' + fp(cert.publicKeySpki) + '</div>' +
+          '<div class="tc-field"><b>Signature:</b> ' + fp(cert.signature) + '</div>' +
+        '</div>'
+      );
+    }
+
+    function render() {
+      var scn = scenarios[state.scenario];
+      var chain = scn.chain;
+      var hostname = state.hostname; // snapshot -- the value THIS render is actually computed for
+      var myGen = ++renderGen;
+
+      root.querySelectorAll('.tc-scenario-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.scenario === state.scenario);
+      });
+
+      verifyChain(chain, trustStore, hostname, now).then(function(r) {
+        if (myGen !== renderGen) return; // a newer render superseded this one -- discard
+
+        // chain visualization
+        var html = '';
+        for (var i = 0; i < chain.length; i++) {
+          var link = r.linkResults[i];
+          var expired = now < chain[i].notBefore || now > chain[i].notAfter;
+          html += renderCard(chain[i], !link.ok || expired);
+          var isSelf = i === chain.length - 1;
+          var label = isSelf ? 'self-signature' : 'signed by ' + chain[i + 1].subject;
+          html += '<div class="tc-link ' + (link.ok ? 'ok' : 'fail') + '">' +
+                    '<span class="tc-arrow">' + (link.ok ? '✓' : '✗') + '</span>' +
+                    '<span>' + label + (link.ok ? ' -- valid' : ' -- SIGNATURE MISMATCH') + '</span>' +
+                  '</div>';
+        }
+        chainCol.innerHTML = html;
+
+        trustEl.innerHTML = trustStore.map(function(t) {
+          return '<div class="tc-field"><b>' + t.subject + '</b><br>' + fp(t.publicKeySpki) + '</div>';
+        }).join('');
+
+        function row(label, ok) {
+          return '<div class="tc-check-row"><span>' + label + '</span>' +
+            '<span class="tc-check-mark ' + (ok ? 'ok' : 'fail') + '">' + (ok ? '✓ pass' : '✗ fail') + '</span></div>';
+        }
+        checklistEl.innerHTML =
+          row('Signature chain valid', r.sigChainValid) +
+          row('Root trusted', r.rootTrusted) +
+          row('Not expired', r.notExpired) +
+          row('Hostname matches', r.hostnameMatches);
+
+        var reasons = [];
+        if (!r.sigChainValid) reasons.push('a certificate was altered after signing');
+        if (!r.rootTrusted) reasons.push('the chain does not lead to a trusted root');
+        if (!r.notExpired) reasons.push('a certificate is outside its validity window');
+        if (!r.hostnameMatches) reasons.push('the certificate was not issued for "' + hostname + '"');
+
+        verdictEl.className = 'tc-verdict ' + (r.overallTrusted ? 'ok' : 'fail');
+        verdictEl.innerHTML = (r.overallTrusted ? '🔒 TRUSTED' : '🔓 NOT TRUSTED') +
+          (reasons.length ? '<div class="tc-verdict-reason">Rejected: ' + reasons.join('; ') + '.</div>' : '<div class="tc-verdict-reason">All four checks pass independently.</div>');
+      });
+    }
+
+    root.querySelectorAll('.tc-scenario-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        state.scenario = btn.dataset.scenario;
+        state.hostname = scenarios[state.scenario].defaultHost;
+        hostInput.value = state.hostname;
+        render();
+      });
+    });
+    hostInput.addEventListener('input', function() {
+      state.hostname = hostInput.value.trim();
+      render();
+    });
+
+    buildPki().then(function() {
+      document.getElementById('tcLoading').style.display = 'none';
+      document.getElementById('tcApp').style.display = 'block';
+      hostInput.value = state.hostname;
+      noteEl.textContent = 'Certificates here are a simplified JSON stand-in for real X.509 DER -- but the signatures are genuine ECDSA (P-256) via the browser’s real Web Crypto API: sign() with the issuer’s private key, verify() with its public key, exactly like a real TLS chain.';
+      render();
+    }).catch(function(err) {
+      document.getElementById('tcLoading').textContent = 'Web Crypto unavailable in this context: ' + err.message;
+    });
+  })();
+  </script>
+</div>

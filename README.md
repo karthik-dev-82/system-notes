@@ -33,6 +33,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
 | 🎮 **[SSH Handshake (Interactive)](docs/source/ssh_secure_shell_interactive.rst)** | Interactive SSH handshake -- a real toy-scale Diffie-Hellman exchange, host-key MITM detection, and both auth methods | Diffie-Hellman, host key fingerprints, password vs. public-key auth |
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
+| 🎮 **[TLS Certificate Chain (Interactive)](docs/source/tls_cert_chain_interactive.rst)** | Interactive TLS certificate chain -- real ECDSA signatures, four independent trust checks, break each one separately | certificate chain, root/intermediate/leaf, trust store, hostname verification |
 | 🎮 **[UTF-8 & Unicode (Interactive)](docs/source/utf8_encoding_interactive.rst)** | Interactive UTF-8 encode/decode -- step through the real bit-slicing byte by byte, then run it backward | code points, byte-length ranges, bit slicing, self-sync/resync |
 | 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
 | 🔠 **[Base64 Encoding](docs/source/base64_encoding.rst)** | Base64, ASCII, URL encoding, and hex, explained with analogies | Base64 alphabet, percent-encoding, MIME attachments, hex colors |
@@ -125,6 +126,7 @@ system-notes/
         ├── lidar_slam.rst
         ├── ssh_secure_shell_interactive.rst
         ├── ssh_secure_shell.rst
+        ├── tls_cert_chain_interactive.rst
         ├── utf8_encoding_interactive.rst
         ├── unicode_utf8_encoding.rst
         ├── base64_encoding.rst
@@ -180,6 +182,7 @@ system-notes/
             ├── net_tuntap_widget.html
             ├── net_vlan_widget.html
             ├── ssh_handshake_widget.html
+            ├── tls_cert_chain_widget.html
             ├── utf8_encoding_widget.html
             ├── concurrency_models_widget.html
             ├── asyncio_gather_widget.html
