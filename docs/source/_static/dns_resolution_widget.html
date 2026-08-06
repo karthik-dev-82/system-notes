@@ -1,0 +1,293 @@
+<div class="dn-root" id="dnWidget">
+  <style>
+    #dnWidget {
+      --dn-bg: #0f172a;
+      --dn-panel: #16213e;
+      --dn-border: #2a3655;
+      --dn-text: #e2e8f0;
+      --dn-muted: #94a3b8;
+      --dn-accent: #38bdf8;
+      --dn-good: #4ade80;
+      --dn-bad: #f87171;
+      --dn-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--dn-bg);
+      color: var(--dn-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #dnWidget * { box-sizing: border-box; }
+    #dnWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #dnWidget .dn-sub { color: var(--dn-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .dn-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--dn-panel); border: 1px solid var(--dn-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 980px; }
+    .dn-controls label { font-size: 0.78rem; color: var(--dn-muted); display: flex; align-items: center; gap: 6px; }
+    .dn-select { background: var(--dn-bg); color: var(--dn-text); border: 1px solid var(--dn-border); border-radius: 6px; padding: 6px 10px; font-family: ui-monospace, monospace; font-size: 0.78rem; }
+    .dn-btn { background: var(--dn-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .dn-btn.secondary { background: transparent; color: var(--dn-text); border: 1px solid var(--dn-border); font-weight: 600; }
+    .dn-clock { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--dn-warn); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; padding: 6px 12px; }
+
+    .dn-body { display: flex; gap: 16px; min-width: 980px; }
+    .dn-trace-col { flex: 1 1 auto; min-width: 0; }
+    .dn-cache-col { width: 380px; flex: 0 0 auto; }
+
+    .dn-card { background: var(--dn-panel); border: 1px solid var(--dn-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+    .dn-card-title { font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+
+    .dn-hop { display: flex; gap: 10px; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid rgba(42,54,85,0.5); font-size: 0.76rem; }
+    .dn-hop:last-child { border-bottom: none; }
+    .dn-hop-tier { flex: 0 0 96px; font-weight: 700; text-transform: uppercase; font-size: 0.62rem; letter-spacing: 0.03em; padding: 3px 6px; border-radius: 5px; text-align: center; height: fit-content; }
+    .dn-hop-tier.root { background: rgba(56,189,248,0.18); color: var(--dn-accent); }
+    .dn-hop-tier.tld { background: rgba(251,191,36,0.18); color: var(--dn-warn); }
+    .dn-hop-tier.authoritative { background: rgba(74,222,128,0.18); color: var(--dn-good); }
+    .dn-hop-tier.cache { background: rgba(148,163,184,0.18); color: var(--dn-muted); }
+    .dn-hop-detail { font-family: ui-monospace, monospace; color: var(--dn-muted); }
+    .dn-hop-detail b { color: var(--dn-text); }
+
+    .dn-result { border-radius: 10px; padding: 12px 14px; margin-top: 10px; font-size: 0.82rem; }
+    .dn-result.ok { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.35); color: var(--dn-good); }
+    .dn-result.nx { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.35); color: var(--dn-bad); }
+    .dn-result-sub { color: var(--dn-muted); font-size: 0.74rem; margin-top: 4px; }
+
+    table.dn-cache-table { width: 100%; border-collapse: collapse; font-size: 0.7rem; }
+    table.dn-cache-table th { text-align: left; color: var(--dn-muted); font-weight: 600; padding: 5px 6px; border-bottom: 1px solid var(--dn-border); font-size: 0.64rem; text-transform: uppercase; }
+    table.dn-cache-table td { padding: 5px 6px; border-bottom: 1px solid rgba(42,54,85,0.5); font-family: ui-monospace, monospace; }
+    .dn-empty { color: var(--dn-muted); font-size: 0.76rem; font-style: italic; }
+
+    .dn-note { font-size: 0.76rem; color: var(--dn-muted); line-height: 1.5; margin-top: 4px; }
+  </style>
+
+  <h3>DNS Resolution: Play With It</h3>
+  <div class="dn-sub">One recursive resolver walking a real referral chain: root &rarr; TLD &rarr; authoritative. Resolve a name, then resolve another under the same TLD, then advance the clock past a TTL and watch exactly which layer gets refetched.</div>
+
+  <div class="dn-controls">
+    <label>Look up:
+      <select class="dn-select" id="dnHostSelect">
+        <option value="example.com.">example.com (A)</option>
+        <option value="www.example.com.">www.example.com (CNAME -&gt; example.com)</option>
+        <option value="blog.example.com.">blog.example.com (CNAME -&gt; example.com)</option>
+        <option value="shop.example.com.">shop.example.com (A, different TTL)</option>
+        <option value="example.org.">example.org (different TLD)</option>
+        <option value="nope.example.com.">nope.example.com (does not exist)</option>
+      </select>
+    </label>
+    <button class="dn-btn" id="dnResolveBtn">Resolve</button>
+    <button class="dn-btn secondary" id="dnAdv30">+30s</button>
+    <button class="dn-btn secondary" id="dnAdv5m">+5m</button>
+    <button class="dn-btn secondary" id="dnAdv2d">+2d</button>
+    <button class="dn-btn secondary" id="dnResetBtn">Reset</button>
+    <div class="dn-clock" id="dnClock">T+0s</div>
+  </div>
+
+  <div class="dn-body">
+    <div class="dn-trace-col">
+      <div class="dn-card">
+        <div class="dn-card-title">Resolution trace</div>
+        <div id="dnHops"></div>
+        <div id="dnResult"></div>
+      </div>
+      <div class="dn-note" id="dnNote"></div>
+    </div>
+    <div class="dn-cache-col">
+      <div class="dn-card">
+        <div class="dn-card-title">Resolver cache (live)</div>
+        <table class="dn-cache-table">
+          <thead><tr><th>Name</th><th>Type</th><th>Value</th><th>TTL left</th></tr></thead>
+          <tbody id="dnCacheBody"></tbody>
+        </table>
+        <div id="dnCacheEmpty" class="dn-empty" style="display:none;">Cache is empty.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('dnWidget');
+
+    var ZONE_OF = {
+      'example.com.': 'example.com.',
+      'www.example.com.': 'example.com.',
+      'blog.example.com.': 'example.com.',
+      'shop.example.com.': 'example.com.',
+      'nope.example.com.': 'example.com.',
+      'example.org.': 'example.org.'
+    };
+    var TLD_OF = { 'example.com.': 'com.', 'example.org.': 'org.' };
+    var ROOT_NS_TTL = 172800;
+    var ZONE_NS_TTL = 172800;
+    var NEG_TTL = 60;
+
+    var AUTH_DATA = {
+      'example.com.': {
+        'example.com.|A':      { kind: 'A', value: '93.184.216.34', ttl: 300 },
+        'www.example.com.|A':  { kind: 'CNAME', target: 'example.com.', ttl: 300 },
+        'blog.example.com.|A': { kind: 'CNAME', target: 'example.com.', ttl: 300 },
+        'shop.example.com.|A': { kind: 'A', value: '93.184.216.99', ttl: 120 }
+      },
+      'example.org.': {
+        'example.org.|A': { kind: 'A', value: '51.68.12.4', ttl: 300 }
+      }
+    };
+
+    function cacheGet(cache, key, now) {
+      var e = cache[key];
+      if (!e) return undefined;
+      if (now >= e.expiresAt) { delete cache[key]; return undefined; }
+      return e;
+    }
+    function cacheSet(cache, key, record, now) {
+      cache[key] = { record: record, expiresAt: now + record.ttl * 1000, storedAt: now };
+    }
+
+    function resolveIterative(name, type, cache, now, hopLog) {
+      var key = name + '|' + type;
+      var cached = cacheGet(cache, key, now);
+      if (cached) {
+        if (cached.record.kind === 'CNAME') {
+          return resolveIterative(cached.record.target, type, cache, now, hopLog);
+        }
+        return cached.record;
+      }
+
+      var zone = ZONE_OF[name];
+      if (!zone) return { kind: 'NXDOMAIN', ttl: NEG_TTL };
+      var tld = TLD_OF[zone];
+
+      var tldKey = tld + '|NS';
+      if (!cacheGet(cache, tldKey, now)) {
+        hopLog.push({ tier: 'root', query: tld + ' NS?', response: 'referral to ' + tld + ' TLD servers' });
+        cacheSet(cache, tldKey, { kind: 'NS', value: 'tld-ns-for-' + tld, ttl: ROOT_NS_TTL }, now);
+      }
+
+      var zoneKey = zone + '|NS';
+      if (!cacheGet(cache, zoneKey, now)) {
+        hopLog.push({ tier: 'tld', query: zone + ' NS?', response: 'referral to ' + zone + ' authoritative servers' });
+        cacheSet(cache, zoneKey, { kind: 'NS', value: 'auth-ns-for-' + zone, ttl: ZONE_NS_TTL }, now);
+      }
+
+      var record = (AUTH_DATA[zone] || {})[key];
+      if (!record) record = { kind: 'NXDOMAIN', ttl: NEG_TTL };
+      var respText = record.kind === 'A' ? record.value : (record.kind === 'CNAME' ? 'CNAME -> ' + record.target : 'NXDOMAIN');
+      hopLog.push({ tier: 'authoritative', query: name + ' ' + type + '?', response: respText });
+      cacheSet(cache, key, record, now);
+
+      if (record.kind === 'CNAME') {
+        return resolveIterative(record.target, type, cache, now, hopLog);
+      }
+      return record;
+    }
+
+    function resolve(name, type, cache, now) {
+      var hopLog = [];
+      var record = resolveIterative(name, type, cache, now, hopLog);
+      return { record: record, hops: hopLog };
+    }
+
+    function fmtTtl(seconds) {
+      if (seconds >= 3600) return (seconds / 3600).toFixed(1) + 'h';
+      if (seconds >= 60) return (seconds / 60).toFixed(1) + 'm';
+      return Math.max(0, Math.round(seconds)) + 's';
+    }
+
+    var cache = {};
+    var now = Date.parse('2024-01-01T00:00:00Z');
+    var startNow = now;
+
+    var hostSelect = document.getElementById('dnHostSelect');
+    var hopsEl = document.getElementById('dnHops');
+    var resultEl = document.getElementById('dnResult');
+    var cacheBodyEl = document.getElementById('dnCacheBody');
+    var cacheEmptyEl = document.getElementById('dnCacheEmpty');
+    var clockEl = document.getElementById('dnClock');
+    var noteEl = document.getElementById('dnNote');
+
+    function renderTrace(name, r) {
+      if (r.hops.length === 0) {
+        hopsEl.innerHTML = '<div class="dn-hop"><span class="dn-hop-tier cache">CACHE</span><span class="dn-hop-detail">Full cache hit for <b>' + name + '</b> -- no network query needed.</span></div>';
+      } else {
+        hopsEl.innerHTML = r.hops.map(function(h) {
+          return '<div class="dn-hop">' +
+            '<span class="dn-hop-tier ' + h.tier + '">' + h.tier + '</span>' +
+            '<span class="dn-hop-detail"><b>' + h.query + '</b> &rarr; ' + h.response + '</span>' +
+          '</div>';
+        }).join('');
+      }
+
+      var hopWord = r.hops.length === 1 ? 'hop' : 'hops';
+      if (r.record.kind === 'NXDOMAIN') {
+        resultEl.className = 'dn-result nx';
+        resultEl.innerHTML = 'NXDOMAIN -- no such name' +
+          '<div class="dn-result-sub">' + r.hops.length + ' ' + hopWord + '. Negative result cached for ' + NEG_TTL + 's.</div>';
+      } else {
+        resultEl.className = 'dn-result ok';
+        resultEl.innerHTML = name + ' &rarr; <b>' + r.record.value + '</b>' +
+          '<div class="dn-result-sub">' + r.hops.length + ' ' + hopWord + (r.hops.length === 0 ? ' (warm cache)' : '') + '.</div>';
+      }
+    }
+
+    function renderCache() {
+      var keys = Object.keys(cache);
+      // drop anything expired so the table only ever shows what the resolver would actually use
+      keys.forEach(function(k) { cacheGet(cache, k, now); });
+      keys = Object.keys(cache);
+
+      if (keys.length === 0) {
+        cacheBodyEl.innerHTML = '';
+        cacheEmptyEl.style.display = 'block';
+        return;
+      }
+      cacheEmptyEl.style.display = 'none';
+      cacheBodyEl.innerHTML = keys.sort().map(function(k) {
+        var parts = k.split('|');
+        var e = cache[k];
+        var remaining = (e.expiresAt - now) / 1000;
+        var valueText = e.record.kind === 'A' ? e.record.value
+          : e.record.kind === 'NS' ? e.record.value
+          : e.record.kind === 'CNAME' ? '-> ' + e.record.target
+          : 'NXDOMAIN';
+        return '<tr><td>' + parts[0] + '</td><td>' + parts[1] + '</td><td>' + valueText + '</td><td>' + fmtTtl(remaining) + '</td></tr>';
+      }).join('');
+    }
+
+    function renderClock() {
+      clockEl.textContent = 'T+' + fmtTtl((now - startNow) / 1000);
+    }
+
+    function doResolve() {
+      var name = hostSelect.value;
+      var r = resolve(name, 'A', cache, now);
+      renderTrace(name, r);
+      renderCache();
+      renderClock();
+    }
+
+    function advance(seconds) {
+      now += seconds * 1000;
+      renderClock();
+      renderCache();
+    }
+
+    document.getElementById('dnResolveBtn').addEventListener('click', doResolve);
+    document.getElementById('dnAdv30').addEventListener('click', function() { advance(30); });
+    document.getElementById('dnAdv5m').addEventListener('click', function() { advance(300); });
+    document.getElementById('dnAdv2d').addEventListener('click', function() { advance(172800); });
+    document.getElementById('dnResetBtn').addEventListener('click', function() {
+      cache = {};
+      now = startNow;
+      hopsEl.innerHTML = '';
+      resultEl.className = '';
+      resultEl.innerHTML = '';
+      renderCache();
+      renderClock();
+    });
+
+    noteEl.textContent = 'Root and TLD referrals are cached for 2 simulated days here; real root/TLD delegation data is similarly long-lived. Answer records use each record’s own (much shorter) TTL -- which is why re-resolving a name later usually needs one fresh query, not three.';
+
+    renderCache();
+    renderClock();
+  })();
+  </script>
+</div>

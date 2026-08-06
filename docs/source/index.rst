@@ -30,6 +30,7 @@ worth writing down and coming back to.
    lidar_slam
    ssh_secure_shell_interactive
    ssh_secure_shell
+   dns_resolution_interactive
    tls_cert_chain_interactive
    utf8_encoding_interactive
    unicode_utf8_encoding
@@ -141,6 +142,9 @@ System Notes
    * - :doc:`ssh_secure_shell`
      - How the SSH handshake, encryption, and key auth actually work
      - key exchange, host keys, password vs. key auth, tunneling
+   * - :doc:`dns_resolution_interactive`
+     - Interactive DNS resolver -- walk root/TLD/authoritative, then watch layered TTL caching and CNAME-following in action
+     - recursive resolver, referral chain, TTL caching, CNAME
    * - :doc:`tls_cert_chain_interactive`
      - Interactive TLS certificate chain -- real ECDSA signatures, four independent trust checks, break each one separately
      - certificate chain, root/intermediate/leaf, trust store, hostname verification
