@@ -42,6 +42,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Hash Load Balancer (Interactive)](docs/source/hash_load_balancer_interactive.rst)** | Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is | flow 5-tuple, hash % N, connection vs. user stickiness |
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
 | ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
+| 🎮 **[Bitcoin Mining (Interactive)](docs/source/bitcoin_mining_interactive.rst)** | Interactive Bitcoin mining -- real SHA-256 in your browser, tamper with a block and watch the cascade | proof of work, SHA-256, block hashing, 51% attack cost |
 | ₿ **[Bitcoin, Distributed Ledgers & Zcash](docs/source/bitcoin_distributed_ledgers_zcash.rst)** | Bitcoin, distributed ledgers, and Zcash explained with analogies | blockchain, proof of work, mining, zero-knowledge proofs |
 
 ### C++ Notes
@@ -127,6 +128,7 @@ system-notes/
         ├── hash_load_balancer_interactive.rst
         ├── consistent_hashing_interactive.rst
         ├── hash_load_balancer.rst
+        ├── bitcoin_mining_interactive.rst
         ├── bitcoin_distributed_ledgers_zcash.rst
         ├── spdlog_sinks_architecture.rst
         ├── cpp_memory_interactive.rst
@@ -163,7 +165,8 @@ system-notes/
             ├── net_vlan_widget.html
             ├── ssh_handshake_widget.html
             ├── utf8_encoding_widget.html
-            └── concurrency_models_widget.html
+            ├── concurrency_models_widget.html
+            └── bitcoin_mining_widget.html
 
 ```
 

@@ -1,0 +1,348 @@
+<div class="bc-root" id="bcWidget">
+  <style>
+    #bcWidget {
+      --bc-bg: #0f172a;
+      --bc-panel: #16213e;
+      --bc-border: #2a3655;
+      --bc-text: #e2e8f0;
+      --bc-muted: #94a3b8;
+      --bc-accent: #38bdf8;
+      --bc-good: #4ade80;
+      --bc-bad: #f87171;
+      --bc-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bc-bg);
+      color: var(--bc-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #bcWidget * { box-sizing: border-box; }
+    #bcWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #bcWidget .bc-sub { color: var(--bc-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .bc-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--bc-panel); border: 1px solid var(--bc-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 900px; }
+    .bc-controls label { font-size: 0.8rem; color: var(--bc-muted); display: flex; align-items: center; gap: 8px; }
+    .bc-controls input[type="range"] { width: 130px; accent-color: var(--bc-accent); }
+    .bc-btn { background: var(--bc-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .bc-btn.secondary { background: transparent; color: var(--bc-text); border: 1px solid var(--bc-border); }
+    .bc-btn.danger { background: var(--bc-bad); color: #2a0505; }
+    .bc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .bc-mining-status { background: var(--bc-panel); border: 1px solid var(--bc-accent); border-radius: 10px; padding: 10px 16px; margin-bottom: 14px; min-width: 900px; font-family: ui-monospace, monospace; font-size: 0.78rem; display: none; }
+    .bc-mining-status.show { display: block; }
+    .bc-mining-status .bc-ms-row { display: flex; gap: 22px; flex-wrap: wrap; }
+    .bc-mining-status b { color: var(--bc-accent); }
+
+    .bc-chain-row { display: flex; gap: 12px; margin-bottom: 16px; min-width: 900px; overflow-x: auto; padding-bottom: 4px; }
+    .bc-card { flex: 0 0 260px; background: var(--bc-panel); border: 2px solid var(--bc-border); border-radius: 10px; padding: 12px 14px; }
+    .bc-card.valid { border-color: var(--bc-good); }
+    .bc-card.invalid { border-color: var(--bc-bad); }
+    .bc-card.placeholder { border-style: dashed; opacity: 0.55; }
+    .bc-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .bc-card-title { font-weight: 800; color: #fff; font-size: 0.85rem; }
+    .bc-card-badge { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 10px; }
+    .bc-card-badge.valid { background: rgba(74,222,128,0.15); color: var(--bc-good); }
+    .bc-card-badge.invalid { background: rgba(248,113,113,0.15); color: var(--bc-bad); }
+    .bc-field { margin-bottom: 6px; }
+    .bc-field-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bc-muted); margin-bottom: 2px; }
+    .bc-field textarea { width: 100%; resize: vertical; min-height: 40px; background: #0a1128; color: var(--bc-text); border: 1px solid var(--bc-border); border-radius: 6px; padding: 5px 7px; font-size: 0.76rem; font-family: -apple-system, sans-serif; }
+    .bc-field .bc-mono { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--bc-text); word-break: break-all; background: #0a1128; border: 1px solid var(--bc-border); border-radius: 6px; padding: 5px 7px; }
+    .bc-field .bc-mono.bad { color: var(--bc-bad); }
+    .bc-reason { font-size: 0.72rem; color: var(--bc-bad); margin: 6px 0; }
+    .bc-card-actions { margin-top: 8px; }
+    .bc-card-actions .bc-btn { width: 100%; padding: 6px; font-size: 0.76rem; }
+
+    .bc-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 900px; }
+    .bc-explain-panel, .bc-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .bc-explain-panel { flex: 1.3; }
+    .bc-box { background: var(--bc-panel); border: 1px solid var(--bc-border); border-radius: 10px; padding: 12px 14px; }
+    .bc-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bc-muted); margin-bottom: 8px; }
+    .bc-log { height: 160px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .bc-log div { color: var(--bc-muted); }
+    .bc-log div.good { color: var(--bc-good); }
+    .bc-log div.bad { color: var(--bc-bad); }
+
+    details.bc-notes { margin-top: 14px; background: var(--bc-panel); border: 1px solid var(--bc-border); border-radius: 10px; padding: 12px 16px; min-width: 900px; font-size: 0.85rem; line-height: 1.6; }
+    details.bc-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.bc-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--bc-muted); }
+    details.bc-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--bc-accent); }
+  </style>
+
+  <h3>Bitcoin Mining &amp; the Blockchain: Play With It</h3>
+  <div class="bc-sub">Real SHA-256, computed live in your browser -- mine a small chain, then edit an old block's data and watch exactly why that breaks everything after it.</div>
+
+  <div class="bc-controls">
+    <label>Difficulty: <span id="bcDiffVal">14 bits</span>
+      <input type="range" id="bcDiffSlider" min="8" max="18" step="1" value="14">
+    </label>
+    <label>Mining speed: <span id="bcSpeedVal">1x</span>
+      <input type="range" id="bcSpeedSlider" min="0.3" max="3" step="0.1" value="1">
+    </label>
+    <button class="bc-btn" id="bcMineBtn">Mine Next Block</button>
+    <button class="bc-btn secondary" id="bcResetBtn">Reset Chain</button>
+  </div>
+
+  <div class="bc-mining-status" id="bcMiningStatus">
+    <div class="bc-ms-row">
+      <div>Mining block <b id="bcMsBlock">-</b></div>
+      <div>Attempts: <b id="bcMsAttempts">0</b></div>
+      <div>Current nonce: <b id="bcMsNonce">0</b></div>
+      <div>Target: hash starts with <b id="bcMsTarget">0</b> zero bits</div>
+    </div>
+    <div style="margin-top:6px;">Trying hash: <span id="bcMsHash">-</span></div>
+  </div>
+
+  <div class="bc-chain-row" id="bcChainRow"></div>
+
+  <div class="bc-panels">
+    <div class="bc-explain-panel">
+      <div class="bc-box">
+        <div class="bc-panel-title">What's happening right now</div>
+        <div id="bcExplain">A genesis block is already being mined for you. Once it's done, click "Mine Next Block" to add more -- each one records the previous block's real hash. Then try editing an old block's text and watch what happens.</div>
+      </div>
+    </div>
+    <div class="bc-side-panel-col">
+      <div class="bc-box">
+        <div class="bc-panel-title">Event log</div>
+        <div class="bc-log" id="bcLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="bc-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>This is genuinely SHA-256</b>, computed via your browser's native <code>crypto.subtle.digest</code> -- not a simulation. Real Bitcoin mining is exactly this loop (try a nonce, hash it, check the leading zero bits, repeat) at a difficulty around 80 bits instead of this widget's 8-18. Going from 18 bits to 80 bits isn't a little harder, it's roughly 2<sup>62</sup> times harder -- which is why real mining needs warehouses of specialized ASIC chips, not a browser tab.</li>
+      <li><b>A block's hash is never stored -- it's always recomputed.</b> That's the entire trick this widget demonstrates: there is no cached "hash" field anywhere in this page's code that tampering could leave stale. Every block's hash is derived fresh from its current data, its recorded previous-hash, and its nonce, every single time anyone looks at it. Change one character of data and the hash is a completely different, unpredictable number (this is the <em>avalanche effect</em> -- SHA-256 is deliberately designed so similar inputs never produce similar outputs).</li>
+      <li><b>"Repair" is doing real work, not resetting a flag.</b> When you repair a tampered block, the widget actually re-runs the mining search against the new data to find a valid nonce -- watch the attempt counter to see it happen. On a real network, this is exactly what an attacker rewriting history would have to do, for every block after the one they changed, faster than the rest of the network is finding new blocks -- which is the actual meaning of a "51% attack": out-computing everyone else combined, not breaking any cryptography.</li>
+      <li>See <a href="bitcoin_distributed_ledgers_zcash.html">Bitcoin, Distributed Ledgers &amp; Zcash Explained</a> for the plain-language overview this widget is built from, including how this same proof-of-work mechanism fits into the bigger picture of transaction broadcasting and network-wide consensus.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('bcWidget');
+    if (!window.crypto || !window.crypto.subtle) {
+      root.innerHTML = '<p style="color:#f87171;">This widget needs the Web Crypto API (crypto.subtle), which requires a modern browser and a secure context (https).</p>';
+      return;
+    }
+
+    const diffSlider = document.getElementById('bcDiffSlider');
+    const diffVal = document.getElementById('bcDiffVal');
+    const speedSlider = document.getElementById('bcSpeedSlider');
+    const speedVal = document.getElementById('bcSpeedVal');
+    const mineBtn = document.getElementById('bcMineBtn');
+    const resetBtn = document.getElementById('bcResetBtn');
+    const chainRow = document.getElementById('bcChainRow');
+    const explainEl = document.getElementById('bcExplain');
+    const logEl = document.getElementById('bcLog');
+    const msBox = document.getElementById('bcMiningStatus');
+    const msBlock = document.getElementById('bcMsBlock');
+    const msAttempts = document.getElementById('bcMsAttempts');
+    const msNonce = document.getElementById('bcMsNonce');
+    const msTarget = document.getElementById('bcMsTarget');
+    const msHash = document.getElementById('bcMsHash');
+
+    const MAX_BLOCKS = 4;
+    const GENESIS_PREV = '0'.repeat(64);
+    const DEFAULT_TEXTS = ['Genesis Block', 'Alice pays Bob 1 BTC', 'Bob pays Carol 0.5 BTC', 'Carol pays Dave 0.25 BTC'];
+
+    function updateDiffLabel() {
+      const bits = parseInt(diffSlider.value, 10);
+      diffVal.textContent = bits + ' bits (~' + Math.pow(2, bits).toLocaleString() + ' avg attempts)';
+    }
+    diffSlider.addEventListener('input', updateDiffLabel);
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    updateDiffLabel();
+
+    function bytesToHex(buf) {
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+    async function sha256Hex(str) {
+      const enc = new TextEncoder().encode(str);
+      const digest = await window.crypto.subtle.digest('SHA-256', enc);
+      return bytesToHex(digest);
+    }
+    function countLeadingZeroBits(hex) {
+      let bits = 0;
+      for (const ch of hex) {
+        const nibble = parseInt(ch, 16);
+        if (nibble === 0) { bits += 4; continue; }
+        if (nibble < 8) bits += 1;
+        if (nibble < 4) bits += 1;
+        if (nibble < 2) bits += 1;
+        break;
+      }
+      return bits;
+    }
+    function currentHash(block) { return sha256Hex(block.data + '|' + block.prevHash + '|' + block.nonce); }
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+    function short(hex) { return hex.slice(0, 10) + '…' + hex.slice(-6); }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    let blocks = [];
+    let mining = false;
+    let miningToken = 0;
+
+    function difficulty() { return parseInt(diffSlider.value, 10); }
+    function delayMs() { return 25 / parseFloat(speedSlider.value); }
+
+    function setButtonsDisabled() {
+      mineBtn.disabled = mining || blocks.length >= MAX_BLOCKS;
+      resetBtn.disabled = false;
+      diffSlider.disabled = mining || blocks.length > 1;
+      root.querySelectorAll('.bc-repair-btn').forEach(b => { b.disabled = mining; });
+      root.querySelectorAll('.bc-data-input').forEach(t => { t.disabled = mining; });
+    }
+
+    async function mineWithProgress(data, prevHash, bits, uiIndex) {
+      const myToken = miningToken;
+      msBox.classList.add('show');
+      msBlock.textContent = uiIndex;
+      msTarget.textContent = bits;
+      const BATCH = 150;
+      for (let nonce = 0; nonce < 20000000; nonce++) {
+        const hash = await sha256Hex(data + '|' + prevHash + '|' + nonce);
+        if (myToken !== miningToken) return null;
+        if (countLeadingZeroBits(hash) >= bits) {
+          msAttempts.textContent = (nonce + 1).toLocaleString();
+          msNonce.textContent = nonce;
+          msHash.textContent = hash;
+          return { nonce, hash, attempts: nonce + 1 };
+        }
+        if (nonce % BATCH === 0) {
+          msAttempts.textContent = (nonce + 1).toLocaleString();
+          msNonce.textContent = nonce;
+          msHash.textContent = hash;
+          await sleep(delayMs());
+          if (myToken !== miningToken) return null;
+        }
+      }
+      return null;
+    }
+
+    async function repairBlock(i) {
+      if (mining) return;
+      mining = true;
+      setButtonsDisabled();
+      if (i > 0) {
+        blocks[i].prevHash = await currentHash(blocks[i - 1]);
+      }
+      log('Mining block ' + i + ' (target: ' + difficulty() + ' leading zero bits)...', null);
+      const result = await mineWithProgress(blocks[i].data, blocks[i].prevHash, difficulty(), i);
+      if (result) {
+        blocks[i].nonce = result.nonce;
+        blocks[i].mined = true;
+        log('Block ' + i + ' mined: nonce=' + result.nonce + ' in ' + result.attempts.toLocaleString() + ' attempts, hash ' + short(result.hash), 'good');
+      }
+      mining = false;
+      msBox.classList.remove('show');
+      setButtonsDisabled();
+      await renderChain();
+    }
+
+    async function mineNextBlock() {
+      if (mining || blocks.length >= MAX_BLOCKS) return;
+      const idx = blocks.length;
+      blocks.push({ data: DEFAULT_TEXTS[idx] || ('Block ' + idx + ' data'), prevHash: '', nonce: 0, mined: false });
+      await repairBlock(idx);
+    }
+
+    function onDataChanged(i, value) {
+      if (mining) return;
+      blocks[i].data = value;
+      log('Block ' + i + "'s data was edited by hand -- its hash no longer matches its nonce.", 'bad');
+      renderChain();
+    }
+
+    async function renderChain() {
+      chainRow.innerHTML = '';
+      let prevActualHash = null;
+      for (let i = 0; i < blocks.length; i++) {
+        const b = blocks[i];
+
+        if (!b.mined) {
+          const pending = document.createElement('div');
+          pending.className = 'bc-card placeholder';
+          pending.innerHTML = '<div class="bc-card-title" style="text-align:center;color:var(--bc-muted);padding:30px 0;">Block ' + i + '<br>(mining in progress…)</div>';
+          chainRow.appendChild(pending);
+          continue;
+        }
+
+        const hash = await currentHash(b);
+        const powOk = countLeadingZeroBits(hash) >= difficulty();
+        const linkOk = i === 0 ? true : b.prevHash === prevActualHash;
+        const valid = powOk && linkOk;
+        prevActualHash = hash;
+
+        const card = document.createElement('div');
+        card.className = 'bc-card ' + (valid ? 'valid' : 'invalid');
+
+        let reasonHtml = '';
+        if (!powOk) reasonHtml += '<div class="bc-reason">✗ invalid proof-of-work -- hash doesn\'t meet the difficulty target for this data/nonce</div>';
+        if (!linkOk) reasonHtml += '<div class="bc-reason">✗ broken link -- this block\'s "prev hash" no longer matches block ' + (i - 1) + '\'s actual current hash</div>';
+
+        card.innerHTML =
+          '<div class="bc-card-head"><span class="bc-card-title">Block ' + i + (i === 0 ? ' (genesis)' : '') + '</span>' +
+          '<span class="bc-card-badge ' + (valid ? 'valid' : 'invalid') + '">' + (valid ? '✓ valid' : '✗ invalid') + '</span></div>' +
+          '<div class="bc-field"><div class="bc-field-label">Data</div><textarea class="bc-data-input" data-idx="' + i + '">' + b.data.replace(/</g, '&lt;') + '</textarea></div>' +
+          '<div class="bc-field"><div class="bc-field-label">Prev Hash</div><div class="bc-mono ' + (linkOk ? '' : 'bad') + '">' + short(b.prevHash || GENESIS_PREV) + '</div></div>' +
+          '<div class="bc-field"><div class="bc-field-label">Nonce</div><div class="bc-mono">' + b.nonce + '</div></div>' +
+          '<div class="bc-field"><div class="bc-field-label">Hash (live, always recomputed)</div><div class="bc-mono ' + (powOk ? '' : 'bad') + '">' + short(hash) + '</div></div>' +
+          reasonHtml +
+          (valid ? '' : '<div class="bc-card-actions"><button class="bc-btn danger bc-repair-btn" data-idx="' + i + '">Repair (re-mine) This Block</button></div>');
+
+        chainRow.appendChild(card);
+      }
+
+      if (blocks.length < MAX_BLOCKS) {
+        const ph = document.createElement('div');
+        ph.className = 'bc-card placeholder';
+        ph.innerHTML = '<div class="bc-card-title" style="text-align:center;color:var(--bc-muted);padding:30px 0;">Block ' + blocks.length + '<br>(not yet mined)</div>';
+        chainRow.appendChild(ph);
+      }
+
+      root.querySelectorAll('.bc-data-input').forEach(t => {
+        t.addEventListener('change', (e) => onDataChanged(parseInt(e.target.dataset.idx, 10), e.target.value));
+      });
+      root.querySelectorAll('.bc-repair-btn').forEach(b => {
+        b.addEventListener('click', (e) => repairBlock(parseInt(e.target.dataset.idx, 10)));
+      });
+
+      const anyInvalid = chainRow.querySelector('.bc-card.invalid');
+      if (blocks.length === MAX_BLOCKS && !anyInvalid) {
+        explainEl.textContent = 'The chain is complete and fully valid. Now try editing an early block\'s "Data" field -- watch its hash change instantly, its badge turn red, and the block after it break too, even though you never touched that one directly.';
+      } else if (anyInvalid) {
+        explainEl.textContent = 'Something no longer matches. A block is only valid if (a) its hash actually meets the difficulty target for its current data, and (b) the next block correctly recorded that hash as its "prev hash." Editing history breaks (a) immediately, which cascades into breaking (b) for everything downstream.';
+      }
+      setButtonsDisabled();
+    }
+
+    async function resetChain() {
+      miningToken++;
+      mining = false;
+      msBox.classList.remove('show');
+      logEl.innerHTML = '';
+      explainEl.textContent = 'A genesis block is already being mined for you. Once it\'s done, click "Mine Next Block" to add more -- each one records the previous block\'s real hash. Then try editing an old block\'s text and watch what happens.';
+      blocks = [{ data: DEFAULT_TEXTS[0], prevHash: GENESIS_PREV, nonce: 0, mined: false }];
+      await renderChain();
+      await repairBlock(0);
+    }
+
+    mineBtn.addEventListener('click', mineNextBlock);
+    resetBtn.addEventListener('click', resetChain);
+
+    resetChain();
+  })();
+  </script>
+</div>
