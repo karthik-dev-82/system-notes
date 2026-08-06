@@ -39,6 +39,7 @@ worth writing down and coming back to.
    hash_load_balancer_interactive
    consistent_hashing_interactive
    hash_load_balancer
+   bitcoin_distributed_ledgers_zcash
 
 .. toctree::
    :hidden:
@@ -159,6 +160,9 @@ System Notes
    * - :doc:`hash_load_balancer`
      - Hash-based load balancing, sticky sessions, and consistent hashing
      - modulo hashing, session affinity, CDN routing, reshuffling problem
+   * - :doc:`bitcoin_distributed_ledgers_zcash`
+     - Bitcoin, distributed ledgers, and Zcash explained with analogies
+     - blockchain, proof of work, mining, zero-knowledge proofs
 
 C++ Notes
 -----------------

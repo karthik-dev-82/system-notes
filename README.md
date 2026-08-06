@@ -42,6 +42,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Hash Load Balancer (Interactive)](docs/source/hash_load_balancer_interactive.rst)** | Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is | flow 5-tuple, hash % N, connection vs. user stickiness |
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
 | ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
+| ₿ **[Bitcoin, Distributed Ledgers & Zcash](docs/source/bitcoin_distributed_ledgers_zcash.rst)** | Bitcoin, distributed ledgers, and Zcash explained with analogies | blockchain, proof of work, mining, zero-knowledge proofs |
 
 ### C++ Notes
 
@@ -126,6 +127,7 @@ system-notes/
         ├── hash_load_balancer_interactive.rst
         ├── consistent_hashing_interactive.rst
         ├── hash_load_balancer.rst
+        ├── bitcoin_distributed_ledgers_zcash.rst
         ├── spdlog_sinks_architecture.rst
         ├── cpp_memory_interactive.rst
         ├── cpp_raii_smart_pointers_interactive.rst
