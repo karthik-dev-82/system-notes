@@ -23,6 +23,7 @@ worth writing down and coming back to.
    overlayfs_interactive
    process_memory_layout_interactive
    vma_paging_interactive
+   page_cache_interactive
    docker_packet_journey_interactive
    kernel_networking_docker_internals
    lidar_slam
@@ -117,6 +118,9 @@ System Notes
    * - :doc:`vma_paging_interactive`
      - Interactive VMAs and page tables -- grow the heap for free, then watch a real page fault get resolved
      - VMAs, page tables, page faults, lazy allocation
+   * - :doc:`page_cache_interactive`
+     - Interactive page cache -- two processes share one cache, mmap() skips the copy, crash before fsync() and lose it
+     - page cache, mmap, fsync, write-back, cross-process sharing
    * - :doc:`docker_packet_journey_interactive`
      - Interactive packet journey -- container, veth, docker0, netfilter, and back
      - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack

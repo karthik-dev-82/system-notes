@@ -1,0 +1,450 @@
+<div class="pc-root" id="pcWidget">
+  <style>
+    #pcWidget {
+      --pc-bg: #0f172a;
+      --pc-panel: #16213e;
+      --pc-border: #2a3655;
+      --pc-text: #e2e8f0;
+      --pc-muted: #94a3b8;
+      --pc-accent: #38bdf8;
+      --pc-good: #4ade80;
+      --pc-bad: #f87171;
+      --pc-warn: #fbbf24;
+      --pc-p1: #38bdf8;
+      --pc-p2: #a78bfa;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pc-bg);
+      color: var(--pc-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pcWidget * { box-sizing: border-box; }
+    #pcWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pcWidget .pc-sub { color: var(--pc-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .pc-legend { background: var(--pc-panel); border: 1px solid var(--pc-border); border-radius: 10px; padding: 10px 16px; margin-bottom: 16px; min-width: 940px; font-size: 0.74rem; color: var(--pc-muted); font-family: ui-monospace, monospace; display: flex; flex-wrap: wrap; gap: 18px; }
+    .pc-legend b { color: #fff; }
+
+    .pc-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--pc-panel); border: 1px solid var(--pc-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 940px; }
+    .pc-controls label { font-size: 0.8rem; color: var(--pc-muted); display: flex; align-items: center; gap: 8px; }
+    .pc-chunk-row { display: flex; gap: 6px; }
+    .pc-chunk-btn { background: transparent; color: var(--pc-muted); border: 1px solid var(--pc-border); border-radius: 6px; padding: 6px 10px; font-size: 0.76rem; font-family: ui-monospace, monospace; cursor: pointer; }
+    .pc-chunk-btn.active { background: var(--pc-warn); color: #2a1c00; border-color: var(--pc-warn); }
+    .pc-btn { background: var(--pc-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .pc-btn.secondary { background: transparent; color: var(--pc-text); border: 1px solid var(--pc-border); }
+    .pc-btn.danger { background: var(--pc-bad); color: #2a0505; }
+    .pc-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .pc-processes { display: flex; gap: 14px; min-width: 940px; margin-bottom: 14px; flex-wrap: wrap; }
+    .pc-process { flex: 1; min-width: 300px; border-radius: 10px; padding: 12px 14px; border: 2px solid; }
+    .pc-process.p1 { border-color: var(--pc-p1); }
+    .pc-process.p2 { border-color: var(--pc-p2); }
+    .pc-process-title { font-weight: 800; color: #fff; font-size: 0.85rem; margin-bottom: 8px; }
+    .pc-process .pc-toggle { display: inline-flex; border: 1px solid var(--pc-border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+    .pc-process .pc-toggle button { background: transparent; color: var(--pc-muted); border: none; padding: 6px 12px; font-size: 0.74rem; font-weight: 600; cursor: pointer; }
+    .pc-process .pc-toggle button.active { background: var(--pc-warn); color: #2a1c00; }
+    .pc-process-actions { display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+    .pc-view-row { display: flex; gap: 5px; }
+    .pc-view-slot { width: 34px; height: 34px; border-radius: 5px; background: #0a1128; border: 1px dashed var(--pc-border); display: flex; align-items: center; justify-content: center; font-size: 0.68rem; color: var(--pc-muted); font-family: ui-monospace, monospace; }
+    .pc-view-slot.mapped.p1 { border-style: solid; border-color: var(--pc-p1); background: rgba(56,189,248,0.18); color: #fff; }
+    .pc-view-slot.mapped.p2 { border-style: solid; border-color: var(--pc-p2); background: rgba(167,139,250,0.18); color: #fff; }
+    .pc-view-label { font-size: 0.66rem; color: var(--pc-muted); margin-bottom: 4px; }
+
+    .pc-central { display: flex; flex-direction: column; gap: 10px; min-width: 940px; margin-bottom: 16px; }
+    .pc-box { background: var(--pc-panel); border: 1px solid var(--pc-border); border-radius: 10px; padding: 12px 14px; }
+    .pc-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pc-muted); margin-bottom: 8px; }
+    .pc-slot-row { display: flex; gap: 8px; }
+    .pc-slot { flex: 1; height: 46px; border-radius: 6px; background: #0a1128; border: 2px solid var(--pc-border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.7rem; color: var(--pc-muted); transition: background 0.2s, border-color 0.2s; }
+    .pc-slot.clean { border-color: var(--pc-accent); background: rgba(56,189,248,0.14); color: #fff; }
+    .pc-slot.dirty { border-color: var(--pc-warn); background: rgba(251,191,36,0.18); color: #fff; }
+    .pc-slot.flash-io { border-color: var(--pc-bad); box-shadow: 0 0 0 2px rgba(248,113,113,0.5); }
+    .pc-slot.flash-copy { border-color: #fff; box-shadow: 0 0 0 2px rgba(255,255,255,0.5); }
+    .pc-slot.lost { border-color: var(--pc-bad); background: rgba(248,113,113,0.25); }
+    .pc-disk-slot { flex: 1; height: 38px; border-radius: 6px; background: #0a1128; border: 2px solid var(--pc-border); display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.7rem; color: var(--pc-muted); }
+    .pc-disk-slot.writing { border-color: var(--pc-bad); box-shadow: 0 0 0 2px rgba(248,113,113,0.5); }
+
+    .pc-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 940px; }
+    .pc-explain-panel, .pc-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .pc-explain-panel { flex: 1.3; }
+    .pc-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pc-log div { color: var(--pc-muted); }
+    .pc-log div.good { color: var(--pc-good); }
+    .pc-log div.bad { color: var(--pc-bad); }
+    .pc-log div.warn { color: var(--pc-warn); }
+
+    details.pc-notes { margin-top: 4px; background: var(--pc-panel); border: 1px solid var(--pc-border); border-radius: 10px; padding: 12px 16px; min-width: 940px; font-size: 0.85rem; line-height: 1.6; }
+    details.pc-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.pc-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--pc-muted); }
+    details.pc-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--pc-accent); }
+  </style>
+
+  <h3>Page Cache: Play With It</h3>
+  <div class="pc-sub">Two processes, one shared file, one shared page cache. Watch a cold read pay a real disk-latency cost that a warm one never does -- and watch a write "complete" instantly while it's still only in RAM.</div>
+
+  <div class="pc-legend">
+    <span><b>Latency model (representative, 2020s laptop/server-class x86-64 or Apple Silicon -- not one specific chip's datasheet):</b></span>
+    <span>page cache &rarr; user buffer copy: <b>~0.2 &micro;s</b> (RAM-bandwidth-bound)</span>
+    <span>NVMe SSD 4&nbsp;KB random read/write: <b>~100 &micro;s</b></span>
+    <span>(for scale) old-school HDD seek: <b>~10,000 &micro;s</b></span>
+    <span>animation timing below is compressed for visibility -- the numbers above are the real ones</span>
+  </div>
+
+  <div class="pc-controls">
+    <span style="font-size:0.78rem;color:var(--pc-muted);">Selected chunk:</span>
+    <div class="pc-chunk-row" id="pcChunkRow"></div>
+    <label>Speed: <span id="pcSpeedVal">1x</span><input type="range" id="pcSpeedSlider" min="0.4" max="2.5" step="0.1" value="1"></label>
+    <button class="pc-btn" id="pcFsyncBtn">fsync()</button>
+    <button class="pc-btn danger" id="pcCrashBtn">Simulate Crash</button>
+    <button class="pc-btn secondary" id="pcResetBtn">Reset</button>
+  </div>
+
+  <div class="pc-processes">
+    <div class="pc-process p1">
+      <div class="pc-process-title">Process 1 &mdash; "render"</div>
+      <div class="pc-toggle" id="pcP1Toggle">
+        <button class="pc-p1-mode active" data-mode="read">read()</button>
+        <button class="pc-p1-mode" data-mode="mmap">mmap()</button>
+      </div>
+      <div class="pc-process-actions">
+        <button class="pc-btn secondary" id="pcP1Access">Access selected chunk</button>
+        <button class="pc-btn secondary" id="pcP1Write">Write selected chunk</button>
+      </div>
+      <div class="pc-view-label">This process's view of the file</div>
+      <div class="pc-view-row" id="pcP1View"></div>
+    </div>
+    <div class="pc-process p2">
+      <div class="pc-process-title">Process 2 &mdash; "render3d"</div>
+      <div class="pc-toggle" id="pcP2Toggle">
+        <button class="pc-p2-mode active" data-mode="read">read()</button>
+        <button class="pc-p2-mode" data-mode="mmap">mmap()</button>
+      </div>
+      <div class="pc-process-actions">
+        <button class="pc-btn secondary" id="pcP2Access">Access selected chunk</button>
+        <button class="pc-btn secondary" id="pcP2Write">Write selected chunk</button>
+      </div>
+      <div class="pc-view-label">This process's view of the file</div>
+      <div class="pc-view-row" id="pcP2View"></div>
+    </div>
+  </div>
+
+  <div class="pc-central">
+    <div class="pc-box">
+      <div class="pc-panel-title">Page cache (system-wide, shared by every process -- RAM)</div>
+      <div class="pc-slot-row" id="pcCacheGrid"></div>
+    </div>
+    <div class="pc-box">
+      <div class="pc-panel-title">scene.dat on disk (persistent -- only changes on fsync)</div>
+      <div class="pc-slot-row" id="pcDiskGrid"></div>
+    </div>
+  </div>
+
+  <div class="pc-panels">
+    <div class="pc-explain-panel">
+      <div class="pc-box">
+        <div class="pc-panel-title">What's happening right now</div>
+        <div id="pcExplain">Pick a chunk and click "Access selected chunk" for Process 1. The first access to any chunk is a cold miss -- real (simulated) disk latency. Access the same chunk again, or from Process 2, and it's a hit: the page cache is one shared resource, not one per process.</div>
+      </div>
+    </div>
+    <div class="pc-side-panel-col">
+      <div class="pc-box">
+        <div class="pc-panel-title">Event log</div>
+        <div class="pc-log" id="pcLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="pc-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Every regular file read in Linux goes through the page cache</b> -- there's no way to opt out short of <code>O_DIRECT</code>. Ask for a single byte and the kernel still pulls in the whole containing 4&nbsp;KB page, on the theory that you'll probably want the rest of it soon (and it's barely more expensive to fetch 4&nbsp;KB than 1 byte at these latencies anyway).</li>
+      <li><b>This is the actual answer to "why does I/O block?"</b> from <a href="python_concurrency_interactive.html">Multiprocessing vs Threading vs AsyncIO</a> -- a cold page-cache miss is a real wait for a real disk (or network) round trip, tens to hundreds of microseconds even on fast NVMe storage, doing nothing useful the whole time. Threading and asyncio both exist to let something else run during exactly that gap; a warm page-cache hit, by contrast, is fast enough that there's rarely anything worth yielding for.</li>
+      <li><b>The kernel doesn't shrink the page cache just because it can.</b> Free RAM that isn't caching anything is doing no work for you, so a healthy system's cache grows until memory pressure forces it to evict something -- that's why "available" memory looks low on a machine that's actually running fine.</li>
+      <li><b>write() returning doesn't mean your data is safe.</b> This widget's crash button makes that concrete: anything written but never <code>fsync()</code>'d only ever existed in RAM. Database engines and anything else that can't tolerate silent data loss call <code>fsync()</code> (or open files with flags that force synchronous writes) specifically to convert "probably on disk soon" into "confirmed on disk, right now" -- at the cost of paying that full disk-latency price on every write instead of amortizing it in the background.</li>
+      <li><b>This widget skips one real behavior for clarity: read-ahead.</b> A real kernel notices sequential access patterns and starts pulling in upcoming pages before you ask for them, so a sequential scan pays the miss cost far less often than this one-page-at-a-time model shows.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('pcWidget');
+
+    const FILE_PAGES = 6;
+    const DISK_LATENCY_MS = 1400;
+    const COPY_LATENCY_MS = 220;
+
+    const speedSlider = document.getElementById('pcSpeedSlider');
+    const speedVal = document.getElementById('pcSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+    // ---- verified page-cache state machine ----
+    function makeState() {
+      return {
+        disk: new Array(FILE_PAGES).fill(0),
+        cache: new Array(FILE_PAGES).fill(null), // null | { version, dirty }
+      };
+    }
+    function readPage(state, i) {
+      let hit = true;
+      if (state.cache[i] === null) { hit = false; state.cache[i] = { version: state.disk[i], dirty: false }; }
+      return { hit, copied: true };
+    }
+    function mmapTouch(state, i) {
+      let hit = true;
+      if (state.cache[i] === null) { hit = false; state.cache[i] = { version: state.disk[i], dirty: false }; }
+      return { hit, copied: false };
+    }
+    function writePage(state, i) {
+      let hit = true;
+      if (state.cache[i] === null) { hit = false; state.cache[i] = { version: state.disk[i], dirty: false }; }
+      state.cache[i].version += 1;
+      state.cache[i].dirty = true;
+      return { hit };
+    }
+    function fsync(state) {
+      const written = [];
+      for (let i = 0; i < FILE_PAGES; i++) {
+        if (state.cache[i] && state.cache[i].dirty) {
+          state.disk[i] = state.cache[i].version;
+          state.cache[i].dirty = false;
+          written.push(i);
+        }
+      }
+      return written;
+    }
+    function crash(state) {
+      const lost = [];
+      for (let i = 0; i < FILE_PAGES; i++) {
+        if (state.cache[i] && state.cache[i].dirty) lost.push(i);
+      }
+      state.cache = new Array(FILE_PAGES).fill(null);
+      return lost;
+    }
+
+    let state = makeState();
+    let selectedChunk = 0;
+    let p1Mode = 'read', p2Mode = 'read';
+    let p1Mapped = new Set(), p2Mapped = new Set();
+    let p1LastRead = null, p2LastRead = null;
+    let busy = false;
+
+    const chunkRow = document.getElementById('pcChunkRow');
+    const cacheGridEl = document.getElementById('pcCacheGrid');
+    const diskGridEl = document.getElementById('pcDiskGrid');
+    const p1ViewEl = document.getElementById('pcP1View');
+    const p2ViewEl = document.getElementById('pcP2View');
+    const explainEl = document.getElementById('pcExplain');
+    const logEl = document.getElementById('pcLog');
+    const fsyncBtn = document.getElementById('pcFsyncBtn');
+    const crashBtn = document.getElementById('pcCrashBtn');
+    const resetBtn = document.getElementById('pcResetBtn');
+    const p1AccessBtn = document.getElementById('pcP1Access');
+    const p1WriteBtn = document.getElementById('pcP1Write');
+    const p2AccessBtn = document.getElementById('pcP2Access');
+    const p2WriteBtn = document.getElementById('pcP2Write');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function setBusy(b) {
+      busy = b;
+      [p1AccessBtn, p1WriteBtn, p2AccessBtn, p2WriteBtn, fsyncBtn, crashBtn].forEach(btn => btn.disabled = b);
+    }
+
+    function renderChunkRow() {
+      chunkRow.innerHTML = '';
+      for (let i = 0; i < FILE_PAGES; i++) {
+        const b = document.createElement('button');
+        b.className = 'pc-chunk-btn' + (i === selectedChunk ? ' active' : '');
+        b.textContent = 'Chunk ' + i;
+        b.addEventListener('click', () => { selectedChunk = i; renderChunkRow(); });
+        chunkRow.appendChild(b);
+      }
+    }
+
+    function renderCentral() {
+      cacheGridEl.innerHTML = '';
+      diskGridEl.innerHTML = '';
+      for (let i = 0; i < FILE_PAGES; i++) {
+        const c = state.cache[i];
+        const slot = document.createElement('div');
+        slot.className = 'pc-slot' + (c ? (c.dirty ? ' dirty' : ' clean') : '');
+        slot.id = 'pc-cache-slot-' + i;
+        slot.innerHTML = '#' + i + '<br>' + (c ? (c.dirty ? 'dirty' : 'clean') : 'empty');
+        cacheGridEl.appendChild(slot);
+
+        const dslot = document.createElement('div');
+        dslot.className = 'pc-disk-slot';
+        dslot.id = 'pc-disk-slot-' + i;
+        dslot.textContent = '#' + i + ' v' + state.disk[i];
+        diskGridEl.appendChild(dslot);
+      }
+    }
+
+    function renderView(el, mapped, lastRead, procClass) {
+      el.innerHTML = '';
+      for (let i = 0; i < FILE_PAGES; i++) {
+        const slot = document.createElement('div');
+        let cls = 'pc-view-slot';
+        if (mapped.has(i)) cls += ' mapped ' + procClass;
+        slot.className = cls;
+        slot.textContent = mapped.has(i) ? '#' + i : (lastRead === i ? '#' + i : '');
+        el.appendChild(slot);
+      }
+    }
+
+    function renderAll() {
+      renderCentral();
+      renderView(p1ViewEl, p1Mapped, p1LastRead, 'p1');
+      renderView(p2ViewEl, p2Mapped, p2LastRead, 'p2');
+    }
+
+    async function flashCache(i, cls, ms) {
+      const el = document.getElementById('pc-cache-slot-' + i);
+      if (!el) return;
+      el.classList.add(cls);
+      await sleep(scaled(ms));
+      el.classList.remove(cls);
+    }
+
+    async function doAccess(procName, procClass, mode, mapped, setLastRead) {
+      if (busy) return;
+      setBusy(true);
+      const i = selectedChunk;
+      const wasHit = state.cache[i] !== null;
+
+      if (!wasHit) {
+        log(procName + ': chunk ' + i + ' not in page cache -- cold miss. Issuing real disk I/O (~100 µs on NVMe).', 'warn');
+        explainEl.textContent = procName + ' is the first to touch chunk ' + i + '. The kernel allocates a page frame and reads 4 KB from disk into the page cache -- the only genuinely slow step in this whole picture.';
+        await flashCache(i, 'flash-io', DISK_LATENCY_MS);
+      }
+
+      const result = mode === 'read' ? readPage(state, i) : mmapTouch(state, i);
+
+      if (mode === 'read') {
+        await flashCache(i, 'flash-copy', COPY_LATENCY_MS);
+        setLastRead(i);
+        log(procName + ': read(chunk ' + i + ') -> ' + (wasHit ? 'HIT' : 'miss resolved') + ', page cache copied into ' + procName + '\'s user buffer (~0.2 µs).', wasHit ? 'good' : null);
+        explainEl.textContent = wasHit
+          ? procName + ' got this chunk straight from the (already warm) page cache -- no disk involved, just a fast memory copy into its own buffer.'
+          : procName + '\'s read() call is now satisfied the same way a warm read always is: page cache -> user buffer, a real copy.';
+      } else {
+        mapped.add(i);
+        log(procName + ': mmap-touch(chunk ' + i + ') -> ' + (wasHit ? 'HIT' : 'miss resolved') + ', ' + procName + '\'s virtual page now points DIRECTLY at the page cache page -- zero copy.', wasHit ? 'good' : null);
+        explainEl.textContent = wasHit
+          ? procName + ' just mapped a page it never had to fetch itself -- ' + (procClass === 'p1' ? 'Process 2' : 'Process 1') + ' (or ' + procName + ' itself, earlier) already paid that cost.'
+          : procName + '\'s mmap()\'d page now lives directly on top of the page cache page -- reading or writing that memory touches the cache with no extra copy in between.';
+      }
+
+      renderAll();
+      setBusy(false);
+    }
+
+    async function doWrite(procName, procClass) {
+      if (busy) return;
+      setBusy(true);
+      const i = selectedChunk;
+      const wasHit = state.cache[i] !== null;
+      if (!wasHit) {
+        log(procName + ': chunk ' + i + ' not resident -- must be read in before it can be modified.', 'warn');
+        await flashCache(i, 'flash-io', DISK_LATENCY_MS);
+      }
+      writePage(state, i);
+      await flashCache(i, 'flash-copy', COPY_LATENCY_MS);
+      log(procName + ': wrote chunk ' + i + ' -- completes immediately, marked dirty. Disk is now STALE until fsync().', 'warn');
+      explainEl.textContent = 'The write already "succeeded" as far as ' + procName + ' can tell -- but that data exists only in RAM right now. If the machine loses power this instant, this change never happened.';
+      renderAll();
+      setBusy(false);
+    }
+
+    async function doFsync() {
+      if (busy) return;
+      setBusy(true);
+      const dirty = [];
+      for (let i = 0; i < FILE_PAGES; i++) if (state.cache[i] && state.cache[i].dirty) dirty.push(i);
+      if (dirty.length === 0) {
+        log('fsync(): nothing dirty -- disk already matches the page cache.', null);
+        setBusy(false);
+        return;
+      }
+      log('fsync(): writing back ' + dirty.length + ' dirty page(s) to disk (~100 µs each, real I/O)...', 'warn');
+      for (const i of dirty) {
+        const dslot = document.getElementById('pc-disk-slot-' + i);
+        if (dslot) dslot.classList.add('writing');
+        await sleep(scaled(DISK_LATENCY_MS));
+        if (dslot) dslot.classList.remove('writing');
+      }
+      const written = fsync(state);
+      log('fsync() complete -- chunk(s) ' + written.join(', ') + ' now durable on disk.', 'good');
+      explainEl.textContent = 'Every page that was dirty a moment ago now matches disk exactly. This is the only way to be sure a write survived -- everything else is "probably, eventually."';
+      renderAll();
+      setBusy(false);
+    }
+
+    async function doCrash() {
+      if (busy) return;
+      setBusy(true);
+      const lost = crash(state);
+      if (lost.length > 0) {
+        for (const i of lost) {
+          const el = document.getElementById('pc-cache-slot-' + i);
+          if (el) el.classList.add('lost');
+        }
+        log('💥 CRASH -- RAM is gone. Chunk(s) ' + lost.join(', ') + ' were dirty and never fsynced: that data is LOST, permanently.', 'bad');
+        explainEl.textContent = 'The page cache lived entirely in RAM. Anything dirty that hadn\'t been fsynced had no other copy anywhere -- it\'s simply gone. Disk still holds whatever was last durably written.';
+        await sleep(scaled(700));
+      } else {
+        log('💥 CRASH -- RAM is gone, but nothing was lost: everything had already been fsynced.', 'good');
+        explainEl.textContent = 'Every page was clean when the crash hit, so disk already had the latest version of everything. The cache itself is gone, but nothing real was lost -- it will simply be repopulated from disk on the next access.';
+      }
+      p1Mapped = new Set(); p2Mapped = new Set(); p1LastRead = null; p2LastRead = null;
+      renderAll();
+      setBusy(false);
+    }
+
+    function reset() {
+      state = makeState();
+      selectedChunk = 0;
+      p1Mode = 'read'; p2Mode = 'read';
+      p1Mapped = new Set(); p2Mapped = new Set();
+      p1LastRead = null; p2LastRead = null;
+      root.querySelectorAll('.pc-p1-mode').forEach(b => b.classList.toggle('active', b.dataset.mode === 'read'));
+      root.querySelectorAll('.pc-p2-mode').forEach(b => b.classList.toggle('active', b.dataset.mode === 'read'));
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Pick a chunk and click "Access selected chunk" for Process 1. The first access to any chunk is a cold miss -- real (simulated) disk latency. Access the same chunk again, or from Process 2, and it\'s a hit: the page cache is one shared resource, not one per process.';
+      renderChunkRow();
+      renderAll();
+      setBusy(false);
+    }
+
+    root.querySelectorAll('.pc-p1-mode').forEach(b => b.addEventListener('click', () => {
+      p1Mode = b.dataset.mode;
+      root.querySelectorAll('.pc-p1-mode').forEach(x => x.classList.toggle('active', x === b));
+    }));
+    root.querySelectorAll('.pc-p2-mode').forEach(b => b.addEventListener('click', () => {
+      p2Mode = b.dataset.mode;
+      root.querySelectorAll('.pc-p2-mode').forEach(x => x.classList.toggle('active', x === b));
+    }));
+
+    p1AccessBtn.addEventListener('click', () => doAccess('Process 1', 'p1', p1Mode, p1Mapped, (i) => { p1LastRead = i; }));
+    p2AccessBtn.addEventListener('click', () => doAccess('Process 2', 'p2', p2Mode, p2Mapped, (i) => { p2LastRead = i; }));
+    p1WriteBtn.addEventListener('click', () => doWrite('Process 1', 'p1'));
+    p2WriteBtn.addEventListener('click', () => doWrite('Process 2', 'p2'));
+    fsyncBtn.addEventListener('click', doFsync);
+    crashBtn.addEventListener('click', doCrash);
+    resetBtn.addEventListener('click', reset);
+
+    reset();
+  })();
+  </script>
+</div>
