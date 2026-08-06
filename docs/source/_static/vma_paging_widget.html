@@ -1,0 +1,314 @@
+<div class="vm-root" id="vmWidget">
+  <style>
+    #vmWidget {
+      --vm-bg: #0f172a;
+      --vm-panel: #16213e;
+      --vm-border: #2a3655;
+      --vm-text: #e2e8f0;
+      --vm-muted: #94a3b8;
+      --vm-accent: #38bdf8;
+      --vm-good: #4ade80;
+      --vm-bad: #f87171;
+      --vm-warn: #fbbf24;
+      --vm-text-seg: #f472b6;
+      --vm-heap-seg: #4ade80;
+      --vm-stack-seg: #a78bfa;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--vm-bg);
+      color: var(--vm-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #vmWidget * { box-sizing: border-box; }
+    #vmWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #vmWidget .vm-sub { color: var(--vm-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .vm-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--vm-panel); border: 1px solid var(--vm-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 920px; }
+    .vm-toggle { display: inline-flex; border: 1px solid var(--vm-border); border-radius: 8px; overflow: hidden; }
+    .vm-toggle button { background: transparent; color: var(--vm-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .vm-toggle button.active { background: var(--vm-warn); color: #2a1c00; }
+    .vm-btn { background: var(--vm-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .vm-btn.secondary { background: transparent; color: var(--vm-text); border: 1px solid var(--vm-border); }
+
+    .vm-box { background: var(--vm-panel); border: 1px solid var(--vm-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; min-width: 920px; }
+    .vm-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--vm-muted); margin-bottom: 8px; }
+
+    .vm-vma-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .vm-vma-card { flex: 1; min-width: 220px; border-radius: 8px; padding: 8px 12px; border: 2px solid; font-size: 0.78rem; }
+    .vm-vma-card.text { border-color: var(--vm-text-seg); }
+    .vm-vma-card.heap { border-color: var(--vm-heap-seg); }
+    .vm-vma-card.stack { border-color: var(--vm-stack-seg); }
+    .vm-vma-name { font-weight: 800; color: #fff; }
+    .vm-vma-detail { color: var(--vm-muted); font-family: ui-monospace, monospace; font-size: 0.72rem; margin-top: 2px; }
+
+    .vm-grid-label { font-size: 0.7rem; color: var(--vm-muted); margin-bottom: 6px; }
+    .vm-page-grid { display: grid; grid-template-columns: repeat(12, 1fr); gap: 6px; }
+    .vm-page { position: relative; aspect-ratio: 1; border-radius: 6px; background: #0a1128; border: 2px solid var(--vm-border); display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--vm-muted); cursor: pointer; transition: transform 0.1s; }
+    .vm-page:hover { transform: scale(1.06); }
+    .vm-page.vma-text { border-color: var(--vm-text-seg); }
+    .vm-page.vma-heap { border-color: var(--vm-heap-seg); }
+    .vm-page.vma-stack { border-color: var(--vm-stack-seg); }
+    .vm-page.present.vma-text { background: rgba(244,114,182,0.28); color: #fff; }
+    .vm-page.present.vma-heap { background: rgba(74,222,128,0.28); color: #fff; }
+    .vm-page.present.vma-stack { background: rgba(167,139,250,0.28); color: #fff; }
+    .vm-page.flash-good { background: var(--vm-good) !important; color: #052e12 !important; }
+    .vm-page.flash-bad { background: var(--vm-bad) !important; color: #2a0505 !important; }
+    .vm-page.flash-neutral { background: var(--vm-accent) !important; color: #041322 !important; }
+
+    .vm-frame-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .vm-frame { width: 48px; height: 48px; border-radius: 6px; background: #0a1128; border: 2px dashed var(--vm-border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.62rem; color: var(--vm-muted); }
+    .vm-frame.used { border-style: solid; border-color: var(--vm-accent); background: rgba(56,189,248,0.14); color: #fff; }
+
+    .vm-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 920px; }
+    .vm-explain-panel, .vm-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .vm-explain-panel { flex: 1.3; }
+    .vm-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .vm-log div { color: var(--vm-muted); }
+    .vm-log div.good { color: var(--vm-good); }
+    .vm-log div.bad { color: var(--vm-bad); }
+
+    details.vm-notes { margin-top: 4px; background: var(--vm-panel); border: 1px solid var(--vm-border); border-radius: 10px; padding: 12px 16px; min-width: 920px; font-size: 0.85rem; line-height: 1.6; }
+    details.vm-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.vm-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--vm-muted); }
+    details.vm-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--vm-accent); }
+  </style>
+
+  <h3>VMAs, Page Tables &amp; the Lazy Kernel: Play With It</h3>
+  <div class="vm-sub">A VMA is a promise. A page table entry is what's actually been done. Grow the heap and watch nothing physical happen -- then touch a page and watch the kernel scramble to back that promise for real, one page at a time.</div>
+
+  <div class="vm-controls">
+    <span style="font-size:0.78rem;color:var(--vm-muted);">Access mode:</span>
+    <div class="vm-toggle" id="vmModeToggle">
+      <button class="vm-mode-btn active" data-mode="read">Read</button>
+      <button class="vm-mode-btn" data-mode="write">Write</button>
+    </div>
+    <button class="vm-btn" id="vmGrowBtn">Grow Heap (call brk)</button>
+    <button class="vm-btn secondary" id="vmResetBtn">Reset</button>
+  </div>
+
+  <div class="vm-box">
+    <div class="vm-panel-title">Virtual Memory Areas (the kernel's promises)</div>
+    <div class="vm-vma-row" id="vmVmaRow"></div>
+  </div>
+
+  <div class="vm-box">
+    <div class="vm-grid-label">24 virtual pages (4 KB each) -- click a page to touch it in the current access mode. Gray pages have no VMA at all.</div>
+    <div class="vm-page-grid" id="vmPageGrid"></div>
+  </div>
+
+  <div class="vm-box">
+    <div class="vm-panel-title">Physical frame pool (only 10 real frames exist in this demo)</div>
+    <div class="vm-frame-row" id="vmFrameRow"></div>
+  </div>
+
+  <div class="vm-panels">
+    <div class="vm-explain-panel">
+      <div class="vm-box" style="margin-bottom:0;">
+        <div class="vm-panel-title">What's happening right now</div>
+        <div id="vmExplain">Click "Grow Heap" and watch the heap VMA extend with zero physical frames consumed. Then touch one of the newly-covered pages and watch a real page fault get resolved -- that's the moment a frame actually gets allocated.</div>
+      </div>
+    </div>
+    <div class="vm-side-panel-col">
+      <div class="vm-box" style="margin-bottom:0;">
+        <div class="vm-panel-title">Event log</div>
+        <div class="vm-log" id="vmLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="vm-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Every page here is lazy, including code.</b> This demo starts the text segment unmapped too -- real ELF text pages are demand-paged from the executable file on first access, exactly like heap and stack pages are demand-paged from nowhere (anonymous memory, zero-filled on first touch).</li>
+      <li><b>Frame exhaustion is simplified here on purpose.</b> A real kernel facing "no free frames" doesn't just fail -- it runs page reclaim first: evicting a clean file-backed page (cheap, just discard it, re-read later) or swapping out a dirty anonymous page (expensive, must write it to disk first) to free one up, then retries the allocation. This demo has a fixed pool and reports <code>out-of-frames</code> directly so the scarcity itself stays visible.</li>
+      <li><b>The permission check always runs, present or not.</b> Notice that writing to the read-only text segment faults whether or not that page has ever been touched before -- the R/W flag in the PTE is checked on every single access, not just the first one. This is also the exact mechanism behind copy-on-write after <code>fork()</code>: pages get marked read-only on purpose so the very first write anywhere triggers a fault, which is the kernel's cue to actually duplicate that page.</li>
+      <li>This widget shows the mechanism <em>behind</em> the picture drawn in <a href="process_memory_layout_interactive.html">A Process's Address Space: Play With It</a> -- that page's segments are exactly the VMAs this page is allocating real memory for.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('vmWidget');
+
+    const TOTAL_PAGES = 24;
+    const TOTAL_FRAMES = 10;
+    const HEAP_GROW_STEP = 4;
+
+    function makeState() {
+      return {
+        vmas: [
+          { key: 'text', name: 'Text (code)', start: 0, end: 2, writable: false, anonymous: false, cls: 'text' },
+          { key: 'heap', name: 'Heap', start: 6, end: 8, writable: true, anonymous: true, cls: 'heap' },
+          { key: 'stack', name: 'Stack', start: 20, end: 24, writable: true, anonymous: true, cls: 'stack' },
+        ],
+        pageTable: new Array(TOTAL_PAGES).fill(null), // null | { frame, dirty }
+        freeFrames: Array.from({ length: TOTAL_FRAMES }, (_, i) => i),
+      };
+    }
+
+    function findVma(vmas, page) {
+      return vmas.find(v => page >= v.start && page < v.end) || null;
+    }
+
+    function growVma(state, key, additionalPages) {
+      const v = state.vmas.find(x => x.key === key);
+      const followingStarts = state.vmas.filter(x => x !== v && x.start >= v.end).map(x => x.start);
+      const ceiling = followingStarts.length ? Math.min(TOTAL_PAGES, ...followingStarts) : TOTAL_PAGES;
+      const newEnd = Math.min(ceiling, v.end + additionalPages);
+      const grew = newEnd - v.end;
+      v.end = newEnd;
+      return { vma: v, grew, hitCeiling: newEnd === ceiling };
+    }
+
+    function touchPage(state, page, isWrite) {
+      const vma = findVma(state.vmas, page);
+      if (!vma) return { result: 'segfault-no-vma' };
+      if (isWrite && !vma.writable) return { result: 'segfault-readonly', vma };
+
+      const existing = state.pageTable[page];
+      if (existing) {
+        if (isWrite) existing.dirty = true;
+        return { result: 'already-mapped', frame: existing.frame, vma };
+      }
+
+      if (state.freeFrames.length === 0) return { result: 'out-of-frames', vma };
+      const frame = state.freeFrames.pop();
+      state.pageTable[page] = { frame, dirty: isWrite };
+      return { result: 'page-fault-resolved', frame, vma };
+    }
+
+    let state = makeState();
+    let mode = 'read';
+
+    const vmaRowEl = document.getElementById('vmVmaRow');
+    const pageGridEl = document.getElementById('vmPageGrid');
+    const frameRowEl = document.getElementById('vmFrameRow');
+    const explainEl = document.getElementById('vmExplain');
+    const logEl = document.getElementById('vmLog');
+    const modeBtns = root.querySelectorAll('.vm-mode-btn');
+    const growBtn = document.getElementById('vmGrowBtn');
+    const resetBtn = document.getElementById('vmResetBtn');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderVmas() {
+      vmaRowEl.innerHTML = '';
+      state.vmas.forEach(v => {
+        const card = document.createElement('div');
+        card.className = 'vm-vma-card ' + v.cls;
+        card.innerHTML =
+          '<div class="vm-vma-name">' + v.name + '</div>' +
+          '<div class="vm-vma-detail">pages ' + v.start + '-' + (v.end - 1) + ' (' + (v.end - v.start) + ' pages) &middot; ' +
+          (v.writable ? 'RW' : 'RO') + ' &middot; ' + (v.anonymous ? 'anonymous' : 'file-backed') + '</div>';
+        vmaRowEl.appendChild(card);
+      });
+    }
+
+    function renderGrid() {
+      pageGridEl.innerHTML = '';
+      for (let p = 0; p < TOTAL_PAGES; p++) {
+        const vma = findVma(state.vmas, p);
+        const entry = state.pageTable[p];
+        const div = document.createElement('div');
+        div.className = 'vm-page' + (vma ? ' vma-' + vma.cls : '') + (entry ? ' present' : '');
+        div.textContent = p;
+        div.title = vma ? (vma.name + (entry ? ' -- present, frame ' + entry.frame : ' -- VMA exists, not yet backed')) : 'no VMA covers this page';
+        div.addEventListener('click', () => onTouch(p, div));
+        pageGridEl.appendChild(div);
+      }
+    }
+
+    function renderFrames() {
+      frameRowEl.innerHTML = '';
+      const owner = new Array(TOTAL_FRAMES).fill(null);
+      state.pageTable.forEach((entry, page) => { if (entry) owner[entry.frame] = page; });
+      for (let f = 0; f < TOTAL_FRAMES; f++) {
+        const div = document.createElement('div');
+        const inUse = owner[f] !== null;
+        div.className = 'vm-frame' + (inUse ? ' used' : '');
+        div.innerHTML = 'F' + f + (inUse ? '<br>&larr;p' + owner[f] : '');
+        frameRowEl.appendChild(div);
+      }
+    }
+
+    function renderAll() {
+      renderVmas();
+      renderGrid();
+      renderFrames();
+    }
+
+    function flash(el, cls) {
+      el.classList.add(cls);
+      setTimeout(() => el.classList.remove(cls), 500);
+    }
+
+    function onTouch(page, el) {
+      const isWrite = mode === 'write';
+      const r = touchPage(state, page, isWrite);
+      const verb = isWrite ? 'write to' : 'read from';
+
+      if (r.result === 'segfault-no-vma') {
+        flash(el, 'flash-bad');
+        log('SIGSEGV: ' + verb + ' page ' + page + ' -- no VMA covers this address. The kernel has no record of what this memory is for.', 'bad');
+        explainEl.textContent = 'Any access to an address with no covering VMA is invalid, full stop -- there is no "maybe" here. In a real process this delivers SIGSEGV and normally ends the program.';
+      } else if (r.result === 'segfault-readonly') {
+        flash(el, 'flash-bad');
+        log('SIGSEGV: write to page ' + page + ' rejected -- this page belongs to a read-only VMA (' + r.vma.name + ').', 'bad');
+        explainEl.textContent = 'The R/W flag is checked on every access, whether or not the page is already present. A write to a read-only VMA always faults -- this is also exactly the mechanism copy-on-write is built on.';
+      } else if (r.result === 'page-fault-resolved') {
+        flash(el, 'flash-good');
+        renderAll();
+        log('Page fault on page ' + page + ' -> find_vma(): covered by "' + r.vma.name + '", permitted -> do_anonymous_page() -> frame ' + r.frame + ' allocated, PTE created (Present=1' + (isWrite ? ', Dirty=1' : '') + ').', 'good');
+        explainEl.textContent = 'The VMA said this address was valid, but its page table entry was blank -- nothing physical existed yet. That first touch is what actually triggers allocation: a real frame gets pulled from the pool and wired into a brand-new PTE.';
+      } else if (r.result === 'already-mapped') {
+        flash(el, 'flash-neutral');
+        log('Page ' + page + ' already resident at frame ' + r.frame + ' -- PTE Accessed bit set' + (isWrite ? ', Dirty bit set' : '') + '. No fault, this is the fast path.', null);
+        explainEl.textContent = 'Once a page has a real frame behind it, every later access (until it’s ever evicted) just hits the existing PTE directly -- no kernel involvement needed.';
+      } else if (r.result === 'out-of-frames') {
+        flash(el, 'flash-bad');
+        log('Page fault on page ' + page + ' -> find_vma() OK, but the frame pool is empty. A real kernel would reclaim a page here (evict or swap) before retrying -- not simulated in this demo.', 'bad');
+        explainEl.textContent = 'This demo caps the frame pool at ' + TOTAL_FRAMES + ' on purpose, so you can actually run out -- something that’s easy to forget happens on real machines too, just at a much larger scale.';
+      }
+    }
+
+    function setMode(m) {
+      mode = m;
+      modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    }
+
+    function growHeap() {
+      const r = growVma(state, 'heap', HEAP_GROW_STEP);
+      renderAll();
+      if (r.grew > 0) {
+        log('brk(): heap VMA extended by ' + r.grew + ' page(s), now pages ' + r.vma.start + '-' + (r.vma.end - 1) + '. Zero physical frames touched.', 'good');
+        explainEl.textContent = 'The kernel just updated one field in one VMA struct. That’s the entire cost of "allocating" this memory so far -- no frame was reserved, no page table entry was written, nothing physical happened at all.';
+      } else {
+        log('brk(): heap can’t grow further -- it would collide with the next VMA (the stack’s reserved region).', 'bad');
+        explainEl.textContent = 'VMAs never overlap. The heap has grown right up against the gap the stack claims for itself, and stops there.';
+      }
+    }
+
+    growBtn.addEventListener('click', growHeap);
+    resetBtn.addEventListener('click', () => {
+      state = makeState();
+      mode = 'read';
+      modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === 'read'));
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Click "Grow Heap" and watch the heap VMA extend with zero physical frames consumed. Then touch one of the newly-covered pages and watch a real page fault get resolved -- that’s the moment a frame actually gets allocated.';
+      renderAll();
+    });
+    modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+
+    renderAll();
+  })();
+  </script>
+</div>

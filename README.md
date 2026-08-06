@@ -24,6 +24,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔌 **[Linux Devices](docs/source/linux_devices.rst)** | Block/char/network/terminal/pseudo devices, and USB layering | `/dev`, `lsblk`, `ttyACM`/`ttyUSB`, `udevadm`, PTYs |
 | 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
 | 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
+| 🎮 **[Process Address Space (Interactive)](docs/source/process_memory_layout_interactive.rst)** | Interactive process address space -- click code to see where it lands, then watch ASLR reshuffle it | text/data/bss/heap/mmap/stack segments, ASLR |
+| 🎮 **[VMAs & Page Tables (Interactive)](docs/source/vma_paging_interactive.rst)** | Interactive VMAs and page tables -- grow the heap for free, then watch a real page fault get resolved | VMAs, page tables, page faults, lazy allocation |
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
@@ -111,6 +113,8 @@ system-notes/
         ├── linux_devices.rst
         ├── linux_fs_basics_interactive.rst
         ├── overlayfs_interactive.rst
+        ├── process_memory_layout_interactive.rst
+        ├── vma_paging_interactive.rst
         ├── docker_packet_journey_interactive.rst
         ├── kernel_networking_docker_internals.rst
         ├── lidar_slam.rst
@@ -152,6 +156,8 @@ system-notes/
             ├── proc_explorer_widget.html
             ├── linux_fs_basics_widget.html
             ├── overlayfs_widget.html
+            ├── process_memory_layout_widget.html
+            ├── vma_paging_widget.html
             ├── cpp_memory_widget.html
             ├── cpp_unique_ptr_widget.html
             ├── cpp_shared_ptr_widget.html

@@ -1,0 +1,349 @@
+<div class="pm-root" id="pmWidget">
+  <style>
+    #pmWidget {
+      --pm-bg: #0f172a;
+      --pm-panel: #16213e;
+      --pm-border: #2a3655;
+      --pm-text: #e2e8f0;
+      --pm-muted: #94a3b8;
+      --pm-accent: #38bdf8;
+      --pm-good: #4ade80;
+      --pm-bad: #f87171;
+      --pm-warn: #fbbf24;
+      --pm-purple: #a78bfa;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pm-bg);
+      color: var(--pm-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pmWidget * { box-sizing: border-box; }
+    #pmWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pmWidget .pm-sub { color: var(--pm-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pm-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--pm-panel); border: 1px solid var(--pm-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 920px; }
+    .pm-controls label { font-size: 0.8rem; color: var(--pm-muted); display: flex; align-items: center; gap: 8px; }
+    .pm-toggle { display: inline-flex; border: 1px solid var(--pm-border); border-radius: 8px; overflow: hidden; }
+    .pm-toggle button { background: transparent; color: var(--pm-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .pm-toggle button.active { background: var(--pm-warn); color: #2a1c00; }
+    .pm-btn { background: var(--pm-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .pm-btn.secondary { background: transparent; color: var(--pm-text); border: 1px solid var(--pm-border); }
+    .pm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .pm-main { display: flex; gap: 16px; min-width: 920px; margin-bottom: 16px; flex-wrap: wrap; }
+    .pm-code-col { flex: 1; min-width: 340px; display: flex; flex-direction: column; gap: 12px; }
+    .pm-map-col { flex: 1.1; min-width: 380px; }
+
+    .pm-box { background: var(--pm-panel); border: 1px solid var(--pm-border); border-radius: 10px; padding: 12px 14px; }
+    .pm-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pm-muted); margin-bottom: 8px; }
+
+    .pm-code { font-family: ui-monospace, monospace; font-size: 0.76rem; line-height: 1.9; background: #0a1128; border-radius: 8px; padding: 8px 0; }
+    .pm-code-line { padding: 2px 12px; white-space: pre; color: var(--pm-text); cursor: pointer; border-left: 3px solid transparent; }
+    .pm-code-line:hover { background: rgba(56,189,248,0.08); }
+    .pm-code-line.active { background: rgba(56,189,248,0.14); border-left-color: var(--pm-accent); }
+    .pm-code-line .pm-comment { color: var(--pm-muted); }
+
+    .pm-actions { display: flex; flex-direction: column; gap: 8px; }
+    .pm-actions .pm-btn { text-align: left; }
+
+    .pm-map { display: flex; flex-direction: column; background: #0a1128; border: 1px solid var(--pm-border); border-radius: 8px; overflow: hidden; }
+    .pm-seg { padding: 8px 12px; border-bottom: 1px solid var(--pm-border); transition: background 0.2s, box-shadow 0.2s; }
+    .pm-seg:last-child { border-bottom: none; }
+    .pm-seg-row { display: flex; justify-content: space-between; align-items: baseline; }
+    .pm-seg-name { font-weight: 700; font-size: 0.8rem; color: #fff; }
+    .pm-seg-size { font-size: 0.68rem; color: var(--pm-muted); font-family: ui-monospace, monospace; }
+    .pm-seg-addrs { font-size: 0.66rem; color: var(--pm-muted); font-family: ui-monospace, monospace; margin-top: 2px; }
+    .pm-seg.kernel { background: repeating-linear-gradient(45deg, #1e2338, #1e2338 6px, #232a45 6px, #232a45 12px); }
+    .pm-seg.gap { background: #0a1128; color: var(--pm-muted); font-size: 0.68rem; font-style: italic; text-align: center; padding: 4px 12px; }
+    .pm-seg.highlight { background: rgba(56,189,248,0.18); box-shadow: inset 0 0 0 2px var(--pm-accent); }
+    .pm-seg-sub { font-size: 0.65rem; color: var(--pm-muted); font-family: ui-monospace, monospace; margin-top: 4px; padding-left: 8px; border-left: 2px solid var(--pm-border); }
+    .pm-arrow { font-size: 0.65rem; color: var(--pm-purple); }
+
+    .pm-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 920px; }
+    .pm-explain-panel, .pm-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .pm-explain-panel { flex: 1.3; }
+    .pm-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pm-log div { color: var(--pm-muted); }
+    .pm-log div.good { color: var(--pm-good); }
+    .pm-log div.warn { color: var(--pm-warn); }
+
+    details.pm-notes { margin-top: 14px; background: var(--pm-panel); border: 1px solid var(--pm-border); border-radius: 10px; padding: 12px 16px; min-width: 920px; font-size: 0.85rem; line-height: 1.6; }
+    details.pm-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.pm-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--pm-muted); }
+    details.pm-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--pm-accent); }
+  </style>
+
+  <h3>A Process's Address Space: Play With It</h3>
+  <div class="pm-sub">Click a line of code to see exactly which segment it lands in. Grow the heap, load a library, push a stack frame -- then flip ASLR off and on and watch what does (and doesn't) change between runs.</div>
+
+  <div class="pm-controls">
+    <span style="font-size:0.78rem;color:var(--pm-muted);">ASLR:</span>
+    <div class="pm-toggle" id="pmAslrToggle">
+      <button class="pm-aslr-btn active" data-aslr="on">On (modern default)</button>
+      <button class="pm-aslr-btn" data-aslr="off">Off (classic)</button>
+    </div>
+    <button class="pm-btn" id="pmRerunBtn">Run Program Again</button>
+    <button class="pm-btn secondary" id="pmResetBtn">Reset</button>
+  </div>
+
+  <div class="pm-main">
+    <div class="pm-code-col">
+      <div class="pm-box">
+        <div class="pm-panel-title">Sample program (click a line)</div>
+        <div class="pm-code" id="pmCode"></div>
+      </div>
+      <div class="pm-box">
+        <div class="pm-panel-title">Actions</div>
+        <div class="pm-actions">
+          <button class="pm-btn secondary" id="pmMallocBtn">malloc() more heap (+256 KB)</button>
+          <button class="pm-btn secondary" id="pmLoadLibBtn">Load another shared library</button>
+          <button class="pm-btn secondary" id="pmPushFrameBtn">Push a stack frame (+8 KB)</button>
+        </div>
+      </div>
+    </div>
+    <div class="pm-map-col">
+      <div class="pm-box">
+        <div class="pm-panel-title">Virtual address space (high addresses at top -- not to scale)</div>
+        <div class="pm-map" id="pmMap"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="pm-panels">
+    <div class="pm-explain-panel">
+      <div class="pm-box">
+        <div class="pm-panel-title">What's happening right now</div>
+        <div id="pmExplain">Every piece of a running program lives somewhere specific in its virtual address space, and which segment it lands in is determined entirely by what that piece of data <em>is</em> -- not by where you wrote it in the source file. Click a line on the left to see where it ends up.</div>
+      </div>
+    </div>
+    <div class="pm-side-panel-col">
+      <div class="pm-box">
+        <div class="pm-panel-title">Event log</div>
+        <div class="pm-log" id="pmLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="pm-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>This is the classic 32-bit layout, deliberately</b> -- it's the clearest way to see the shape, and it's exactly the diagram most operating-systems courses still teach. 64-bit Linux uses the same structure (kernel space, stack, mmap region, heap, BSS, data, text) over a vastly larger address space, so the picture doesn't change, only the amount of empty space between the pieces does.</li>
+      <li><b>The randomized offsets here are illustrative, not exact kernel constants.</b> Real ASLR entropy depends on architecture and kernel version. The important idea -- that the stack, shared-library, and heap <em>base addresses</em> move on every run, while their relative order to each other never does -- is exactly right.</li>
+      <li><b>Modern distros also randomize the executable's own base address</b> via position-independent executables (PIE) -- this widget keeps the text segment's start fixed for clarity, matching the classic (pre-PIE-by-default) picture this diagram comes from.</li>
+      <li>This diagram shows <em>where</em> each segment lives. It doesn't yet show what backs that space with actual RAM -- <a href="vma_paging_interactive.html">VMAs, Page Tables &amp; the Lazy Kernel: Play With It</a> picks up exactly where this leaves off.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('pmWidget');
+
+    const TASK_SIZE = 0xC0000000;
+    const TEXT_START = 0x08048000;
+    const MMAP_BASE_CLASSIC = 0x40000000;
+    const TEXT_SIZE = 8192, DATA_SIZE = 256, BSS_SIZE = 128;
+    const BRK_RAND_MAX = 1 * 1024 * 1024;
+    const MMAP_RAND_MAX = 1 * 1024 * 1024;
+    const STACK_RAND_MAX = 1 * 1024 * 1024;
+    const HEAP_STEP = 256 * 1024, HEAP_MAX_CLICKS = 5;
+    const LIBS = [
+      { name: 'libc.so', size: 1835008 },
+      { name: 'libm.so', size: 524288 },
+      { name: 'libpthread.so', size: 106496 },
+    ];
+    const STACK_FRAME_SIZE = 8192, STACK_MAX_CLICKS = 8;
+
+    function hex(n) { return '0x' + Math.round(n).toString(16); }
+    function human(bytes) {
+      if (bytes >= 1024 * 1024) return (bytes / (1024 * 1024)).toFixed(bytes % (1024 * 1024) === 0 ? 0 : 2) + ' MB';
+      if (bytes >= 1024) return (bytes / 1024).toFixed(bytes % 1024 === 0 ? 0 : 1) + ' KB';
+      return bytes + ' B';
+    }
+
+    const CODE_LINES = [
+      { text: '#include <stdio.h>', segs: [], note: 'A header, not code itself -- nothing is placed in memory for this line.' },
+      { text: 'static int userCount;', segs: ['bss'], note: 'An uninitialized static variable. The compiler does not need to store a value for it in the binary at all -- BSS just reserves zero-filled space that is created at load time.' },
+      { text: 'static char *label = "Reference Guide";', segs: ['data', 'text'], note: 'Two different things on one line: the pointer variable "label" itself (8 bytes, initialized) lives in DATA. The string literal it points to is baked directly into the binary as read-only content, in TEXT.' },
+      { text: 'int main() {', segs: ['text'], note: 'The compiled machine code for main() itself is part of TEXT, alongside the string literal above.' },
+      { text: '    int localTotal = 7;', segs: ['stack'], note: 'A local variable. It exists only for the lifetime of this function call, on this thread’s stack frame.' },
+      { text: '    char *buf = malloc(2048);', segs: ['heap'], note: 'malloc() asks the C runtime for heap space. Click "malloc() more heap" below to watch the heap segment actually grow.' },
+      { text: '    printf("%s\\n", label);', segs: ['mmap'], note: 'printf() is not your code -- it is a call into libc.so, which the loader mapped into the memory-mapping segment before main() ever ran.' },
+      { text: '    return 0;', segs: ['stack'], note: 'Returning unwinds this function’s stack frame.' },
+      { text: '}', segs: [], note: '' },
+    ];
+
+    let aslr = true;
+    let heapGrowSteps = 0, libsLoaded = 1, stackFrames = 0;
+    let activeLine = -1;
+    let lastLayout = null;
+
+    function rand(max) { return Math.floor(Math.random() * (max + 1)); }
+
+    function computeLayout(brkRand, mmapRand, stackRand) {
+      const textStart = TEXT_START;
+      const textEnd = textStart + TEXT_SIZE;
+      const dataStart = textEnd;
+      const dataEnd = dataStart + DATA_SIZE;
+      const bssStart = dataEnd;
+      const bssEnd = bssStart + BSS_SIZE;
+      const heapStart = bssEnd + brkRand;
+      const heapEnd = heapStart + heapGrowSteps * HEAP_STEP;
+      const mmapBase = MMAP_BASE_CLASSIC - mmapRand;
+      const mmapUsed = LIBS.slice(0, libsLoaded).reduce((a, l) => a + l.size, 0);
+      const mmapTop = mmapBase;
+      const mmapBottom = mmapBase - mmapUsed;
+      const stackTop = TASK_SIZE - stackRand;
+      const stackUsed = stackFrames * STACK_FRAME_SIZE;
+      const stackBottom = stackTop - stackUsed;
+      return { textStart, textEnd, dataStart, dataEnd, bssStart, bssEnd, heapStart, heapEnd, mmapBase, mmapTop, mmapBottom, stackTop, stackBottom, brkRand, mmapRand, stackRand };
+    }
+
+    let currentRand = { brk: 0, mmap: 0, stack: 0 };
+
+    function newRandomOffsets() {
+      currentRand = aslr
+        ? { brk: rand(BRK_RAND_MAX), mmap: rand(MMAP_RAND_MAX), stack: rand(STACK_RAND_MAX) }
+        : { brk: 0, mmap: 0, stack: 0 };
+    }
+
+    const codeEl = document.getElementById('pmCode');
+    const mapEl = document.getElementById('pmMap');
+    const explainEl = document.getElementById('pmExplain');
+    const logEl = document.getElementById('pmLog');
+    const aslrBtns = root.querySelectorAll('.pm-aslr-btn');
+    const rerunBtn = document.getElementById('pmRerunBtn');
+    const resetBtn = document.getElementById('pmResetBtn');
+    const mallocBtn = document.getElementById('pmMallocBtn');
+    const loadLibBtn = document.getElementById('pmLoadLibBtn');
+    const pushFrameBtn = document.getElementById('pmPushFrameBtn');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderCode() {
+      codeEl.innerHTML = '';
+      CODE_LINES.forEach((line, i) => {
+        const div = document.createElement('div');
+        div.className = 'pm-code-line' + (i === activeLine ? ' active' : '');
+        div.textContent = line.text;
+        div.addEventListener('click', () => {
+          activeLine = i;
+          renderCode();
+          renderMap();
+          explainEl.textContent = line.note || 'This line does not place anything new in memory.';
+        });
+        codeEl.appendChild(div);
+      });
+    }
+
+    function segBlock(name, segKey, startAddr, endAddr, extraHtml, arrow) {
+      const size = endAddr - startAddr;
+      const highlighted = CODE_LINES[activeLine] && CODE_LINES[activeLine].segs.includes(segKey);
+      const div = document.createElement('div');
+      div.className = 'pm-seg' + (highlighted ? ' highlight' : '');
+      div.innerHTML =
+        '<div class="pm-seg-row"><span class="pm-seg-name">' + name + (arrow ? ' <span class="pm-arrow">' + arrow + '</span>' : '') + '</span><span class="pm-seg-size">' + human(size) + '</span></div>' +
+        '<div class="pm-seg-addrs">' + hex(endAddr) + ' → ' + hex(startAddr) + '</div>' +
+        (extraHtml || '');
+      return div;
+    }
+
+    function renderMap() {
+      const L = computeLayout(currentRand.brk, currentRand.mmap, currentRand.stack);
+      lastLayout = L;
+      mapEl.innerHTML = '';
+
+      const kernel = document.createElement('div');
+      kernel.className = 'pm-seg kernel';
+      kernel.innerHTML = '<div class="pm-seg-row"><span class="pm-seg-name" style="color:var(--pm-muted);">Kernel space (reserved, inaccessible)</span><span class="pm-seg-size">1 GB</span></div><div class="pm-seg-addrs">0xffffffff → ' + hex(TASK_SIZE) + '</div>';
+      mapEl.appendChild(kernel);
+
+      mapEl.appendChild(segBlock('Stack', 'stack', L.stackBottom, L.stackTop, '', '↓ grows down'));
+
+      const gap1 = document.createElement('div');
+      gap1.className = 'pm-seg gap';
+      gap1.textContent = 'unmapped';
+      mapEl.appendChild(gap1);
+
+      let libsHtml = LIBS.slice(0, libsLoaded).map(l => '<div class="pm-seg-sub">' + l.name + ' (' + human(l.size) + ')</div>').join('');
+      mapEl.appendChild(segBlock('Memory Mapping Segment', 'mmap', L.mmapBottom, L.mmapTop, libsHtml, '↓ grows down'));
+
+      const gap2 = document.createElement('div');
+      gap2.className = 'pm-seg gap';
+      gap2.textContent = 'unmapped';
+      mapEl.appendChild(gap2);
+
+      mapEl.appendChild(segBlock('Heap', 'heap', L.heapStart, Math.max(L.heapEnd, L.heapStart + 1), '', '↑ grows up'));
+      mapEl.appendChild(segBlock('BSS', 'bss', L.bssStart, L.bssEnd));
+      mapEl.appendChild(segBlock('Data', 'data', L.dataStart, L.dataEnd));
+      mapEl.appendChild(segBlock('Text (code, read-only)', 'text', L.textStart, L.textEnd));
+    }
+
+    function setAslr(mode) {
+      aslr = mode === 'on';
+      aslrBtns.forEach(b => b.classList.toggle('active', b.dataset.aslr === mode));
+    }
+
+    function rerun() {
+      const prev = lastLayout;
+      newRandomOffsets();
+      heapGrowSteps = 0; libsLoaded = 1; stackFrames = 0;
+      renderMap();
+      if (!prev) return;
+      if (aslr) {
+        log('New run -- stack, library, and heap base addresses reshuffled:', 'warn');
+        log('  stack top:  ' + hex(prev.stackTop) + '  ->  ' + hex(lastLayout.stackTop));
+        log('  mmap base:  ' + hex(prev.mmapBase) + '  ->  ' + hex(lastLayout.mmapBase));
+        log('  heap start: ' + hex(prev.heapStart) + '  ->  ' + hex(lastLayout.heapStart));
+        explainEl.textContent = 'With ASLR on, every fresh run picks new random offsets for the stack, the shared-library area, and the heap. An exploit that hardcodes one of last run’s addresses will almost certainly miss this time.';
+      } else {
+        log('New run -- ASLR is off, so every address is identical to last time.', 'good');
+        explainEl.textContent = 'With ASLR off, these addresses are exactly the same on every single run -- which is also exactly what made classic return-to-libc and stack-smashing exploits so reliable: the attacker could hardcode an address and count on it working every time.';
+      }
+    }
+
+    function reset() {
+      heapGrowSteps = 0; libsLoaded = 1; stackFrames = 0; activeLine = -1;
+      newRandomOffsets();
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Every piece of a running program lives somewhere specific in its virtual address space, and which segment it lands in is determined entirely by what that piece of data is -- not by where you wrote it in the source file. Click a line on the left to see where it ends up.';
+      renderCode();
+      renderMap();
+    }
+
+    mallocBtn.addEventListener('click', () => {
+      if (heapGrowSteps >= HEAP_MAX_CLICKS) { log('Heap is at this demo’s growth limit.', 'warn'); return; }
+      heapGrowSteps++;
+      renderMap();
+      log('malloc(256 KB): heap end now ' + hex(lastLayout.heapEnd) + ' -- the heap grows upward, toward the mmap segment.', 'good');
+    });
+    loadLibBtn.addEventListener('click', () => {
+      if (libsLoaded >= LIBS.length) { log('All illustrative libraries are already loaded.', 'warn'); return; }
+      const lib = LIBS[libsLoaded];
+      libsLoaded++;
+      renderMap();
+      log('Loaded ' + lib.name + ' -- mapped into the mmap segment, which grows downward as more libraries load.', 'good');
+    });
+    pushFrameBtn.addEventListener('click', () => {
+      if (stackFrames >= STACK_MAX_CLICKS) { log('Stack is at this demo’s depth limit (real limit: RLIMIT_STACK, 8 MB by default).', 'warn'); return; }
+      stackFrames++;
+      renderMap();
+      log('Pushed a stack frame -- stack bottom now ' + hex(lastLayout.stackBottom) + ' -- the stack grows downward, toward the mmap segment.', 'good');
+    });
+
+    aslrBtns.forEach(b => b.addEventListener('click', () => { setAslr(b.dataset.aslr); reset(); }));
+    rerunBtn.addEventListener('click', rerun);
+    resetBtn.addEventListener('click', reset);
+
+    reset();
+  })();
+  </script>
+</div>

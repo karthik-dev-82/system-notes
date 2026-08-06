@@ -21,6 +21,8 @@ worth writing down and coming back to.
    linux_devices
    linux_fs_basics_interactive
    overlayfs_interactive
+   process_memory_layout_interactive
+   vma_paging_interactive
    docker_packet_journey_interactive
    kernel_networking_docker_internals
    lidar_slam
@@ -108,6 +110,12 @@ System Notes
    * - :doc:`overlayfs_interactive`
      - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
      - lowerdir, upperdir, merged view, copy-up, whiteouts
+   * - :doc:`process_memory_layout_interactive`
+     - Interactive process address space -- click code to see where it lands, then watch ASLR reshuffle it
+     - text/data/bss/heap/mmap/stack segments, ASLR
+   * - :doc:`vma_paging_interactive`
+     - Interactive VMAs and page tables -- grow the heap for free, then watch a real page fault get resolved
+     - VMAs, page tables, page faults, lazy allocation
    * - :doc:`docker_packet_journey_interactive`
      - Interactive packet journey -- container, veth, docker0, netfilter, and back
      - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack
