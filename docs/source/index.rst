@@ -65,6 +65,7 @@ worth writing down and coming back to.
    python_sequences_interactive
    python_hashing_interactive
    python_concurrency_interactive
+   python_asyncio_gather_interactive
 
 System Notes
 -----------------
@@ -230,3 +231,6 @@ Python Notes
    * - :doc:`python_concurrency_interactive`
      - Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side
      - GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound
+   * - :doc:`python_asyncio_gather_interactive`
+     - Interactive asyncio.gather() -- 3 real coroutines, real console output, and the argument-order-vs-completion-order guarantee made concrete
+     - async/await, asyncio.gather, asyncio.TaskGroup, coroutine scheduling

@@ -1,0 +1,348 @@
+<div class="ag-root" id="agWidget">
+  <style>
+    #agWidget {
+      --ag-bg: #0f172a;
+      --ag-panel: #16213e;
+      --ag-border: #2a3655;
+      --ag-text: #e2e8f0;
+      --ag-muted: #94a3b8;
+      --ag-accent: #38bdf8;
+      --ag-warn: #fbbf24;
+      --ag-a: #38bdf8;
+      --ag-b: #4ade80;
+      --ag-c: #f472b6;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ag-bg);
+      color: var(--ag-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #agWidget * { box-sizing: border-box; }
+    #agWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #agWidget .ag-sub { color: var(--ag-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ag-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--ag-panel); border: 1px solid var(--ag-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 940px; }
+    .ag-controls label { font-size: 0.78rem; color: var(--ag-muted); display: flex; align-items: center; gap: 6px; }
+    .ag-controls input[type="range"] { width: 90px; }
+    .ag-delay-a input { accent-color: var(--ag-a); }
+    .ag-delay-b input { accent-color: var(--ag-b); }
+    .ag-delay-c input { accent-color: var(--ag-c); }
+    .ag-btn { background: var(--ag-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .ag-btn.secondary { background: transparent; color: var(--ag-text); border: 1px solid var(--ag-border); }
+    .ag-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .ag-main { display: flex; gap: 16px; min-width: 940px; margin-bottom: 16px; flex-wrap: wrap; }
+    .ag-code-col { flex: 1.2; min-width: 420px; }
+    .ag-side-col { flex: 1; min-width: 340px; display: flex; flex-direction: column; gap: 14px; }
+
+    .ag-box { background: var(--ag-panel); border: 1px solid var(--ag-border); border-radius: 10px; padding: 12px 14px; }
+    .ag-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ag-muted); margin-bottom: 8px; }
+
+    .ag-code { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.85; background: #0a1128; border-radius: 8px; padding: 8px 0; }
+    .ag-code-line { display: flex; align-items: center; padding: 1px 12px; white-space: pre; color: var(--ag-text); }
+    .ag-gutter { display: inline-flex; gap: 3px; width: 54px; flex-shrink: 0; }
+    .ag-badge { width: 15px; height: 15px; border-radius: 50%; font-size: 0.58rem; font-weight: 800; display: flex; align-items: center; justify-content: center; color: #04121f; }
+    .ag-badge.a { background: var(--ag-a); }
+    .ag-badge.b { background: var(--ag-b); }
+    .ag-badge.c { background: var(--ag-c); }
+    .ag-badge.dim { opacity: 0.35; }
+
+    .ag-lane-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .ag-lane-label { width: 60px; flex-shrink: 0; font-size: 0.72rem; font-weight: 700; }
+    .ag-lane-label.a { color: var(--ag-a); }
+    .ag-lane-label.b { color: var(--ag-b); }
+    .ag-lane-label.c { color: var(--ag-c); }
+    .ag-lane-track { position: relative; flex: 1; height: 20px; background: #0a1128; border-radius: 4px; border: 1px solid var(--ag-border); overflow: hidden; }
+    .ag-seg { position: absolute; top: 0; bottom: 0; }
+    .ag-seg.run { background: var(--ag-accent); }
+    .ag-seg.wait { background: repeating-linear-gradient(45deg, rgba(148,163,184,0.25), rgba(148,163,184,0.25) 5px, rgba(148,163,184,0.1) 5px, rgba(148,163,184,0.1) 10px); border-top: 1px solid var(--ag-border); border-bottom: 1px solid var(--ag-border); }
+
+    .ag-console { height: 170px; overflow-y: auto; font-size: 0.76rem; line-height: 1.6; font-family: ui-monospace, monospace; background: #0a1128; border-radius: 6px; padding: 8px 10px; }
+    .ag-console div { color: var(--ag-muted); }
+    .ag-console div.a { color: var(--ag-a); }
+    .ag-console div.b { color: var(--ag-b); }
+    .ag-console div.c { color: var(--ag-c); }
+    .ag-console div.sys { color: var(--ag-warn); font-weight: 700; }
+
+    .ag-results { font-family: ui-monospace, monospace; font-size: 0.8rem; background: #0a1128; border-radius: 6px; padding: 10px 12px; min-height: 24px; }
+    .ag-results .ag-result-row { color: var(--ag-muted); }
+    .ag-results .ag-result-row b { color: #fff; }
+
+    .ag-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 940px; }
+    .ag-explain-panel { flex: 1; min-width: 300px; }
+    details.ag-notes { margin-top: 4px; background: var(--ag-panel); border: 1px solid var(--ag-border); border-radius: 10px; padding: 12px 16px; min-width: 940px; font-size: 0.85rem; line-height: 1.6; }
+    details.ag-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ag-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ag-muted); }
+    details.ag-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ag-accent); }
+  </style>
+
+  <h3>asyncio.gather(): Play With It</h3>
+  <div class="ag-sub">Three real coroutines, one real asyncio.gather() call. Set each one's delay, run it, and watch the actual execution order -- including the one detail almost everyone gets wrong the first time.</div>
+
+  <div class="ag-controls">
+    <label class="ag-delay-a">A delay: <span id="agDelayAVal">2s</span><input type="range" id="agDelayA" min="1" max="5" step="1" value="2"></label>
+    <label class="ag-delay-b">B delay: <span id="agDelayBVal">1s</span><input type="range" id="agDelayB" min="1" max="5" step="1" value="1"></label>
+    <label class="ag-delay-c">C delay: <span id="agDelayCVal">3s</span><input type="range" id="agDelayC" min="1" max="5" step="1" value="3"></label>
+    <label>Speed: <span id="agSpeedVal">1x</span><input type="range" id="agSpeedSlider" min="0.4" max="2.5" step="0.1" value="1"></label>
+    <button class="ag-btn" id="agRunBtn">Run: asyncio.run(main())</button>
+    <button class="ag-btn secondary" id="agResetBtn">Reset</button>
+  </div>
+
+  <div class="ag-main">
+    <div class="ag-code-col">
+      <div class="ag-box">
+        <div class="ag-panel-title">source.py &nbsp;<span style="text-transform:none;letter-spacing:0;">(gutter dots show which task is at that line)</span></div>
+        <div class="ag-code" id="agCode"></div>
+      </div>
+    </div>
+    <div class="ag-side-col">
+      <div class="ag-box">
+        <div class="ag-panel-title">Task timeline</div>
+        <div id="agLanes">
+          <div class="ag-lane-row"><div class="ag-lane-label a">Task A</div><div class="ag-lane-track" id="agTrackA"></div></div>
+          <div class="ag-lane-row"><div class="ag-lane-label b">Task B</div><div class="ag-lane-track" id="agTrackB"></div></div>
+          <div class="ag-lane-row"><div class="ag-lane-label c">Task C</div><div class="ag-lane-track" id="agTrackC"></div></div>
+        </div>
+      </div>
+      <div class="ag-box">
+        <div class="ag-panel-title">Console output</div>
+        <div class="ag-console" id="agConsole"></div>
+      </div>
+      <div class="ag-box">
+        <div class="ag-panel-title">gather() return value</div>
+        <div class="ag-results" id="agResults"><span style="color:var(--ag-muted);">(not resolved yet)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ag-panels">
+    <div class="ag-explain-panel">
+      <div class="ag-box">
+        <div class="ag-panel-title">What's happening right now</div>
+        <div id="agExplain">Set each task's delay, then click Run. Watch the console: all three "starting" lines print immediately, back to back -- <code>await</code> hasn't suspended anything yet at that point. Only once every task hits its <code>await asyncio.sleep(...)</code> does the event loop actually have to wait for anything.</div>
+      </div>
+    </div>
+  </div>
+
+  <details class="ag-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Coroutines use <code>await</code>, not <code>yield</code>.</b> If you've seen Python asyncio tutorials using <code>yield</code> inside a coroutine, that's the old generator-based coroutine style (<code>@asyncio.coroutine</code> + <code>yield from</code>), removed in Python 3.11. <code>yield</code> in modern <code>async def</code> code means something different entirely: it turns the function into an <em>async generator</em>, consumed with <code>async for</code>, not <code>await</code> -- a related but separate tool from what <code>gather()</code> works with. Every coroutine passed to <code>gather()</code> should use <code>await</code>, never <code>yield</code>.</li>
+      <li><b>The order-preservation guarantee is the whole point of this widget.</b> <code>asyncio.gather()</code> always returns results in the order its arguments were given, never in the order the tasks actually finished. Set B's delay to 1 and A's to 5 and watch it happen: B finishes first by a wide margin, but its result still lands in the <em>second</em> slot of the returned list, because that's where <code>fetch_data("B", ...)</code> was positioned in the original call.</li>
+      <li><b><code>asyncio.TaskGroup</code> (Python 3.11+) is the newer recommended alternative</b> for exactly this pattern, with better error handling: if one task raises, <code>gather()</code> by default lets the others keep running silently in the background, while <code>TaskGroup</code> cancels its siblings immediately and reports the failure clearly. Same ordering guarantee, safer failure behavior:
+      <pre style="background:#0a1128;padding:8px 10px;border-radius:6px;overflow-x:auto;">async def main():
+    async with asyncio.TaskGroup() as tg:
+        a = tg.create_task(fetch_data("A", 2))
+        b = tg.create_task(fetch_data("B", 1))
+        c = tg.create_task(fetch_data("C", 3))
+    results = [a.result(), b.result(), c.result()]</pre></li>
+      <li>See <a href="python_concurrency_interactive.html">Multiprocessing vs Threading vs AsyncIO: Play With It</a> for how this same cooperative scheduling compares to threads and processes at the abstract scheduling level, rather than this page's real-source-code view of it.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('agWidget');
+
+    const delayA = document.getElementById('agDelayA'), delayAVal = document.getElementById('agDelayAVal');
+    const delayB = document.getElementById('agDelayB'), delayBVal = document.getElementById('agDelayBVal');
+    const delayC = document.getElementById('agDelayC'), delayCVal = document.getElementById('agDelayCVal');
+    const speedSlider = document.getElementById('agSpeedSlider'), speedVal = document.getElementById('agSpeedVal');
+    const runBtn = document.getElementById('agRunBtn');
+    const resetBtn = document.getElementById('agResetBtn');
+    const codeEl = document.getElementById('agCode');
+    const consoleEl = document.getElementById('agConsole');
+    const resultsEl = document.getElementById('agResults');
+    const explainEl = document.getElementById('agExplain');
+    const tracks = { A: document.getElementById('agTrackA'), B: document.getElementById('agTrackB'), C: document.getElementById('agTrackC') };
+
+    [[delayA, delayAVal], [delayB, delayBVal], [delayC, delayCVal]].forEach(([sl, val]) => {
+      sl.addEventListener('input', () => { val.textContent = sl.value + 's'; });
+    });
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+
+    const CODE_LINES = [
+      { key: 'def', text: 'async def fetch_data(name, delay):' },
+      { key: 'print-start', text: '    print(f"{name}: starting, will take {delay}s")' },
+      { key: 'await', text: '    await asyncio.sleep(delay)' },
+      { key: 'print-done', text: '    print(f"{name}: done")' },
+      { key: 'return', text: '    return f"{name}-result"' },
+      { key: 'blank1', text: '' },
+      { key: 'main-def', text: 'async def main():' },
+      { key: 'gather-open', text: '    results = await asyncio.gather(' },
+      { key: 'arg-a', text: '        fetch_data("A", A_DELAY),' },
+      { key: 'arg-b', text: '        fetch_data("B", B_DELAY),' },
+      { key: 'arg-c', text: '        fetch_data("C", C_DELAY),' },
+      { key: 'gather-close', text: '    )' },
+      { key: 'print-all', text: '    print("All done:", results)' },
+      { key: 'blank2', text: '' },
+      { key: 'run-call', text: 'asyncio.run(main())' },
+    ];
+
+    const NAMES = ['A', 'B', 'C'];
+    let taskPos = { A: null, B: null, C: null }; // current code-line key each task is "at", or null
+    let running = false;
+    let timers = [];
+
+    function clearTimers() { timers.forEach(t => clearTimeout(t)); timers = []; }
+    function after(ms, fn) { const id = setTimeout(fn, ms); timers.push(id); return id; }
+    function speed() { return parseFloat(speedSlider.value); }
+    function scaled(ms) { return ms / speed(); }
+    function delays() { return { A: parseInt(delayA.value, 10), B: parseInt(delayB.value, 10), C: parseInt(delayC.value, 10) }; }
+
+    function renderCode() {
+      codeEl.innerHTML = '';
+      const d = delays();
+      CODE_LINES.forEach(line => {
+        const div = document.createElement('div');
+        div.className = 'ag-code-line';
+        div.id = 'ag-line-' + line.key;
+        const text = line.text.replace('A_DELAY', d.A).replace('B_DELAY', d.B).replace('C_DELAY', d.C);
+        const gutter = document.createElement('span');
+        gutter.className = 'ag-gutter';
+        gutter.id = 'ag-gutter-' + line.key;
+        div.appendChild(gutter);
+        const codeText = document.createElement('span');
+        codeText.textContent = text;
+        div.appendChild(codeText);
+        codeEl.appendChild(div);
+      });
+    }
+
+    function renderGutters() {
+      ['print-start', 'await', 'print-done', 'return'].forEach(key => {
+        const g = document.getElementById('ag-gutter-' + key);
+        g.innerHTML = '';
+        NAMES.forEach(n => {
+          if (taskPos[n] === key) {
+            const b = document.createElement('span');
+            b.className = 'ag-badge ' + n.toLowerCase() + (key === 'await' ? ' dim' : '');
+            b.textContent = n;
+            g.appendChild(b);
+          }
+        });
+      });
+    }
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      consoleEl.appendChild(d);
+      consoleEl.scrollTop = consoleEl.scrollHeight;
+    }
+
+    function simulateGather(tasks) {
+      const events = [];
+      tasks.forEach((t, i) => events.push({ t: 0, kind: 'start', name: t.name, index: i }));
+      const doneOrder = tasks.map((t, i) => Object.assign({}, t, { index: i })).sort((a, b) => (a.delay - b.delay) || (a.index - b.index));
+      doneOrder.forEach(t => events.push({ t: t.delay, kind: 'done', name: t.name, index: t.index }));
+      const results = new Array(tasks.length);
+      doneOrder.forEach(t => { results[t.index] = t.name + '-result'; });
+      const resolveAt = Math.max(...tasks.map(t => t.delay));
+      return { results, resolveAt, doneOrder };
+    }
+
+    function reset() {
+      clearTimers();
+      running = false;
+      taskPos = { A: null, B: null, C: null };
+      consoleEl.innerHTML = '';
+      resultsEl.innerHTML = '<span style="color:var(--ag-muted);">(not resolved yet)</span>';
+      Object.values(tracks).forEach(t => t.innerHTML = '');
+      explainEl.textContent = 'Set each task\'s delay, then click Run. Watch the console: all three "starting" lines print immediately, back to back -- await hasn\'t suspended anything yet at that point. Only once every task hits its await asyncio.sleep(...) does the event loop actually have to wait for anything.';
+      renderCode();
+      renderGutters();
+      runBtn.disabled = false;
+      [delayA, delayB, delayC].forEach(s => s.disabled = false);
+    }
+
+    function secToPx(sec, maxSec, trackWidth) { return (sec / maxSec) * trackWidth; }
+
+    function run() {
+      if (running) return;
+      reset();
+      running = true;
+      runBtn.disabled = true;
+      [delayA, delayB, delayC].forEach(s => s.disabled = true);
+
+      const d = delays();
+      const tasks = NAMES.map(n => ({ name: n, delay: d[n] }));
+      const { results, resolveAt, doneOrder } = simulateGather(tasks);
+      const maxSec = Math.max(...NAMES.map(n => d[n]));
+      const trackWidth = 260;
+
+      log('>>> asyncio.run(main())', 'sys');
+
+      const STAGGER = 550;
+      NAMES.forEach((n, i) => {
+        after(scaled(STAGGER * i) + 1, () => {
+          taskPos[n] = 'print-start';
+          renderGutters();
+          log(n + ': starting, will take ' + d[n] + 's', n.toLowerCase());
+          const track = tracks[n];
+          const runSeg = document.createElement('div');
+          runSeg.className = 'ag-seg run';
+          runSeg.style.left = '0px';
+          runSeg.style.width = '6px';
+          track.appendChild(runSeg);
+          after(scaled(200), () => {
+            taskPos[n] = 'await';
+            renderGutters();
+            const waitSeg = document.createElement('div');
+            waitSeg.className = 'ag-seg wait';
+            waitSeg.style.left = '6px';
+            waitSeg.style.width = Math.max(2, secToPx(d[n], maxSec, trackWidth) - 6) + 'px';
+            track.appendChild(waitSeg);
+          });
+        });
+      });
+
+      const afterStarts = scaled(STAGGER * NAMES.length) + scaled(400);
+      after(afterStarts, () => {
+        explainEl.textContent = 'All three tasks have now hit their await and suspended. The event loop has nothing left to run synchronously -- from here, it just waits for whichever timer fires first.';
+      });
+
+      doneOrder.forEach(t => {
+        after(afterStarts + scaled(t.delay * 900), () => {
+          taskPos[t.name] = 'print-done';
+          renderGutters();
+          log(t.name + ': done', t.name.toLowerCase());
+          const isLast = t === doneOrder[doneOrder.length - 1];
+          after(scaled(150), () => {
+            taskPos[t.name] = null;
+            renderGutters();
+            if (!isLast) {
+              explainEl.textContent = t.name + ' finished first among the remaining tasks and returns immediately -- but gather() itself keeps waiting for everyone else before it resolves.';
+            }
+          });
+        });
+      });
+
+      const totalWait = afterStarts + scaled(resolveAt * 900) + scaled(400);
+      after(totalWait, () => {
+        log('All tasks complete -- gather() resolves', 'sys');
+        log('All done: [' + results.map(r => "'" + r + "'").join(', ') + ']', 'sys');
+        let html = '';
+        NAMES.forEach((n, i) => {
+          const finishRank = doneOrder.findIndex(t => t.name === n) + 1;
+          html += '<div class="ag-result-row">[' + i + '] <b>\'' + n + '-result\'</b> &mdash; task ' + n + ', finished ' + finishRank + (finishRank === 1 ? 'st' : finishRank === 2 ? 'nd' : 'rd') + ', argument position ' + i + '</div>';
+        });
+        resultsEl.innerHTML = html;
+        explainEl.textContent = 'gather() resolved. Look at the finish-order vs. argument-position columns -- they very likely don\'t match, and that mismatch is exactly the point: the returned list always mirrors the call\'s argument order, never completion order.';
+        running = false;
+        runBtn.disabled = false;
+        [delayA, delayB, delayC].forEach(s => s.disabled = false);
+      });
+    }
+
+    runBtn.addEventListener('click', run);
+    resetBtn.addEventListener('click', reset);
+
+    reset();
+  })();
+  </script>
+</div>

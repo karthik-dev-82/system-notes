@@ -66,6 +66,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Python Sequences (Interactive)](docs/source/python_sequences_interactive.rst)** | Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source | dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks |
 | 🎮 **[Python Hashing (Interactive)](docs/source/python_hashing_interactive.rst)** | Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra | hash tables, open addressing, insertion order, union/intersection/difference |
 | 🎮 **[Multiprocessing vs Threading vs AsyncIO (Interactive)](docs/source/python_concurrency_interactive.rst)** | Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side | GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound |
+| 🎮 **[asyncio.gather() (Interactive)](docs/source/python_asyncio_gather_interactive.rst)** | Interactive asyncio.gather() -- 3 real coroutines, real console output, and the argument-order-vs-completion-order guarantee made concrete | async/await, asyncio.gather, asyncio.TaskGroup, coroutine scheduling |
 
 ---
 
@@ -145,6 +146,7 @@ system-notes/
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
         ├── python_concurrency_interactive.rst
+        ├── python_asyncio_gather_interactive.rst
         └── _static/
             ├── custom.css
             ├── tcp_udp_widget.html
@@ -174,6 +176,7 @@ system-notes/
             ├── ssh_handshake_widget.html
             ├── utf8_encoding_widget.html
             ├── concurrency_models_widget.html
+            ├── asyncio_gather_widget.html
             └── bitcoin_mining_widget.html
 
 ```
