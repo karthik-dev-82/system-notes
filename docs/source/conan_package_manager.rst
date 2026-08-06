@@ -53,8 +53,8 @@ Option 1: Simple conanfile.txt
 
    # === HOW TO PACKAGE IT ===
    [generators]
-   cmake              # Create files that CMake understands
-   cmake_find_package # Create find_package() files
+   CMakeToolchain # Writes a toolchain file CMake reads automatically
+   CMakeDeps      # Writes find_package() config files for each dependency
 
    # === SPECIAL SETTINGS ===
    [options]
@@ -97,16 +97,13 @@ Option 2: Python conanfile.py (more power!)
 
 .. note::
 
-   This mixes two different Conan major versions. The ``.py``
-   example's ``from conan import ConanFile`` import and its
-   ``CMakeToolchain``/``CMakeDeps`` generators are **Conan 2.x**
-   syntax. The ``.txt`` example's ``cmake``, ``cmake_find_package``,
-   and ``cmake_find_package_multi`` generators are **Conan 1.x**
-   terminology -- they were removed in Conan 2.x in favor of the same
-   ``CMakeToolchain``/``CMakeDeps`` generators shown in the ``.py``
-   example. Conan 1.x also imports ``ConanFile`` from ``conans``
-   (plural), not ``conan``. Check ``conan --version`` before copying
-   either style, and don't mix them within one project.
+   This guide targets **Conan 2.x**, the current major version. If
+   you run into a tutorial or an older codebase using ``from conans
+   import ConanFile`` (plural) or generators named ``cmake``,
+   ``cmake_find_package``, or ``cmake_find_package_multi``, that's
+   Conan 1.x -- those generator names were removed in 2.x in favor of
+   ``CMakeToolchain``/``CMakeDeps``, shown throughout this page. Check
+   ``conan --version`` if you're not sure which one a project expects.
 
 Key Sections Breakdown
 ------------------------------
@@ -122,8 +119,10 @@ number."
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Tells Conan how to explain the libraries to your build system --
-``cmake`` for CMake projects, ``visual_studio`` for Visual Studio,
-``makefile`` for Make-based projects.
+``CMakeToolchain``/``CMakeDeps`` for CMake projects,
+``MSBuildToolchain``/``MSBuildDeps`` for Visual Studio,
+``AutotoolsToolchain``/``AutotoolsDeps`` for Make-based/Autotools
+projects.
 
 ``[options]`` -- Customization
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -149,17 +148,17 @@ Essential Conan Commands
    # Install with specific build type
    conan install . --build=missing
 
-   # Search for available packages
-   conan search boost --remote=conancenter
+   # Search for available packages on a remote
+   conan search boost -r=conancenter
 
-   # Show information about a package
-   conan info .
+   # Show the dependency graph for a package
+   conan graph info .
 
-   # Create your own package
-   conan create . myuser/stable
+   # Create your own package (name/version come from the recipe)
+   conan create .
 
-   # Upload package to server
-   conan upload MyPackage/1.0@myuser/stable --all
+   # Upload a package to a remote (requires an explicit remote and confirmation)
+   conan upload mypackage/1.0 -r=myremote --confirm
 
 Real-World Example: Game Project
 ------------------------------------------
@@ -180,8 +179,8 @@ Real-World Example: Game Project
    zlib/1.3
 
    [generators]
-   cmake
-   cmake_find_package_multi
+   CMakeToolchain
+   CMakeDeps
 
    [options]
    sdl:shared=True
@@ -254,7 +253,8 @@ For a Game Project
    lua/5.4.6         # Scripting
 
    [generators]
-   cmake
+   CMakeToolchain
+   CMakeDeps
 
 For a Network Application
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -268,8 +268,8 @@ For a Network Application
    protobuf/3.21.12
 
    [generators]
-   cmake
-   cmake_find_package
+   CMakeToolchain
+   CMakeDeps
 
 Remember
 -------------
