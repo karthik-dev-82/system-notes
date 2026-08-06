@@ -1,0 +1,417 @@
+<div class="cw-root" id="cwWidget">
+  <style>
+    #cwWidget {
+      --cw-bg: #0f172a;
+      --cw-panel: #16213e;
+      --cw-border: #2a3655;
+      --cw-text: #e2e8f0;
+      --cw-muted: #94a3b8;
+      --cw-accent: #38bdf8;
+      --cw-good: #4ade80;
+      --cw-bad: #f87171;
+      --cw-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cw-bg);
+      color: var(--cw-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cwWidget * { box-sizing: border-box; }
+    #cwWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cwWidget .cw-sub { color: var(--cw-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cw-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--cw-panel); border: 1px solid var(--cw-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 920px; }
+    .cw-controls label { font-size: 0.8rem; color: var(--cw-muted); display: flex; align-items: center; gap: 8px; }
+    .cw-controls input[type="range"] { width: 110px; accent-color: var(--cw-accent); }
+    .cw-toggle { display: inline-flex; border: 1px solid var(--cw-border); border-radius: 8px; overflow: hidden; }
+    .cw-toggle button { background: transparent; color: var(--cw-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .cw-toggle button.active { background: var(--cw-warn); color: #2a1c00; }
+    .cw-btn { background: var(--cw-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .cw-btn.secondary { background: transparent; color: var(--cw-text); border: 1px solid var(--cw-border); }
+    .cw-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .cw-panels { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; min-width: 920px; }
+    .cw-panel { background: var(--cw-panel); border: 1px solid var(--cw-border); border-radius: 10px; padding: 12px 16px; }
+    .cw-panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; margin-bottom: 8px; }
+    .cw-panel-name { font-weight: 800; color: #fff; font-size: 0.9rem; }
+    .cw-panel-desc { color: var(--cw-muted); font-size: 0.74rem; margin-left: 8px; }
+    .cw-panel-time { font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; color: var(--cw-accent); white-space: nowrap; }
+
+    .cw-lane-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .cw-lane-label { width: 66px; flex-shrink: 0; font-size: 0.68rem; color: var(--cw-muted); font-family: ui-monospace, monospace; }
+    .cw-lane-track { position: relative; flex: 1; height: 22px; background: #0a1128; border-radius: 4px; border: 1px solid var(--cw-border); overflow: hidden; transition: box-shadow 0.15s, border-color 0.15s; }
+    .cw-lane-track.cw-active { border-color: var(--cw-accent); box-shadow: 0 0 0 2px rgba(56,189,248,0.35) inset; }
+    .cw-seg { position: absolute; top: 0; bottom: 0; background: rgba(255,255,255,0.04); border-right: 1px solid rgba(255,255,255,0.1); }
+    .cw-seg-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0%; }
+    .cw-seg.cpu .cw-seg-fill { background: var(--cw-accent); }
+    .cw-seg.io .cw-seg-fill { background: var(--cw-warn); opacity: 0.8; }
+    .cw-seg-tip { position: absolute; inset: 0; }
+
+    .cw-legend { display: flex; gap: 16px; font-size: 0.72rem; color: var(--cw-muted); margin: 2px 0 10px; }
+    .cw-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .cw-legend i { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+    .cw-legend .cpu-sw { background: var(--cw-accent); }
+    .cw-legend .io-sw { background: var(--cw-warn); }
+
+    .cw-compare { background: var(--cw-panel); border: 1px solid var(--cw-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 920px; }
+    .cw-compare-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cw-muted); margin-bottom: 10px; }
+    .cw-compare-row { display: flex; align-items: center; gap: 8px; margin-top: 6px; }
+    .cw-compare-label { width: 150px; flex-shrink: 0; font-size: 0.75rem; color: var(--cw-text); }
+    .cw-compare-track { position: relative; flex: 1; height: 16px; background: #0a1128; border-radius: 4px; border: 1px solid var(--cw-border); overflow: hidden; }
+    .cw-compare-fill { position: absolute; top: 0; bottom: 0; left: 0; width: 0%; background: var(--cw-accent); }
+    .cw-compare-time { width: 60px; text-align: right; flex-shrink: 0; font-family: ui-monospace, monospace; font-size: 0.75rem; color: var(--cw-muted); }
+
+    .cw-panels-row { display: flex; gap: 14px; flex-wrap: wrap; min-width: 920px; }
+    .cw-explain-panel, .cw-side-panel-col { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .cw-explain-panel { flex: 1.3; }
+    .cw-box { background: var(--cw-panel); border: 1px solid var(--cw-border); border-radius: 10px; padding: 12px 14px; }
+    .cw-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cw-muted); margin-bottom: 8px; }
+    .cw-log { height: 160px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cw-log div { color: var(--cw-muted); }
+    .cw-log div.good { color: var(--cw-good); }
+    .cw-log div.warn { color: var(--cw-warn); }
+
+    details.cw-notes { margin-top: 14px; background: var(--cw-panel); border: 1px solid var(--cw-border); border-radius: 10px; padding: 12px 16px; min-width: 920px; font-size: 0.85rem; line-height: 1.6; }
+    details.cw-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cw-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cw-muted); }
+    details.cw-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cw-accent); }
+  </style>
+
+  <h3>Multiprocessing vs Threading vs AsyncIO: Play With It</h3>
+  <div class="cw-sub">The exact same 3 tasks, run four different ways. Same problem, same task shapes -- watch why the timelines come out so differently.</div>
+
+  <div class="cw-controls">
+    <span style="font-size:0.78rem;color:var(--cw-muted);">Workload:</span>
+    <div class="cw-toggle" id="cwWorkloadToggle">
+      <button class="cw-wl-btn active" data-workload="io">I/O-bound (web requests)</button>
+      <button class="cw-wl-btn" data-workload="cpu">CPU-bound (pure computation)</button>
+    </div>
+    <label>Speed: <span id="cwSpeedVal">1x</span>
+      <input type="range" id="cwSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    </label>
+    <button class="cw-btn" id="cwRunBtn">Run All Four</button>
+    <button class="cw-btn secondary" id="cwResetBtn">Reset</button>
+  </div>
+
+  <div class="cw-legend">
+    <span><i class="cpu-sw"></i> CPU work (compute)</span>
+    <span><i class="io-sw"></i> I/O wait (network / disk -- CPU is free during this)</span>
+    <span>Glowing lane = currently holds the CPU</span>
+  </div>
+
+  <div class="cw-panels" id="cwPanels"></div>
+
+  <div class="cw-compare">
+    <div class="cw-compare-title">Total time to finish all 3 tasks</div>
+    <div id="cwCompareRows"></div>
+  </div>
+
+  <div class="cw-panels-row">
+    <div class="cw-explain-panel">
+      <div class="cw-box">
+        <div class="cw-panel-title">What's happening right now</div>
+        <div id="cwExplain">Pick a workload, then click "Run All Four." All three tasks are identical across every panel -- only the scheduling strategy changes. Watch which lanes light up together, and which take turns.</div>
+      </div>
+    </div>
+    <div class="cw-side-panel-col">
+      <div class="cw-box">
+        <div class="cw-panel-title">Event log</div>
+        <div class="cw-log" id="cwLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="cw-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Threading and AsyncIO can finish at the exact same total time and still behave completely differently.</b> For CPU-bound work above, both take the same 4.05s -- but watch the glowing lane: threading jumps between all three lanes constantly (the OS preempts the GIL holder every few milliseconds, in reality), while asyncio finishes lane 1 completely, <em>then</em> starts lane 2. A coroutine that never hits an <code>await</code> holds the entire event loop hostage for its whole duration -- nothing else on that loop runs, not even an unrelated heartbeat task.</li>
+      <li><b>Multiprocessing pays real overhead that this widget shows honestly.</b> Its head start isn't free -- spinning up a new OS process (a new Python interpreter, no shared memory) costs more than spinning up a thread or a coroutine, which is why it still wins decisively for CPU-bound work but is comparative overkill for a handful of quick I/O calls.</li>
+      <li><b>Why the summary table calls threading "fast I/O-bound" and asyncio "slow I/O-bound":</b> with only 3 tasks the two look identical here, but that stops being true at scale. Spawning 3 threads is cheap; spawning 3,000 threads to hold open 3,000 slow connections is not -- each OS thread costs real memory (stack space) and real kernel scheduling overhead. 3,000 asyncio tasks cost barely more than 3 do, since they're just objects the single event loop juggles, not OS-scheduled entities. That's the actual reason asyncio exists, not because it's faster per task.</li>
+      <li><b>None of this changes if you switch to PyPy or add more CPU cores</b> -- the GIL is a property of the standard CPython interpreter's memory-safety design, not a hardware limitation. It's also why <code>multiprocessing</code> processes don't share memory by default and need explicit IPC (pipes, queues, shared memory blocks) to talk to each other, unlike threads which share everything and need locks instead.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const root = document.getElementById('cwWidget');
+
+    const speedSlider = document.getElementById('cwSpeedSlider');
+    const speedVal = document.getElementById('cwSpeedVal');
+    speedSlider.addEventListener('input', () => { speedVal.textContent = speedSlider.value + 'x'; });
+
+    const N_TASKS = 3;
+    const IO_BOUND_TASK = () => [['cpu', 2], ['io', 10], ['cpu', 1]];
+    const CPU_BOUND_TASK = () => [['cpu', 9]];
+    const MP_OVERHEAD = 1;
+    const SEC_PER_TICK = 0.15;
+    const TICK_MS_AT_1X = 260;
+
+    function taskFactoryFor(workload) { return workload === 'io' ? IO_BOUND_TASK : CPU_BOUND_TASK; }
+
+    function runSequentialBaseline(taskFactory) {
+      let cursor = 0;
+      const intervals = [];
+      for (let i = 0; i < N_TASKS; i++) {
+        const segs = taskFactory();
+        let t = cursor;
+        for (const [type, dur] of segs) { intervals.push({ lane: i, start: t, end: t + dur, type }); t += dur; }
+        cursor = t;
+      }
+      return { intervals, totalTime: cursor };
+    }
+
+    function runMultiprocessing(taskFactory) {
+      const all = [];
+      let maxEnd = 0;
+      for (let i = 0; i < N_TASKS; i++) {
+        const segs = taskFactory();
+        let t = MP_OVERHEAD;
+        for (const [type, dur] of segs) { all.push({ lane: i, start: t, end: t + dur, type }); t += dur; }
+        maxEnd = Math.max(maxEnd, t);
+      }
+      return { intervals: all, totalTime: maxEnd };
+    }
+
+    function runSharedCore(taskFactory, quantum) {
+      const threads = [];
+      for (let i = 0; i < N_TASKS; i++) threads.push({ lane: i, segs: taskFactory(), segIdx: 0, remaining: null });
+      threads.forEach(th => { th.remaining = th.segs[0][1]; });
+
+      let t = 0;
+      let ready = threads.map(th => th.lane);
+      const ioBlocked = [];
+      const intervals = [];
+      let finished = 0;
+
+      function advanceToNextIoUnblock() {
+        ioBlocked.sort((a, b) => a.unblockAt - b.unblockAt);
+        const next = ioBlocked.shift();
+        t = Math.max(t, next.unblockAt);
+        ready.push(next.lane);
+      }
+
+      while (finished < N_TASKS) {
+        if (ready.length === 0) { advanceToNextIoUnblock(); continue; }
+        const laneId = ready.shift();
+        const th = threads[laneId];
+        const run = Math.min(quantum, th.remaining);
+        const start = t, end = t + run;
+        intervals.push({ lane: laneId, start, end, type: 'cpu' });
+        t = end;
+        th.remaining -= run;
+
+        if (th.remaining > 0) {
+          ready.push(laneId);
+        } else {
+          th.segIdx++;
+          if (th.segIdx >= th.segs.length) {
+            finished++;
+          } else {
+            const [nextType, nextDur] = th.segs[th.segIdx];
+            intervals.push({ lane: laneId, start: t, end: t + nextDur, type: 'io' });
+            ioBlocked.push({ lane: laneId, unblockAt: t + nextDur });
+            th.segIdx++;
+            if (th.segIdx < th.segs.length) th.remaining = th.segs[th.segIdx][1];
+          }
+        }
+      }
+      return { intervals, totalTime: t };
+    }
+
+    const MODELS = [
+      { key: 'seq', name: 'Sequential', desc: '(no concurrency -- baseline) one task at a time, start to finish', run: (tf) => runSequentialBaseline(tf) },
+      { key: 'mp', name: 'Multiprocessing', desc: '3 OS processes, 1 per task -- genuine parallelism, one per CPU core', run: (tf) => runMultiprocessing(tf) },
+      { key: 'th', name: 'Threading', desc: '3 threads, 1 process -- the GIL lets only one run Python bytecode at a time; the OS preempts between them', run: (tf) => runSharedCore(tf, 3) },
+      { key: 'aio', name: 'AsyncIO', desc: '3 coroutines, 1 thread -- a single event loop, switching only when a task explicitly awaits', run: (tf) => runSharedCore(tf, Infinity) },
+    ];
+
+    const panelsEl = document.getElementById('cwPanels');
+    const compareRowsEl = document.getElementById('cwCompareRows');
+    const explainEl = document.getElementById('cwExplain');
+    const logEl = document.getElementById('cwLog');
+    const runBtn = document.getElementById('cwRunBtn');
+    const resetBtn = document.getElementById('cwResetBtn');
+    const wlBtns = root.querySelectorAll('.cw-wl-btn');
+
+    const TRACK_WIDTH_PX = 640;
+
+    MODELS.forEach(m => {
+      const panel = document.createElement('div');
+      panel.className = 'cw-panel';
+      panel.id = 'cwPanel-' + m.key;
+      panel.innerHTML =
+        '<div class="cw-panel-head">' +
+          '<div><span class="cw-panel-name">' + m.name + '</span><span class="cw-panel-desc">' + m.desc + '</span></div>' +
+          '<div class="cw-panel-time" id="cwTime-' + m.key + '">&mdash;</div>' +
+        '</div>';
+      for (let i = 0; i < N_TASKS; i++) {
+        const row = document.createElement('div');
+        row.className = 'cw-lane-row';
+        row.innerHTML = '<div class="cw-lane-label">Task ' + (i + 1) + '</div><div class="cw-lane-track" id="cwTrack-' + m.key + '-' + i + '"></div>';
+        panel.appendChild(row);
+      }
+      panelsEl.appendChild(panel);
+
+      const crow = document.createElement('div');
+      crow.className = 'cw-compare-row';
+      crow.innerHTML =
+        '<div class="cw-compare-label">' + m.name + '</div>' +
+        '<div class="cw-compare-track"><div class="cw-compare-fill" id="cwCompareFill-' + m.key + '"></div></div>' +
+        '<div class="cw-compare-time" id="cwCompareTime-' + m.key + '">&mdash;</div>';
+      compareRowsEl.appendChild(crow);
+    });
+
+    let workload = 'io';
+    let schedules = {};
+    let maxTotal = 1;
+    let pxPerTick = 1;
+    let running = false;
+    let rafId = null;
+    let startTs = 0;
+    let announced = {};
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function fmtSec(ticks) { return (ticks * SEC_PER_TICK).toFixed(2) + 's'; }
+
+    function buildSchedules() {
+      const tf = taskFactoryFor(workload);
+      schedules = {};
+      maxTotal = 1;
+      MODELS.forEach(m => {
+        const result = m.run(tf);
+        schedules[m.key] = result;
+        maxTotal = Math.max(maxTotal, result.totalTime);
+      });
+      pxPerTick = TRACK_WIDTH_PX / maxTotal;
+    }
+
+    function renderStaticTracks() {
+      MODELS.forEach(m => {
+        const sched = schedules[m.key];
+        for (let i = 0; i < N_TASKS; i++) {
+          const track = document.getElementById('cwTrack-' + m.key + '-' + i);
+          track.innerHTML = '';
+          track.classList.remove('cw-active');
+          sched.intervals.filter(iv => iv.lane === i).forEach(iv => {
+            const seg = document.createElement('div');
+            seg.className = 'cw-seg ' + iv.type;
+            seg.style.left = (iv.start * pxPerTick) + 'px';
+            seg.style.width = Math.max(1, (iv.end - iv.start) * pxPerTick) + 'px';
+            seg.title = (iv.type === 'cpu' ? 'compute ' : 'I/O wait ') + fmtSec(iv.end - iv.start);
+            const fill = document.createElement('div');
+            fill.className = 'cw-seg-fill';
+            seg.appendChild(fill);
+            track.appendChild(seg);
+          });
+        }
+        document.getElementById('cwTime-' + m.key).textContent = '—';
+      });
+      MODELS.forEach(m => {
+        document.getElementById('cwCompareFill-' + m.key).style.width = '0%';
+        document.getElementById('cwCompareTime-' + m.key).textContent = '—';
+      });
+    }
+
+    function resetAll() {
+      running = false;
+      if (rafId) cancelAnimationFrame(rafId);
+      announced = {};
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Pick a workload, then click "Run All Four." All three tasks are identical across every panel -- only the scheduling strategy changes. Watch which lanes light up together, and which take turns.';
+      buildSchedules();
+      renderStaticTracks();
+      runBtn.disabled = false;
+      runBtn.textContent = 'Run All Four';
+    }
+
+    function setWorkload(w) {
+      if (running) return;
+      workload = w;
+      wlBtns.forEach(b => b.classList.toggle('active', b.dataset.workload === w));
+      resetAll();
+      log(w === 'io'
+        ? 'Workload: each task quickly parses a request, waits on a slow network call, then processes the response.'
+        : 'Workload: each task is pure computation -- no I/O anywhere, nothing to wait on.', null);
+    }
+
+    function frame(now) {
+      const speed = parseFloat(speedSlider.value);
+      const elapsedMs = now - startTs;
+      const t = elapsedMs / (TICK_MS_AT_1X / speed);
+
+      let allDone = true;
+      MODELS.forEach(m => {
+        const sched = schedules[m.key];
+        const localT = Math.min(t, sched.totalTime);
+        if (localT < sched.totalTime) allDone = false;
+
+        for (let i = 0; i < N_TASKS; i++) {
+          const track = document.getElementById('cwTrack-' + m.key + '-' + i);
+          const segs = track.querySelectorAll('.cw-seg');
+          const intervals = sched.intervals.filter(iv => iv.lane === i);
+          let laneActive = false;
+          segs.forEach((segEl, idx) => {
+            const iv = intervals[idx];
+            const fill = segEl.querySelector('.cw-seg-fill');
+            const frac = iv.end === iv.start ? 1 : Math.max(0, Math.min(1, (localT - iv.start) / (iv.end - iv.start)));
+            fill.style.width = (frac * 100) + '%';
+            if (iv.type === 'cpu' && localT >= iv.start && localT < iv.end) laneActive = true;
+          });
+          track.classList.toggle('cw-active', laneActive);
+        }
+
+        document.getElementById('cwTime-' + m.key).textContent = fmtSec(localT) + ' / ' + fmtSec(sched.totalTime);
+
+        const cfrac = Math.min(1, localT / maxTotal);
+        document.getElementById('cwCompareFill-' + m.key).style.width = (cfrac * 100) + '%';
+        if (localT >= sched.totalTime) {
+          document.getElementById('cwCompareTime-' + m.key).textContent = fmtSec(sched.totalTime);
+          if (!announced[m.key]) {
+            announced[m.key] = true;
+            log(m.name + ' finished in ' + fmtSec(sched.totalTime) + '.', 'good');
+          }
+        }
+      });
+
+      if (allDone) {
+        running = false;
+        runBtn.disabled = false;
+        runBtn.textContent = 'Run Again';
+        const order = MODELS.map(m => ({ name: m.name, t: schedules[m.key].totalTime })).sort((a, b) => a.t - b.t);
+        log('Fastest to slowest: ' + order.map(o => o.name + ' (' + fmtSec(o.t) + ')').join(' < ') + '.', 'warn');
+        explainEl.textContent = workload === 'io'
+          ? 'With I/O-bound work, multiprocessing wins by a hair (true parallelism, but paid startup overhead), while threading and asyncio tie -- both release the CPU during a wait, they just do it by different rules (OS preemption vs explicit await).'
+          : 'With CPU-bound work, multiprocessing is the clear winner -- separate cores doing separate work. Threading and asyncio both take exactly as long as running sequentially: one CPU, shared by however many threads or coroutines ask for it, still only does one thing at a time.';
+        return;
+      }
+      rafId = requestAnimationFrame(frame);
+    }
+
+    function run() {
+      if (running) return;
+      resetAll();
+      running = true;
+      runBtn.disabled = true;
+      log('Starting all four models with the identical task set...', null);
+      startTs = performance.now();
+      rafId = requestAnimationFrame(frame);
+    }
+
+    wlBtns.forEach(b => b.addEventListener('click', () => setWorkload(b.dataset.workload)));
+    runBtn.addEventListener('click', run);
+    resetBtn.addEventListener('click', resetAll);
+
+    resetAll();
+  })();
+  </script>
+</div>

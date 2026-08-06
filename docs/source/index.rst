@@ -59,6 +59,7 @@ worth writing down and coming back to.
 
    python_sequences_interactive
    python_hashing_interactive
+   python_concurrency_interactive
 
 System Notes
 -----------------
@@ -206,3 +207,6 @@ Python Notes
    * - :doc:`python_hashing_interactive`
      - Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra
      - hash tables, open addressing, insertion order, union/intersection/difference
+   * - :doc:`python_concurrency_interactive`
+     - Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side
+     - GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound
