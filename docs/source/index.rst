@@ -23,6 +23,7 @@ worth writing down and coming back to.
    overlayfs_interactive
    process_memory_layout_interactive
    vma_paging_interactive
+   latency_numbers_interactive
    page_cache_interactive
    docker_packet_journey_interactive
    kernel_networking_docker_internals
@@ -118,6 +119,9 @@ System Notes
    * - :doc:`vma_paging_interactive`
      - Interactive VMAs and page tables -- grow the heap for free, then watch a real page fault get resolved
      - VMAs, page tables, page faults, lazy allocation
+   * - :doc:`latency_numbers_interactive`
+     - Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop
+     - CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT
    * - :doc:`page_cache_interactive`
      - Interactive page cache -- two processes share one cache, mmap() skips the copy, crash before fsync() and lose it
      - page cache, mmap, fsync, write-back, cross-process sharing

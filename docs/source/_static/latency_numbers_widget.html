@@ -1,0 +1,286 @@
+<div class="ln-root" id="lnWidget">
+  <style>
+    #lnWidget {
+      --ln-bg: #0f172a;
+      --ln-panel: #16213e;
+      --ln-border: #2a3655;
+      --ln-text: #e2e8f0;
+      --ln-muted: #94a3b8;
+      --ln-accent: #38bdf8;
+      --ln-good: #4ade80;
+      --ln-bad: #f87171;
+      --ln-warn: #fbbf24;
+      --ln-flat: #94a3b8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ln-bg);
+      color: var(--ln-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #lnWidget * { box-sizing: border-box; }
+    #lnWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #lnWidget .ln-sub { color: var(--ln-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .ln-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--ln-panel); border: 1px solid var(--ln-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 960px; }
+    .ln-controls label { font-size: 0.8rem; color: var(--ln-muted); display: flex; align-items: center; gap: 8px; }
+    .ln-era-row { display: flex; gap: 6px; }
+    .ln-era-btn { background: transparent; color: var(--ln-muted); border: 1px solid var(--ln-border); border-radius: 6px; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .ln-era-btn.active { background: var(--ln-accent); color: #041322; border-color: var(--ln-accent); }
+    .ln-select { background: var(--ln-bg); color: var(--ln-text); border: 1px solid var(--ln-border); border-radius: 6px; padding: 6px 10px; font-size: 0.8rem; font-family: inherit; }
+    .ln-legend { display: flex; gap: 16px; margin-left: auto; font-size: 0.74rem; color: var(--ln-muted); }
+    .ln-legend span { display: inline-flex; align-items: center; gap: 5px; }
+    .ln-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+
+    .ln-ruler-wrap { background: var(--ln-panel); border: 1px solid var(--ln-border); border-radius: 10px; padding: 20px 24px 12px; margin-bottom: 16px; min-width: 960px; }
+    .ln-ruler-track { position: relative; height: 46px; margin: 0 6px; }
+    .ln-ruler-line { position: absolute; left: 0; right: 0; top: 20px; height: 2px; background: var(--ln-border); }
+    .ln-tick { position: absolute; top: 12px; width: 1px; height: 18px; background: var(--ln-border); }
+    .ln-tick-label { position: absolute; top: 32px; transform: translateX(-50%); font-size: 0.62rem; color: var(--ln-muted); font-family: ui-monospace, monospace; white-space: nowrap; }
+    .ln-mark { position: absolute; top: 13px; width: 12px; height: 12px; border-radius: 50%; transform: translateX(-50%); cursor: pointer; border: 2px solid var(--ln-bg); transition: left 0.6s ease; z-index: 2; }
+    .ln-mark:hover, .ln-mark.anchor { box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.35); }
+
+    .ln-table-wrap { background: var(--ln-panel); border: 1px solid var(--ln-border); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; min-width: 960px; overflow-x: auto; }
+    table.ln-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+    table.ln-table th { text-align: left; color: var(--ln-muted); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--ln-border); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.03em; }
+    table.ln-table td { padding: 6px 10px; border-bottom: 1px solid rgba(42, 54, 85, 0.5); font-family: ui-monospace, monospace; }
+    table.ln-table tr.ln-row { cursor: pointer; }
+    table.ln-table tr.ln-row:hover { background: rgba(56, 189, 248, 0.08); }
+    table.ln-table tr.ln-row.anchor { background: rgba(56, 189, 248, 0.16); }
+    table.ln-table td.ln-op { font-family: inherit; }
+    .ln-cat-tag { font-size: 0.68rem; font-weight: 700; padding: 2px 7px; border-radius: 5px; }
+    .ln-cat-faster { color: #04150a; background: var(--ln-good); }
+    .ln-cat-slower { color: #2a0505; background: var(--ln-bad); }
+    .ln-cat-flat { color: #0b1220; background: var(--ln-flat); }
+
+    .ln-human { background: var(--ln-panel); border: 1px solid var(--ln-border); border-radius: 10px; padding: 14px 16px; min-width: 960px; }
+    .ln-human h4 { margin: 0 0 8px; font-size: 0.9rem; color: #fff; }
+    .ln-human-note { font-size: 0.78rem; color: var(--ln-muted); line-height: 1.5; }
+    .ln-human-note b { color: #fff; }
+  </style>
+
+  <h3>Latency Numbers Every Programmer Should Know</h3>
+  <div class="ln-sub">Click any dot (or table row) to make it "1 second" and see everything else on that timescale.</div>
+
+  <div class="ln-controls">
+    <label>Era
+      <div class="ln-era-row">
+        <button class="ln-era-btn" data-era="classic">Classic (2012)</button>
+        <button class="ln-era-btn" data-era="modern">Modern (2024, representative)</button>
+      </div>
+    </label>
+    <label>Anchor
+      <select class="ln-select" id="lnAnchorSelect"></select>
+    </label>
+    <div class="ln-legend">
+      <span><i class="ln-dot" style="background:var(--ln-good)"></i>faster now</span>
+      <span><i class="ln-dot" style="background:var(--ln-flat)"></i>essentially unchanged</span>
+      <span><i class="ln-dot" style="background:var(--ln-bad)"></i>slower now</span>
+    </div>
+  </div>
+
+  <div class="ln-ruler-wrap">
+    <div class="ln-ruler-track" id="lnRulerTrack">
+      <div class="ln-ruler-line"></div>
+    </div>
+  </div>
+
+  <div class="ln-table-wrap">
+    <table class="ln-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th>Operation</th>
+          <th>Classic (2012)</th>
+          <th>Modern (2024, representative)</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody id="lnTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="ln-human">
+    <h4 id="lnHumanTitle">If L1 cache reference took 1 second&hellip;</h4>
+    <div class="ln-human-note" id="lnHumanNote"></div>
+  </div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('lnWidget');
+
+    var OPS = [
+      { key: 'l1',       label: 'L1 cache reference',                    classicNs: 0.5,        modernNs: 0.7 },
+      { key: 'branch',   label: 'Branch mispredict',                     classicNs: 5,          modernNs: 8 },
+      { key: 'l2',       label: 'L2 cache reference',                    classicNs: 7,          modernNs: 2.5 },
+      { key: 'mutex',    label: 'Mutex lock/unlock',                     classicNs: 25,         modernNs: 25 },
+      { key: 'mem',      label: 'Main memory reference',                 classicNs: 100,        modernNs: 70 },
+      { key: 'compress', label: 'Compress ~1 KB (Zippy / Snappy)',       classicNs: 3000,       modernNs: 2000 },
+      { key: 'net1k',    label: 'Send ~1-2 KB over datacenter LAN',      classicNs: 10000,      modernNs: 1600 },
+      { key: 'mem1mb',   label: 'Read 1 MB sequentially from memory',    classicNs: 250000,     modernNs: 10000 },
+      { key: 'ssdrand',  label: 'Read 4 KB randomly from SSD',           classicNs: 150000,     modernNs: 20000 },
+      { key: 'dcrtt',    label: 'Round trip within same datacenter',     classicNs: 500000,     modernNs: 100000 },
+      { key: 'ssdseq',   label: 'Read 1 MB sequentially from SSD',       classicNs: 1000000,    modernNs: 100000 },
+      { key: 'hddseek',  label: 'Disk seek (HDD)',                       classicNs: 10000000,   modernNs: 10000000 },
+      { key: 'hddseq',   label: 'Read 1 MB sequentially from disk',      classicNs: 20000000,   modernNs: 6000000 },
+      { key: 'canl',     label: 'Packet round trip, CA <-> Netherlands', classicNs: 150000000, modernNs: 150000000 }
+    ];
+
+    var DOMAIN_MIN_NS = 0.1;
+    var DOMAIN_MAX_NS = 1e9;
+
+    function rulerPos(ns) {
+      var lo = Math.log10(DOMAIN_MIN_NS), hi = Math.log10(DOMAIN_MAX_NS);
+      return ((Math.log10(ns) - lo) / (hi - lo)) * 100;
+    }
+
+    function category(classicNs, modernNs) {
+      var ratio = classicNs / modernNs;
+      if (ratio >= 1.2) return 'faster';
+      if (ratio <= 1 / 1.2) return 'slower';
+      return 'flat';
+    }
+
+    function scaleToHumanSeconds(ns, anchorNs) {
+      return ns / anchorNs;
+    }
+
+    function fmtNum(n) {
+      if (Math.abs(n) >= 100) return n.toFixed(0);
+      if (Math.abs(n) >= 10) return n.toFixed(1);
+      return n.toFixed(2);
+    }
+
+    function formatHumanDuration(seconds) {
+      var abs = Math.abs(seconds);
+      if (abs < 60) return { unit: 's', text: fmtNum(seconds) + 's' };
+      if (abs < 3600) return { unit: 'm', text: fmtNum(seconds / 60) + 'm' };
+      if (abs < 86400) return { unit: 'h', text: fmtNum(seconds / 3600) + 'h' };
+      if (abs < 31536000) return { unit: 'd', text: fmtNum(seconds / 86400) + 'd' };
+      return { unit: 'yr', text: fmtNum(seconds / 31536000) + 'yr' };
+    }
+
+    function formatNs(ns) {
+      if (ns < 1000) return fmtNum(ns) + ' ns';
+      if (ns < 1000000) return fmtNum(ns / 1000) + ' µs';
+      if (ns < 1000000000) return fmtNum(ns / 1000000) + ' ms';
+      return fmtNum(ns / 1000000000) + ' s';
+    }
+
+    var DECADES = [0.1, 1, 10, 100, 1000, 10000, 100000, 1000000, 10000000, 100000000, 1000000000];
+    var DECADE_LABELS = ['0.1ns', '1ns', '10ns', '100ns', '1µs', '10µs', '100µs', '1ms', '10ms', '100ms', '1s'];
+
+    var CAT_VAR = { faster: 'var(--ln-good)', slower: 'var(--ln-bad)', flat: 'var(--ln-flat)' };
+
+    var trackEl = document.getElementById('lnRulerTrack');
+    var tbodyEl = document.getElementById('lnTableBody');
+    var anchorSelect = document.getElementById('lnAnchorSelect');
+    var humanTitle = document.getElementById('lnHumanTitle');
+    var humanNote = document.getElementById('lnHumanNote');
+
+    var state = { era: 'modern', anchorKey: 'l1' };
+
+    // -- build static ruler ticks + populate anchor dropdown once --
+    DECADES.forEach(function(ns, i) {
+      var pos = rulerPos(ns);
+      var tick = document.createElement('div');
+      tick.className = 'ln-tick';
+      tick.style.left = pos + '%';
+      trackEl.appendChild(tick);
+      var lbl = document.createElement('div');
+      lbl.className = 'ln-tick-label';
+      lbl.style.left = pos + '%';
+      lbl.textContent = DECADE_LABELS[i];
+      trackEl.appendChild(lbl);
+    });
+
+    var markEls = {};
+    OPS.forEach(function(o) {
+      var mark = document.createElement('div');
+      mark.className = 'ln-mark';
+      mark.title = o.label;
+      mark.dataset.key = o.key;
+      mark.addEventListener('click', function() { setAnchor(o.key); });
+      trackEl.appendChild(mark);
+      markEls[o.key] = mark;
+
+      var opt = document.createElement('option');
+      opt.value = o.key;
+      opt.textContent = o.label;
+      anchorSelect.appendChild(opt);
+    });
+
+    root.querySelectorAll('.ln-era-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        state.era = btn.dataset.era;
+        render();
+      });
+    });
+    anchorSelect.addEventListener('change', function() {
+      setAnchor(anchorSelect.value);
+    });
+
+    function setAnchor(key) {
+      state.anchorKey = key;
+      render();
+    }
+
+    function nsFor(o) {
+      return state.era === 'classic' ? o.classicNs : o.modernNs;
+    }
+
+    function render() {
+      root.querySelectorAll('.ln-era-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.era === state.era);
+      });
+      anchorSelect.value = state.anchorKey;
+
+      var anchorOp = OPS.find(function(o) { return o.key === state.anchorKey; });
+      var anchorNs = nsFor(anchorOp);
+
+      OPS.forEach(function(o) {
+        var ns = nsFor(o);
+        var mark = markEls[o.key];
+        mark.style.left = rulerPos(ns) + '%';
+        mark.style.background = CAT_VAR[category(o.classicNs, o.modernNs)];
+        mark.classList.toggle('anchor', o.key === state.anchorKey);
+      });
+
+      tbodyEl.innerHTML = '';
+      OPS.forEach(function(o) {
+        var cat = category(o.classicNs, o.modernNs);
+        var ratio = o.classicNs / o.modernNs;
+        var changeText;
+        if (cat === 'flat') changeText = '~same';
+        else if (cat === 'faster') changeText = fmtNum(ratio) + '× faster';
+        else changeText = fmtNum(1 / ratio) + '× slower';
+
+        var tr = document.createElement('tr');
+        tr.className = 'ln-row' + (o.key === state.anchorKey ? ' anchor' : '');
+        tr.addEventListener('click', function() { setAnchor(o.key); });
+        tr.innerHTML =
+          '<td><span class="ln-dot" style="background:' + CAT_VAR[cat] + '"></span></td>' +
+          '<td class="ln-op">' + o.label + '</td>' +
+          '<td>' + formatNs(o.classicNs) + '</td>' +
+          '<td>' + formatNs(o.modernNs) + '</td>' +
+          '<td><span class="ln-cat-tag ln-cat-' + cat + '">' + changeText + '</span></td>';
+        tbodyEl.appendChild(tr);
+      });
+
+      humanTitle.textContent = 'If ' + anchorOp.label.toLowerCase() + ' took 1 second…';
+
+      var rows = OPS.slice().sort(function(a, b) { return nsFor(a) - nsFor(b); }).map(function(o) {
+        var seconds = scaleToHumanSeconds(nsFor(o), anchorNs);
+        var human = formatHumanDuration(seconds);
+        var marker = o.key === state.anchorKey ? ' <b>(anchor)</b>' : '';
+        return o.label + ': <b>' + human.text + '</b>' + marker;
+      });
+      humanNote.innerHTML = rows.join(' &nbsp;&middot;&nbsp; ');
+    }
+
+    render();
+  })();
+  </script>
+</div>
