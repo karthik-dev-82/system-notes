@@ -50,6 +50,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | Reference Guide | Primary Focus | Key Utilities Covered |
 | --- | --- | --- |
 | 📝 **[spdlog Sinks & Architecture](docs/source/spdlog_sinks_architecture.rst)** | spdlog logging architecture, sinks, and log levels | `spdlog`, sinks, formatters, log levels, rotation |
+| 📦 **[Conan Package Manager Guide](docs/source/conan_package_manager.rst)** | Conan package manager for C++ -- conanfile structure, generators, and commands | `conanfile.txt`, `conanfile.py`, generators, ConanCenter |
 | 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
 | 🎮 **[C++ RAII & Smart Pointers (Interactive)](docs/source/cpp_raii_smart_pointers_interactive.rst)** | Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak | RAII, unique_ptr, shared_ptr, weak_ptr, reference counting |
 | 🎮 **[C++ Move Semantics (Interactive)](docs/source/cpp_move_semantics_interactive.rst)** | Interactive move semantics -- copy vs move construction cost, made countable | move constructor, std::move, moved-from state, noexcept |
@@ -131,6 +132,7 @@ system-notes/
         ├── bitcoin_mining_interactive.rst
         ├── bitcoin_distributed_ledgers_zcash.rst
         ├── spdlog_sinks_architecture.rst
+        ├── conan_package_manager.rst
         ├── cpp_memory_interactive.rst
         ├── cpp_raii_smart_pointers_interactive.rst
         ├── cpp_move_semantics_interactive.rst

@@ -48,6 +48,7 @@ worth writing down and coming back to.
    :caption: C++ Notes
 
    spdlog_sinks_architecture
+   conan_package_manager
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
    cpp_move_semantics_interactive
@@ -182,6 +183,9 @@ C++ Notes
    * - :doc:`spdlog_sinks_architecture`
      - spdlog logging architecture, sinks, and log levels
      - ``spdlog``, sinks, formatters, log levels, rotation
+   * - :doc:`conan_package_manager`
+     - Conan package manager for C++ -- conanfile structure, generators, and commands
+     - ``conanfile.txt``, ``conanfile.py``, generators, ConanCenter
    * - :doc:`cpp_memory_interactive`
      - Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free
      - stack frames, heap allocation, raw pointers, undefined behavior
