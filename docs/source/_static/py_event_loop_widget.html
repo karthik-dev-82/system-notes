@@ -1,0 +1,265 @@
+<div class="cl-root" id="clWidget">
+  <style>
+    #clWidget {
+      --cl-bg: #0f172a;
+      --cl-panel: #16213e;
+      --cl-border: #2a3655;
+      --cl-text: #e2e8f0;
+      --cl-muted: #94a3b8;
+      --cl-accent: #38bdf8;
+      --cl-good: #4ade80;
+      --cl-warn: #fbbf24;
+      --cl-p1: #38bdf8;
+      --cl-p2: #a78bfa;
+      --cl-p3: #fb923c;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cl-bg);
+      color: var(--cl-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #clWidget * { box-sizing: border-box; }
+    #clWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #clWidget .cl-sub { color: var(--cl-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .cl-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--cl-panel); border: 1px solid var(--cl-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 980px; }
+    .cl-controls label { font-size: 0.78rem; color: var(--cl-muted); display: flex; align-items: center; gap: 6px; }
+    .cl-select { background: var(--cl-bg); color: var(--cl-text); border: 1px solid var(--cl-border); border-radius: 6px; padding: 6px 8px; font-family: ui-monospace, monospace; font-size: 0.74rem; }
+    .cl-btn { background: var(--cl-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .cl-btn.secondary { background: transparent; color: var(--cl-text); border: 1px solid var(--cl-border); font-weight: 600; }
+    .cl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .cl-tick-badge { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--cl-warn); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; padding: 6px 12px; }
+
+    .cl-body { display: flex; gap: 16px; min-width: 980px; }
+    .cl-loop-col { width: 300px; flex: 0 0 auto; }
+    .cl-main-col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+    .cl-card { background: var(--cl-panel); border: 1px solid var(--cl-border); border-radius: 10px; padding: 14px 16px; }
+    .cl-card-title { font-size: 0.78rem; font-weight: 700; color: var(--cl-muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+
+    .cl-loop-code { font-family: ui-monospace, monospace; font-size: 0.7rem; line-height: 1.6; color: var(--cl-muted); white-space: pre-wrap; }
+
+    table.cl-status { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+    table.cl-status th { text-align: left; color: var(--cl-muted); font-weight: 600; padding: 5px 8px; border-bottom: 1px solid var(--cl-border); font-size: 0.66rem; text-transform: uppercase; }
+    table.cl-status td { padding: 5px 8px; border-bottom: 1px solid rgba(42,54,85,0.5); font-family: ui-monospace, monospace; }
+    .cl-task-name { font-weight: 700; }
+    .cl-task-name.t0 { color: var(--cl-p1); }
+    .cl-task-name.t1 { color: var(--cl-p2); }
+    .cl-task-name.t2 { color: var(--cl-p3); }
+    .cl-state-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; }
+    .cl-state-tag.ready { background: rgba(74,222,128,0.18); color: var(--cl-good); }
+    .cl-state-tag.sleeping { background: rgba(148,163,184,0.18); color: var(--cl-muted); }
+    .cl-state-tag.done { background: rgba(56,189,248,0.18); color: var(--cl-accent); }
+
+    .cl-log { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--cl-muted); max-height: 220px; overflow-y: auto; }
+    .cl-log-line { padding: 2px 0; border-bottom: 1px solid rgba(42,54,85,0.4); }
+    .cl-log-line b { font-weight: 700; }
+    .cl-empty { color: var(--cl-muted); font-size: 0.76rem; font-style: italic; }
+    .cl-note { font-size: 0.76rem; color: var(--cl-muted); line-height: 1.5; margin-top: 4px; }
+  </style>
+
+  <h3>A Toy Event Loop, Ticking</h3>
+  <div class="cl-sub">Three coroutines, one hand-built scheduler on the right. Each coroutine's only way to hand control back is an <code>await</code> (modeled here as a <code>yield</code>) -- the loop decides who runs next, entirely by checking whose wait is over.</div>
+
+  <div class="cl-controls">
+    <label>Task A: <select class="cl-select" data-task="0"></select></label>
+    <label>Task B: <select class="cl-select" data-task="1"></select></label>
+    <label>Task C: <select class="cl-select" data-task="2"></select></label>
+    <button class="cl-btn secondary" id="clRebuildBtn">Rebuild</button>
+    <button class="cl-btn" id="clStepBtn">Step one tick</button>
+    <button class="cl-btn secondary" id="clRunBtn">Run to completion</button>
+    <div class="cl-tick-badge" id="clTickBadge">tick 0</div>
+  </div>
+
+  <div class="cl-body">
+    <div class="cl-loop-col">
+      <div class="cl-card">
+        <div class="cl-card-title">The scheduler (real code, runs unmodified)</div>
+        <div class="cl-loop-code">while not all_done(tasks):
+    for t in tasks:
+        if t.sleeping and t.wake_at &lt;= tick:
+            t.ready = True
+        if t.waiting_on.done:
+            t.ready = True
+            t.send_value = t.waiting_on.result
+
+    for t in tasks:
+        if not t.ready:
+            continue
+        result = t.coro.send(t.send_value)
+        if result.done:
+            t.done = True
+        elif result.type == "sleep":
+            t.wake_at = tick + result.ticks
+
+    tick += 1</div>
+      </div>
+    </div>
+    <div class="cl-main-col">
+      <div class="cl-card">
+        <div class="cl-card-title">Task status</div>
+        <table class="cl-status">
+          <thead><tr><th>Task</th><th>State</th><th>Detail</th></tr></thead>
+          <tbody id="clStatusBody"></tbody>
+        </table>
+      </div>
+      <div class="cl-card">
+        <div class="cl-card-title">Scheduler trace</div>
+        <div class="cl-log" id="clLog"></div>
+      </div>
+    </div>
+  </div>
+  <div class="cl-note" id="clNote"></div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('clWidget');
+
+    function* sleepCoroutine(ticksList, log, name) {
+      for (var idx = 0; idx < ticksList.length; idx++) {
+        yield { type: 'sleep', ticks: ticksList[idx] };
+      }
+      log.push({ text: name + ' finished after ' + ticksList.length + ' sleep(s)', task: name });
+      return name + '-result';
+    }
+
+    var PATTERNS = {
+      'sleep(1)': [1],
+      'sleep(2)': [2],
+      'sleep(3)': [3],
+      'sleep(5)': [5],
+      'sleep(1), sleep(1)': [1, 1],
+      'sleep(2), sleep(2)': [2, 2],
+      'no await (returns immediately)': []
+    };
+    var DEFAULTS = ['sleep(3)', 'sleep(1), sleep(1)', 'sleep(5)'];
+    var TASK_IDS = ['A', 'B', 'C'];
+    var TASK_CLASS = ['t0', 't1', 't2'];
+
+    function makeTasks(taskDefs) {
+      var tasks = {};
+      taskDefs.forEach(function(d) {
+        tasks[d.id] = { id: d.id, gen: d.gen, state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined };
+      });
+      return tasks;
+    }
+
+    function runOneTick(tasks, ids, tick) {
+      var trace = [];
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state === 'sleeping' && t.wakeAtTick <= tick) t.state = 'ready';
+        if (t.state === 'waiting' && tasks[t.waitingOn] && tasks[t.waitingOn].state === 'done') {
+          t.state = 'ready';
+          t.sendValue = tasks[t.waitingOn].result;
+        }
+      });
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state !== 'ready') return;
+        var r = t.gen.next(t.sendValue);
+        t.sendValue = undefined;
+        if (r.done) {
+          trace.push({ tick: tick, id: id, action: 'done', value: r.value });
+          t.state = 'done';
+          t.result = r.value;
+        } else {
+          trace.push({ tick: tick, id: id, action: r.value.type, ticks: r.value.ticks });
+          if (r.value.type === 'sleep') { t.state = 'sleeping'; t.wakeAtTick = tick + r.value.ticks; }
+        }
+      });
+      return trace;
+    }
+
+    function allDone(tasks, ids) {
+      return ids.every(function(id) { return tasks[id].state === 'done'; });
+    }
+
+    var state = { tasks: null, ids: TASK_IDS, tick: 0, log: [], sharedLog: [] };
+    var selects = Array.prototype.slice.call(root.querySelectorAll('.cl-select'));
+
+    selects.forEach(function(sel, i) {
+      Object.keys(PATTERNS).forEach(function(label) {
+        var opt = document.createElement('option');
+        opt.value = label;
+        opt.textContent = label;
+        if (label === DEFAULTS[i]) opt.selected = true;
+        sel.appendChild(opt);
+      });
+    });
+
+    var statusBody = document.getElementById('clStatusBody');
+    var logEl = document.getElementById('clLog');
+    var tickBadge = document.getElementById('clTickBadge');
+    var noteEl = document.getElementById('clNote');
+
+    function rebuild() {
+      state.sharedLog = [];
+      var defs = selects.map(function(sel, i) {
+        var pattern = PATTERNS[sel.value];
+        return { id: TASK_IDS[i], gen: sleepCoroutine(pattern, state.sharedLog, TASK_IDS[i]) };
+      });
+      state.tasks = makeTasks(defs);
+      state.tick = 0;
+      state.log = [];
+      render();
+    }
+
+    function stepOnce() {
+      if (allDone(state.tasks, state.ids)) return;
+      var entries = runOneTick(state.tasks, state.ids, state.tick);
+      state.log = state.log.concat(entries);
+      state.tick += 1;
+      render();
+    }
+
+    function runToCompletion() {
+      var guard = 0;
+      while (!allDone(state.tasks, state.ids) && guard < 1000) {
+        stepOnce();
+        guard += 1;
+      }
+    }
+
+    function describeAction(e) {
+      if (e.action === 'done') return 'finished, returned "' + e.value + '"';
+      if (e.action === 'sleep') return 'awaits sleep(' + e.ticks + ')';
+      return e.action;
+    }
+
+    function render() {
+      tickBadge.textContent = 'tick ' + state.tick;
+
+      statusBody.innerHTML = state.ids.map(function(id, i) {
+        var t = state.tasks[id];
+        var detail = t.state === 'sleeping' ? 'wakes at tick ' + t.wakeAtTick
+          : t.state === 'done' ? 'returned "' + t.result + '"'
+          : t.state === 'ready' ? 'about to run' : '';
+        return '<tr><td class="cl-task-name ' + TASK_CLASS[i] + '">' + id + '</td>' +
+          '<td><span class="cl-state-tag ' + t.state + '">' + t.state + '</span></td>' +
+          '<td>' + detail + '</td></tr>';
+      }).join('');
+
+      logEl.innerHTML = state.log.map(function(e) {
+        var cls = TASK_CLASS[state.ids.indexOf(e.id)];
+        return '<div class="cl-log-line"><b class="cl-task-name ' + cls + '">tick ' + e.tick + ', ' + e.id + '</b>: ' + describeAction(e) + '</div>';
+      }).join('') || '<span class="cl-empty">Click "Step one tick" to start.</span>';
+
+      var done = allDone(state.tasks, state.ids);
+      document.getElementById('clStepBtn').disabled = done;
+      document.getElementById('clRunBtn').disabled = done;
+    }
+
+    document.getElementById('clRebuildBtn').addEventListener('click', rebuild);
+    document.getElementById('clStepBtn').addEventListener('click', stepOnce);
+    document.getElementById('clRunBtn').addEventListener('click', runToCompletion);
+
+    noteEl.textContent = 'Every task above is genuinely independent -- try Task A on sleep(5) and Task B on sleep(1): B finishes at tick 1 no matter what A is doing, because the loop never lets one task’s wait block another’s turn. That’s the entire mechanism behind "asyncio runs things concurrently" -- nothing more exotic than this loop.';
+
+    rebuild();
+  })();
+  </script>
+</div>

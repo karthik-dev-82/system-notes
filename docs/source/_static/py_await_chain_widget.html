@@ -1,0 +1,209 @@
+<div class="ac-root" id="acWidget">
+  <style>
+    #acWidget {
+      --ac-bg: #0f172a;
+      --ac-panel: #16213e;
+      --ac-border: #2a3655;
+      --ac-text: #e2e8f0;
+      --ac-muted: #94a3b8;
+      --ac-accent: #38bdf8;
+      --ac-good: #4ade80;
+      --ac-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ac-bg);
+      color: var(--ac-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #acWidget * { box-sizing: border-box; }
+    #acWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #acWidget .ac-sub { color: var(--ac-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .ac-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--ac-panel); border: 1px solid var(--ac-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 900px; }
+    .ac-btn { background: var(--ac-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .ac-btn.secondary { background: transparent; color: var(--ac-text); border: 1px solid var(--ac-border); font-weight: 600; }
+    .ac-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .ac-tick-badge { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--ac-warn); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; padding: 6px 12px; }
+
+    .ac-chain { display: flex; flex-direction: column; gap: 6px; min-width: 900px; margin-bottom: 16px; }
+    .ac-frame { background: var(--ac-panel); border: 1px solid var(--ac-border); border-radius: 10px; padding: 12px 16px; }
+    .ac-frame.done { border-color: var(--ac-good); }
+    .ac-frame-head { display: flex; justify-content: space-between; align-items: center; font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700; }
+    .ac-frame-detail { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--ac-muted); margin-top: 6px; }
+    .ac-frame-src { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--ac-muted); white-space: pre; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--ac-border); }
+    .ac-state-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; }
+    .ac-state-tag.ready { background: rgba(74,222,128,0.18); color: var(--ac-good); }
+    .ac-state-tag.sleeping { background: rgba(148,163,184,0.18); color: var(--ac-muted); }
+    .ac-state-tag.waiting { background: rgba(56,189,248,0.18); color: var(--ac-accent); }
+    .ac-state-tag.done { background: rgba(74,222,128,0.18); color: var(--ac-good); }
+    .ac-arrow { text-align: center; color: var(--ac-muted); font-size: 0.9rem; }
+
+    .ac-log { background: var(--ac-panel); border: 1px solid var(--ac-border); border-radius: 10px; padding: 14px 16px; font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--ac-muted); min-width: 900px; max-height: 200px; overflow-y: auto; }
+    .ac-log-line { padding: 2px 0; border-bottom: 1px solid rgba(42,54,85,0.4); }
+    .ac-empty { color: var(--ac-muted); font-size: 0.76rem; font-style: italic; }
+    .ac-note { font-size: 0.76rem; color: var(--ac-muted); line-height: 1.5; margin-top: 12px; }
+  </style>
+
+  <h3>await Chains Through</h3>
+  <div class="ac-sub"><code>outer</code> awaits <code>middle</code>, which awaits <code>inner</code>. Step through it and watch control pass all the way down before anything runs, then the return value carry all the way back up -- <code>await</code> doesn't block, it delegates.</div>
+
+  <div class="ac-controls">
+    <button class="ac-btn" id="acStepBtn">Step one tick</button>
+    <button class="ac-btn secondary" id="acRunBtn">Run to completion</button>
+    <button class="ac-btn secondary" id="acResetBtn">Reset</button>
+    <div class="ac-tick-badge" id="acTickBadge">tick 0</div>
+  </div>
+
+  <div class="ac-chain" id="acChain"></div>
+
+  <div class="ac-log" id="acLog"></div>
+  <div class="ac-note" id="acNote"></div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('acWidget');
+
+    function* innerGen(log) {
+      yield { type: 'sleep', ticks: 3 };
+      log.push('inner finished its sleep(3)');
+      return 'inner-result';
+    }
+    function* middleGen(log) {
+      var received = yield { type: 'await', target: 'inner' };
+      log.push('middle received "' + received + '" from inner');
+      return received + ' -> relayed by middle';
+    }
+    function* outerGen(log) {
+      var received = yield { type: 'await', target: 'middle' };
+      log.push('outer received "' + received + '" from middle');
+      return received + ' -> relayed by outer';
+    }
+
+    var FRAMES = [
+      { id: 'inner', label: 'inner()', src: 'async def inner():\n    await asyncio.sleep(3)\n    return "inner-result"' },
+      { id: 'middle', label: 'middle()', src: 'async def middle():\n    r = await inner()\n    return r + " -> relayed by middle"' },
+      { id: 'outer', label: 'outer()', src: 'async def outer():\n    r = await middle()\n    return r + " -> relayed by outer"' }
+    ];
+
+    function makeTasks() {
+      var log = [];
+      var tasks = {
+        inner: { id: 'inner', gen: innerGen(log), state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined },
+        middle: { id: 'middle', gen: middleGen(log), state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined },
+        outer: { id: 'outer', gen: outerGen(log), state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined }
+      };
+      return { tasks: tasks, log: log };
+    }
+
+    function runOneTick(tasks, ids, tick) {
+      var trace = [];
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state === 'sleeping' && t.wakeAtTick <= tick) t.state = 'ready';
+        if (t.state === 'waiting' && tasks[t.waitingOn].state === 'done') {
+          t.state = 'ready';
+          t.sendValue = tasks[t.waitingOn].result;
+        }
+      });
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state !== 'ready') return;
+        var r = t.gen.next(t.sendValue);
+        t.sendValue = undefined;
+        if (r.done) {
+          trace.push({ tick: tick, id: id, text: id + ' finished, returned "' + r.value + '"' });
+          t.state = 'done';
+          t.result = r.value;
+        } else if (r.value.type === 'sleep') {
+          t.state = 'sleeping';
+          t.wakeAtTick = tick + r.value.ticks;
+          trace.push({ tick: tick, id: id, text: id + ' awaits sleep(' + r.value.ticks + ')' });
+        } else if (r.value.type === 'await') {
+          t.state = 'waiting';
+          t.waitingOn = r.value.target;
+          trace.push({ tick: tick, id: id, text: id + ' awaits ' + r.value.target + '()' });
+        }
+      });
+      return trace;
+    }
+
+    function allDone(tasks, ids) {
+      return ids.every(function(id) { return tasks[id].state === 'done'; });
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    var IDS = ['inner', 'middle', 'outer'];
+    var state = { tasks: null, tick: 0, log: [] };
+
+    var chainEl = document.getElementById('acChain');
+    var logEl = document.getElementById('acLog');
+    var tickBadge = document.getElementById('acTickBadge');
+    var noteEl = document.getElementById('acNote');
+
+    function reset() {
+      var built = makeTasks();
+      state.tasks = built.tasks;
+      state.tick = 0;
+      state.log = [];
+      render();
+    }
+
+    function stepOnce() {
+      if (allDone(state.tasks, IDS)) return;
+      var entries = runOneTick(state.tasks, IDS, state.tick);
+      state.log = state.log.concat(entries);
+      state.tick += 1;
+      render();
+    }
+
+    function runToCompletion() {
+      var guard = 0;
+      while (!allDone(state.tasks, IDS) && guard < 1000) { stepOnce(); guard += 1; }
+    }
+
+    function detailFor(t) {
+      if (t.state === 'sleeping') return 'sleeping, wakes at tick ' + t.wakeAtTick;
+      if (t.state === 'waiting') return 'awaiting ' + t.waitingOn + '() -- has not resumed yet';
+      if (t.state === 'done') return 'returned "' + t.result + '"';
+      return 'ready to run next tick';
+    }
+
+    function render() {
+      tickBadge.textContent = 'tick ' + state.tick;
+
+      chainEl.innerHTML = FRAMES.map(function(f, i) {
+        var t = state.tasks[f.id];
+        var html = '<div class="ac-frame' + (t.state === 'done' ? ' done' : '') + '">' +
+          '<div class="ac-frame-head"><span>' + f.label + '</span><span class="ac-state-tag ' + t.state + '">' + t.state + '</span></div>' +
+          '<div class="ac-frame-detail">' + detailFor(t) + '</div>' +
+          '<div class="ac-frame-src">' + escapeHtml(f.src) + '</div>' +
+          '</div>';
+        if (i < FRAMES.length - 1) html += '<div class="ac-arrow">&uarr; awaited by</div>';
+        return html;
+      }).join('');
+
+      logEl.innerHTML = state.log.map(function(e) {
+        return '<div class="ac-log-line">tick ' + e.tick + ', <b>' + e.id + '</b>: ' + e.text + '</div>';
+      }).join('') || '<span class="ac-empty">Click "Step one tick" to start.</span>';
+
+      var done = allDone(state.tasks, IDS);
+      document.getElementById('acStepBtn').disabled = done;
+      document.getElementById('acRunBtn').disabled = done;
+    }
+
+    document.getElementById('acStepBtn').addEventListener('click', stepOnce);
+    document.getElementById('acRunBtn').addEventListener('click', runToCompletion);
+    document.getElementById('acResetBtn').addEventListener('click', reset);
+
+    noteEl.textContent = 'Notice outer and middle both go "waiting" almost immediately -- neither one is doing any work while inner sleeps, and neither is the event loop. outer only receives a value once middle is done, and middle only receives one once inner is -- one extra tick of scheduling latency per link in the chain, which is why outer finishes at tick 5, not tick 3.';
+
+    reset();
+  })();
+  </script>
+</div>
