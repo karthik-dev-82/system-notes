@@ -69,6 +69,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | --- | --- | --- |
 | 🎮 **[Python Sequences (Interactive)](docs/source/python_sequences_interactive.rst)** | Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source | dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks |
 | 🎮 **[Python Hashing (Interactive)](docs/source/python_hashing_interactive.rst)** | Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra | hash tables, open addressing, insertion order, union/intersection/difference |
+| 🎮 **[Python Generators (Interactive)](docs/source/python_generators_interactive.rst)** | Interactive generators -- step through next()/send()/throw()/close(), then measure laziness against a list comprehension | yield, suspended frames, StopIteration, two-way communication |
 | 🎮 **[Multiprocessing vs Threading vs AsyncIO (Interactive)](docs/source/python_concurrency_interactive.rst)** | Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side | GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound |
 | 🎮 **[asyncio.gather() (Interactive)](docs/source/python_asyncio_gather_interactive.rst)** | Interactive asyncio.gather() -- 3 real coroutines, real console output, and the argument-order-vs-completion-order guarantee made concrete | async/await, asyncio.gather, asyncio.TaskGroup, coroutine scheduling |
 
@@ -153,6 +154,7 @@ system-notes/
         ├── cpp_exception_unwind_interactive.rst
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
+        ├── python_generators_interactive.rst
         ├── python_concurrency_interactive.rst
         ├── python_asyncio_gather_interactive.rst
         └── _static/
@@ -180,6 +182,8 @@ system-notes/
             ├── py_stack_widget.html
             ├── py_queue_widget.html
             ├── py_hashing_widget.html
+            ├── py_generator_stepper_widget.html
+            ├── py_generator_laziness_widget.html
             ├── net_bridge_widget.html
             ├── net_tuntap_widget.html
             ├── net_vlan_widget.html

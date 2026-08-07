@@ -1,0 +1,340 @@
+<div class="gs-root" id="gsWidget">
+  <style>
+    #gsWidget {
+      --gs-bg: #0f172a;
+      --gs-panel: #16213e;
+      --gs-border: #2a3655;
+      --gs-text: #e2e8f0;
+      --gs-muted: #94a3b8;
+      --gs-accent: #38bdf8;
+      --gs-good: #4ade80;
+      --gs-bad: #f87171;
+      --gs-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--gs-bg);
+      color: var(--gs-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #gsWidget * { box-sizing: border-box; }
+    #gsWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #gsWidget .gs-sub { color: var(--gs-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .gs-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; min-width: 960px; }
+    .gs-tab { background: var(--gs-panel); color: var(--gs-muted); border: 1px solid var(--gs-border); border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .gs-tab.active { background: var(--gs-accent); color: #041322; border-color: var(--gs-accent); }
+
+    .gs-body { display: flex; gap: 16px; min-width: 960px; }
+    .gs-code-col { flex: 1 1 auto; min-width: 0; }
+    .gs-side-col { width: 320px; flex: 0 0 auto; display: flex; flex-direction: column; gap: 12px; }
+
+    .gs-card { background: var(--gs-panel); border: 1px solid var(--gs-border); border-radius: 10px; padding: 14px 16px; }
+    .gs-card-title { font-size: 0.78rem; font-weight: 700; color: var(--gs-muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+
+    .gs-code { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.7; white-space: pre; }
+    .gs-code-line { padding: 1px 8px; border-radius: 4px; color: var(--gs-muted); }
+    .gs-code-line.hl { background: rgba(56,189,248,0.18); color: #fff; font-weight: 600; }
+
+    .gs-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+    .gs-btn { background: var(--gs-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .gs-btn.secondary { background: transparent; color: var(--gs-text); border: 1px solid var(--gs-border); font-weight: 600; }
+    .gs-btn.danger { background: var(--gs-bad); color: #2a0505; }
+    .gs-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .gs-num-input { width: 64px; background: var(--gs-bg); color: var(--gs-text); border: 1px solid var(--gs-border); border-radius: 6px; padding: 6px 8px; font-family: ui-monospace, monospace; font-size: 0.78rem; }
+
+    .gs-state-badge { display: inline-block; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em; padding: 3px 9px; border-radius: 12px; }
+    .gs-state-badge.created { background: rgba(148,163,184,0.18); color: var(--gs-muted); }
+    .gs-state-badge.suspended { background: rgba(56,189,248,0.18); color: var(--gs-accent); }
+    .gs-state-badge.exhausted { background: rgba(74,222,128,0.18); color: var(--gs-good); }
+
+    .gs-locals { font-family: ui-monospace, monospace; font-size: 0.76rem; color: var(--gs-muted); }
+    .gs-locals b { color: var(--gs-text); }
+    .gs-empty { color: var(--gs-muted); font-size: 0.76rem; font-style: italic; }
+
+    .gs-log { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--gs-muted); max-height: 160px; overflow-y: auto; }
+    .gs-log-line { padding: 2px 0; border-bottom: 1px solid rgba(42,54,85,0.4); }
+    .gs-log-line b { color: var(--gs-text); }
+    .gs-log-line.ret { color: var(--gs-good); }
+
+    .gs-error-banner { background: rgba(248,113,113,0.14); border: 1px solid rgba(248,113,113,0.4); color: var(--gs-bad); border-radius: 8px; padding: 8px 12px; font-size: 0.76rem; font-family: ui-monospace, monospace; margin-top: 8px; }
+  </style>
+
+  <h3>Step Through a Generator</h3>
+  <div class="gs-sub">Real generator control flow -- native JS <code>function*</code>/<code>yield</code> objects, whose suspend/resume/send/throw protocol is deliberately almost identical to Python's. The source shown is Python; the object executing each step is a JS generator with the same state machine.</div>
+
+  <div class="gs-tabs" id="gsTabs">
+    <button class="gs-tab" data-preset="countdown">Basic: yield &amp; next()</button>
+    <button class="gs-tab" data-preset="total">Two-way: send()</button>
+    <button class="gs-tab" data-preset="resilient">throw() &amp; close()</button>
+  </div>
+
+  <div class="gs-body">
+    <div class="gs-code-col">
+      <div class="gs-card">
+        <div class="gs-card-title">Source</div>
+        <div class="gs-code" id="gsCode"></div>
+        <div class="gs-controls" id="gsControls"></div>
+        <div id="gsErrorBanner"></div>
+      </div>
+    </div>
+    <div class="gs-side-col">
+      <div class="gs-card">
+        <div class="gs-card-title">Generator state</div>
+        <div id="gsStateBadge"></div>
+        <div class="gs-locals" id="gsLocals" style="margin-top:10px;"></div>
+      </div>
+      <div class="gs-card">
+        <div class="gs-card-title">Output / log</div>
+        <div class="gs-log" id="gsLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('gsWidget');
+
+    // ---------------- real generator functions ----------------
+    function* countdownGen(n, log) {
+      log.push({ text: 'starting from ' + n });
+      while (n > 0) {
+        yield { value: n, locals: { n: n }, line: 4 };
+        n -= 1;
+      }
+      log.push({ text: 'liftoff!' });
+      return 'liftoff';
+    }
+
+    function* runningTotalGen(log) {
+      var total = 0;
+      while (true) {
+        var x = yield { value: total, locals: { total: total }, line: 4 };
+        if (x === undefined) continue;
+        total += x;
+        log.push({ text: 'received ' + x + ', total now ' + total });
+      }
+    }
+
+    function* resilientGen(log) {
+      var step_ = 0;
+      try {
+        while (true) {
+          try {
+            yield { value: step_, locals: { step: step_ }, line: 6 };
+            step_ += 1;
+          } catch (e) {
+            log.push({ text: 'caught ' + e.message + ', continuing' });
+            step_ += 1;
+          }
+        }
+      } finally {
+        log.push({ text: 'cleanup ran', cls: 'ret' });
+      }
+    }
+
+    // ---------------- controller wrapper ----------------
+    function makeController(genFactory, extraArg) {
+      var log = [];
+      var gen = extraArg !== undefined ? genFactory(extraArg, log) : genFactory(log);
+      return { gen: gen, log: log, state: 'created', lastYielded: undefined };
+    }
+
+    function step(ctrl, action, sendValue) {
+      if (ctrl.state === 'exhausted') {
+        throw new Error('cannot resume an exhausted generator');
+      }
+      if (action === 'send' && ctrl.state === 'created' && sendValue !== undefined) {
+        throw new Error("TypeError: can't send non-None value to a just-started generator");
+      }
+
+      var result;
+      if (action === 'throw') {
+        result = ctrl.gen.throw(new Error(sendValue));
+      } else if (action === 'close') {
+        result = ctrl.gen.return(undefined);
+      } else {
+        result = ctrl.gen.next(action === 'send' ? sendValue : undefined);
+      }
+
+      if (result.done) {
+        ctrl.state = 'exhausted';
+        ctrl.lastYielded = undefined;
+        return { done: true, returnValue: result.value };
+      }
+      ctrl.state = 'suspended';
+      ctrl.lastYielded = result.value;
+      return { done: false, value: result.value.value, locals: result.value.locals, line: result.value.line };
+    }
+
+    // ---------------- presets ----------------
+    var PRESETS = {
+      countdown: {
+        source: [
+          'def countdown(n):',
+          '    print(f"starting from {n}")',
+          '    while n > 0:',
+          '        yield n',
+          '        n -= 1',
+          '    print("liftoff!")',
+          '    return "liftoff"'
+        ],
+        factory: countdownGen,
+        extraArg: 3,
+        controls: ['next', 'reset']
+      },
+      total: {
+        source: [
+          'def running_total():',
+          '    total = 0',
+          '    while True:',
+          '        x = yield total',
+          '        total += x'
+        ],
+        factory: runningTotalGen,
+        controls: ['next', 'send', 'reset']
+      },
+      resilient: {
+        source: [
+          'def resilient():',
+          '    step = 0',
+          '    try:',
+          '        while True:',
+          '            try:',
+          '                yield step',
+          '                step += 1',
+          '            except Exception as e:',
+          '                print(f"caught {e}, continuing")',
+          '                step += 1',
+          '    finally:',
+          '        print("cleanup ran")'
+        ],
+        factory: resilientGen,
+        controls: ['next', 'throw', 'close', 'reset']
+      }
+    };
+
+    var state = { preset: 'countdown', ctrl: null };
+
+    var codeEl = document.getElementById('gsCode');
+    var controlsEl = document.getElementById('gsControls');
+    var stateBadgeEl = document.getElementById('gsStateBadge');
+    var localsEl = document.getElementById('gsLocals');
+    var logEl = document.getElementById('gsLog');
+    var errorEl = document.getElementById('gsErrorBanner');
+
+    function newController() {
+      var p = PRESETS[state.preset];
+      state.ctrl = makeController(p.factory, p.extraArg);
+      errorEl.innerHTML = '';
+    }
+
+    function renderCode(highlightLine) {
+      var p = PRESETS[state.preset];
+      codeEl.innerHTML = p.source.map(function(line, i) {
+        var lineNo = i + 1;
+        var cls = lineNo === highlightLine ? 'gs-code-line hl' : 'gs-code-line';
+        return '<div class="' + cls + '">' + escapeHtml(line) + '</div>';
+      }).join('');
+    }
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderControls() {
+      var p = PRESETS[state.preset];
+      var exhausted = state.ctrl.state === 'exhausted';
+      var html = '';
+      if (p.controls.indexOf('next') !== -1) {
+        html += '<button class="gs-btn" id="gsNextBtn" ' + (exhausted ? 'disabled' : '') + '>next()</button>';
+      }
+      if (p.controls.indexOf('send') !== -1) {
+        html += '<input type="number" class="gs-num-input" id="gsSendInput" value="5" ' + (exhausted ? 'disabled' : '') + '>' +
+                '<button class="gs-btn secondary" id="gsSendBtn" ' + (exhausted ? 'disabled' : '') + '>send(value)</button>';
+      }
+      if (p.controls.indexOf('throw') !== -1) {
+        html += '<button class="gs-btn secondary" id="gsThrowBtn" ' + (exhausted ? 'disabled' : '') + '>throw(Exception("boom"))</button>';
+      }
+      if (p.controls.indexOf('close') !== -1) {
+        html += '<button class="gs-btn danger" id="gsCloseBtn" ' + (exhausted ? 'disabled' : '') + '>close()</button>';
+      }
+      html += '<button class="gs-btn secondary" id="gsResetBtn">reset</button>';
+      controlsEl.innerHTML = html;
+
+      var nextBtn = document.getElementById('gsNextBtn');
+      if (nextBtn) nextBtn.addEventListener('click', function() { doStep('next'); });
+      var sendBtn = document.getElementById('gsSendBtn');
+      if (sendBtn) sendBtn.addEventListener('click', function() {
+        var v = Number(document.getElementById('gsSendInput').value);
+        doStep('send', v);
+      });
+      var throwBtn = document.getElementById('gsThrowBtn');
+      if (throwBtn) throwBtn.addEventListener('click', function() { doStep('throw', 'boom'); });
+      var closeBtn = document.getElementById('gsCloseBtn');
+      if (closeBtn) closeBtn.addEventListener('click', function() { doStep('close'); });
+      document.getElementById('gsResetBtn').addEventListener('click', function() {
+        newController();
+        renderAll(undefined);
+      });
+    }
+
+    function renderState(highlightLine) {
+      var ctrl = state.ctrl;
+      stateBadgeEl.innerHTML = '<span class="gs-state-badge ' + ctrl.state + '">' + ctrl.state + '</span>';
+
+      if (ctrl.state === 'created') {
+        localsEl.innerHTML = '<span class="gs-empty">Generator object exists, but the function body hasn’t run yet -- call next() to start it.</span>';
+      } else if (ctrl.state === 'suspended') {
+        var locals = ctrl.lastYielded.locals;
+        localsEl.innerHTML = Object.keys(locals).map(function(k) {
+          return '<div><b>' + k + '</b> = ' + locals[k] + '</div>';
+        }).join('') + '<div style="margin-top:6px;color:var(--gs-muted);">suspended at yield, line ' + ctrl.lastYielded.line + '</div>';
+      } else {
+        localsEl.innerHTML = '<span class="gs-empty">Exhausted -- the frame is gone. Calling next() again would raise StopIteration.</span>';
+      }
+    }
+
+    function renderLog() {
+      logEl.innerHTML = state.ctrl.log.map(function(e) {
+        return '<div class="gs-log-line ' + (e.cls || '') + '">' + escapeHtml(e.text) + '</div>';
+      }).join('') || '<span class="gs-empty">(nothing printed yet)</span>';
+    }
+
+    function renderAll(highlightLine) {
+      renderCode(highlightLine);
+      renderControls();
+      renderState(highlightLine);
+      renderLog();
+    }
+
+    function doStep(action, value) {
+      errorEl.innerHTML = '';
+      try {
+        var r = step(state.ctrl, action, value);
+        renderAll(r.done ? undefined : r.line);
+        if (r.done && r.returnValue !== undefined) {
+          logEl.innerHTML += '<div class="gs-log-line ret">StopIteration(' + JSON.stringify(r.returnValue) + ')</div>';
+        }
+      } catch (e) {
+        errorEl.innerHTML = '<div class="gs-error-banner">' + escapeHtml(e.message) + '</div>';
+      }
+    }
+
+    root.querySelectorAll('.gs-tab').forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        state.preset = tab.dataset.preset;
+        root.querySelectorAll('.gs-tab').forEach(function(t) { t.classList.toggle('active', t === tab); });
+        newController();
+        renderAll(undefined);
+      });
+    });
+
+    root.querySelector('.gs-tab[data-preset="countdown"]').classList.add('active');
+    newController();
+    renderAll(undefined);
+  })();
+  </script>
+</div>

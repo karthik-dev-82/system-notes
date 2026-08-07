@@ -1,0 +1,190 @@
+<div class="gl-root" id="glWidget">
+  <style>
+    #glWidget {
+      --gl-bg: #0f172a;
+      --gl-panel: #16213e;
+      --gl-border: #2a3655;
+      --gl-text: #e2e8f0;
+      --gl-muted: #94a3b8;
+      --gl-accent: #38bdf8;
+      --gl-good: #4ade80;
+      --gl-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--gl-bg);
+      color: var(--gl-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #glWidget * { box-sizing: border-box; }
+    #glWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #glWidget .gl-sub { color: var(--gl-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .gl-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--gl-panel); border: 1px solid var(--gl-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 900px; }
+    .gl-controls label { font-size: 0.8rem; color: var(--gl-muted); display: flex; align-items: center; gap: 8px; }
+    .gl-select { background: var(--gl-bg); color: var(--gl-text); border: 1px solid var(--gl-border); border-radius: 6px; padding: 6px 10px; font-family: ui-monospace, monospace; font-size: 0.78rem; }
+    .gl-btn { background: var(--gl-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .gl-btn.secondary { background: transparent; color: var(--gl-text); border: 1px solid var(--gl-border); font-weight: 600; }
+    .gl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .gl-columns { display: flex; gap: 16px; min-width: 900px; }
+    .gl-col { flex: 1 1 0; background: var(--gl-panel); border: 1px solid var(--gl-border); border-radius: 10px; padding: 14px 16px; }
+    .gl-col-title { font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 4px; font-family: ui-monospace, monospace; }
+    .gl-col-sub { font-size: 0.72rem; color: var(--gl-muted); margin-bottom: 12px; }
+
+    .gl-meter-track { background: var(--gl-bg); border: 1px solid var(--gl-border); border-radius: 6px; height: 22px; overflow: hidden; margin-bottom: 6px; }
+    .gl-meter-fill { height: 100%; background: var(--gl-accent); width: 0%; transition: width 0.3s ease; }
+    .gl-meter-fill.eager { background: var(--gl-warn); }
+    .gl-meter-label { font-family: ui-monospace, monospace; font-size: 0.76rem; color: var(--gl-muted); }
+    .gl-meter-label b { color: var(--gl-text); }
+
+    .gl-stat { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--gl-muted); margin-top: 10px; line-height: 1.6; }
+    .gl-stat b { color: var(--gl-text); }
+
+    .gl-note { font-size: 0.76rem; color: var(--gl-muted); line-height: 1.5; margin-top: 12px; }
+  </style>
+
+  <h3>Generator vs. List: Laziness on Demand</h3>
+  <div class="gl-sub">A real <code>Array.from()</code> (standing in for a list comprehension) and a real JS generator (standing in for a generator expression) building the same values, side by side. Watch what happens the instant each is created, before anything asks for a value.</div>
+
+  <div class="gl-controls">
+    <label>N:
+      <select class="gl-select" id="glNSelect">
+        <option value="20">20</option>
+        <option value="1000">1,000</option>
+        <option value="100000">100,000</option>
+        <option value="1000000" selected>1,000,000</option>
+      </select>
+    </label>
+    <button class="gl-btn" id="glBuildListBtn">Build [x*x for x in range(N)]</button>
+    <button class="gl-btn secondary" id="glCreateGenBtn">Create (x*x for x in range(N))</button>
+    <button class="gl-btn secondary" id="glPull1Btn">Pull next()</button>
+    <button class="gl-btn secondary" id="glPull10Btn">Pull 10</button>
+    <button class="gl-btn secondary" id="glPullAllBtn">Pull until exhausted</button>
+    <button class="gl-btn secondary" id="glResetBtn">Reset</button>
+  </div>
+
+  <div class="gl-columns">
+    <div class="gl-col">
+      <div class="gl-col-title">list comprehension (eager)</div>
+      <div class="gl-col-sub">[x*x for x in range(N)]</div>
+      <div class="gl-meter-track"><div class="gl-meter-fill eager" id="glListMeter"></div></div>
+      <div class="gl-meter-label" id="glListLabel">not built yet</div>
+      <div class="gl-stat" id="glListStat"></div>
+    </div>
+    <div class="gl-col">
+      <div class="gl-col-title">generator expression (lazy)</div>
+      <div class="gl-col-sub">(x*x for x in range(N))</div>
+      <div class="gl-meter-track"><div class="gl-meter-fill" id="glGenMeter"></div></div>
+      <div class="gl-meter-label" id="glGenLabel">not created yet</div>
+      <div class="gl-stat" id="glGenStat"></div>
+    </div>
+  </div>
+
+  <div class="gl-note" id="glNote"></div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('glWidget');
+
+    function* genExpr(n) {
+      for (var i = 0; i < n; i++) yield i * i;
+    }
+
+    var nSelect = document.getElementById('glNSelect');
+    var listMeter = document.getElementById('glListMeter');
+    var listLabel = document.getElementById('glListLabel');
+    var listStat = document.getElementById('glListStat');
+    var genMeter = document.getElementById('glGenMeter');
+    var genLabel = document.getElementById('glGenLabel');
+    var genStat = document.getElementById('glGenStat');
+    var noteEl = document.getElementById('glNote');
+
+    var listState = { built: false, length: 0, ms: 0 };
+    var genState = { gen: null, pulled: 0, exhausted: false, n: 0 };
+
+    function currentN() { return Number(nSelect.value); }
+
+    function renderList() {
+      var n = currentN();
+      var pct = listState.built ? 100 : 0;
+      listMeter.style.width = pct + '%';
+      listLabel.innerHTML = listState.built
+        ? '<b>' + listState.length + '</b> / ' + n + ' elements materialized'
+        : 'not built yet -- 0 elements exist';
+      listStat.innerHTML = listState.built
+        ? 'Array.from() took <b>' + listState.ms.toFixed(2) + 'ms</b> and allocated all ' + listState.length + ' elements before the line finished executing.'
+        : '';
+    }
+
+    function renderGen() {
+      var n = genState.n || currentN();
+      var pct = n > 0 ? Math.min(100, (genState.pulled / n) * 100) : 0;
+      genMeter.style.width = pct + '%';
+      genLabel.innerHTML = genState.gen
+        ? '<b>' + genState.pulled + '</b> / ' + n + ' elements pulled so far'
+        : 'not created yet -- 0 elements exist';
+      genStat.innerHTML = genState.gen
+        ? (genState.exhausted
+            ? 'Exhausted -- exactly ' + genState.pulled + ' values were ever computed, one at a time, only as they were pulled.'
+            : 'Creating this generator took a fixed, tiny amount of work regardless of N -- nothing is computed until you pull.')
+        : '';
+
+      var pullDisabled = !genState.gen || genState.exhausted;
+      document.getElementById('glPull1Btn').disabled = pullDisabled;
+      document.getElementById('glPull10Btn').disabled = pullDisabled;
+      document.getElementById('glPullAllBtn').disabled = pullDisabled;
+    }
+
+    document.getElementById('glBuildListBtn').addEventListener('click', function() {
+      var n = currentN();
+      var t0 = performance.now();
+      var list = Array.from({ length: n }, function(_, i) { return i * i; });
+      var t1 = performance.now();
+      listState = { built: true, length: list.length, ms: t1 - t0 };
+      renderList();
+    });
+
+    document.getElementById('glCreateGenBtn').addEventListener('click', function() {
+      var n = currentN();
+      genState = { gen: genExpr(n), pulled: 0, exhausted: false, n: n };
+      renderGen();
+    });
+
+    function pullFrom(count) {
+      if (!genState.gen || genState.exhausted) return;
+      for (var i = 0; i < count; i++) {
+        var r = genState.gen.next();
+        if (r.done) { genState.exhausted = true; break; }
+        genState.pulled += 1;
+      }
+      renderGen();
+    }
+
+    document.getElementById('glPull1Btn').addEventListener('click', function() { pullFrom(1); });
+    document.getElementById('glPull10Btn').addEventListener('click', function() { pullFrom(10); });
+    document.getElementById('glPullAllBtn').addEventListener('click', function() { pullFrom(genState.n || currentN()); });
+
+    document.getElementById('glResetBtn').addEventListener('click', function() {
+      listState = { built: false, length: 0, ms: 0 };
+      genState = { gen: null, pulled: 0, exhausted: false, n: 0 };
+      renderList();
+      renderGen();
+    });
+
+    nSelect.addEventListener('change', function() {
+      listState = { built: false, length: 0, ms: 0 };
+      genState = { gen: null, pulled: 0, exhausted: false, n: 0 };
+      renderList();
+      renderGen();
+    });
+
+    noteEl.textContent = 'Both meters above are driven by real objects, not a simulated count: the list bar reflects an actual array’s .length, and the generator bar only increases on an actual .next() call. Set N to 1,000,000 and the difference stops being theoretical -- the list finishes all at once and the generator bar sits at zero until you pull it.';
+
+    renderList();
+    renderGen();
+  })();
+  </script>
+</div>

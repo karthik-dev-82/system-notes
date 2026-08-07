@@ -68,6 +68,7 @@ worth writing down and coming back to.
 
    python_sequences_interactive
    python_hashing_interactive
+   python_generators_interactive
    python_concurrency_interactive
    python_asyncio_gather_interactive
 
@@ -244,6 +245,9 @@ Python Notes
    * - :doc:`python_hashing_interactive`
      - Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra
      - hash tables, open addressing, insertion order, union/intersection/difference
+   * - :doc:`python_generators_interactive`
+     - Interactive generators -- step through next()/send()/throw()/close(), then measure laziness against a list comprehension
+     - yield, suspended frames, StopIteration, two-way communication
    * - :doc:`python_concurrency_interactive`
      - Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side
      - GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound
