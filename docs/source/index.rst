@@ -69,6 +69,7 @@ worth writing down and coming back to.
    python_sequences_interactive
    python_hashing_interactive
    python_generators_interactive
+   python_context_managers_interactive
    python_coroutines_interactive
    python_concurrency_interactive
    python_asyncio_gather_interactive
@@ -249,6 +250,9 @@ Python Notes
    * - :doc:`python_generators_interactive`
      - Interactive generators -- step through next()/send()/throw()/close(), then measure laziness against a list comprehension
      - yield, suspended frames, StopIteration, two-way communication
+   * - :doc:`python_context_managers_interactive`
+     - Interactive context managers -- class-based vs @contextmanager side by side, four scenarios, identical outcomes
+     - with statement, __enter__/__exit__, contextlib, exception suppression
    * - :doc:`python_coroutines_interactive`
      - Interactive toy event loop -- a real hand-built scheduler driving coroutines, plus await delegation chained through nested calls
      - async/await, event loop, cooperative scheduling, await delegation

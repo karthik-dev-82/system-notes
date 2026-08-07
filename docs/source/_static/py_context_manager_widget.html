@@ -1,0 +1,348 @@
+<div class="cx-root" id="cxWidget">
+  <style>
+    #cxWidget {
+      --cx-bg: #0f172a;
+      --cx-panel: #16213e;
+      --cx-border: #2a3655;
+      --cx-text: #e2e8f0;
+      --cx-muted: #94a3b8;
+      --cx-accent: #38bdf8;
+      --cx-good: #4ade80;
+      --cx-bad: #f87171;
+      --cx-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cx-bg);
+      color: var(--cx-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cxWidget * { box-sizing: border-box; }
+    #cxWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cxWidget .cx-sub { color: var(--cx-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .cx-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; min-width: 1000px; }
+    .cx-scenario-btn { background: var(--cx-panel); color: var(--cx-muted); border: 1px solid var(--cx-border); border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .cx-scenario-btn.active { background: var(--cx-accent); color: #041322; border-color: var(--cx-accent); }
+
+    .cx-protocol { background: var(--cx-panel); border: 1px solid var(--cx-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 1000px; font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--cx-muted); white-space: pre; }
+    .cx-protocol b { color: #fff; }
+
+    .cx-columns { display: flex; gap: 16px; min-width: 1000px; }
+    .cx-col { flex: 1; background: var(--cx-panel); border: 1px solid var(--cx-border); border-radius: 10px; padding: 14px 16px; }
+    .cx-col-title { font-size: 0.85rem; font-weight: 700; color: #fff; margin-bottom: 8px; }
+
+    .cx-code { font-family: ui-monospace, monospace; font-size: 0.73rem; line-height: 1.6; white-space: pre; background: var(--cx-bg); border: 1px solid var(--cx-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; overflow-x: auto; }
+
+    .cx-log { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--cx-muted); min-height: 60px; }
+    .cx-log-line { padding: 2px 0; border-bottom: 1px solid rgba(42,54,85,0.4); }
+
+    .cx-outcome { border-radius: 8px; padding: 10px 12px; margin-top: 10px; font-size: 0.8rem; font-weight: 700; }
+    .cx-outcome.ok { background: rgba(74,222,128,0.14); color: var(--cx-good); border: 1px solid rgba(74,222,128,0.4); }
+    .cx-outcome.bad { background: rgba(248,113,113,0.14); color: var(--cx-bad); border: 1px solid rgba(248,113,113,0.4); }
+    .cx-outcome-sub { font-weight: 400; font-size: 0.74rem; color: var(--cx-muted); margin-top: 4px; }
+
+    .cx-agree { text-align: center; font-size: 0.78rem; font-weight: 700; margin-top: 12px; min-width: 1000px; }
+    .cx-agree.ok { color: var(--cx-good); }
+    .cx-agree.bad { color: var(--cx-bad); }
+    .cx-note { font-size: 0.76rem; color: var(--cx-muted); line-height: 1.5; margin-top: 12px; }
+  </style>
+
+  <h3>Context Managers: Play With It</h3>
+  <div class="cx-sub">The same resource-management protocol, written two ways -- a plain class with <code>__enter__</code>/<code>__exit__</code>, and a generator wrapped in <code>@contextlib.contextmanager</code>. Pick a scenario and watch both arrive at the identical outcome.</div>
+
+  <div class="cx-controls" id="cxScenarios">
+    <button class="cx-scenario-btn" data-scenario="normal">Normal exit</button>
+    <button class="cx-scenario-btn" data-scenario="propagates">Exception propagates</button>
+    <button class="cx-scenario-btn" data-scenario="suppressed">Exception suppressed</button>
+    <button class="cx-scenario-btn" data-scenario="enter-fails">__enter__ fails</button>
+  </div>
+
+  <div class="cx-protocol">What every <b>with</b> statement actually does:
+
+value = mgr.__enter__()          <span style="color:var(--cx-muted)"># if this raises, __exit__ is never called</span>
+try:
+    BODY(value)
+except Exception as exc:
+    if not mgr.__exit__(type(exc), exc, tb):
+        raise                    <span style="color:var(--cx-muted)"># __exit__ returned falsy -> propagate</span>
+else:
+    mgr.__exit__(None, None, None)</div>
+
+  <div class="cx-columns">
+    <div class="cx-col">
+      <div class="cx-col-title">Class-based</div>
+      <div class="cx-code" id="cxClassCode"></div>
+      <div class="cx-log" id="cxClassLog"></div>
+      <div id="cxClassOutcome"></div>
+    </div>
+    <div class="cx-col">
+      <div class="cx-col-title">Generator-based (@contextmanager)</div>
+      <div class="cx-code" id="cxGenCode"></div>
+      <div class="cx-log" id="cxGenLog"></div>
+      <div id="cxGenOutcome"></div>
+    </div>
+  </div>
+  <div class="cx-agree" id="cxAgree"></div>
+  <div class="cx-note" id="cxNote"></div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('cxWidget');
+
+    // ---------------- class-based context manager ----------------
+    function makeResourceClass(name, log, shouldSuppress) {
+      return {
+        __enter__: function () {
+          log.push({ event: 'enter', text: 'acquiring ' + name });
+          return name;
+        },
+        __exit__: function (excType, excValue) {
+          if (excValue === null) {
+            log.push({ event: 'normal-exit', text: 'releasing ' + name + ' (no exception)' });
+            return false;
+          }
+          log.push({ event: 'exception-caught', text: 'caught ' + excValue.message + ' while holding ' + name });
+          log.push({ event: 'exit-after-exception', text: 'releasing ' + name + ' (after exception)' });
+          return shouldSuppress;
+        }
+      };
+    }
+
+    // ---------------- generator-based context manager ----------------
+    function* resourceGen(name, log, shouldSuppress) {
+      log.push({ event: 'enter', text: 'acquiring ' + name });
+      try {
+        yield name;
+        log.push({ event: 'normal-exit', text: 'releasing ' + name + ' (no exception)' });
+      } catch (e) {
+        log.push({ event: 'exception-caught', text: 'caught ' + e.message + ' while holding ' + name });
+        log.push({ event: 'exit-after-exception', text: 'releasing ' + name + ' (after exception)' });
+        if (shouldSuppress) return;
+        throw e;
+      }
+    }
+
+    function cmFromGenerator(genObj) {
+      return {
+        __enter__: function () {
+          var r = genObj.next();
+          if (r.done) throw new Error('generator did not yield');
+          return r.value;
+        },
+        __exit__: function (excType, excValue) {
+          if (excValue === null) {
+            var r = genObj.next();
+            if (!r.done) throw new Error('generator yielded more than once');
+            return false;
+          }
+          try {
+            var r2 = genObj.throw(excValue);
+            if (!r2.done) throw new Error('generator yielded again after handling an exception');
+            return true;
+          } catch (e) {
+            if (e === excValue) return false;
+            throw e;
+          }
+        }
+      };
+    }
+
+    // ---------------- the `with` statement itself ----------------
+    function withStatement(mgr, bodyFn) {
+      var value = mgr.__enter__();
+      try {
+        var result = bodyFn(value);
+        mgr.__exit__(null, null);
+        return { completed: true, suppressed: false, value: result };
+      } catch (e) {
+        var suppressed = mgr.__exit__(e.constructor, e);
+        if (suppressed) return { completed: true, suppressed: true, exception: e };
+        throw e;
+      }
+    }
+
+    function runScenario(scenario, useGenerator) {
+      var log = [];
+      var shouldSuppress = scenario === 'suppressed';
+      var enterFails = scenario === 'enter-fails';
+
+      var mgr = useGenerator
+        ? cmFromGenerator(resourceGen('R', log, shouldSuppress))
+        : makeResourceClass('R', log, shouldSuppress);
+
+      if (enterFails) {
+        mgr.__enter__ = function () { throw new Error('boom-on-enter'); };
+      }
+
+      var outcome;
+      try {
+        outcome = withStatement(mgr, function () {
+          if (scenario === 'propagates' || scenario === 'suppressed') throw new Error('boom');
+          return 'body-ran';
+        });
+      } catch (e) {
+        outcome = { completed: false, suppressed: false, exception: e, threwOutOfWith: true };
+      }
+      return { log: log, outcome: outcome };
+    }
+
+    // ---------------- static source snippets (illustrative, match the executed scenario exactly) ----------------
+    var SOURCES = {
+      class: {
+        normal:
+          'class Resource:\n' +
+          '    def __enter__(self):\n' +
+          '        print("acquiring R")\n' +
+          '        return "R"\n' +
+          '    def __exit__(self, exc_type, exc_val, exc_tb):\n' +
+          '        print("releasing R (no exception)")\n' +
+          '        return False\n\n' +
+          'with Resource() as r:\n' +
+          '    ...  # no exception',
+        propagates:
+          'class Resource:\n' +
+          '    def __enter__(self):\n' +
+          '        print("acquiring R")\n' +
+          '        return "R"\n' +
+          '    def __exit__(self, exc_type, exc_val, exc_tb):\n' +
+          '        print("caught", exc_val, "while holding R")\n' +
+          '        print("releasing R (after exception)")\n' +
+          '        return False   # <- don\'t suppress\n\n' +
+          'with Resource() as r:\n' +
+          '    raise RuntimeError("boom")',
+        suppressed:
+          'class Resource:\n' +
+          '    def __enter__(self):\n' +
+          '        print("acquiring R")\n' +
+          '        return "R"\n' +
+          '    def __exit__(self, exc_type, exc_val, exc_tb):\n' +
+          '        print("caught", exc_val, "while holding R")\n' +
+          '        print("releasing R (after exception)")\n' +
+          '        return True   # <- suppress!\n\n' +
+          'with Resource() as r:\n' +
+          '    raise RuntimeError("boom")',
+        'enter-fails':
+          'class Resource:\n' +
+          '    def __enter__(self):\n' +
+          '        raise RuntimeError("boom-on-enter")\n' +
+          '    def __exit__(self, exc_type, exc_val, exc_tb):\n' +
+          '        print("this never runs")\n' +
+          '        return False\n\n' +
+          'with Resource() as r:\n' +
+          '    ...  # never reached'
+      },
+      gen: {
+        normal:
+          '@contextmanager\n' +
+          'def resource():\n' +
+          '    print("acquiring R")\n' +
+          '    yield "R"\n' +
+          '    print("releasing R (no exception)")\n\n' +
+          'with resource() as r:\n' +
+          '    ...  # no exception',
+        propagates:
+          '@contextmanager\n' +
+          'def resource():\n' +
+          '    print("acquiring R")\n' +
+          '    try:\n' +
+          '        yield "R"\n' +
+          '        print("releasing R (no exception)")\n' +
+          '    except Exception as e:\n' +
+          '        print("caught", e, "while holding R")\n' +
+          '        print("releasing R (after exception)")\n' +
+          '        raise   # <- re-raise, don\'t suppress\n\n' +
+          'with resource() as r:\n' +
+          '    raise RuntimeError("boom")',
+        suppressed:
+          '@contextmanager\n' +
+          'def resource():\n' +
+          '    print("acquiring R")\n' +
+          '    try:\n' +
+          '        yield "R"\n' +
+          '        print("releasing R (no exception)")\n' +
+          '    except Exception as e:\n' +
+          '        print("caught", e, "while holding R")\n' +
+          '        print("releasing R (after exception)")\n' +
+          '        # no raise -- swallow it\n\n' +
+          'with resource() as r:\n' +
+          '    raise RuntimeError("boom")',
+        'enter-fails':
+          '@contextmanager\n' +
+          'def resource():\n' +
+          '    raise RuntimeError("boom-on-enter")\n' +
+          '    yield "R"   # never reached\n' +
+          '    print("this never runs")\n\n' +
+          'with resource() as r:\n' +
+          '    ...  # never reached'
+      }
+    };
+
+    var state = { scenario: 'normal' };
+
+    var classCodeEl = document.getElementById('cxClassCode');
+    var classLogEl = document.getElementById('cxClassLog');
+    var classOutcomeEl = document.getElementById('cxClassOutcome');
+    var genCodeEl = document.getElementById('cxGenCode');
+    var genLogEl = document.getElementById('cxGenLog');
+    var genOutcomeEl = document.getElementById('cxGenOutcome');
+    var agreeEl = document.getElementById('cxAgree');
+    var noteEl = document.getElementById('cxNote');
+
+    function escapeHtml(s) {
+      return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    }
+
+    function renderLog(el, log) {
+      el.innerHTML = log.map(function(l) { return '<div class="cx-log-line">' + escapeHtml(l.text) + '</div>'; }).join('');
+    }
+
+    function renderOutcome(el, outcome) {
+      if (outcome.completed) {
+        el.innerHTML = '<div class="cx-outcome ok">Completed normally' +
+          (outcome.suppressed ? '<div class="cx-outcome-sub">Exception was suppressed by __exit__ -- code after the with-block runs.</div>' : '') +
+          '</div>';
+      } else {
+        el.innerHTML = '<div class="cx-outcome bad">Uncaught: ' + escapeHtml(outcome.exception.message) +
+          '<div class="cx-outcome-sub">Propagated past the with-block.</div></div>';
+      }
+    }
+
+    function render() {
+      root.querySelectorAll('.cx-scenario-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.scenario === state.scenario);
+      });
+
+      classCodeEl.textContent = SOURCES.class[state.scenario];
+      genCodeEl.textContent = SOURCES.gen[state.scenario];
+
+      var classRun = runScenario(state.scenario, false);
+      var genRun = runScenario(state.scenario, true);
+
+      renderLog(classLogEl, classRun.log);
+      renderOutcome(classOutcomeEl, classRun.outcome);
+      renderLog(genLogEl, genRun.log);
+      renderOutcome(genOutcomeEl, genRun.outcome);
+
+      var agree = classRun.outcome.completed === genRun.outcome.completed &&
+        classRun.outcome.suppressed === genRun.outcome.suppressed;
+      agreeEl.className = 'cx-agree ' + (agree ? 'ok' : 'bad');
+      agreeEl.textContent = agree ? '✓ Both implementations produced the identical outcome.' : '✗ Implementations diverged (this would be a bug).';
+    }
+
+    root.querySelectorAll('.cx-scenario-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        state.scenario = btn.dataset.scenario;
+        render();
+      });
+    });
+
+    root.querySelector('.cx-scenario-btn[data-scenario="normal"]').classList.add('active');
+    noteEl.textContent = 'Both columns run the exact same protocol shown above -- class __enter__/__exit__ is called directly; the generator version is driven by a real .next()/.throw() on a real generator object, exactly like the suspend/resume mechanism in the generators widget. That\u2019s not a coincidence: contextlib.contextmanager is a thin wrapper that translates __enter__/__exit__ calls into next()/throw() calls on your generator for you.';
+
+    render();
+  })();
+  </script>
+</div>
