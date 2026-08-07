@@ -1,0 +1,288 @@
+<div class="ac2-root" id="ac2Widget">
+  <style>
+    #ac2Widget {
+      --ac2-bg: #0f172a;
+      --ac2-panel: #16213e;
+      --ac2-border: #2a3655;
+      --ac2-text: #e2e8f0;
+      --ac2-muted: #94a3b8;
+      --ac2-accent: #38bdf8;
+      --ac2-good: #4ade80;
+      --ac2-bad: #f87171;
+      --ac2-warn: #fbbf24;
+      --ac2-p1: #38bdf8;
+      --ac2-p2: #a78bfa;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ac2-bg);
+      color: var(--ac2-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ac2Widget * { box-sizing: border-box; }
+    #ac2Widget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ac2Widget .ac2-sub { color: var(--ac2-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .ac2-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--ac2-panel); border: 1px solid var(--ac2-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 980px; }
+    .ac2-scenario-btn { background: transparent; color: var(--ac2-muted); border: 1px solid var(--ac2-border); border-radius: 8px; padding: 8px 14px; font-size: 0.78rem; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .ac2-scenario-btn.active { background: var(--ac2-accent); color: #041322; border-color: var(--ac2-accent); }
+    .ac2-btn { background: var(--ac2-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .ac2-btn.secondary { background: transparent; color: var(--ac2-text); border: 1px solid var(--ac2-border); font-weight: 600; }
+    .ac2-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .ac2-tick-badge { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--ac2-warn); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; padding: 6px 12px; }
+
+    .ac2-body { display: flex; gap: 16px; min-width: 980px; }
+    .ac2-code-col { width: 340px; flex: 0 0 auto; }
+    .ac2-main-col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+    .ac2-card { background: var(--ac2-panel); border: 1px solid var(--ac2-border); border-radius: 10px; padding: 14px 16px; }
+    .ac2-card-title { font-size: 0.78rem; font-weight: 700; color: var(--ac2-muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+    .ac2-code { font-family: ui-monospace, monospace; font-size: 0.72rem; line-height: 1.6; white-space: pre; }
+
+    table.ac2-status { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+    table.ac2-status th { text-align: left; color: var(--ac2-muted); font-weight: 600; padding: 5px 8px; border-bottom: 1px solid var(--ac2-border); font-size: 0.66rem; text-transform: uppercase; }
+    table.ac2-status td { padding: 5px 8px; border-bottom: 1px solid rgba(42,54,85,0.5); font-family: ui-monospace, monospace; }
+    .ac2-task-name { font-weight: 700; }
+    .ac2-task-name.t0 { color: var(--ac2-p1); }
+    .ac2-task-name.t1 { color: var(--ac2-p2); }
+    .ac2-state-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; }
+    .ac2-state-tag.ready { background: rgba(74,222,128,0.18); color: var(--ac2-good); }
+    .ac2-state-tag.sleeping { background: rgba(148,163,184,0.18); color: var(--ac2-muted); }
+    .ac2-state-tag.done { background: rgba(56,189,248,0.18); color: var(--ac2-accent); }
+
+    .ac2-log { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--ac2-muted); max-height: 200px; overflow-y: auto; }
+    .ac2-log-line { padding: 2px 0; border-bottom: 1px solid rgba(42,54,85,0.4); }
+    .ac2-empty { color: var(--ac2-muted); font-size: 0.76rem; font-style: italic; }
+
+    .ac2-outcome { border-radius: 8px; padding: 10px 12px; margin-top: 4px; font-size: 0.8rem; font-weight: 700; }
+    .ac2-outcome.ok { background: rgba(74,222,128,0.14); color: var(--ac2-good); border: 1px solid rgba(74,222,128,0.4); }
+    .ac2-outcome.bad { background: rgba(248,113,113,0.14); color: var(--ac2-bad); border: 1px solid rgba(248,113,113,0.4); }
+
+    .ac2-note { font-size: 0.76rem; color: var(--ac2-muted); line-height: 1.5; margin-top: 4px; }
+  </style>
+
+  <h3>Async Context Manager: __aenter__ and __aexit__ Take Time</h3>
+  <div class="ac2-sub">Same suppress-or-propagate protocol as <code>__enter__</code>/<code>__exit__</code> -- but both halves are themselves <code>await</code>ed, and can take real ticks to resolve, while a sibling task keeps making progress on the same loop.</div>
+
+  <div class="ac2-controls">
+    <button class="ac2-scenario-btn" data-scenario="normal">Normal exit</button>
+    <button class="ac2-scenario-btn" data-scenario="suppressed">Exception suppressed</button>
+    <button class="ac2-scenario-btn" data-scenario="propagates">Exception propagates</button>
+    <button class="ac2-btn" id="ac2StepBtn" style="margin-left:8px;">Step one tick</button>
+    <button class="ac2-btn secondary" id="ac2RunBtn">Run to completion</button>
+    <div class="ac2-tick-badge" id="ac2TickBadge">tick 0</div>
+  </div>
+
+  <div class="ac2-body">
+    <div class="ac2-code-col">
+      <div class="ac2-card">
+        <div class="ac2-card-title">Source</div>
+        <div class="ac2-code" id="ac2Code"></div>
+      </div>
+    </div>
+    <div class="ac2-main-col">
+      <div class="ac2-card">
+        <div class="ac2-card-title">Task status</div>
+        <table class="ac2-status">
+          <thead><tr><th>Task</th><th>State</th><th>Detail</th></tr></thead>
+          <tbody id="ac2StatusBody"></tbody>
+        </table>
+      </div>
+      <div class="ac2-card">
+        <div class="ac2-card-title">Trace</div>
+        <div class="ac2-log" id="ac2Log"></div>
+        <div id="ac2Outcome"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ac2-note" id="ac2Note"></div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('ac2Widget');
+    var ENTER_TICKS = 3, EXIT_TICKS = 2, SIBLING_TICKS = 4;
+
+    // Models `await __aenter__(); BODY; await __aexit__(...)` as a single
+    // task: the two sleeps stand in for the awaited enter/exit, reusing the
+    // exact suppress/propagate outcome logic already verified for the
+    // sync context-manager widget.
+    function* asyncWithTask(scenario, log) {
+      yield { type: 'sleep', ticks: ENTER_TICKS };
+      log.push({ text: 'entered resource' });
+      var hasExc = scenario === 'suppressed' || scenario === 'propagates';
+      if (hasExc) log.push({ text: 'exception raised in body: boom' });
+      yield { type: 'sleep', ticks: EXIT_TICKS };
+      if (hasExc) {
+        var suppress = scenario === 'suppressed';
+        log.push({ text: suppress ? 'exit suppressed the exception' : 'exit did not suppress the exception' });
+        return suppress ? 'completed (suppressed)' : 'propagated past the with-block';
+      }
+      log.push({ text: 'exited normally' });
+      return 'completed normally';
+    }
+
+    function* sleepCoroutine(ticksList, log, name) {
+      for (var i = 0; i < ticksList.length; i++) yield { type: 'sleep', ticks: ticksList[i] };
+      log.push({ text: name + ' done' });
+      return name + '-result';
+    }
+
+    function makeTasks(taskDefs) {
+      var tasks = {};
+      taskDefs.forEach(function(d) {
+        tasks[d.id] = { id: d.id, gen: d.gen, state: 'ready', wakeAtTick: 0, result: undefined, sendValue: undefined };
+      });
+      return tasks;
+    }
+
+    function runOneTick(tasks, ids, tick) {
+      var trace = [];
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state === 'sleeping' && t.wakeAtTick <= tick) t.state = 'ready';
+      });
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state !== 'ready') return;
+        var r = t.gen.next(t.sendValue);
+        t.sendValue = undefined;
+        if (r.done) {
+          trace.push({ tick: tick, id: id, action: 'done', value: r.value });
+          t.state = 'done';
+          t.result = r.value;
+        } else {
+          trace.push({ tick: tick, id: id, action: r.value.type, ticks: r.value.ticks });
+          if (r.value.type === 'sleep') { t.state = 'sleeping'; t.wakeAtTick = tick + r.value.ticks; }
+        }
+      });
+      return trace;
+    }
+
+    function allDone(tasks, ids) {
+      return ids.every(function(id) { return tasks[id].state === 'done'; });
+    }
+
+    var TASK_IDS = ['with', 'sibling'];
+    var TASK_CLASS = ['t0', 't1'];
+
+    var SOURCES = {
+      normal:
+        'class Resource:\n' +
+        '    async def __aenter__(self):\n' +
+        '        await connect()   # ' + ENTER_TICKS + ' ticks\n' +
+        '        return self\n' +
+        '    async def __aexit__(self, *exc):\n' +
+        '        await disconnect()  # ' + EXIT_TICKS + ' ticks\n' +
+        '        return False\n\n' +
+        'async def use_resource():\n' +
+        '    async with Resource():\n' +
+        '        ...  # no exception\n\n' +
+        'async def sibling():\n' +
+        '    await asyncio.sleep(' + SIBLING_TICKS + ')',
+      suppressed:
+        'class Resource:\n' +
+        '    async def __aenter__(self):\n' +
+        '        await connect()   # ' + ENTER_TICKS + ' ticks\n' +
+        '        return self\n' +
+        '    async def __aexit__(self, exc_type, exc, tb):\n' +
+        '        await disconnect()  # ' + EXIT_TICKS + ' ticks\n' +
+        '        return True   # <- suppress!\n\n' +
+        'async def use_resource():\n' +
+        '    async with Resource():\n' +
+        '        raise RuntimeError("boom")',
+      propagates:
+        'class Resource:\n' +
+        '    async def __aenter__(self):\n' +
+        '        await connect()   # ' + ENTER_TICKS + ' ticks\n' +
+        '        return self\n' +
+        '    async def __aexit__(self, exc_type, exc, tb):\n' +
+        '        await disconnect()  # ' + EXIT_TICKS + ' ticks\n' +
+        '        return False   # <- don\'t suppress\n\n' +
+        'async def use_resource():\n' +
+        '    async with Resource():\n' +
+        '        raise RuntimeError("boom")'
+    };
+
+    var state = { tasks: null, tick: 0, log: [], scenario: 'normal' };
+
+    var statusBody = document.getElementById('ac2StatusBody');
+    var logEl = document.getElementById('ac2Log');
+    var tickBadge = document.getElementById('ac2TickBadge');
+    var codeEl = document.getElementById('ac2Code');
+    var outcomeEl = document.getElementById('ac2Outcome');
+    var noteEl = document.getElementById('ac2Note');
+
+    function rebuild() {
+      var log = [];
+      var defs = [
+        { id: 'with', gen: asyncWithTask(state.scenario, log) },
+        { id: 'sibling', gen: sleepCoroutine([SIBLING_TICKS], log, 'sibling') }
+      ];
+      state.tasks = makeTasks(defs);
+      state.tick = 0;
+      state.log = log;
+      codeEl.textContent = SOURCES[state.scenario];
+      outcomeEl.innerHTML = '';
+      render();
+    }
+
+    function stepOnce() {
+      if (allDone(state.tasks, TASK_IDS)) return;
+      runOneTick(state.tasks, TASK_IDS, state.tick);
+      state.tick += 1;
+      render();
+      if (state.tasks['with'].state === 'done' && !outcomeEl.innerHTML) {
+        var r = state.tasks['with'].result;
+        var ok = r === 'completed normally' || r === 'completed (suppressed)';
+        outcomeEl.innerHTML = '<div class="ac2-outcome ' + (ok ? 'ok' : 'bad') + '">' + r + '</div>';
+      }
+    }
+
+    function runToCompletion() {
+      var guard = 0;
+      while (!allDone(state.tasks, TASK_IDS) && guard < 1000) { stepOnce(); guard += 1; }
+    }
+
+    function render() {
+      tickBadge.textContent = 'tick ' + state.tick;
+      root.querySelectorAll('.ac2-scenario-btn').forEach(function(b) {
+        b.classList.toggle('active', b.dataset.scenario === state.scenario);
+      });
+
+      statusBody.innerHTML = TASK_IDS.map(function(id, i) {
+        var t = state.tasks[id];
+        var detail = t.state === 'sleeping' ? 'awaiting, wakes at tick ' + t.wakeAtTick
+          : t.state === 'done' ? 'finished'
+          : t.state === 'ready' ? 'about to run' : '';
+        return '<tr><td class="ac2-task-name ' + TASK_CLASS[i] + '">' + id + '</td>' +
+          '<td><span class="ac2-state-tag ' + t.state + '">' + t.state + '</span></td>' +
+          '<td>' + detail + '</td></tr>';
+      }).join('');
+
+      logEl.innerHTML = state.log.map(function(e) {
+        return '<div class="ac2-log-line">' + e.text + '</div>';
+      }).join('') || '<span class="ac2-empty">Click "Step one tick" to start.</span>';
+
+      var done = allDone(state.tasks, TASK_IDS);
+      document.getElementById('ac2StepBtn').disabled = done;
+      document.getElementById('ac2RunBtn').disabled = done;
+    }
+
+    root.querySelectorAll('.ac2-scenario-btn').forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        state.scenario = btn.dataset.scenario;
+        rebuild();
+      });
+    });
+    document.getElementById('ac2StepBtn').addEventListener('click', stepOnce);
+    document.getElementById('ac2RunBtn').addEventListener('click', runToCompletion);
+
+    root.querySelector('.ac2-scenario-btn[data-scenario="normal"]').classList.add('active');
+    noteEl.textContent = 'sibling always finishes at tick ' + SIBLING_TICKS + ', whatever the resource’s __aenter__/__aexit__ are doing -- awaiting a connection or a clean shutdown never blocks the rest of the event loop, which is the entire reason __aenter__/__aexit__ exist as coroutines instead of plain methods. The suppress/propagate decision itself is identical to the sync case in python_context_managers_interactive -- only the timing changed.';
+
+    rebuild();
+  })();
+  </script>
+</div>

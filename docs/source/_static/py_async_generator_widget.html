@@ -1,0 +1,227 @@
+<div class="ag-root" id="agWidget">
+  <style>
+    #agWidget {
+      --ag-bg: #0f172a;
+      --ag-panel: #16213e;
+      --ag-border: #2a3655;
+      --ag-text: #e2e8f0;
+      --ag-muted: #94a3b8;
+      --ag-accent: #38bdf8;
+      --ag-good: #4ade80;
+      --ag-warn: #fbbf24;
+      --ag-p1: #38bdf8;
+      --ag-p2: #a78bfa;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ag-bg);
+      color: var(--ag-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #agWidget * { box-sizing: border-box; }
+    #agWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #agWidget .ag-sub { color: var(--ag-muted); font-size: 0.85rem; margin-bottom: 12px; }
+
+    .ag-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--ag-panel); border: 1px solid var(--ag-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 980px; }
+    .ag-btn { background: var(--ag-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .ag-btn.secondary { background: transparent; color: var(--ag-text); border: 1px solid var(--ag-border); font-weight: 600; }
+    .ag-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .ag-tick-badge { margin-left: auto; font-family: ui-monospace, monospace; font-size: 0.8rem; color: var(--ag-warn); background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.3); border-radius: 6px; padding: 6px 12px; }
+
+    .ag-body { display: flex; gap: 16px; min-width: 980px; }
+    .ag-code-col { width: 340px; flex: 0 0 auto; }
+    .ag-main-col { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 12px; }
+
+    .ag-card { background: var(--ag-panel); border: 1px solid var(--ag-border); border-radius: 10px; padding: 14px 16px; }
+    .ag-card-title { font-size: 0.78rem; font-weight: 700; color: var(--ag-muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 8px; }
+    .ag-code { font-family: ui-monospace, monospace; font-size: 0.72rem; line-height: 1.6; white-space: pre; }
+
+    table.ag-status { width: 100%; border-collapse: collapse; font-size: 0.76rem; }
+    table.ag-status th { text-align: left; color: var(--ag-muted); font-weight: 600; padding: 5px 8px; border-bottom: 1px solid var(--ag-border); font-size: 0.66rem; text-transform: uppercase; }
+    table.ag-status td { padding: 5px 8px; border-bottom: 1px solid rgba(42,54,85,0.5); font-family: ui-monospace, monospace; }
+    .ag-task-name { font-weight: 700; }
+    .ag-task-name.t0 { color: var(--ag-p1); }
+    .ag-task-name.t1 { color: var(--ag-p2); }
+    .ag-state-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; }
+    .ag-state-tag.ready { background: rgba(74,222,128,0.18); color: var(--ag-good); }
+    .ag-state-tag.sleeping { background: rgba(148,163,184,0.18); color: var(--ag-muted); }
+    .ag-state-tag.done { background: rgba(56,189,248,0.18); color: var(--ag-accent); }
+
+    .ag-log { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--ag-muted); max-height: 220px; overflow-y: auto; }
+    .ag-log-line { padding: 2px 0; border-bottom: 1px solid rgba(42,54,85,0.4); }
+    .ag-empty { color: var(--ag-muted); font-size: 0.76rem; font-style: italic; }
+    .ag-note { font-size: 0.76rem; color: var(--ag-muted); line-height: 1.5; margin-top: 4px; }
+  </style>
+
+  <h3>Async Generator: yield Meets await</h3>
+  <div class="ag-sub">A producer that <code>yield</code>s items but also <code>await</code>s between them, running on the same toy event loop as the coroutines page -- alongside a second, fully independent task.</div>
+
+  <div class="ag-controls">
+    <button class="ag-btn" id="agStepBtn">Step one tick</button>
+    <button class="ag-btn secondary" id="agRunBtn">Run to completion</button>
+    <button class="ag-btn secondary" id="agResetBtn">Reset</button>
+    <div class="ag-tick-badge" id="agTickBadge">tick 0</div>
+  </div>
+
+  <div class="ag-body">
+    <div class="ag-code-col">
+      <div class="ag-card">
+        <div class="ag-card-title">Source</div>
+        <div class="ag-code">async def agen():
+    for value, delay in ITEMS:
+        await asyncio.sleep(delay)
+        yield value
+
+async def consume():
+    async for v in agen():
+        print("got", v)
+
+async def sibling():
+    await asyncio.sleep(2)
+    print("sibling done")</div>
+      </div>
+    </div>
+    <div class="ag-main-col">
+      <div class="ag-card">
+        <div class="ag-card-title">Task status</div>
+        <table class="ag-status">
+          <thead><tr><th>Task</th><th>State</th><th>Detail</th></tr></thead>
+          <tbody id="agStatusBody"></tbody>
+        </table>
+      </div>
+      <div class="ag-card">
+        <div class="ag-card-title">Trace</div>
+        <div class="ag-log" id="agLog"></div>
+      </div>
+    </div>
+  </div>
+  <div class="ag-note" id="agNote"></div>
+
+  <script>
+  (function() {
+    var root = document.getElementById('agWidget');
+
+    // Models `await sleep(d); yield v; await sleep(d); yield v; ...` as a
+    // single task whose internal sleeps stand in for the awaits between
+    // yields -- the SAME sleep-request shape the coroutines widget uses,
+    // reused unchanged here.
+    function* asyncGenTask(items, log, name) {
+      for (var i = 0; i < items.length; i++) {
+        yield { type: 'sleep', ticks: items[i].delay };
+        log.push({ text: 'got ' + items[i].value, task: name });
+      }
+      log.push({ text: name + ' exhausted', task: name });
+      return items.map(function(it) { return it.value; });
+    }
+
+    function* sleepCoroutine(ticksList, log, name) {
+      for (var i = 0; i < ticksList.length; i++) yield { type: 'sleep', ticks: ticksList[i] };
+      log.push({ text: name + ' done', task: name });
+      return name + '-result';
+    }
+
+    function makeTasks(taskDefs) {
+      var tasks = {};
+      taskDefs.forEach(function(d) {
+        tasks[d.id] = { id: d.id, gen: d.gen, state: 'ready', wakeAtTick: 0, result: undefined, sendValue: undefined };
+      });
+      return tasks;
+    }
+
+    function runOneTick(tasks, ids, tick) {
+      var trace = [];
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state === 'sleeping' && t.wakeAtTick <= tick) t.state = 'ready';
+      });
+      ids.forEach(function(id) {
+        var t = tasks[id];
+        if (t.state !== 'ready') return;
+        var r = t.gen.next(t.sendValue);
+        t.sendValue = undefined;
+        if (r.done) {
+          trace.push({ tick: tick, id: id, action: 'done', value: r.value });
+          t.state = 'done';
+          t.result = r.value;
+        } else {
+          trace.push({ tick: tick, id: id, action: r.value.type, ticks: r.value.ticks });
+          if (r.value.type === 'sleep') { t.state = 'sleeping'; t.wakeAtTick = tick + r.value.ticks; }
+        }
+      });
+      return trace;
+    }
+
+    function allDone(tasks, ids) {
+      return ids.every(function(id) { return tasks[id].state === 'done'; });
+    }
+
+    var TASK_IDS = ['agen', 'sibling'];
+    var TASK_CLASS = ['t0', 't1'];
+    var ITEMS = [{ value: 'a', delay: 3 }, { value: 'b', delay: 2 }, { value: 'c', delay: 2 }];
+
+    var state = { tasks: null, tick: 0, log: [] };
+
+    var statusBody = document.getElementById('agStatusBody');
+    var logEl = document.getElementById('agLog');
+    var tickBadge = document.getElementById('agTickBadge');
+    var noteEl = document.getElementById('agNote');
+
+    function reset() {
+      var log = [];
+      var defs = [
+        { id: 'agen', gen: asyncGenTask(ITEMS, log, 'agen') },
+        { id: 'sibling', gen: sleepCoroutine([2], log, 'sibling') }
+      ];
+      state.tasks = makeTasks(defs);
+      state.tick = 0;
+      state.log = log;
+      render();
+    }
+
+    function stepOnce() {
+      if (allDone(state.tasks, TASK_IDS)) return;
+      runOneTick(state.tasks, TASK_IDS, state.tick);
+      state.tick += 1;
+      render();
+    }
+
+    function runToCompletion() {
+      var guard = 0;
+      while (!allDone(state.tasks, TASK_IDS) && guard < 1000) { stepOnce(); guard += 1; }
+    }
+
+    function render() {
+      tickBadge.textContent = 'tick ' + state.tick;
+
+      statusBody.innerHTML = TASK_IDS.map(function(id, i) {
+        var t = state.tasks[id];
+        var detail = t.state === 'sleeping' ? 'awaiting, wakes at tick ' + t.wakeAtTick
+          : t.state === 'done' ? 'finished'
+          : t.state === 'ready' ? 'about to run' : '';
+        return '<tr><td class="ag-task-name ' + TASK_CLASS[i] + '">' + id + '</td>' +
+          '<td><span class="ag-state-tag ' + t.state + '">' + t.state + '</span></td>' +
+          '<td>' + detail + '</td></tr>';
+      }).join('');
+
+      logEl.innerHTML = state.log.map(function(e) {
+        var cls = TASK_CLASS[TASK_IDS.indexOf(e.task)] || '';
+        return '<div class="ag-log-line"><b class="ag-task-name ' + cls + '">' + e.task + '</b>: ' + e.text + '</div>';
+      }).join('') || '<span class="ag-empty">Click "Step one tick" to start.</span>';
+
+      var done = allDone(state.tasks, TASK_IDS);
+      document.getElementById('agStepBtn').disabled = done;
+      document.getElementById('agRunBtn').disabled = done;
+    }
+
+    document.getElementById('agStepBtn').addEventListener('click', stepOnce);
+    document.getElementById('agRunBtn').addEventListener('click', runToCompletion);
+    document.getElementById('agResetBtn').addEventListener('click', reset);
+
+    noteEl.textContent = 'Watch "sibling" finish at tick 2 no matter what -- the async generator’s internal awaits between items never block it. Try this with a plain (sync) generator and it won’t compile: putting `await` inside a `def ...(): yield ...` body is a SyntaxError in real Python. `async def ...(): yield ...` is what makes an async generator a distinct object in the first place, not just a generator that happens to be inside an async function.';
+
+    reset();
+  })();
+  </script>
+</div>

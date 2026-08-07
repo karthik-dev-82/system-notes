@@ -72,6 +72,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Python Generators (Interactive)](docs/source/python_generators_interactive.rst)** | Interactive generators -- step through next()/send()/throw()/close(), then measure laziness against a list comprehension | yield, suspended frames, StopIteration, two-way communication |
 | 🎮 **[Python Context Managers (Interactive)](docs/source/python_context_managers_interactive.rst)** | Interactive context managers -- class-based vs @contextmanager side by side, four scenarios, identical outcomes | with statement, __enter__/__exit__, contextlib, exception suppression |
 | 🎮 **[Python Coroutines (Interactive)](docs/source/python_coroutines_interactive.rst)** | Interactive toy event loop -- a real hand-built scheduler driving coroutines, plus await delegation chained through nested calls | async/await, event loop, cooperative scheduling, await delegation |
+| 🎮 **[Async Generators & Context Managers (Interactive)](docs/source/python_async_generators_interactive.rst)** | Interactive async generators and async context managers -- yield meets await, and __aenter__/__aexit__ take real time without blocking a sibling task | async generator, async for, __aenter__, __aexit__, asynccontextmanager |
 | 🎮 **[Multiprocessing vs Threading vs AsyncIO (Interactive)](docs/source/python_concurrency_interactive.rst)** | Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side | GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound |
 | 🎮 **[asyncio.gather() (Interactive)](docs/source/python_asyncio_gather_interactive.rst)** | Interactive asyncio.gather() -- 3 real coroutines, real console output, and the argument-order-vs-completion-order guarantee made concrete | async/await, asyncio.gather, asyncio.TaskGroup, coroutine scheduling |
 
@@ -159,6 +160,7 @@ system-notes/
         ├── python_generators_interactive.rst
         ├── python_context_managers_interactive.rst
         ├── python_coroutines_interactive.rst
+        ├── python_async_generators_interactive.rst
         ├── python_concurrency_interactive.rst
         ├── python_asyncio_gather_interactive.rst
         └── _static/
@@ -191,6 +193,8 @@ system-notes/
             ├── py_context_manager_widget.html
             ├── py_event_loop_widget.html
             ├── py_await_chain_widget.html
+            ├── py_async_generator_widget.html
+            ├── py_async_context_manager_widget.html
             ├── net_bridge_widget.html
             ├── net_tuntap_widget.html
             ├── net_vlan_widget.html

@@ -71,6 +71,7 @@ worth writing down and coming back to.
    python_generators_interactive
    python_context_managers_interactive
    python_coroutines_interactive
+   python_async_generators_interactive
    python_concurrency_interactive
    python_asyncio_gather_interactive
 
@@ -256,6 +257,9 @@ Python Notes
    * - :doc:`python_coroutines_interactive`
      - Interactive toy event loop -- a real hand-built scheduler driving coroutines, plus await delegation chained through nested calls
      - async/await, event loop, cooperative scheduling, await delegation
+   * - :doc:`python_async_generators_interactive`
+     - Interactive async generators and async context managers -- yield meets await, and __aenter__/__aexit__ take real time without blocking a sibling task
+     - async generator, async for, __aenter__, __aexit__, asynccontextmanager
    * - :doc:`python_concurrency_interactive`
      - Interactive multiprocessing vs threading vs asyncio -- the same 3 tasks, 4 scheduling strategies, run side by side
      - GIL, pre-emptive vs cooperative multitasking, CPU-bound vs I/O-bound
