@@ -1,0 +1,402 @@
+<div class="cow-root" id="cowWidget">
+  <style>
+    #cowWidget {
+      --cow-bg: #0f172a;
+      --cow-panel: #16213e;
+      --cow-border: #2a3655;
+      --cow-text: #e2e8f0;
+      --cow-muted: #94a3b8;
+      --cow-accent: #38bdf8;
+      --cow-good: #4ade80;
+      --cow-bad: #f87171;
+      --cow-warn: #fbbf24;
+      --cow-ro-fixed: #f472b6;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cow-bg);
+      color: var(--cow-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cowWidget * { box-sizing: border-box; }
+    #cowWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cowWidget .cow-sub { color: var(--cow-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cow-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--cow-panel); border: 1px solid var(--cow-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .cow-controls select { background: #0a1128; color: var(--cow-text); border: 1px solid var(--cow-border); border-radius: 7px; padding: 7px 10px; font-size: 0.8rem; }
+    .cow-btn { background: var(--cow-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .cow-btn.secondary { background: transparent; color: var(--cow-text); border: 1px solid var(--cow-border); }
+    .cow-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .cow-box { background: var(--cow-panel); border: 1px solid var(--cow-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .cow-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cow-muted); margin-bottom: 8px; }
+
+    table.cow-table { border-collapse: collapse; width: 100%; font-size: 0.78rem; }
+    table.cow-table th { text-align: left; color: var(--cow-muted); font-weight: 600; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 4px 8px 8px; }
+    table.cow-table td { padding: 4px; vertical-align: top; }
+    .cow-proc-label { font-family: ui-monospace, monospace; font-weight: 700; color: #fff; padding: 6px 8px !important; white-space: nowrap; }
+    .cow-proc-parent { display: block; color: var(--cow-muted); font-weight: 400; font-size: 0.68rem; }
+
+    .cow-cell { border-radius: 7px; border: 2px solid var(--cow-border); padding: 6px 8px; cursor: pointer; min-width: 108px; transition: transform 0.1s; font-family: ui-monospace, monospace; }
+    .cow-cell:hover { transform: scale(1.04); }
+    .cow-cell .cow-frame-id { font-weight: 700; color: #fff; }
+    .cow-cell .cow-flag { display: inline-block; margin-left: 6px; font-size: 0.65rem; padding: 1px 5px; border-radius: 4px; }
+    .cow-cell .cow-data { display: block; color: var(--cow-muted); font-size: 0.68rem; margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cow-cell.rw { border-color: var(--cow-good); }
+    .cow-cell.rw .cow-flag { background: rgba(74,222,128,0.22); color: var(--cow-good); }
+    .cow-cell.cow { border-color: var(--cow-warn); border-style: dashed; }
+    .cow-cell.cow .cow-flag { background: rgba(251,191,36,0.22); color: var(--cow-warn); }
+    .cow-cell.ro { border-color: var(--cow-ro-fixed); }
+    .cow-cell.ro .cow-flag { background: rgba(244,114,182,0.22); color: var(--cow-ro-fixed); }
+    .cow-cell.flash-good { background: var(--cow-good) !important; }
+    .cow-cell.flash-good, .cow-cell.flash-good * { color: #052e12 !important; }
+    .cow-cell.flash-bad { background: var(--cow-bad) !important; }
+    .cow-cell.flash-bad, .cow-cell.flash-bad * { color: #2a0505 !important; }
+    .cow-cell.flash-neutral { background: var(--cow-accent) !important; }
+    .cow-cell.flash-neutral, .cow-cell.flash-neutral * { color: #041322 !important; }
+
+    .cow-frame-row { display: flex; gap: 6px; flex-wrap: wrap; }
+    .cow-frame { width: 52px; height: 52px; border-radius: 6px; background: #0a1128; border: 2px dashed var(--cow-border); display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.6rem; color: var(--cow-muted); text-align: center; }
+    .cow-frame.used { border-style: solid; border-color: var(--cow-accent); background: rgba(56,189,248,0.14); color: #fff; }
+
+    .cow-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .cow-explain-panel, .cow-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .cow-explain-panel { flex: 1.3; }
+    .cow-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cow-log div { color: var(--cow-muted); }
+    .cow-log div.good { color: var(--cow-good); }
+    .cow-log div.bad { color: var(--cow-bad); }
+
+    details.cow-notes { margin-top: 4px; background: var(--cow-panel); border: 1px solid var(--cow-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.cow-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cow-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cow-muted); }
+    details.cow-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cow-accent); }
+  </style>
+
+  <h3>Copy-on-Write After fork(): Play With It</h3>
+  <div class="cow-sub">fork() doesn't copy a single byte of memory. It shares every frame between parent and child and marks the writable ones read-only in both -- the very first write on either side is what actually triggers a copy, and only if anyone else is still holding on.</div>
+
+  <div class="cow-controls">
+    <span style="font-size:0.78rem;color:var(--cow-muted);">Fork from:</span>
+    <select id="cowForkSelect"></select>
+    <button class="cow-btn" id="cowForkBtn">fork()</button>
+    <button class="cow-btn secondary" id="cowResetBtn">Reset</button>
+  </div>
+
+  <div class="cow-box">
+    <div class="cow-panel-title">Process family &amp; their pages -- click a page cell to write to it</div>
+    <table class="cow-table">
+      <thead><tr id="cowTableHead"></tr></thead>
+      <tbody id="cowTableBody"></tbody>
+    </table>
+  </div>
+
+  <div class="cow-box">
+    <div class="cow-panel-title">Physical frame pool (12 real frames -- refcount shown under each used one)</div>
+    <div class="cow-frame-row" id="cowFrameRow"></div>
+  </div>
+
+  <div class="cow-panels">
+    <div class="cow-explain-panel">
+      <div class="cow-box" style="margin-bottom:0;">
+        <div class="cow-panel-title">What's happening right now</div>
+        <div id="cowExplain">fork() P0 to create a child. Watch every writable page's cell in both rows turn amber (read-only + COW) while every page keeps pointing at the exact same frame -- forking is nearly free. Then click a page cell to write to it and watch the fault get resolved.</div>
+      </div>
+    </div>
+    <div class="cow-side-panel-col">
+      <div class="cow-box" style="margin-bottom:0;">
+        <div class="cow-panel-title">Event log</div>
+        <div class="cow-log" id="cowLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="cow-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>The "last owner" optimization is real, not simplified.</b> Linux's <code>do_wp_page()</code> checks the page's reference count before deciding what to do. If it's 1 -- nobody else can possibly be looking at this frame -- the kernel just flips the write-protect bit off in place. No allocation, no copy, no wasted work. This widget models that exact check: fault a page down to its last reference, then write it again, and watch the frame id stay the same.</li>
+      <li><b>Page D never gets a COW flag, on purpose.</b> A genuinely read-only mapping (e.g. a shared library's executable text) is already safe to share across <code>fork()</code> with zero copying, because nobody was ever allowed to write it in the first place. Forking it just shares the frame directly -- there's no "eventually written" case to prepare for, so the kernel never marks it COW. Try writing to it before and after forking: both always segfault, immediately.</li>
+      <li>This is the exact mechanism <a href="vma_paging_interactive.html">VMAs, Page Tables &amp; the Lazy Kernel: Play With It</a> foreshadows in its own notes: pages get marked read-only specifically so the first write faults, and that fault is the kernel's only cue that a copy is now needed.</li>
+      <li><b>Frame exhaustion is simplified here on purpose</b>, the same way it is in the VMA widget -- a real kernel facing "no free frames" runs page reclaim before retrying rather than simply failing.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const PAGES = [
+      { key: 'a', label: 'Page A (heap)' },
+      { key: 'b', label: 'Page B (heap)' },
+      { key: 'c', label: 'Page C (stack)' },
+      { key: 'd', label: 'Page D (shared lib, RO)' },
+    ];
+    const TOTAL_FRAMES = 12;
+    const MAX_PROCESSES = 6;
+
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function makePool(totalFrames) {
+      const frames = new Map();
+      const free = [];
+      for (let i = 0; i < totalFrames; i++) free.push(i);
+      return { frames, free, total: totalFrames };
+    }
+
+    function allocFrame(pool, data) {
+      if (pool.free.length === 0) throw new Error('OOM: no free frames');
+      const id = pool.free.pop();
+      pool.frames.set(id, { refcount: 1, data, free: false });
+      return id;
+    }
+
+    function createProcess(pool, pid, pageIds, initialData, initialWritable) {
+      const writableOf = initialWritable || (() => true);
+      const pages = {};
+      for (const pg of pageIds) {
+        const frameId = allocFrame(pool, initialData(pg));
+        pages[pg] = { frameId, writable: writableOf(pg), cow: false, present: true };
+      }
+      return { pid, pages };
+    }
+
+    function forkProcess(pool, parent, childPid) {
+      const childPages = {};
+      for (const pg of Object.keys(parent.pages)) {
+        const pte = parent.pages[pg];
+        if (!pte.present) {
+          childPages[pg] = { ...pte };
+          continue;
+        }
+        if (pte.writable) {
+          pte.writable = false;
+          pte.cow = true;
+        }
+        const frame = pool.frames.get(pte.frameId);
+        frame.refcount += 1;
+        childPages[pg] = { frameId: pte.frameId, writable: false, cow: pte.cow, present: true };
+      }
+      return { pid: childPid, pages: childPages };
+    }
+
+    function write(pool, proc, pg, newData) {
+      const pte = proc.pages[pg];
+      if (pte.writable) {
+        const frame = pool.frames.get(pte.frameId);
+        frame.data = newData;
+        return { type: 'none' };
+      }
+      if (!pte.cow) {
+        return { type: 'segfault-protection' };
+      }
+      const frame = pool.frames.get(pte.frameId);
+      if (frame.refcount === 1) {
+        frame.data = newData;
+        pte.writable = true;
+        pte.cow = false;
+        return { type: 'cow-reuse', frame: pte.frameId };
+      }
+      const oldFrameId = pte.frameId;
+      const newFrameId = allocFrame(pool, newData);
+      frame.refcount -= 1;
+      pte.frameId = newFrameId;
+      pte.writable = true;
+      pte.cow = false;
+      return { type: 'cow-copy', oldFrame: oldFrameId, newFrame: newFrameId };
+    }
+
+    function readData(pool, proc, pg) {
+      const pte = proc.pages[pg];
+      return pool.frames.get(pte.frameId).data;
+    }
+
+    // --- Widget state on top of the model ---
+
+    let pool, procs, parentOf, writeCounters, nextPid;
+
+    function reset() {
+      pool = makePool(TOTAL_FRAMES);
+      const root0 = createProcess(
+        pool,
+        'P0',
+        PAGES.map(p => p.key),
+        (pg) => (pg === 'd' ? 'libc.so text' : 'seed-' + pg),
+        (pg) => pg !== 'd'
+      );
+      procs = [root0];
+      parentOf = { P0: null };
+      writeCounters = { P0: 0 };
+      nextPid = 1;
+      renderAll();
+      logEl.innerHTML = '';
+      explainEl.textContent = "fork() P0 to create a child. Watch every writable page's cell in both rows turn amber (read-only + COW) while every page keeps pointing at the exact same frame -- forking is nearly free. Then click a page cell to write to it and watch the fault get resolved.";
+    }
+
+    const theadEl = document.getElementById('cowTableHead');
+    const tbodyEl = document.getElementById('cowTableBody');
+    const frameRowEl = document.getElementById('cowFrameRow');
+    const explainEl = document.getElementById('cowExplain');
+    const logEl = document.getElementById('cowLog');
+    const forkSelectEl = document.getElementById('cowForkSelect');
+    const forkBtn = document.getElementById('cowForkBtn');
+    const resetBtn = document.getElementById('cowResetBtn');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function procLabel(pid) {
+      return parentOf[pid] === null ? pid + ' (root)' : pid + ' (child of ' + parentOf[pid] + ')';
+    }
+
+    function renderHead() {
+      theadEl.innerHTML = '<th>Process</th>' + PAGES.map(p => '<th>' + p.label + '</th>').join('');
+    }
+
+    function cellState(pte) {
+      if (pte.writable) return { cls: 'rw', flag: 'RW' };
+      if (pte.cow) return { cls: 'cow', flag: 'RO (cow)' };
+      return { cls: 'ro', flag: 'RO (fixed)' };
+    }
+
+    function renderTable() {
+      tbodyEl.innerHTML = '';
+      procs.forEach(proc => {
+        const tr = document.createElement('tr');
+        const nameTd = document.createElement('td');
+        nameTd.className = 'cow-proc-label';
+        nameTd.textContent = proc.pid;
+        const sub = document.createElement('span');
+        sub.className = 'cow-proc-parent';
+        sub.textContent = parentOf[proc.pid] === null ? 'root' : 'child of ' + parentOf[proc.pid];
+        nameTd.appendChild(sub);
+        tr.appendChild(nameTd);
+
+        PAGES.forEach(pdef => {
+          const pte = proc.pages[pdef.key];
+          const st = cellState(pte);
+          const td = document.createElement('td');
+          const cell = document.createElement('div');
+          cell.className = 'cow-cell ' + st.cls;
+          cell.dataset.proc = proc.pid;
+          cell.dataset.pg = pdef.key;
+          cell.innerHTML =
+            '<span class="cow-frame-id">F' + pte.frameId + '</span>' +
+            '<span class="cow-flag">' + st.flag + '</span>' +
+            '<span class="cow-data">' + readData(pool, proc, pdef.key) + '</span>';
+          cell.addEventListener('click', () => onWrite(proc, pdef.key));
+          td.appendChild(cell);
+          tr.appendChild(td);
+        });
+        tbodyEl.appendChild(tr);
+      });
+    }
+
+    function renderFrames() {
+      frameRowEl.innerHTML = '';
+      for (let f = 0; f < TOTAL_FRAMES; f++) {
+        const frame = pool.frames.get(f);
+        const div = document.createElement('div');
+        const inUse = !!frame;
+        div.className = 'cow-frame' + (inUse ? ' used' : '');
+        div.innerHTML = inUse ? ('F' + f + '<br>&times;' + frame.refcount) : ('F' + f);
+        div.title = inUse ? ('frame ' + f + ', refcount ' + frame.refcount + ', data: ' + frame.data) : 'free';
+        frameRowEl.appendChild(div);
+      }
+    }
+
+    function renderForkSelect() {
+      const prevValue = forkSelectEl.value;
+      forkSelectEl.innerHTML = '';
+      procs.forEach(proc => {
+        const opt = document.createElement('option');
+        opt.value = proc.pid;
+        opt.textContent = procLabel(proc.pid);
+        forkSelectEl.appendChild(opt);
+      });
+      if (procs.some(p => p.pid === prevValue)) forkSelectEl.value = prevValue;
+      forkBtn.disabled = procs.length >= MAX_PROCESSES;
+    }
+
+    function renderAll() {
+      renderHead();
+      renderTable();
+      renderFrames();
+      renderForkSelect();
+    }
+
+    function flash(el, cls) {
+      if (!el) return;
+      el.classList.add(cls);
+      setTimeout(() => el.classList.remove(cls), 500);
+    }
+
+    // renderTable() rebuilds every cell from scratch on each render, so any
+    // DOM reference captured before a render is stale by the time it runs --
+    // look the freshly-rendered cell back up by its data attributes instead.
+    function freshCell(pid, pg) {
+      return tbodyEl.querySelector('.cow-cell[data-proc="' + pid + '"][data-pg="' + pg + '"]');
+    }
+
+    function onWrite(proc, pg) {
+      const before = proc.pages[pg];
+      const wasFrame = before.frameId;
+      let result;
+      try {
+        writeCounters[proc.pid] = (writeCounters[proc.pid] || 0) + 1;
+        result = write(pool, proc, pg, proc.pid + '#' + writeCounters[proc.pid]);
+      } catch (e) {
+        renderAll();
+        flash(freshCell(proc.pid, pg), 'flash-bad');
+        log('Write to ' + proc.pid + '/page ' + pg + ' failed: ' + e.message + ' -- a real kernel would reclaim a page here before retrying.', 'bad');
+        explainEl.textContent = 'The frame pool is capped at ' + TOTAL_FRAMES + ' in this demo so scarcity stays visible, exactly like in the VMA widget -- real reclaim is not modeled here.';
+        return;
+      }
+
+      renderAll();
+      const cellEl = freshCell(proc.pid, pg);
+
+      if (result.type === 'none') {
+        flash(cellEl, 'flash-neutral');
+        log(proc.pid + ' writes page ' + pg + ' directly -- frame ' + wasFrame + ' is already RW and solely owned, no fault at all.', null);
+        explainEl.textContent = 'This page was never shared, so there is nothing to protect against -- a write here is a plain hardware store, no kernel involvement.';
+      } else if (result.type === 'cow-reuse') {
+        flash(cellEl, 'flash-good');
+        log('Write fault: ' + proc.pid + '/page ' + pg + ' -> do_wp_page(). Frame ' + wasFrame + ' had refcount 1 -- ' + proc.pid + ' is the last owner, so the kernel just clears the COW bit and makes it writable in place. Zero bytes copied.', 'good');
+        explainEl.textContent = "This is the optimization: page_count() came back 1, meaning nobody else could possibly be looking at this frame, so there is nothing to protect by copying. The fault still happened, but resolving it cost nothing.";
+      } else if (result.type === 'cow-copy') {
+        flash(cellEl, 'flash-good');
+        log('Write fault: ' + proc.pid + '/page ' + pg + ' -> do_wp_page(). Frame ' + result.oldFrame + ' is still shared -- kernel allocates frame ' + result.newFrame + ', copies the page, repoints ' + proc.pid + "'s PTE at it. Frame " + result.oldFrame + "'s refcount just dropped by one.", 'good');
+        explainEl.textContent = 'Someone else still holds frame ' + result.oldFrame + ', so their copy has to stay exactly as it was -- the kernel must duplicate the page before letting ' + proc.pid + ' change it.';
+      } else if (result.type === 'segfault-protection') {
+        flash(cellEl, 'flash-bad');
+        log('SIGSEGV: ' + proc.pid + ' tried to write page ' + pg + ' -- this mapping is genuinely read-only, not COW. No amount of forking makes it writable.', 'bad');
+        explainEl.textContent = 'Page D was never writable in the first place, so fork() never had a reason to mark it COW either -- this is a permission fault, the same kind the VMA widget shows for the text segment, not a copy-on-write fault.';
+      }
+    }
+
+    function doFork() {
+      if (procs.length >= MAX_PROCESSES) return;
+      const parentPid = forkSelectEl.value;
+      const parent = procs.find(p => p.pid === parentPid);
+      const childPid = 'P' + (nextPid++);
+      const child = forkProcess(pool, parent, childPid);
+      procs.push(child);
+      parentOf[childPid] = parentPid;
+      writeCounters[childPid] = 0;
+      renderAll();
+      log('fork(): ' + childPid + ' created from ' + parentPid + '. Every writable page shared with ' + parentPid + ' is now read-only+COW in both processes; page D stays exactly as it was. Zero frames allocated.', 'good');
+      explainEl.textContent = childPid + ' and ' + parentPid + ' now share every frame. Nothing has been copied -- fork() only ever changes PTE flags and bumps refcounts. Write to any page in either process to see what actually triggers a copy.';
+    }
+
+    forkBtn.addEventListener('click', doFork);
+    resetBtn.addEventListener('click', reset);
+
+    reset();
+  })();
+  </script>
+</div>

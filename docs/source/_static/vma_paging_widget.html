@@ -126,6 +126,7 @@
       <li><b>Frame exhaustion is simplified here on purpose.</b> A real kernel facing "no free frames" doesn't just fail -- it runs page reclaim first: evicting a clean file-backed page (cheap, just discard it, re-read later) or swapping out a dirty anonymous page (expensive, must write it to disk first) to free one up, then retries the allocation. This demo has a fixed pool and reports <code>out-of-frames</code> directly so the scarcity itself stays visible.</li>
       <li><b>The permission check always runs, present or not.</b> Notice that writing to the read-only text segment faults whether or not that page has ever been touched before -- the R/W flag in the PTE is checked on every single access, not just the first one. This is also the exact mechanism behind copy-on-write after <code>fork()</code>: pages get marked read-only on purpose so the very first write anywhere triggers a fault, which is the kernel's cue to actually duplicate that page.</li>
       <li>This widget shows the mechanism <em>behind</em> the picture drawn in <a href="process_memory_layout_interactive.html">A Process's Address Space: Play With It</a> -- that page's segments are exactly the VMAs this page is allocating real memory for.</li>
+      <li>See <a href="cow_fork_interactive.html">Copy-on-Write After fork(): Play With It</a> for exactly what that permission check enables: forking a process for free, then watching the very first write to a shared page trigger the real copy.</li>
     </ul>
   </details>
 

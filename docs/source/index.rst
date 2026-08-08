@@ -23,6 +23,7 @@ worth writing down and coming back to.
    overlayfs_interactive
    process_memory_layout_interactive
    vma_paging_interactive
+   cow_fork_interactive
    latency_numbers_interactive
    page_cache_interactive
    docker_packet_journey_interactive
@@ -125,6 +126,9 @@ System Notes
    * - :doc:`vma_paging_interactive`
      - Interactive VMAs and page tables -- grow the heap for free, then watch a real page fault get resolved
      - VMAs, page tables, page faults, lazy allocation
+   * - :doc:`cow_fork_interactive`
+     - Interactive copy-on-write -- fork() a process for free, then watch a write fault either reuse a frame or copy it
+     - fork(), copy-on-write, page faults, reference counting
    * - :doc:`latency_numbers_interactive`
      - Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop
      - CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT

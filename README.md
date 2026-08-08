@@ -26,6 +26,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
 | 🎮 **[Process Address Space (Interactive)](docs/source/process_memory_layout_interactive.rst)** | Interactive process address space -- click code to see where it lands, then watch ASLR reshuffle it | text/data/bss/heap/mmap/stack segments, ASLR |
 | 🎮 **[VMAs & Page Tables (Interactive)](docs/source/vma_paging_interactive.rst)** | Interactive VMAs and page tables -- grow the heap for free, then watch a real page fault get resolved | VMAs, page tables, page faults, lazy allocation |
+| 🎮 **[Copy-on-Write After fork() (Interactive)](docs/source/cow_fork_interactive.rst)** | Interactive copy-on-write -- fork() a process for free, then watch a write fault either reuse a frame or copy it | fork(), copy-on-write, page faults, reference counting |
 | 🎮 **[Latency Numbers (Interactive)](docs/source/latency_numbers_interactive.rst)** | Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop | CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT |
 | 🎮 **[Page Cache (Interactive)](docs/source/page_cache_interactive.rst)** | Interactive page cache -- two processes share one cache, mmap() skips the copy, crash before fsync() and lose it | page cache, mmap, fsync, write-back, cross-process sharing |
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
@@ -124,6 +125,7 @@ system-notes/
         ├── overlayfs_interactive.rst
         ├── process_memory_layout_interactive.rst
         ├── vma_paging_interactive.rst
+        ├── cow_fork_interactive.rst
         ├── latency_numbers_interactive.rst
         ├── page_cache_interactive.rst
         ├── docker_packet_journey_interactive.rst
