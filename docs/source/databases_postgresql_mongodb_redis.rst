@@ -701,6 +701,11 @@ Real example with our data:
    -- If EITHER insert fails, BOTH are cancelled!
    -- No capital left pointing at a country that doesn't exist.
 
+See :doc:`db_acid_transaction_interactive` to run this exact Kenya +
+Nairobi example yourself -- force the capital insert to fail on
+purpose, with and without the transaction, and watch what's left
+behind either way.
+
 Flexibility Over Perfection (Food Truck Style)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

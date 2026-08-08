@@ -42,6 +42,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
 | 🎮 **[Index vs. Full Scan (Interactive)](docs/source/db_index_scan_interactive.rst)** | Interactive index vs. full scan -- same 20-country query, run two ways, real cost numbers | indexes, binary search, hash lookup, query planning |
 | 🎮 **[Redis Data Structures (Interactive)](docs/source/db_redis_structures_interactive.rst)** | Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data | hashes, sorted sets, leaderboards, set intersection, TTL/expiry |
+| 🎮 **[ACID Transaction Atomicity (Interactive)](docs/source/db_acid_transaction_interactive.rst)** | Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row | transactions, atomicity, rollback, foreign keys, referential integrity |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
@@ -143,6 +144,7 @@ system-notes/
         ├── databases_postgresql_mongodb_redis.rst
         ├── db_index_scan_interactive.rst
         ├── db_redis_structures_interactive.rst
+        ├── db_acid_transaction_interactive.rst
         ├── image_formats.rst
         ├── threads_sync_interactive.rst
         ├── threads_processes_synchronization.rst

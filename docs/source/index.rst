@@ -39,6 +39,7 @@ worth writing down and coming back to.
    databases_postgresql_mongodb_redis
    db_index_scan_interactive
    db_redis_structures_interactive
+   db_acid_transaction_interactive
    image_formats
    threads_sync_interactive
    threads_processes_synchronization
@@ -176,6 +177,9 @@ System Notes
    * - :doc:`db_redis_structures_interactive`
      - Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data
      - hashes, sorted sets, leaderboards, set intersection, TTL/expiry
+   * - :doc:`db_acid_transaction_interactive`
+     - Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row
+     - transactions, atomicity, rollback, foreign keys, referential integrity
    * - :doc:`image_formats`
      - SVG vs. PNG vs. JPEG, and when to use each
      - vector vs. raster, transparency, lossy/lossless compression

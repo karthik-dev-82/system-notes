@@ -1,0 +1,322 @@
+<div class="dba-root" id="dbAcidWidget">
+  <style>
+    #dbAcidWidget {
+      --dba-bg: #0f172a;
+      --dba-panel: #16213e;
+      --dba-border: #2a3655;
+      --dba-text: #e2e8f0;
+      --dba-muted: #94a3b8;
+      --dba-accent: #38bdf8;
+      --dba-good: #4ade80;
+      --dba-bad: #f87171;
+      --dba-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--dba-bg);
+      color: var(--dba-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #dbAcidWidget * { box-sizing: border-box; }
+    #dbAcidWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #dbAcidWidget .dba-sub { color: var(--dba-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .dba-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--dba-panel); border: 1px solid var(--dba-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .dba-toggle { display: inline-flex; border: 1px solid var(--dba-border); border-radius: 8px; overflow: hidden; }
+    .dba-toggle button { background: transparent; color: var(--dba-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .dba-toggle button.active { background: var(--dba-warn); color: #2a1c00; }
+    .dba-toggle.danger button.active { background: var(--dba-bad); color: #2a0505; }
+    .dba-btn { background: var(--dba-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .dba-btn.secondary { background: transparent; color: var(--dba-text); border: 1px solid var(--dba-border); }
+
+    .dba-box { background: var(--dba-panel); border: 1px solid var(--dba-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .dba-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dba-muted); margin-bottom: 8px; }
+
+    .dba-tables { display: flex; gap: 14px; flex-wrap: wrap; }
+    .dba-table-col { flex: 1; min-width: 260px; }
+    table.dba-table { border-collapse: collapse; width: 100%; font-size: 0.74rem; font-family: ui-monospace, monospace; }
+    table.dba-table th { text-align: left; color: var(--dba-muted); font-weight: 600; font-size: 0.66rem; text-transform: uppercase; padding: 3px 6px; }
+    table.dba-table td { padding: 3px 6px; border-top: 1px solid var(--dba-border); color: var(--dba-text); }
+    table.dba-table tr.new-row td { color: var(--dba-good); background: rgba(74,222,128,0.1); }
+    table.dba-table tr.incomplete-row td { color: var(--dba-warn); background: rgba(251,191,36,0.1); }
+    .dba-badge { display: inline-block; font-size: 0.62rem; padding: 1px 5px; border-radius: 4px; margin-left: 4px; }
+    .dba-badge.warn { background: rgba(251,191,36,0.22); color: var(--dba-warn); }
+
+    .dba-command { font-family: ui-monospace, monospace; font-size: 0.76rem; background: #0a1128; border-radius: 6px; padding: 8px 10px; color: var(--dba-accent); margin-bottom: 10px; white-space: pre-wrap; }
+    .dba-outcome { font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700; padding: 6px 10px; border-radius: 6px; margin-bottom: 10px; display: inline-block; }
+    .dba-outcome.commit { background: rgba(74,222,128,0.18); color: var(--dba-good); }
+    .dba-outcome.rollback { background: rgba(248,113,113,0.18); color: var(--dba-bad); }
+
+    .dba-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .dba-explain-panel, .dba-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .dba-explain-panel { flex: 1.3; }
+    .dba-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .dba-log div { color: var(--dba-muted); }
+    .dba-log div.good { color: var(--dba-good); }
+    .dba-log div.bad { color: var(--dba-bad); }
+
+    details.dba-notes { margin-top: 4px; background: var(--dba-panel); border: 1px solid var(--dba-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.dba-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.dba-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--dba-muted); }
+    details.dba-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--dba-accent); }
+  </style>
+
+  <h3>ACID Transaction Atomicity: Play With It</h3>
+  <div class="dba-sub">The guide's own example: insert Kenya and its capital Nairobi together. Toggle whether a transaction wraps them, then force the second step to fail, and watch what's left behind.</div>
+
+  <div class="dba-controls">
+    <span style="font-size:0.78rem;color:var(--dba-muted);">Mode:</span>
+    <div class="dba-toggle" id="dbaModeToggle">
+      <button class="dba-mode-btn active" data-mode="transactional">BEGIN...COMMIT</button>
+      <button class="dba-mode-btn" data-mode="autocommit">No transaction</button>
+    </div>
+    <span style="font-size:0.78rem;color:var(--dba-muted);">Capital insert:</span>
+    <div class="dba-toggle danger" id="dbaFailToggle">
+      <button class="dba-fail-btn active" data-fail="false">Succeeds</button>
+      <button class="dba-fail-btn" data-fail="true">Force failure</button>
+    </div>
+    <button class="dba-btn" id="dbaRunBtn">Run: insert Kenya + Nairobi</button>
+    <button class="dba-btn secondary" id="dbaResetBtn">Reset</button>
+  </div>
+
+  <div class="dba-box">
+    <div class="dba-command" id="dbaCommand"></div>
+    <div id="dbaOutcome"></div>
+  </div>
+
+  <div class="dba-box">
+    <div class="dba-tables">
+      <div class="dba-table-col">
+        <div class="dba-panel-title">countries</div>
+        <table class="dba-table">
+          <thead><tr><th>id</th><th>name</th></tr></thead>
+          <tbody id="dbaCountriesBody"></tbody>
+        </table>
+      </div>
+      <div class="dba-table-col">
+        <div class="dba-panel-title">capitals</div>
+        <table class="dba-table">
+          <thead><tr><th>id</th><th>country_id</th><th>name</th></tr></thead>
+          <tbody id="dbaCapitalsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="dba-panels">
+    <div class="dba-explain-panel">
+      <div class="dba-box" style="margin-bottom:0;">
+        <div class="dba-panel-title">What's happening right now</div>
+        <div id="dbaExplain">Click "Run" to insert Kenya and Nairobi as one transaction. Both statements succeed, both commit -- try forcing a failure next to see the difference.</div>
+      </div>
+    </div>
+    <div class="dba-side-panel-col">
+      <div class="dba-box" style="margin-bottom:0;">
+        <div class="dba-panel-title">Event log</div>
+        <div class="dba-log" id="dbaLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="dba-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>The foreign key check runs on every insert, transaction or not.</b> A capital can never point at a country that doesn't exist -- that's enforced statement by statement. What a transaction actually protects against is different: it's the risk of the <em>first</em> statement's effect (Kenya, the country) surviving even though the second one (Nairobi, the capital) never made it in.</li>
+      <li><b>Try running twice in a row without resetting.</b> Once Kenya has really been committed, running again fails immediately on the very first statement -- a genuine duplicate-key error, not the simulated one. Transactional and non-transactional modes behave identically here, because nothing ever got a chance to half-succeed.</li>
+      <li><b>"Incomplete" isn't the same as "invalid."</b> A country row with no matching capital doesn't violate any constraint in this schema -- nothing requires every country to have one. It's still worth flagging, though: it's exactly the kind of quiet inconsistency a transaction exists to prevent when the two rows are supposed to arrive together.</li>
+      <li>Same dataset as <a href="db_index_scan_interactive.html">Index vs. Full Scan: Play With It</a> and <a href="db_redis_structures_interactive.html">Redis Data Structures: Play With It</a> -- the 20 countries here are the same 20 countries there.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    function makeDb() {
+      return { countries: new Map(), capitals: new Map() };
+    }
+    function cloneDb(db) {
+      return { countries: new Map(db.countries), capitals: new Map(db.capitals) };
+    }
+    function applyStatement(db, stmt) {
+      if (stmt.type === 'insertCountry') {
+        if (db.countries.has(stmt.row.id)) throw new Error('duplicate country id ' + stmt.row.id);
+        db.countries.set(stmt.row.id, stmt.row);
+      } else if (stmt.type === 'insertCapital') {
+        if (db.capitals.has(stmt.row.id)) throw new Error('duplicate capital id ' + stmt.row.id);
+        if (!db.countries.has(stmt.row.countryId)) throw new Error('FK violation: no country ' + stmt.row.countryId);
+        if (stmt.forceFail) throw new Error('forced failure (simulated app-level error)');
+        db.capitals.set(stmt.row.id, stmt.row);
+      } else {
+        throw new Error('unknown statement type ' + stmt.type);
+      }
+    }
+    function runTransactional(db, statements) {
+      const snapshot = cloneDb(db);
+      const log = [];
+      for (const stmt of statements) {
+        try {
+          applyStatement(db, stmt);
+          log.push({ stmt, ok: true });
+        } catch (e) {
+          db.countries = snapshot.countries;
+          db.capitals = snapshot.capitals;
+          log.push({ stmt, ok: false, error: e.message });
+          return { committed: false, log, error: e.message };
+        }
+      }
+      return { committed: true, log };
+    }
+    function runAutocommit(db, statements) {
+      const log = [];
+      for (const stmt of statements) {
+        try {
+          applyStatement(db, stmt);
+          log.push({ stmt, ok: true });
+        } catch (e) {
+          log.push({ stmt, ok: false, error: e.message });
+          return { committed: false, log, error: e.message };
+        }
+      }
+      return { committed: true, log };
+    }
+    function checkReferentialIntegrity(db) {
+      for (const capital of db.capitals.values()) {
+        if (!db.countries.has(capital.countryId)) return false;
+      }
+      return true;
+    }
+    function countriesWithoutCapitals(db) {
+      const withCapital = new Set([...db.capitals.values()].map(c => c.countryId));
+      return [...db.countries.keys()].filter(id => !withCapital.has(id));
+    }
+
+    // --- Seed the base 20-country dataset (id + name only -- this widget
+    // doesn't need population/region/etc.) ---
+    const BASE_COUNTRIES = [
+      [1, 'China'], [2, 'Japan'], [3, 'India'], [4, 'Indonesia'], [5, 'Pakistan'],
+      [6, 'Bangladesh'], [7, 'Vietnam'], [8, 'Germany'], [9, 'France'], [10, 'Italy'],
+      [11, 'Spain'], [12, 'Netherlands'], [13, 'Austria'], [14, 'Belgium'], [15, 'Finland'],
+      [16, 'United Kingdom'], [17, 'United States'], [18, 'Canada'], [19, 'Mexico'], [20, 'Brazil'],
+    ];
+    const BASE_CAPITALS = [
+      [1, 1, 'Beijing'], [2, 2, 'Tokyo'], [3, 3, 'New Delhi'], [4, 4, 'Jakarta'], [5, 5, 'Islamabad'],
+      [6, 6, 'Dhaka'], [7, 7, 'Hanoi'], [8, 8, 'Berlin'], [9, 9, 'Paris'], [10, 10, 'Rome'],
+      [11, 11, 'Madrid'], [12, 12, 'Amsterdam'], [13, 13, 'Vienna'], [14, 14, 'Brussels'], [15, 15, 'Helsinki'],
+      [16, 16, 'London'], [17, 17, 'Washington D.C.'], [18, 18, 'Ottawa'], [19, 19, 'Mexico City'], [20, 20, 'Brasília'],
+    ];
+    const KENYA = { id: 21, name: 'Kenya' };
+    const NAIROBI = { id: 21, countryId: 21, name: 'Nairobi' };
+
+    function seededDb() {
+      const db = makeDb();
+      for (const [id, name] of BASE_COUNTRIES) db.countries.set(id, { id, name });
+      for (const [id, countryId, name] of BASE_CAPITALS) db.capitals.set(id, { id, countryId, name });
+      return db;
+    }
+
+    let db = seededDb();
+    let mode = 'transactional';
+    let forceFail = false;
+
+    const modeBtns = document.querySelectorAll('.dba-mode-btn');
+    const failBtns = document.querySelectorAll('.dba-fail-btn');
+    const commandEl = document.getElementById('dbaCommand');
+    const outcomeEl = document.getElementById('dbaOutcome');
+    const countriesBodyEl = document.getElementById('dbaCountriesBody');
+    const capitalsBodyEl = document.getElementById('dbaCapitalsBody');
+    const explainEl = document.getElementById('dbaExplain');
+    const logEl = document.getElementById('dbaLog');
+    const runBtn = document.getElementById('dbaRunBtn');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderTables(highlightId) {
+      const incomplete = new Set(countriesWithoutCapitals(db));
+      countriesBodyEl.innerHTML = '';
+      [...db.countries.values()].sort((a, b) => a.id - b.id).forEach(c => {
+        const tr = document.createElement('tr');
+        if (c.id === highlightId) tr.className = 'new-row';
+        else if (incomplete.has(c.id)) tr.className = 'incomplete-row';
+        tr.innerHTML = '<td>' + c.id + '</td><td>' + c.name + (incomplete.has(c.id) ? ' <span class="dba-badge warn">no capital</span>' : '') + '</td>';
+        countriesBodyEl.appendChild(tr);
+      });
+      capitalsBodyEl.innerHTML = '';
+      [...db.capitals.values()].sort((a, b) => a.id - b.id).forEach(c => {
+        const tr = document.createElement('tr');
+        if (c.id === highlightId) tr.className = 'new-row';
+        tr.innerHTML = '<td>' + c.id + '</td><td>' + c.countryId + '</td><td>' + c.name + '</td>';
+        capitalsBodyEl.appendChild(tr);
+      });
+    }
+
+    function runDemo() {
+      const statements = [
+        { type: 'insertCountry', row: { ...KENYA } },
+        { type: 'insertCapital', row: { ...NAIROBI }, forceFail },
+      ];
+      const wrapLabel = mode === 'transactional' ? 'BEGIN;' : '-- no transaction --';
+      const endLabel = mode === 'transactional' ? 'COMMIT;' : '';
+      commandEl.textContent = wrapLabel + '\n  INSERT INTO countries VALUES (21, \'Kenya\');\n  INSERT INTO capitals VALUES (21, 21, \'Nairobi\'' + (forceFail ? ' /* simulated failure */' : '') + ');\n' + endLabel;
+
+      const runner = mode === 'transactional' ? runTransactional : runAutocommit;
+      const result = runner(db, statements);
+
+      renderTables(result.committed ? 21 : null);
+      const integrityOk = checkReferentialIntegrity(db);
+      const incomplete = countriesWithoutCapitals(db);
+
+      if (result.committed) {
+        outcomeEl.innerHTML = '<span class="dba-outcome commit">COMMIT -- both rows now exist</span>';
+        explainEl.textContent = 'Both statements succeeded, so both are now permanent. Referential integrity holds: ' + (integrityOk ? 'every capital points at a real country.' : 'BROKEN (this should never happen).');
+        log((mode === 'transactional' ? 'COMMIT' : 'autocommit') + ': Kenya (21) + Nairobi (21) both inserted.', 'good');
+      } else {
+        const kenyaExists = db.countries.has(21);
+        outcomeEl.innerHTML = '<span class="dba-outcome rollback">' + (mode === 'transactional' ? 'ROLLBACK' : 'STOPPED') + ' -- ' + result.error + '</span>';
+        if (mode === 'transactional') {
+          explainEl.textContent = 'The capital insert failed, so the WHOLE transaction rolled back -- Kenya the country was undone too, even though that statement had already succeeded on its own. ' + (kenyaExists ? 'Something is wrong: Kenya should not exist.' : 'Kenya does not exist. Nothing was left behind.');
+        } else {
+          explainEl.textContent = kenyaExists
+            ? 'Without a transaction, Kenya (the country) is already committed and stays committed -- only the capital insert failed. Kenya now sits in the countries table with no matching capital, flagged below.'
+            : 'The very first statement failed on its own (probably a duplicate id from a previous run) -- there was nothing to leave behind either way.';
+        }
+        log((mode === 'transactional' ? 'ROLLBACK' : 'stopped') + ': ' + result.error + (mode === 'autocommit' && kenyaExists ? ' -- Kenya (country) already committed, capital did not' : ''), 'bad');
+      }
+      if (incomplete.length > 0) {
+        log('Integrity check: ' + incomplete.length + ' countr' + (incomplete.length === 1 ? 'y has' : 'ies have') + ' no matching capital: ' + incomplete.join(', '), 'bad');
+      }
+    }
+
+    function setMode(m) {
+      mode = m;
+      modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+    }
+    function setForceFail(v) {
+      forceFail = v;
+      failBtns.forEach(b => b.classList.toggle('active', b.dataset.fail === String(v)));
+    }
+
+    modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    failBtns.forEach(b => b.addEventListener('click', () => setForceFail(b.dataset.fail === 'true')));
+    runBtn.addEventListener('click', runDemo);
+    document.getElementById('dbaResetBtn').addEventListener('click', () => {
+      db = seededDb();
+      setMode('transactional');
+      setForceFail(false);
+      renderTables(null);
+      commandEl.textContent = '';
+      outcomeEl.innerHTML = '';
+      logEl.innerHTML = '';
+      explainEl.textContent = "Click \"Run\" to insert Kenya and Nairobi as one transaction. Both statements succeed, both commit -- try forcing a failure next to see the difference.";
+    });
+
+    renderTables(null);
+  })();
+  </script>
+</div>
