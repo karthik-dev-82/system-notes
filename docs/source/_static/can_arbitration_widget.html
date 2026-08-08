@@ -1,0 +1,251 @@
+<div class="can-root" id="canWidget">
+  <style>
+    #canWidget {
+      --can-bg: #0f172a;
+      --can-panel: #16213e;
+      --can-border: #2a3655;
+      --can-text: #e2e8f0;
+      --can-muted: #94a3b8;
+      --can-accent: #38bdf8;
+      --can-good: #4ade80;
+      --can-bad: #f87171;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--can-bg);
+      color: var(--can-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #canWidget * { box-sizing: border-box; }
+    #canWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #canWidget .can-sub { color: var(--can-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .can-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--can-panel); border: 1px solid var(--can-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .can-node-toggle { display: inline-flex; align-items: center; gap: 5px; background: #0a1128; border: 1px solid var(--can-border); border-radius: 7px; padding: 5px 10px; cursor: pointer; font-size: 0.76rem; font-family: ui-monospace, monospace; }
+    .can-node-toggle input { cursor: pointer; }
+    .can-btn { background: var(--can-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .can-btn.secondary { background: transparent; color: var(--can-text); border: 1px solid var(--can-border); }
+    .can-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .can-box { background: var(--can-panel); border: 1px solid var(--can-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .can-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--can-muted); margin-bottom: 8px; }
+
+    table.can-table { border-collapse: collapse; width: 100%; font-size: 0.76rem; font-family: ui-monospace, monospace; }
+    table.can-table th { text-align: center; color: var(--can-muted); font-weight: 600; font-size: 0.68rem; padding: 3px 5px; }
+    table.can-table th.can-node-col { text-align: left; }
+    table.can-table td { padding: 3px 5px; text-align: center; border-top: 1px solid var(--can-border); }
+    td.can-node-col { text-align: left; font-weight: 700; color: #fff; }
+    .can-bit-cell { width: 26px; display: inline-block; border-radius: 4px; padding: 2px 0; }
+    .can-bit-cell.dominant { background: rgba(74,222,128,0.22); color: var(--can-good); }
+    .can-bit-cell.recessive { background: rgba(148,163,184,0.15); color: var(--can-muted); }
+    .can-bit-cell.dropped { background: rgba(248,113,113,0.28); color: var(--can-bad); text-decoration: line-through; }
+    .can-bit-cell.ghost { opacity: 0.25; }
+    tr.can-row-winner td { background: rgba(74,222,128,0.08); }
+    tr.can-row-dropped { opacity: 0.55; }
+    .can-bus-row td { font-weight: 800; color: #fff; }
+    .can-bus-row .can-bit-cell.dominant { background: var(--can-good); color: #052e12; }
+    .can-bus-row .can-bit-cell.recessive { background: var(--can-border); color: var(--can-text); }
+
+    .can-outcome { font-family: ui-monospace, monospace; font-size: 0.85rem; font-weight: 700; padding: 7px 12px; border-radius: 6px; display: inline-block; margin-top: 10px; }
+    .can-outcome.win { background: rgba(74,222,128,0.18); color: var(--can-good); }
+
+    .can-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .can-explain-panel, .can-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .can-explain-panel { flex: 1.3; }
+    .can-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .can-log div { color: var(--can-muted); }
+    .can-log div.good { color: var(--can-good); }
+    .can-log div.bad { color: var(--can-bad); }
+
+    details.can-notes { margin-top: 4px; background: var(--can-panel); border: 1px solid var(--can-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.can-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.can-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--can-muted); }
+    details.can-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--can-accent); }
+  </style>
+
+  <h3>CAN Bus Arbitration: Play With It</h3>
+  <div class="can-sub">Pick which nodes transmit at the same instant, then watch the real bit-by-bit race. A lower ID always wins -- not by retry, not by luck, but because a "0" physically overpowers a "1" the moment both are driven onto the same wire.</div>
+
+  <div class="can-controls" id="canNodeToggles"></div>
+  <div class="can-controls">
+    <button class="can-btn" id="canArbitrateBtn">Arbitrate</button>
+    <button class="can-btn secondary" id="canResetBtn">Reset</button>
+  </div>
+
+  <div class="can-box">
+    <div class="can-panel-title">Bit-by-bit race (MSB first, 8-bit CAN ID)</div>
+    <div style="overflow-x:auto;">
+      <table class="can-table" id="canTable"></table>
+    </div>
+    <div id="canOutcome"></div>
+  </div>
+
+  <div class="can-panels">
+    <div class="can-explain-panel">
+      <div class="can-box" style="margin-bottom:0;">
+        <div class="can-panel-title">What's happening right now</div>
+        <div id="canExplain">Pick two or more nodes above, then click "Arbitrate" to watch the actual bit-by-bit priority race.</div>
+      </div>
+    </div>
+    <div class="can-side-panel-col">
+      <div class="can-box" style="margin-bottom:0;">
+        <div class="can-panel-title">Event log</div>
+        <div class="can-log" id="canLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="can-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>The bus is a real wired-AND, modeled exactly.</b> If any transmitting node drives a dominant bit (0) while others drive recessive (1), every node -- including the ones sending 1 -- reads back a 0. That's not a simplification for the demo; it's the actual electrical behavior of a CAN bus's two differential wires.</li>
+      <li><b>Every node reads back what it just sent, every single bit</b>, transmitter or not. The instant a node notices its own bit doesn't match the bus, it already knows it lost -- there's no separate "collision detected" signal or timeout the way Ethernet needs one.</li>
+      <li><b>Zero bits of this frame are ever wasted.</b> Compare that to Ethernet's CSMA/CD: a collision there is only detected after the fact, and the *entire* colliding frame has to be thrown away and retried after a random backoff. CAN's losing nodes simply stop mid-ID and wait for the current frame to finish -- nothing they already sent was wrong or needs resending.</li>
+      <li>This widget uses 8-bit IDs for a compact table; real CAN uses 11-bit (standard) or 29-bit (extended) identifiers. The mechanism -- dominant beats recessive, bit by bit, MSB first -- is identical at any width.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const NODES = [
+      { name: 'Brakes', id: 0b00000010, width: 8 },
+      { name: 'Airbag', id: 0b00000101, width: 8 },
+      { name: 'EngineTemp', id: 0b01000000, width: 8 },
+      { name: 'SeatHeater', id: 0b11001000, width: 8 },
+      { name: 'Infotainment', id: 0b11111111, width: 8 },
+    ];
+
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function arbitrate(nodes) {
+      const width = nodes[0].width;
+      let active = nodes.map(n => n.name);
+      const steps = [];
+      for (let bitPos = width - 1; bitPos >= 0; bitPos--) {
+        const bitsSent = {};
+        for (const n of nodes) {
+          if (active.includes(n.name)) bitsSent[n.name] = (n.id >> bitPos) & 1;
+        }
+        const busValue = Object.values(bitsSent).some(b => b === 0) ? 0 : 1;
+        const droppedThisStep = [];
+        for (const name of Object.keys(bitsSent)) {
+          if (bitsSent[name] !== busValue) droppedThisStep.push(name);
+        }
+        active = active.filter(name => !droppedThisStep.includes(name));
+        steps.push({ bitPos, bitsSent, busValue, droppedThisStep, activeAfter: [...active] });
+        if (active.length <= 1) break;
+      }
+      return { steps, winner: active.length === 1 ? active[0] : null, remaining: active };
+    }
+
+    // --- Widget state ---
+
+    const togglesEl = document.getElementById('canNodeToggles');
+    const tableEl = document.getElementById('canTable');
+    const outcomeEl = document.getElementById('canOutcome');
+    const explainEl = document.getElementById('canExplain');
+    const logEl = document.getElementById('canLog');
+
+    NODES.forEach((n, i) => {
+      const label = document.createElement('label');
+      label.className = 'can-node-toggle';
+      label.innerHTML = '<input type="checkbox" data-name="' + n.name + '" ' + (i < 3 ? 'checked' : '') + '> ' + n.name + ' (id ' + n.id + ')';
+      togglesEl.appendChild(label);
+    });
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function selectedNodes() {
+      const checked = [...togglesEl.querySelectorAll('input:checked')].map(el => el.dataset.name);
+      return NODES.filter(n => checked.includes(n.name));
+    }
+
+    function renderEmpty() {
+      tableEl.innerHTML = '';
+      outcomeEl.innerHTML = '';
+    }
+
+    function renderResult(nodes, result) {
+      const width = nodes[0].width;
+      let html = '<thead><tr><th class="can-node-col">Node (ID)</th>';
+      for (let b = width - 1; b >= 0; b--) html += '<th>' + b + '</th>';
+      html += '</tr></thead><tbody>';
+
+      nodes.forEach(n => {
+        const isWinner = result.winner === n.name;
+        let dropStep = null;
+        result.steps.forEach(s => { if (s.droppedThisStep.includes(n.name)) dropStep = s.bitPos; });
+        const rowClass = isWinner ? 'can-row-winner' : (dropStep !== null ? 'can-row-dropped' : '');
+        html += '<tr class="' + rowClass + '"><td class="can-node-col">' + n.name + ' (' + n.id + ')</td>';
+        for (let b = width - 1; b >= 0; b--) {
+          const step = result.steps.find(s => s.bitPos === b);
+          const stillActive = step && Object.prototype.hasOwnProperty.call(step.bitsSent, n.name);
+          if (!step || !stillActive) {
+            html += '<td><span class="can-bit-cell ghost">&middot;</span></td>';
+            continue;
+          }
+          const bit = step.bitsSent[n.name];
+          const droppedHere = step.droppedThisStep.includes(n.name);
+          const cls = droppedHere ? 'dropped' : (bit === 0 ? 'dominant' : 'recessive');
+          html += '<td><span class="can-bit-cell ' + cls + '">' + bit + '</span></td>';
+        }
+        html += '</tr>';
+      });
+
+      html += '<tr class="can-bus-row"><td class="can-node-col">bus reads</td>';
+      for (let b = width - 1; b >= 0; b--) {
+        const step = result.steps.find(s => s.bitPos === b);
+        if (!step) { html += '<td><span class="can-bit-cell ghost">&middot;</span></td>'; continue; }
+        html += '<td><span class="can-bit-cell ' + (step.busValue === 0 ? 'dominant' : 'recessive') + '">' + step.busValue + '</span></td>';
+      }
+      html += '</tr></tbody>';
+      tableEl.innerHTML = html;
+
+      outcomeEl.innerHTML = '<span class="can-outcome win">Winner: ' + result.winner + ' -- proceeds to transmit its data with zero contention</span>';
+    }
+
+    function runArbitration() {
+      const nodes = selectedNodes();
+      if (nodes.length < 2) {
+        log('Pick at least 2 nodes to arbitrate.', 'bad');
+        explainEl.textContent = 'Arbitration only means something with at least two nodes contending for the bus at once.';
+        return;
+      }
+      const result = arbitrate(nodes);
+      renderResult(nodes, result);
+
+      const firstContest = result.steps.find(s => s.droppedThisStep.length > 0);
+      log('Arbitrated among ' + nodes.map(n => n.name).join(', ') + ' -> winner: ' + result.winner, 'good');
+      result.steps.forEach(s => {
+        if (s.droppedThisStep.length > 0) {
+          log('  bit ' + s.bitPos + ': bus reads ' + s.busValue + ' -- ' + s.droppedThisStep.join(', ') + ' sent 1, lost arbitration immediately.', 'bad');
+        }
+      });
+
+      if (firstContest) {
+        explainEl.textContent = 'At bit ' + firstContest.bitPos + ', ' + firstContest.droppedThisStep.join(' and ') + ' drove a recessive 1 while someone else drove dominant 0 -- the bus itself read as 0, and every node driving 1 saw its own bit get overridden in real time. That is the exact instant those nodes knew to stop.';
+      } else {
+        explainEl.textContent = result.winner + ' has the lowest ID among everyone selected and never once disagreed with the bus -- it drove every bit exactly as the bus read it, all the way through.';
+      }
+    }
+
+    document.getElementById('canArbitrateBtn').addEventListener('click', runArbitration);
+    document.getElementById('canResetBtn').addEventListener('click', () => {
+      togglesEl.querySelectorAll('input').forEach((el, i) => { el.checked = i < 3; });
+      renderEmpty();
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Pick two or more nodes above, then click "Arbitrate" to watch the actual bit-by-bit priority race.';
+    });
+
+    renderEmpty();
+  })();
+  </script>
+</div>

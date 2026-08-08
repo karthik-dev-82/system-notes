@@ -137,3 +137,11 @@ a 2-bit sync header on a 128-bit block, plus a different scrambling
 technique, gets the same clock-recovery guarantee for a fraction of
 the overhead -- the trade-off this page's widget makes concrete at
 8b/10b's coarser, easier-to-see-by-hand granularity.
+
+See Also
+-------------
+
+See :doc:`can_arbitration_interactive` for the other Hardware
+Protocols page in this pair -- a completely different real mechanism
+(bus arbitration) living at the same physical layer this page's line
+encoding operates on.

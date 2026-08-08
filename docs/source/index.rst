@@ -78,6 +78,7 @@ worth writing down and coming back to.
    :caption: Hardware Protocols
 
    8b10b_encoding_interactive
+   can_arbitration_interactive
 
 .. toctree::
    :hidden:
@@ -321,6 +322,9 @@ Hardware Protocols
    * - :doc:`8b10b_encoding_interactive`
      - Interactive 8b/10b-style line coding -- send a byte, watch running disparity keep the wire from ever going flat
      - running disparity, DC balance, clock recovery, sub-block encoding
+   * - :doc:`can_arbitration_interactive`
+     - Interactive CAN bus arbitration -- pick contending nodes, watch the real bit-by-bit priority race
+     - dominant/recessive bits, wired-AND, bitwise arbitration, priority
 
 Media & Streaming
 -------------------------
