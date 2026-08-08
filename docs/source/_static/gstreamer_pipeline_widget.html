@@ -1,0 +1,374 @@
+<div class="gst-root" id="gstWidget">
+  <style>
+    #gstWidget {
+      --gst-bg: #0f172a;
+      --gst-panel: #16213e;
+      --gst-border: #2a3655;
+      --gst-text: #e2e8f0;
+      --gst-muted: #94a3b8;
+      --gst-accent: #38bdf8;
+      --gst-good: #4ade80;
+      --gst-bad: #f87171;
+      --gst-warn: #fbbf24;
+      --gst-source: #a78bfa;
+      --gst-filter: #38bdf8;
+      --gst-sink: #4ade80;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--gst-bg);
+      color: var(--gst-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #gstWidget * { box-sizing: border-box; }
+    #gstWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #gstWidget .gst-sub { color: var(--gst-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .gst-box { background: var(--gst-panel); border: 1px solid var(--gst-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .gst-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--gst-muted); margin-bottom: 8px; }
+
+    .gst-palette { display: flex; gap: 14px; flex-wrap: wrap; }
+    .gst-palette-col { flex: 1; min-width: 200px; }
+    .gst-palette-col h4 { margin: 0 0 6px; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .gst-palette-col.source h4 { color: var(--gst-source); }
+    .gst-palette-col.filter h4 { color: var(--gst-filter); }
+    .gst-palette-col.sink h4 { color: var(--gst-sink); }
+    .gst-elbtn { display: block; width: 100%; text-align: left; background: #0a1128; color: var(--gst-text); border: 1px solid var(--gst-border); border-radius: 6px; padding: 6px 10px; margin-bottom: 5px; font-family: ui-monospace, monospace; font-size: 0.76rem; cursor: pointer; }
+    .gst-elbtn:hover:not(:disabled) { border-color: var(--gst-accent); }
+    .gst-elbtn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .gst-palette-col.source .gst-elbtn { border-left: 3px solid var(--gst-source); }
+    .gst-palette-col.filter .gst-elbtn { border-left: 3px solid var(--gst-filter); }
+    .gst-palette-col.sink .gst-elbtn { border-left: 3px solid var(--gst-sink); }
+
+    .gst-btn { background: var(--gst-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    .gst-btn.secondary { background: transparent; color: var(--gst-text); border: 1px solid var(--gst-border); }
+    .gst-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .gst-chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-height: 36px; }
+    .gst-chip { display: inline-flex; align-items: center; gap: 6px; background: #0a1128; border: 2px solid var(--gst-border); border-radius: 7px; padding: 5px 10px; font-family: ui-monospace, monospace; font-size: 0.76rem; }
+    .gst-chip.source { border-color: var(--gst-source); color: var(--gst-source); }
+    .gst-chip.filter { border-color: var(--gst-filter); color: var(--gst-filter); }
+    .gst-chip.sink { border-color: var(--gst-sink); color: var(--gst-sink); }
+    .gst-chip .gst-kind { color: var(--gst-muted); font-size: 0.66rem; }
+    .gst-chip.pending { border-style: dashed; border-color: var(--gst-warn); color: var(--gst-warn); }
+    .gst-arrow { color: var(--gst-muted); }
+
+    .gst-launch { font-family: ui-monospace, monospace; font-size: 0.76rem; background: #0a1128; border-radius: 6px; padding: 8px 10px; color: var(--gst-accent); margin-top: 10px; word-break: break-word; }
+
+    .gst-probe-row { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+
+    .gst-status { font-family: ui-monospace, monospace; font-size: 0.8rem; font-weight: 700; padding: 6px 10px; border-radius: 6px; display: inline-block; margin-top: 10px; }
+    .gst-status.complete { background: rgba(74,222,128,0.18); color: var(--gst-good); }
+    .gst-status.pending-status { background: rgba(251,191,36,0.18); color: var(--gst-warn); }
+
+    .gst-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .gst-explain-panel, .gst-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .gst-explain-panel { flex: 1.3; }
+    .gst-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .gst-log div { color: var(--gst-muted); }
+    .gst-log div.good { color: var(--gst-good); }
+    .gst-log div.bad { color: var(--gst-bad); }
+
+    .gst-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 16px; }
+
+    details.gst-notes { margin-top: 4px; background: var(--gst-panel); border: 1px solid var(--gst-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.gst-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.gst-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--gst-muted); }
+    details.gst-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--gst-accent); }
+  </style>
+
+  <h3>GStreamer Pipeline Builder: Play With It</h3>
+  <div class="gst-sub">Click elements to chain them together. Every link is checked the way real caps negotiation works: an element only accepts what the one before it actually produces -- get it wrong and you'll see the exact "not negotiated" failure GStreamer itself reports.</div>
+
+  <div class="gst-controls">
+    <button class="gst-btn secondary" id="gstLoadBroken">Load: the guide's broken pipeline</button>
+    <button class="gst-btn secondary" id="gstLoadFixed">Load: the guide's fixed pipeline</button>
+    <button class="gst-btn secondary" id="gstResetBtn">Reset</button>
+  </div>
+
+  <div class="gst-box">
+    <div class="gst-palette">
+      <div class="gst-palette-col source">
+        <h4>Sources</h4>
+        <button class="gst-elbtn" data-el="filesrc">filesrc</button>
+        <button class="gst-elbtn" data-el="videotestsrc">videotestsrc</button>
+        <button class="gst-elbtn" data-el="audiotestsrc">audiotestsrc</button>
+      </div>
+      <div class="gst-palette-col filter">
+        <h4>Filters / Transforms</h4>
+        <button class="gst-elbtn" data-el="decodebin">decodebin</button>
+        <button class="gst-elbtn" data-el="videoconvert">videoconvert</button>
+        <button class="gst-elbtn" data-el="audioconvert">audioconvert</button>
+        <button class="gst-elbtn" data-el="x264enc">x264enc</button>
+        <button class="gst-elbtn" data-el="voaacenc">voaacenc</button>
+        <button class="gst-elbtn" data-el="queue">queue</button>
+      </div>
+      <div class="gst-palette-col sink">
+        <h4>Sinks</h4>
+        <button class="gst-elbtn" data-el="autovideosink">autovideosink</button>
+        <button class="gst-elbtn" data-el="autoaudiosink">autoaudiosink</button>
+        <button class="gst-elbtn" data-el="filesink">filesink</button>
+        <button class="gst-elbtn" data-el="fakesink">fakesink</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="gst-box">
+    <div class="gst-panel-title">Your pipeline</div>
+    <div class="gst-chain" id="gstChain"><span style="color:var(--gst-muted);font-size:0.8rem;">Click a source to begin.</span></div>
+    <div class="gst-probe-row" id="gstProbeRow" style="display:none;">
+      <span style="font-size:0.78rem;color:var(--gst-warn);">decodebin is pending -- pad-added hasn't fired. Resolve it as:</span>
+      <button class="gst-btn secondary" id="gstProbeVideo">video.mp4 -&gt; raw video</button>
+      <button class="gst-btn secondary" id="gstProbeAudio">song.mp3 -&gt; raw audio</button>
+    </div>
+    <div class="gst-launch" id="gstLaunchLine"></div>
+    <div id="gstStatus"></div>
+  </div>
+
+  <div class="gst-panels">
+    <div class="gst-explain-panel">
+      <div class="gst-box" style="margin-bottom:0;">
+        <div class="gst-panel-title">What's happening right now</div>
+        <div id="gstExplain">Start with a source. Then add filters and a sink -- each click is checked against what actually flows out of the element before it.</div>
+      </div>
+    </div>
+    <div class="gst-side-panel-col">
+      <div class="gst-box" style="margin-bottom:0;">
+        <div class="gst-panel-title">Event log</div>
+        <div class="gst-log" id="gstLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="gst-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>This widget's "kind" is a simplification of real caps.</b> Actual GStreamer caps carry pixel format, resolution, framerate, and more -- two "raw video" pads can still fail to negotiate over those details. This widget collapses all of that down to the single layer beginners actually get stuck on: video vs. audio vs. compressed vs. raw vs. an opaque bytestream. <code>videoconvert</code>/<code>audioconvert</code> are real elements doing real work in production pipelines specifically because they absorb that finer-grained mismatch -- that's honestly represented here, just not the pixel-format-level detail underneath it.</li>
+      <li><b>decodebin's pending state is real, not simulated for effect.</b> A real <code>decodebin</code> has no output pad at all until it has sniffed the stream and figured out what's actually inside -- that's why the callback-based Python examples connect a <code>pad-added</code> handler instead of linking immediately. Try linking straight through a freshly-added <code>decodebin</code> in this widget without probing it first.</li>
+      <li><b>A queue never fixes a caps mismatch</b> -- it only decouples timing between two elements that already agree on format. This widget models it as a true passthrough for exactly that reason: watch it forward whatever kind was already flowing, unchanged.</li>
+      <li>The reachable-kinds in this widget's palette are intentionally limited: there's no element here that turns video into audio (nor should there be), and no decoder that turns compressed video back into something a raw sink accepts -- a real pipeline for that would need something like <code>avdec_h264</code>, left out here to keep the palette small enough to actually explore.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const KIND = {
+      BYTESTREAM: 'bytestream',
+      RAW_VIDEO: 'raw-video',
+      RAW_AUDIO: 'raw-audio',
+      COMPRESSED_VIDEO: 'compressed-video',
+      COMPRESSED_AUDIO: 'compressed-audio',
+    };
+    const KIND_LABEL = {
+      [KIND.BYTESTREAM]: 'bytestream',
+      [KIND.RAW_VIDEO]: 'raw video',
+      [KIND.RAW_AUDIO]: 'raw audio',
+      [KIND.COMPRESSED_VIDEO]: 'compressed video',
+      [KIND.COMPRESSED_AUDIO]: 'compressed audio',
+    };
+
+    const ELEMENTS = {
+      filesrc: { role: 'source', label: 'filesrc', accepts: null, produces: KIND.BYTESTREAM },
+      videotestsrc: { role: 'source', label: 'videotestsrc', accepts: null, produces: KIND.RAW_VIDEO },
+      audiotestsrc: { role: 'source', label: 'audiotestsrc', accepts: null, produces: KIND.RAW_AUDIO },
+
+      decodebin: { role: 'filter', label: 'decodebin', accepts: new Set([KIND.BYTESTREAM]), produces: 'DYNAMIC' },
+      videoconvert: { role: 'filter', label: 'videoconvert', accepts: new Set([KIND.RAW_VIDEO]), produces: KIND.RAW_VIDEO },
+      audioconvert: { role: 'filter', label: 'audioconvert', accepts: new Set([KIND.RAW_AUDIO]), produces: KIND.RAW_AUDIO },
+      x264enc: { role: 'filter', label: 'x264enc', accepts: new Set([KIND.RAW_VIDEO]), produces: KIND.COMPRESSED_VIDEO },
+      voaacenc: { role: 'filter', label: 'voaacenc', accepts: new Set([KIND.RAW_AUDIO]), produces: KIND.COMPRESSED_AUDIO },
+      queue: { role: 'filter', label: 'queue', accepts: 'ANY', produces: 'PASSTHROUGH' },
+
+      autovideosink: { role: 'sink', label: 'autovideosink', accepts: new Set([KIND.RAW_VIDEO]), produces: null },
+      autoaudiosink: { role: 'sink', label: 'autoaudiosink', accepts: new Set([KIND.RAW_AUDIO]), produces: null },
+      filesink: { role: 'sink', label: 'filesink', accepts: 'ANY', produces: null },
+      fakesink: { role: 'sink', label: 'fakesink', accepts: 'ANY', produces: null },
+    };
+
+    function makeState() {
+      return { chain: [], currentKind: null };
+    }
+
+    function tryAppend(state, elementKey) {
+      const def = ELEMENTS[elementKey];
+      if (!def) return { ok: false, reason: 'unknown element ' + elementKey };
+
+      if (state.chain.length === 0) {
+        if (def.role !== 'source') {
+          return { ok: false, reason: 'a pipeline must start with a source element' };
+        }
+        state.chain.push({ key: elementKey, resolvedKind: def.produces });
+        state.currentKind = def.produces;
+        return { ok: true };
+      }
+
+      if (def.role === 'source') {
+        return { ok: false, reason: 'a source element can only be first in the chain' };
+      }
+
+      const last = state.chain[state.chain.length - 1];
+      const lastDef = ELEMENTS[last.key];
+      if (lastDef.role === 'sink') {
+        return { ok: false, reason: 'the pipeline already ended at ' + lastDef.label + ' -- a sink has no output pad to link from' };
+      }
+      if (last.resolvedKind === 'PENDING') {
+        return { ok: false, reason: 'decodebin has not created its output pad yet -- probe it first (pad-added has not fired)' };
+      }
+
+      const cur = state.currentKind;
+      const accepted = def.accepts === 'ANY' || def.accepts.has(cur);
+      if (!accepted) {
+        return { ok: false, reason: 'not negotiated: ' + def.label + " doesn't accept " + KIND_LABEL[cur] };
+      }
+
+      let produced;
+      if (def.produces === 'PASSTHROUGH') produced = cur;
+      else if (def.produces === 'DYNAMIC') produced = 'PENDING';
+      else produced = def.produces;
+
+      state.chain.push({ key: elementKey, resolvedKind: produced });
+      state.currentKind = produced === 'PENDING' ? null : produced;
+      return { ok: true };
+    }
+
+    function probeDecodebin(state, resolvedKind) {
+      const last = state.chain[state.chain.length - 1];
+      if (!last || last.key !== 'decodebin' || last.resolvedKind !== 'PENDING') {
+        return { ok: false, reason: 'nothing pending to probe' };
+      }
+      last.resolvedKind = resolvedKind;
+      state.currentKind = resolvedKind;
+      return { ok: true };
+    }
+
+    function isComplete(state) {
+      if (state.chain.length < 2) return false;
+      const last = state.chain[state.chain.length - 1];
+      const def = ELEMENTS[last.key];
+      return def.role === 'sink' && last.resolvedKind !== 'PENDING';
+    }
+
+    // --- Widget rendering on top of the model ---
+
+    let state = makeState();
+
+    const chainEl = document.getElementById('gstChain');
+    const probeRowEl = document.getElementById('gstProbeRow');
+    const launchLineEl = document.getElementById('gstLaunchLine');
+    const statusEl = document.getElementById('gstStatus');
+    const explainEl = document.getElementById('gstExplain');
+    const logEl = document.getElementById('gstLog');
+    const elBtns = document.querySelectorAll('.gst-elbtn');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function render() {
+      if (state.chain.length === 0) {
+        chainEl.innerHTML = '<span style="color:var(--gst-muted);font-size:0.8rem;">Click a source to begin.</span>';
+      } else {
+        chainEl.innerHTML = state.chain.map((e, i) => {
+          const def = ELEMENTS[e.key];
+          const pendingCls = e.resolvedKind === 'PENDING' ? ' pending' : '';
+          const kindLabel = e.resolvedKind === 'PENDING' ? 'pending...' : (e.resolvedKind ? KIND_LABEL[e.resolvedKind] : 'terminal');
+          const chip = '<span class="gst-chip ' + def.role + pendingCls + '">' + def.label + '<span class="gst-kind">' + kindLabel + '</span></span>';
+          return i === 0 ? chip : '<span class="gst-arrow">&rarr;</span>' + chip;
+        }).join('');
+      }
+
+      const pending = state.chain.length > 0 && state.chain[state.chain.length - 1].resolvedKind === 'PENDING';
+      probeRowEl.style.display = pending ? 'flex' : 'none';
+
+      launchLineEl.textContent = state.chain.length
+        ? state.chain.map(e => e.key).join(' ! ')
+        : '(empty pipeline)';
+
+      if (isComplete(state)) {
+        statusEl.innerHTML = '<span class="gst-status complete">Pipeline complete -- ready to set_state(PLAYING)</span>';
+      } else if (pending) {
+        statusEl.innerHTML = '<span class="gst-status pending-status">Waiting on decodebin\'s pad-added signal</span>';
+      } else {
+        statusEl.innerHTML = '';
+      }
+
+      elBtns.forEach(btn => {
+        const key = btn.dataset.el;
+        const def = ELEMENTS[key];
+        let disabled = false;
+        if (state.chain.length === 0) {
+          disabled = def.role !== 'source';
+        } else {
+          const last = state.chain[state.chain.length - 1];
+          const lastDef = ELEMENTS[last.key];
+          disabled = def.role === 'source' || lastDef.role === 'sink';
+        }
+        btn.disabled = disabled;
+      });
+    }
+
+    function onAppend(key) {
+      const def = ELEMENTS[key];
+      const r = tryAppend(state, key);
+      render();
+      if (r.ok) {
+        log('+ ' + def.label + ' linked OK.', 'good');
+        explainEl.textContent = def.role === 'source'
+          ? def.label + ' produces ' + KIND_LABEL[def.produces] + ' -- nothing upstream to check yet.'
+          : def.produces === 'DYNAMIC'
+            ? def.label + " accepted the input, but it won't produce anything until it has actually looked inside the stream -- that's the real pad-added signal, modeled as a pending state here."
+            : def.produces === 'PASSTHROUGH'
+              ? def.label + ' passed ' + KIND_LABEL[state.currentKind] + ' straight through, unchanged -- queues buffer timing, they never touch format.'
+              : def.label + ' accepted ' + KIND_LABEL[state.currentKind] + ' and now produces ' + (state.currentKind ? KIND_LABEL[state.currentKind] : 'nothing further') + '.';
+      } else {
+        log('x ' + def.label + ': ' + r.reason, 'bad');
+        explainEl.textContent = r.reason + '. Nothing was added -- the chain is exactly as it was before this click.';
+      }
+    }
+
+    function onProbe(kind) {
+      const r = probeDecodebin(state, kind);
+      render();
+      if (r.ok) {
+        log('decodebin pad-added fired -> ' + KIND_LABEL[kind] + '.', 'good');
+        explainEl.textContent = 'decodebin just found out what was actually inside the file: ' + KIND_LABEL[kind] + '. Now -- and only now -- can something link to its output pad.';
+      }
+    }
+
+    elBtns.forEach(btn => btn.addEventListener('click', () => onAppend(btn.dataset.el)));
+    document.getElementById('gstProbeVideo').addEventListener('click', () => onProbe(KIND.RAW_VIDEO));
+    document.getElementById('gstProbeAudio').addEventListener('click', () => onProbe(KIND.RAW_AUDIO));
+
+    document.getElementById('gstResetBtn').addEventListener('click', () => {
+      state = makeState();
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Start with a source. Then add filters and a sink -- each click is checked against what actually flows out of the element before it.';
+      render();
+    });
+
+    function loadSequence(keys, probeAt, probeKind) {
+      state = makeState();
+      logEl.innerHTML = '';
+      for (let i = 0; i < keys.length; i++) {
+        onAppend(keys[i]);
+        if (i === probeAt) onProbe(probeKind);
+      }
+    }
+
+    document.getElementById('gstLoadBroken').addEventListener('click', () => {
+      loadSequence(['filesrc', 'autovideosink'], -1, null);
+    });
+    document.getElementById('gstLoadFixed').addEventListener('click', () => {
+      loadSequence(['filesrc', 'decodebin', 'videoconvert', 'autovideosink'], 1, KIND.RAW_VIDEO);
+    });
+
+    render();
+  })();
+  </script>
+</div>

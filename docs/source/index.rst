@@ -75,6 +75,13 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: Media & Streaming
+
+   gstreamer_pipeline_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: Databases
 
    databases_postgresql_mongodb_redis
@@ -291,6 +298,21 @@ Encoding & Formats
    * - :doc:`image_formats`
      - SVG vs. PNG vs. JPEG, and when to use each
      - vector vs. raster, transparency, lossy/lossless compression
+
+Media & Streaming
+-------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`gstreamer_pipeline_interactive`
+     - Interactive GStreamer pipeline builder -- chain elements together, real caps negotiation, decodebin's dynamic pad
+     - pads, caps negotiation, decodebin, pipeline states
 
 Databases
 -----------------

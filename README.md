@@ -44,6 +44,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Redis Data Structures (Interactive)](docs/source/db_redis_structures_interactive.rst)** | Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data | hashes, sorted sets, leaderboards, set intersection, TTL/expiry |
 | 🎮 **[ACID Transaction Atomicity (Interactive)](docs/source/db_acid_transaction_interactive.rst)** | Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row | transactions, atomicity, rollback, foreign keys, referential integrity |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
+| 🎮 **[GStreamer Pipelines (Interactive)](docs/source/gstreamer_pipeline_interactive.rst)** | Interactive GStreamer pipeline builder -- chain elements together, real caps negotiation, decodebin's dynamic pad | pads, caps negotiation, decodebin, pipeline states |
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
 | 🔐 **[Complete Guide to OpenSSL](docs/source/openssl_guide.rst)** | Encryption, hashing, and certificates, plus practical OpenSSL commands | symmetric/asymmetric crypto, TLS, x509 certs, `openssl` CLI |
@@ -146,6 +147,7 @@ system-notes/
         ├── db_redis_structures_interactive.rst
         ├── db_acid_transaction_interactive.rst
         ├── image_formats.rst
+        ├── gstreamer_pipeline_interactive.rst
         ├── threads_sync_interactive.rst
         ├── threads_processes_synchronization.rst
         ├── openssl_guide.rst
