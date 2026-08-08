@@ -8,49 +8,97 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
-   :caption: System Notes
+   :caption: Shell & System Basics
 
    bashrc_reference
    system_monitoring_commands
    developer_commands
+   linux_devices
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Networking
+
    network_interfaces_interactive
    network_interfaces
    tcp_udp_interactive
    tcp_congestion_control_interactive
+   docker_packet_journey_interactive
+   kernel_networking_docker_internals
+   dns_resolution_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Containers & Filesystems
+
    docker_dev_environment
-   linux_devices
    linux_fs_basics_interactive
    overlayfs_interactive
+   proc_filesystem_interactive
+   proc_filesystem
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Memory & Processes
+
    process_memory_layout_interactive
    vma_paging_interactive
    cow_fork_interactive
-   latency_numbers_interactive
    page_cache_interactive
-   docker_packet_journey_interactive
-   kernel_networking_docker_internals
-   lidar_slam
+   latency_numbers_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Security & Cryptography
+
    ssh_secure_shell_interactive
    ssh_secure_shell
-   dns_resolution_interactive
    tls_cert_chain_interactive
+   openssl_guide
+   bitcoin_mining_interactive
+   bitcoin_distributed_ledgers_zcash
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Encoding & Formats
+
    utf8_encoding_interactive
    unicode_utf8_encoding
    base64_encoding
+   image_formats
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Databases
+
    databases_postgresql_mongodb_redis
    db_index_scan_interactive
    db_redis_structures_interactive
    db_acid_transaction_interactive
-   image_formats
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Concurrency & Distributed Systems
+
    threads_sync_interactive
    threads_processes_synchronization
-   openssl_guide
-   proc_filesystem_interactive
-   proc_filesystem
    hash_load_balancer_interactive
    consistent_hashing_interactive
    hash_load_balancer
-   bitcoin_mining_interactive
-   bitcoin_distributed_ledgers_zcash
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
+   :caption: Robotics
+
+   lidar_slam
 
 .. toctree::
    :hidden:
@@ -79,8 +127,8 @@ worth writing down and coming back to.
    python_concurrency_interactive
    python_asyncio_gather_interactive
 
-System Notes
------------------
+Shell & System Basics
+-----------------------------
 
 .. list-table::
    :class: longtable
@@ -99,6 +147,21 @@ System Notes
    * - :doc:`developer_commands`
      - Daily engineering workflows & tooling
      - ``docker``, ``git``, ``rsync``, ``aria2c``, ``find``, ``grep``
+   * - :doc:`linux_devices`
+     - Block/char/network/terminal/pseudo devices, and USB layering
+     - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
+
+Networking
+-----------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`network_interfaces_interactive`
      - Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation
      - MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation
@@ -111,18 +174,54 @@ System Notes
    * - :doc:`tcp_congestion_control_interactive`
      - Interactive TCP congestion control -- drive the cwnd sawtooth yourself
      - slow start, congestion avoidance, fast retransmit, timeout, ssthresh
+   * - :doc:`docker_packet_journey_interactive`
+     - Interactive packet journey -- container, veth, docker0, netfilter, and back
+     - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack
+   * - :doc:`kernel_networking_docker_internals`
+     - Kernel networking stack, Docker internals, iptables, OverlayFS
+     - netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2
+   * - :doc:`dns_resolution_interactive`
+     - Interactive DNS resolver -- walk root/TLD/authoritative, then watch layered TTL caching and CNAME-following in action
+     - recursive resolver, referral chain, TTL caching, CNAME
+
+Containers & Filesystems
+------------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`docker_dev_environment`
      - How the ``development`` repo's Docker dev container is built
      - ``Dockerfile``, ``devcontainer.json``, ``docker-compose.yml``
-   * - :doc:`linux_devices`
-     - Block/char/network/terminal/pseudo devices, and USB layering
-     - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
    * - :doc:`linux_fs_basics_interactive`
      - Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on
      - inodes, hard links, symlinks, mount points, VFS
    * - :doc:`overlayfs_interactive`
      - Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts
      - lowerdir, upperdir, merged view, copy-up, whiteouts
+   * - :doc:`proc_filesystem_interactive`
+     - Live /proc explorer -- click any path and watch it get generated on demand
+     - /proc/PID, meminfo, loadavg, uptime, process lifecycle
+   * - :doc:`proc_filesystem`
+     - The virtual /proc filesystem -- process info, system stats, tuning knobs
+     - ``/proc/PID``, ``/proc/cpuinfo``, ``/proc/meminfo``, ``/proc/sys``
+
+Memory & Processes
+-------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`process_memory_layout_interactive`
      - Interactive process address space -- click code to see where it lands, then watch ASLR reshuffle it
      - text/data/bss/heap/mmap/stack segments, ASLR
@@ -132,33 +231,54 @@ System Notes
    * - :doc:`cow_fork_interactive`
      - Interactive copy-on-write -- fork() a process for free, then watch a write fault either reuse a frame or copy it
      - fork(), copy-on-write, page faults, reference counting
-   * - :doc:`latency_numbers_interactive`
-     - Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop
-     - CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT
    * - :doc:`page_cache_interactive`
      - Interactive page cache -- two processes share one cache, mmap() skips the copy, crash before fsync() and lose it
      - page cache, mmap, fsync, write-back, cross-process sharing
-   * - :doc:`docker_packet_journey_interactive`
-     - Interactive packet journey -- container, veth, docker0, netfilter, and back
-     - MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack
-   * - :doc:`kernel_networking_docker_internals`
-     - Kernel networking stack, Docker internals, iptables, OverlayFS
-     - netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2
-   * - :doc:`lidar_slam`
-     - LIDAR and SLAM for navigation where GPS doesn't work
-     - point clouds, localization, mapping, autonomous vehicles
+   * - :doc:`latency_numbers_interactive`
+     - Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop
+     - CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT
+
+Security & Cryptography
+------------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`ssh_secure_shell_interactive`
      - Interactive SSH handshake -- a real toy-scale Diffie-Hellman exchange, host-key MITM detection, and both auth methods
      - Diffie-Hellman, host key fingerprints, password vs. public-key auth
    * - :doc:`ssh_secure_shell`
      - How the SSH handshake, encryption, and key auth actually work
      - key exchange, host keys, password vs. key auth, tunneling
-   * - :doc:`dns_resolution_interactive`
-     - Interactive DNS resolver -- walk root/TLD/authoritative, then watch layered TTL caching and CNAME-following in action
-     - recursive resolver, referral chain, TTL caching, CNAME
    * - :doc:`tls_cert_chain_interactive`
      - Interactive TLS certificate chain -- real ECDSA signatures, four independent trust checks, break each one separately
      - certificate chain, root/intermediate/leaf, trust store, hostname verification
+   * - :doc:`openssl_guide`
+     - Encryption, hashing, and certificates, plus practical OpenSSL commands
+     - symmetric/asymmetric crypto, TLS, x509 certs, ``openssl`` CLI
+   * - :doc:`bitcoin_mining_interactive`
+     - Interactive Bitcoin mining -- real SHA-256 in your browser, tamper with a block and watch the cascade
+     - proof of work, SHA-256, block hashing, 51% attack cost
+   * - :doc:`bitcoin_distributed_ledgers_zcash`
+     - Bitcoin, distributed ledgers, and Zcash explained with analogies
+     - blockchain, proof of work, mining, zero-knowledge proofs
+
+Encoding & Formats
+-------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`utf8_encoding_interactive`
      - Interactive UTF-8 encode/decode -- step through the real bit-slicing byte by byte, then run it backward
      - code points, byte-length ranges, bit slicing, self-sync/resync
@@ -168,6 +288,21 @@ System Notes
    * - :doc:`base64_encoding`
      - Base64, ASCII, URL encoding, and hex, explained with analogies
      - Base64 alphabet, percent-encoding, MIME attachments, hex colors
+   * - :doc:`image_formats`
+     - SVG vs. PNG vs. JPEG, and when to use each
+     - vector vs. raster, transparency, lossy/lossless compression
+
+Databases
+-----------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`databases_postgresql_mongodb_redis`
      - PostgreSQL, MongoDB, and Redis compared with a kitchen analogy
      - joins, documents, key-value, ACID, indexes, sorted sets
@@ -180,24 +315,24 @@ System Notes
    * - :doc:`db_acid_transaction_interactive`
      - Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row
      - transactions, atomicity, rollback, foreign keys, referential integrity
-   * - :doc:`image_formats`
-     - SVG vs. PNG vs. JPEG, and when to use each
-     - vector vs. raster, transparency, lossy/lossless compression
+
+Concurrency & Distributed Systems
+-----------------------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
    * - :doc:`threads_sync_interactive`
      - Interactive threads & synchronization -- step through race conditions and deadlock yourself
      - mutex, semaphore, condition variable, race condition, deadlock
    * - :doc:`threads_processes_synchronization`
      - Threads, processes, and synchronization primitives in C++
      - mutex, semaphore, condition variable, deadlock, race conditions
-   * - :doc:`openssl_guide`
-     - Encryption, hashing, and certificates, plus practical OpenSSL commands
-     - symmetric/asymmetric crypto, TLS, x509 certs, ``openssl`` CLI
-   * - :doc:`proc_filesystem_interactive`
-     - Live /proc explorer -- click any path and watch it get generated on demand
-     - /proc/PID, meminfo, loadavg, uptime, process lifecycle
-   * - :doc:`proc_filesystem`
-     - The virtual /proc filesystem -- process info, system stats, tuning knobs
-     - ``/proc/PID``, ``/proc/cpuinfo``, ``/proc/meminfo``, ``/proc/sys``
    * - :doc:`hash_load_balancer_interactive`
      - Interactive hash load balancer -- 10 clients, 3 servers, naive modulo hashing, and what a flow actually is
      - flow 5-tuple, hash % N, connection vs. user stickiness
@@ -207,12 +342,21 @@ System Notes
    * - :doc:`hash_load_balancer`
      - Hash-based load balancing, sticky sessions, and consistent hashing
      - modulo hashing, session affinity, CDN routing, reshuffling problem
-   * - :doc:`bitcoin_mining_interactive`
-     - Interactive Bitcoin mining -- real SHA-256 in your browser, tamper with a block and watch the cascade
-     - proof of work, SHA-256, block hashing, 51% attack cost
-   * - :doc:`bitcoin_distributed_ledgers_zcash`
-     - Bitcoin, distributed ledgers, and Zcash explained with analogies
-     - blockchain, proof of work, mining, zero-knowledge proofs
+
+Robotics
+-----------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`lidar_slam`
+     - LIDAR and SLAM for navigation where GPS doesn't work
+     - point clouds, localization, mapping, autonomous vehicles
 
 C++ Notes
 -----------------
