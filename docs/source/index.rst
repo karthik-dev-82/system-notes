@@ -75,6 +75,13 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: Hardware Protocols
+
+   8b10b_encoding_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: Media & Streaming
 
    gstreamer_pipeline_interactive
@@ -299,6 +306,21 @@ Encoding & Formats
    * - :doc:`image_formats`
      - SVG vs. PNG vs. JPEG, and when to use each
      - vector vs. raster, transparency, lossy/lossless compression
+
+Hardware Protocols
+-------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`8b10b_encoding_interactive`
+     - Interactive 8b/10b-style line coding -- send a byte, watch running disparity keep the wire from ever going flat
+     - running disparity, DC balance, clock recovery, sub-block encoding
 
 Media & Streaming
 -------------------------
