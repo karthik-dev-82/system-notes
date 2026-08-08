@@ -38,6 +38,7 @@ worth writing down and coming back to.
    base64_encoding
    databases_postgresql_mongodb_redis
    db_index_scan_interactive
+   db_redis_structures_interactive
    image_formats
    threads_sync_interactive
    threads_processes_synchronization
@@ -172,6 +173,9 @@ System Notes
    * - :doc:`db_index_scan_interactive`
      - Interactive index vs. full scan -- same 20-country query, run two ways, real cost numbers
      - indexes, binary search, hash lookup, query planning
+   * - :doc:`db_redis_structures_interactive`
+     - Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data
+     - hashes, sorted sets, leaderboards, set intersection, TTL/expiry
    * - :doc:`image_formats`
      - SVG vs. PNG vs. JPEG, and when to use each
      - vector vs. raster, transparency, lossy/lossless compression

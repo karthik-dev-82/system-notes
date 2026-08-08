@@ -419,6 +419,11 @@ Think of it like:
 * **TTL (Time To Live):** like food that expires -- cached data
   auto-deletes
 
+See :doc:`db_redis_structures_interactive` to run hashes, sorted
+sets, sets, and a TTL cache yourself against the live country data --
+including watching a key actually expire and confirming it never
+comes back.
+
 When to Use Each Database
 --------------------------------
 

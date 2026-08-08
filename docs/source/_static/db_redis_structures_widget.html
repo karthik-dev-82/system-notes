@@ -1,0 +1,505 @@
+<div class="dbr-root" id="dbRedisWidget">
+  <style>
+    #dbRedisWidget {
+      --dbr-bg: #0f172a;
+      --dbr-panel: #16213e;
+      --dbr-border: #2a3655;
+      --dbr-text: #e2e8f0;
+      --dbr-muted: #94a3b8;
+      --dbr-accent: #38bdf8;
+      --dbr-good: #4ade80;
+      --dbr-bad: #f87171;
+      --dbr-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--dbr-bg);
+      color: var(--dbr-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #dbRedisWidget * { box-sizing: border-box; }
+    #dbRedisWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #dbRedisWidget .dbr-sub { color: var(--dbr-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .dbr-toggle { display: inline-flex; border: 1px solid var(--dbr-border); border-radius: 8px; overflow: hidden; margin-bottom: 16px; flex-wrap: wrap; }
+    .dbr-toggle button { background: transparent; color: var(--dbr-muted); border: none; padding: 8px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .dbr-toggle button.active { background: var(--dbr-warn); color: #2a1c00; }
+
+    .dbr-box { background: var(--dbr-panel); border: 1px solid var(--dbr-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .dbr-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dbr-muted); margin-bottom: 8px; }
+    .dbr-controls-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .dbr-controls-row select, .dbr-controls-row input[type="number"] { background: #0a1128; color: var(--dbr-text); border: 1px solid var(--dbr-border); border-radius: 7px; padding: 6px 9px; font-size: 0.78rem; }
+    .dbr-btn { background: var(--dbr-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .dbr-btn.secondary { background: transparent; color: var(--dbr-text); border: 1px solid var(--dbr-border); }
+    .dbr-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .dbr-command { font-family: ui-monospace, monospace; font-size: 0.78rem; background: #0a1128; border-radius: 6px; padding: 8px 10px; color: var(--dbr-accent); margin-bottom: 10px; }
+    .dbr-result { font-family: ui-monospace, monospace; font-size: 0.78rem; color: #fff; margin-bottom: 10px; }
+
+    .dbr-chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dbr-chip { background: #0a1128; border: 1px solid var(--dbr-border); border-radius: 6px; padding: 4px 9px; font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--dbr-muted); }
+    .dbr-chip.match { border-color: var(--dbr-good); color: var(--dbr-good); background: rgba(74,222,128,0.1); }
+    .dbr-chip.dim { opacity: 0.35; }
+
+    .dbr-zlist { display: flex; flex-direction: column; gap: 3px; max-height: 320px; overflow-y: auto; }
+    .dbr-zrow { display: flex; justify-content: space-between; gap: 8px; border: 1px solid var(--dbr-border); border-radius: 5px; padding: 3px 8px; font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--dbr-muted); }
+    .dbr-zrow.inrange { border-color: var(--dbr-good); color: var(--dbr-good); background: rgba(74,222,128,0.1); }
+    .dbr-zrow.target { border-color: var(--dbr-warn); color: var(--dbr-warn); }
+    .dbr-zrank { font-weight: 700; color: #fff; min-width: 26px; }
+
+    .dbr-sets-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    .dbr-set-card { flex: 1; min-width: 160px; border: 2px solid var(--dbr-border); border-radius: 8px; padding: 8px; }
+    .dbr-set-card.selA { border-color: var(--dbr-accent); }
+    .dbr-set-card.selB { border-color: var(--dbr-warn); }
+    .dbr-set-title { font-weight: 700; color: #fff; font-size: 0.76rem; margin-bottom: 4px; }
+
+    .dbr-cache-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; }
+    .dbr-cache-key { border: 1px solid var(--dbr-border); border-radius: 8px; padding: 8px 10px; min-width: 220px; font-family: ui-monospace, monospace; font-size: 0.76rem; }
+    .dbr-cache-key.expired { border-color: var(--dbr-bad); opacity: 0.6; }
+    .dbr-cache-key.live { border-color: var(--dbr-good); }
+    .dbr-ttl-bar { height: 6px; border-radius: 3px; background: #0a1128; margin-top: 6px; overflow: hidden; }
+    .dbr-ttl-fill { height: 100%; background: var(--dbr-good); }
+
+    .dbr-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .dbr-explain-panel, .dbr-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .dbr-explain-panel { flex: 1.3; }
+    .dbr-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .dbr-log div { color: var(--dbr-muted); }
+    .dbr-log div.good { color: var(--dbr-good); }
+
+    details.dbr-notes { margin-top: 4px; background: var(--dbr-panel); border: 1px solid var(--dbr-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.dbr-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.dbr-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--dbr-muted); }
+    details.dbr-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--dbr-accent); }
+  </style>
+
+  <h3>Redis Data Structures: Play With It</h3>
+  <div class="dbr-sub">The same 20-country data, stored four different ways. Every structure below is doing genuinely different work under the hood -- not just "fast lookups" in general.</div>
+
+  <div class="dbr-toggle" id="dbrTabToggle">
+    <button class="dbr-tab-btn active" data-tab="hash">Hash (bins)</button>
+    <button class="dbr-tab-btn" data-tab="zset">Sorted Set (leaderboard)</button>
+    <button class="dbr-tab-btn" data-tab="set">Set (combos)</button>
+    <button class="dbr-tab-btn" data-tab="ttl">TTL (cache)</button>
+  </div>
+
+  <div class="dbr-box" id="dbrHashTab">
+    <div class="dbr-panel-title">HGET country:&lt;iso2&gt; &lt;field&gt;</div>
+    <div class="dbr-controls-row">
+      <select id="dbrHashCountry"></select>
+      <select id="dbrHashField">
+        <option value="name">name</option>
+        <option value="population">population</option>
+        <option value="capital">capital</option>
+        <option value="currency">currency</option>
+      </select>
+      <button class="dbr-btn" id="dbrHashRun">HGET</button>
+    </div>
+    <div class="dbr-command" id="dbrHashCommand"></div>
+    <div class="dbr-result" id="dbrHashResult"></div>
+    <div class="dbr-chip-row" id="dbrHashChips"></div>
+  </div>
+
+  <div class="dbr-box" id="dbrZsetTab" style="display:none;">
+    <div class="dbr-controls-row">
+      <span style="font-size:0.78rem;color:var(--dbr-muted);">Ranking:</span>
+      <select id="dbrZsetKind">
+        <option value="population">population_ranking</option>
+        <option value="gdp">gdp_ranking</option>
+      </select>
+      <span style="font-size:0.78rem;color:var(--dbr-muted);">Op:</span>
+      <select id="dbrZsetOp">
+        <option value="top">ZREVRANGE 0 4 (top 5)</option>
+        <option value="rank">ZREVRANK &lt;country&gt;</option>
+      </select>
+      <select id="dbrZsetCountry"></select>
+      <button class="dbr-btn" id="dbrZsetRun">Run</button>
+    </div>
+    <div class="dbr-command" id="dbrZsetCommand"></div>
+    <div class="dbr-result" id="dbrZsetResult"></div>
+    <div class="dbr-zlist" id="dbrZsetList"></div>
+  </div>
+
+  <div class="dbr-box" id="dbrSetTab" style="display:none;">
+    <div class="dbr-controls-row">
+      <span style="font-size:0.78rem;color:var(--dbr-muted);">Set A:</span>
+      <select id="dbrSetA"></select>
+      <span style="font-size:0.78rem;color:var(--dbr-muted);">Set B:</span>
+      <select id="dbrSetB"></select>
+      <button class="dbr-btn" id="dbrSetRun">SINTER</button>
+    </div>
+    <div class="dbr-command" id="dbrSetCommand"></div>
+    <div class="dbr-result" id="dbrSetResult"></div>
+    <div class="dbr-sets-row" id="dbrSetCards"></div>
+  </div>
+
+  <div class="dbr-box" id="dbrTtlTab" style="display:none;">
+    <div class="dbr-controls-row">
+      <button class="dbr-btn" id="dbrTtlSet">SET cache:demo "value" EX 5</button>
+      <button class="dbr-btn secondary" id="dbrTtlTick">Advance 1 tick</button>
+      <button class="dbr-btn secondary" id="dbrTtlGet">GET cache:demo</button>
+    </div>
+    <div style="font-size:0.78rem;color:var(--dbr-muted);margin-bottom:8px;">Virtual clock: tick <span id="dbrTtlClock" style="color:#fff;font-family:ui-monospace,monospace;">0</span></div>
+    <div class="dbr-cache-row" id="dbrTtlCards"></div>
+    <div class="dbr-result" id="dbrTtlResult"></div>
+  </div>
+
+  <div class="dbr-panels">
+    <div class="dbr-explain-panel">
+      <div class="dbr-box" style="margin-bottom:0;">
+        <div class="dbr-panel-title">What's happening right now</div>
+        <div id="dbrExplain">Pick a country and a field, then HGET it -- a hash lookup goes straight to the field, no scanning, no ordering to maintain.</div>
+      </div>
+    </div>
+    <div class="dbr-side-panel-col">
+      <div class="dbr-box" style="margin-bottom:0;">
+        <div class="dbr-panel-title">Command log</div>
+        <div class="dbr-log" id="dbrLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="dbr-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>The sorted set never gets sorted after the fact.</b> Every <code>ZADD</code> in this widget re-sorts immediately -- ties broken by member name, exactly like real Redis. That means <code>ZREVRANK</code> is never a search: it's just reading a position off a structure that was already correct the moment before you asked.</li>
+      <li><b>SINTER does real set math.</b> Try Europe &cap; EUR -- all 8 EUR-currency countries are European in this dataset, so the intersection equals the smaller set exactly. Try Europe &cap; USD to see the other extreme: the United States isn't European, so the intersection is empty even though both sets are non-empty.</li>
+      <li><b>The TTL clock here is virtual, not real time</b> -- you advance it yourself, one tick at a time, so the expiry moment is exact and repeatable rather than something you'd have to wait through. Once a key's tick has passed, no later <code>GET</code> ever brings it back -- there's no partial-credit "still a little fresh" state.</li>
+      <li>All four structures above are reading from the exact same 20-country dataset used in <a href="databases_postgresql_mongodb_redis.html">Databases: The Ultimate Guide for Young Engineers</a> and in <a href="db_index_scan_interactive.html">Index vs. Full Scan: Play With It</a> -- the same USA, same Germany, same population numbers throughout.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const COUNTRIES = [
+      { id: 1, name: 'China', iso2: 'CN', region: 'Asia', population: 1439323776, gdpPerCapita: 12556, currency: 'CNY', capital: 'Beijing' },
+      { id: 2, name: 'Japan', iso2: 'JP', region: 'Asia', population: 126000000, gdpPerCapita: 42928.92, currency: 'JPY', capital: 'Tokyo' },
+      { id: 3, name: 'India', iso2: 'IN', region: 'Asia', population: 1380004385, gdpPerCapita: 2100, currency: 'INR', capital: 'New Delhi' },
+      { id: 4, name: 'Indonesia', iso2: 'ID', region: 'Asia', population: 273500000, gdpPerCapita: 4292, currency: 'IDR', capital: 'Jakarta' },
+      { id: 5, name: 'Pakistan', iso2: 'PK', region: 'Asia', population: 220900000, gdpPerCapita: 1543, currency: 'PKR', capital: 'Islamabad' },
+      { id: 6, name: 'Bangladesh', iso2: 'BD', region: 'Asia', population: 171000000, gdpPerCapita: 2600, currency: 'BDT', capital: 'Dhaka' },
+      { id: 7, name: 'Vietnam', iso2: 'VN', region: 'Asia', population: 98000000, gdpPerCapita: 4300, currency: 'VND', capital: 'Hanoi' },
+      { id: 8, name: 'Germany', iso2: 'DE', region: 'Europe', population: 83000000, gdpPerCapita: 48000, currency: 'EUR', capital: 'Berlin' },
+      { id: 9, name: 'France', iso2: 'FR', region: 'Europe', population: 65000000, gdpPerCapita: 40000, currency: 'EUR', capital: 'Paris' },
+      { id: 10, name: 'Italy', iso2: 'IT', region: 'Europe', population: 60000000, gdpPerCapita: 34000, currency: 'EUR', capital: 'Rome' },
+      { id: 11, name: 'Spain', iso2: 'ES', region: 'Europe', population: 47000000, gdpPerCapita: 27000, currency: 'EUR', capital: 'Madrid' },
+      { id: 12, name: 'Netherlands', iso2: 'NL', region: 'Europe', population: 17500000, gdpPerCapita: 55000, currency: 'EUR', capital: 'Amsterdam' },
+      { id: 13, name: 'Austria', iso2: 'AT', region: 'Europe', population: 9000000, gdpPerCapita: 50000, currency: 'EUR', capital: 'Vienna' },
+      { id: 14, name: 'Belgium', iso2: 'BE', region: 'Europe', population: 11600000, gdpPerCapita: 46000, currency: 'EUR', capital: 'Brussels' },
+      { id: 15, name: 'Finland', iso2: 'FI', region: 'Europe', population: 5500000, gdpPerCapita: 48000, currency: 'EUR', capital: 'Helsinki' },
+      { id: 16, name: 'United Kingdom', iso2: 'GB', region: 'Europe', population: 68000000, gdpPerCapita: 41000, currency: 'GBP', capital: 'London' },
+      { id: 17, name: 'United States', iso2: 'US', region: 'Americas', population: 331900000, gdpPerCapita: 65298.73, currency: 'USD', capital: 'Washington D.C.' },
+      { id: 18, name: 'Canada', iso2: 'CA', region: 'Americas', population: 38000000, gdpPerCapita: 52000, currency: 'CAD', capital: 'Ottawa' },
+      { id: 19, name: 'Mexico', iso2: 'MX', region: 'Americas', population: 128900000, gdpPerCapita: 10000, currency: 'MXN', capital: 'Mexico City' },
+      { id: 20, name: 'Brazil', iso2: 'BR', region: 'Americas', population: 212000000, gdpPerCapita: 8900, currency: 'BRL', capital: 'Brasília' },
+    ];
+    const byIso2 = new Map(COUNTRIES.map(c => [c.iso2, c]));
+    const REGIONS = ['Asia', 'Europe', 'Americas', 'Africa'];
+    const CURRENCIES = [...new Set(COUNTRIES.map(c => c.currency))].sort();
+
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function hset(hash, field, value) { hash[field] = value; }
+    function hget(hash, field) { return Object.prototype.hasOwnProperty.call(hash, field) ? hash[field] : null; }
+
+    function zCompare(a, b) {
+      if (a.score !== b.score) return b.score - a.score;
+      return a.member < b.member ? -1 : a.member > b.member ? 1 : 0;
+    }
+    function zadd(sortedSet, member, score) {
+      const i = sortedSet.findIndex(e => e.member === member);
+      if (i !== -1) sortedSet.splice(i, 1);
+      sortedSet.push({ member, score });
+      sortedSet.sort(zCompare);
+    }
+    function zrevrange(sortedSet, start, stop) {
+      return sortedSet.slice(start, stop + 1).map(e => e.member);
+    }
+    function zrevrank(sortedSet, member) {
+      const i = sortedSet.findIndex(e => e.member === member);
+      return i === -1 ? null : i;
+    }
+
+    function sadd(set, member) { set.add(member); }
+    function sismember(set, member) { return set.has(member); }
+    function sinter(setA, setB) { return [...setA].filter(m => setB.has(m)).sort(); }
+    function scard(set) { return set.size; }
+
+    function cacheSet(cache, key, value, ttlTicks, nowTick) {
+      cache[key] = { value, expiresAtTick: nowTick + ttlTicks };
+    }
+    function cacheGet(cache, key, nowTick) {
+      const entry = cache[key];
+      if (!entry) return null;
+      if (nowTick >= entry.expiresAtTick) {
+        delete cache[key];
+        return null;
+      }
+      return entry.value;
+    }
+    function cacheTTLRemaining(cache, key, nowTick) {
+      const entry = cache[key];
+      if (!entry) return null;
+      const remaining = entry.expiresAtTick - nowTick;
+      return remaining > 0 ? remaining : null;
+    }
+
+    // --- Widget state built on top of the model ---
+
+    const hashes = {};
+    for (const c of COUNTRIES) {
+      hashes[c.iso2] = {};
+      hset(hashes[c.iso2], 'name', c.name);
+      hset(hashes[c.iso2], 'population', c.population);
+      hset(hashes[c.iso2], 'capital', c.capital);
+      hset(hashes[c.iso2], 'currency', c.currency);
+    }
+
+    const popRanking = [];
+    const gdpRanking = [];
+    for (const c of COUNTRIES) {
+      zadd(popRanking, c.iso2, c.population);
+      zadd(gdpRanking, c.iso2, c.gdpPerCapita);
+    }
+
+    const regionSets = {};
+    const currencySets = {};
+    for (const r of REGIONS) regionSets[r] = new Set();
+    for (const cur of CURRENCIES) currencySets[cur] = new Set();
+    for (const c of COUNTRIES) {
+      sadd(regionSets[c.region], c.iso2);
+      sadd(currencySets[c.currency], c.iso2);
+    }
+    const allSetKeys = [...REGIONS.map(r => 'region:' + r), ...CURRENCIES.map(c => 'currency:' + c)];
+    function resolveSet(key) {
+      if (key.startsWith('region:')) return regionSets[key.slice(7)];
+      return currencySets[key.slice(9)];
+    }
+
+    let cache = {};
+    let tick = 0;
+
+    // --- DOM wiring ---
+
+    const tabBtns = document.querySelectorAll('.dbr-tab-btn');
+    const tabs = {
+      hash: document.getElementById('dbrHashTab'),
+      zset: document.getElementById('dbrZsetTab'),
+      set: document.getElementById('dbrSetTab'),
+      ttl: document.getElementById('dbrTtlTab'),
+    };
+    const explainEl = document.getElementById('dbrExplain');
+    const logEl = document.getElementById('dbrLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+    function fmt(n) { return typeof n === 'number' ? n.toLocaleString('en-US') : n; }
+
+    function setTab(name) {
+      tabBtns.forEach(b => b.classList.toggle('active', b.dataset.tab === name));
+      Object.keys(tabs).forEach(k => { tabs[k].style.display = k === name ? '' : 'none'; });
+    }
+
+    // Hash tab
+    const hashCountrySel = document.getElementById('dbrHashCountry');
+    const hashFieldSel = document.getElementById('dbrHashField');
+    const hashCommandEl = document.getElementById('dbrHashCommand');
+    const hashResultEl = document.getElementById('dbrHashResult');
+    const hashChipsEl = document.getElementById('dbrHashChips');
+    COUNTRIES.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.iso2;
+      opt.textContent = c.name + ' (' + c.iso2 + ')';
+      hashCountrySel.appendChild(opt);
+    });
+    hashCountrySel.value = 'US';
+
+    function runHash(logIt) {
+      const iso2 = hashCountrySel.value;
+      const field = hashFieldSel.value;
+      const value = hget(hashes[iso2], field);
+      hashCommandEl.textContent = 'HGET country:' + iso2 + ' ' + field;
+      hashResultEl.textContent = '-> ' + fmt(value);
+      hashChipsEl.innerHTML = '';
+      COUNTRIES.forEach(c => {
+        const chip = document.createElement('span');
+        chip.className = 'dbr-chip' + (c.iso2 === iso2 ? ' match' : ' dim');
+        chip.textContent = c.iso2;
+        hashChipsEl.appendChild(chip);
+      });
+      explainEl.textContent = 'A hash lookup goes straight to country:' + iso2 + "'s " + field + ' field. No other country’s hash was touched -- there is nothing to scan through.';
+      if (logIt) log('HGET country:' + iso2 + ' ' + field + ' -> ' + fmt(value), 'good');
+    }
+
+    // Sorted set tab
+    const zsetKindSel = document.getElementById('dbrZsetKind');
+    const zsetOpSel = document.getElementById('dbrZsetOp');
+    const zsetCountrySel = document.getElementById('dbrZsetCountry');
+    const zsetCommandEl = document.getElementById('dbrZsetCommand');
+    const zsetResultEl = document.getElementById('dbrZsetResult');
+    const zsetListEl = document.getElementById('dbrZsetList');
+    COUNTRIES.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.iso2;
+      opt.textContent = c.name + ' (' + c.iso2 + ')';
+      zsetCountrySel.appendChild(opt);
+    });
+    zsetCountrySel.value = 'US';
+
+    function currentZset() {
+      return zsetKindSel.value === 'population' ? popRanking : gdpRanking;
+    }
+    function zsetKeyName() {
+      return zsetKindSel.value === 'population' ? 'population_ranking' : 'gdp_ranking';
+    }
+
+    function runZset(logIt) {
+      const zset = currentZset();
+      const op = zsetOpSel.value;
+      zsetCountrySel.style.display = op === 'rank' ? '' : 'none';
+      let commandText, resultText, targetMember = null, topCount = 0;
+      if (op === 'top') {
+        const top5 = zrevrange(zset, 0, 4);
+        commandText = 'ZREVRANGE ' + zsetKeyName() + ' 0 4';
+        resultText = '-> ' + top5.map((m, i) => (i + 1) + '. ' + byIso2.get(m).name).join('  ');
+        topCount = 5;
+        explainEl.textContent = 'The top 5 were already sorted before you asked -- every ZADD keeps ' + zsetKeyName() + ' fully ordered, so reading the top of it is just reading the front of an array.';
+      } else {
+        targetMember = zsetCountrySel.value;
+        const rank = zrevrank(zset, targetMember);
+        commandText = 'ZREVRANK ' + zsetKeyName() + ' ' + targetMember;
+        resultText = '-> ' + rank + ' (place #' + (rank + 1) + ')';
+        explainEl.textContent = byIso2.get(targetMember).name + "'s rank is just its position in the already-sorted structure -- no counting or comparing happens at query time.";
+      }
+      zsetCommandEl.textContent = commandText;
+      zsetResultEl.textContent = resultText;
+      zsetListEl.innerHTML = '';
+      zset.forEach((entry, i) => {
+        const c = byIso2.get(entry.member);
+        const row = document.createElement('div');
+        const isTop = op === 'top' && i < topCount;
+        const isTarget = op === 'rank' && entry.member === targetMember;
+        row.className = 'dbr-zrow' + (isTop ? ' inrange' : '') + (isTarget ? ' target' : '');
+        row.innerHTML = '<span><span class="dbr-zrank">#' + (i + 1) + '</span> ' + c.name + '</span><span>' + fmt(entry.score) + '</span>';
+        zsetListEl.appendChild(row);
+      });
+      if (logIt) log(commandText + ' ' + resultText, 'good');
+    }
+
+    // Set tab
+    const setASel = document.getElementById('dbrSetA');
+    const setBSel = document.getElementById('dbrSetB');
+    const setCommandEl = document.getElementById('dbrSetCommand');
+    const setResultEl = document.getElementById('dbrSetResult');
+    const setCardsEl = document.getElementById('dbrSetCards');
+    allSetKeys.forEach(key => {
+      [setASel, setBSel].forEach(sel => {
+        const opt = document.createElement('option');
+        opt.value = key;
+        opt.textContent = key;
+        sel.appendChild(opt);
+      });
+    });
+    setASel.value = 'region:Europe';
+    setBSel.value = 'currency:EUR';
+
+    function runSet(logIt) {
+      const keyA = setASel.value, keyB = setBSel.value;
+      const setA = resolveSet(keyA), setB = resolveSet(keyB);
+      const result = sinter(setA, setB);
+      setCommandEl.textContent = 'SINTER ' + keyA + ' ' + keyB;
+      setResultEl.textContent = '-> {' + result.join(', ') + '} (' + result.length + ' member' + (result.length === 1 ? '' : 's') + ')';
+      setCardsEl.innerHTML = '';
+      const resultSet = new Set(result);
+      [[keyA, setA, 'selA'], [keyB, setB, 'selB']].forEach(([key, set, cls]) => {
+        const card = document.createElement('div');
+        card.className = 'dbr-set-card ' + cls;
+        card.innerHTML = '<div class="dbr-set-title">' + key + ' (' + scard(set) + ')</div>' +
+          [...set].sort().map(m => '<span class="dbr-chip' + (resultSet.has(m) ? ' match' : '') + '">' + m + '</span>').join(' ');
+        setCardsEl.appendChild(card);
+      });
+      explainEl.textContent = result.length === 0
+        ? keyA + ' and ' + keyB + ' share no members -- SINTER walked the smaller set checking membership in the other, and found nothing.'
+        : 'SINTER checked every member of the smaller set against the larger one -- ' + result.length + ' of them are in both.';
+      if (logIt) log('SINTER ' + keyA + ' ' + keyB + ' -> {' + result.join(', ') + '}', 'good');
+    }
+
+    // TTL tab
+    const ttlSetBtn = document.getElementById('dbrTtlSet');
+    const ttlTickBtn = document.getElementById('dbrTtlTick');
+    const ttlGetBtn = document.getElementById('dbrTtlGet');
+    const ttlClockEl = document.getElementById('dbrTtlClock');
+    const ttlCardsEl = document.getElementById('dbrTtlCards');
+    const ttlResultEl = document.getElementById('dbrTtlResult');
+    const TTL_TICKS = 5;
+
+    function renderTtl() {
+      ttlClockEl.textContent = tick;
+      ttlCardsEl.innerHTML = '';
+      const entry = cache['cache:demo'];
+      const card = document.createElement('div');
+      if (!entry) {
+        card.className = 'dbr-cache-key';
+        card.innerHTML = 'cache:demo -- <span style="color:var(--dbr-muted);">not set</span>';
+      } else {
+        const remaining = cacheTTLRemaining(cache, 'cache:demo', tick);
+        const isLive = remaining !== null;
+        card.className = 'dbr-cache-key ' + (isLive ? 'live' : 'expired');
+        const pct = isLive ? Math.max(0, Math.min(100, (remaining / TTL_TICKS) * 100)) : 0;
+        card.innerHTML = 'cache:demo = "' + entry.value + '"<br>' +
+          (isLive ? remaining + ' tick' + (remaining === 1 ? '' : 's') + ' left' : 'expired') +
+          '<div class="dbr-ttl-bar"><div class="dbr-ttl-fill" style="width:' + pct + '%;"></div></div>';
+      }
+      ttlCardsEl.appendChild(card);
+    }
+
+    ttlSetBtn.addEventListener('click', () => {
+      cacheSet(cache, 'cache:demo', 'v' + tick, TTL_TICKS, tick);
+      renderTtl();
+      ttlResultEl.textContent = '';
+      explainEl.textContent = 'cache:demo now expires at tick ' + (tick + TTL_TICKS) + '. Advance the clock to watch it count down, then try GET after it passes.';
+      log('SET cache:demo "v' + tick + '" EX ' + TTL_TICKS + ' (at tick ' + tick + ')', 'good');
+    });
+    ttlTickBtn.addEventListener('click', () => {
+      tick += 1;
+      renderTtl();
+      explainEl.textContent = 'Clock advanced to tick ' + tick + '. Nothing is checked until the next GET -- Redis expires keys lazily, on access, not the instant the clock ticks past them.';
+    });
+    ttlGetBtn.addEventListener('click', () => {
+      const value = cacheGet(cache, 'cache:demo', tick);
+      renderTtl();
+      ttlResultEl.textContent = 'GET cache:demo -> ' + (value === null ? 'nil' : '"' + value + '"');
+      explainEl.textContent = value === null
+        ? 'Once a key’s expiry tick has passed, GET returns nil forever after -- there is no partial credit, and no later tick brings it back.'
+        : 'Still live -- GET returned the value because the clock has not reached its expiry tick yet.';
+      log('GET cache:demo (at tick ' + tick + ') -> ' + (value === null ? 'nil' : '"' + value + '"'), 'good');
+    });
+
+    // --- Wire up tabs ---
+    tabBtns.forEach(b => b.addEventListener('click', () => setTab(b.dataset.tab)));
+    document.getElementById('dbrHashRun').addEventListener('click', () => runHash(true));
+    hashCountrySel.addEventListener('change', () => runHash(false));
+    hashFieldSel.addEventListener('change', () => runHash(false));
+    document.getElementById('dbrZsetRun').addEventListener('click', () => runZset(true));
+    zsetKindSel.addEventListener('change', () => runZset(false));
+    zsetOpSel.addEventListener('change', () => runZset(false));
+    zsetCountrySel.addEventListener('change', () => runZset(false));
+    document.getElementById('dbrSetRun').addEventListener('click', () => runSet(true));
+    setASel.addEventListener('change', () => runSet(false));
+    setBSel.addEventListener('change', () => runSet(false));
+
+    setTab('hash');
+    runHash(false);
+    runZset(false);
+    runSet(false);
+    renderTtl();
+  })();
+  </script>
+</div>
