@@ -52,3 +52,8 @@ See :doc:`hash_load_balancer` for the modulo-hashing walkthrough this
 page builds on, including the exact 75%-vs-25% figures and the
 production use cases (sticky sessions, cache routing, CDN edge
 selection) that make any of this matter in the first place.
+
+See :doc:`kafka_topic_interactive` for the same "same key, same owner,
+every time" hashing idea applied to a message log instead of a server
+ring -- Kafka's partition routing is a simpler, fixed-partition-count
+cousin of the reshuffling problem this page solves for servers.

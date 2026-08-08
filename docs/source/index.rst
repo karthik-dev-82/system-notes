@@ -99,6 +99,7 @@ worth writing down and coming back to.
    hash_load_balancer_interactive
    consistent_hashing_interactive
    hash_load_balancer
+   kafka_topic_interactive
 
 .. toctree::
    :hidden:
@@ -364,6 +365,9 @@ Concurrency & Distributed Systems
    * - :doc:`hash_load_balancer`
      - Hash-based load balancing, sticky sessions, and consistent hashing
      - modulo hashing, session affinity, CDN routing, reshuffling problem
+   * - :doc:`kafka_topic_interactive`
+     - Interactive Kafka topic -- send keyed readings, watch partition routing, poll with consumer groups, rebalance live
+     - partitions, consumer groups, offsets, rebalancing, replay
 
 Robotics
 -----------------

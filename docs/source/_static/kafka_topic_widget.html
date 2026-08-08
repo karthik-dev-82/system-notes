@@ -1,0 +1,369 @@
+<div class="kfk-root" id="kafkaWidget">
+  <style>
+    #kafkaWidget {
+      --kfk-bg: #0f172a;
+      --kfk-panel: #16213e;
+      --kfk-border: #2a3655;
+      --kfk-text: #e2e8f0;
+      --kfk-muted: #94a3b8;
+      --kfk-accent: #38bdf8;
+      --kfk-good: #4ade80;
+      --kfk-warn: #fbbf24;
+      --kfk-p0: #38bdf8;
+      --kfk-p1: #a78bfa;
+      --kfk-p2: #fb923c;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--kfk-bg);
+      color: var(--kfk-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #kafkaWidget * { box-sizing: border-box; }
+    #kafkaWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #kafkaWidget .kfk-sub { color: var(--kfk-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .kfk-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--kfk-panel); border: 1px solid var(--kfk-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .kfk-controls select { background: #0a1128; color: var(--kfk-text); border: 1px solid var(--kfk-border); border-radius: 7px; padding: 7px 10px; font-size: 0.8rem; }
+    .kfk-btn { background: var(--kfk-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .kfk-btn.secondary { background: transparent; color: var(--kfk-text); border: 1px solid var(--kfk-border); }
+    .kfk-btn.small { padding: 4px 9px; font-size: 0.7rem; }
+    .kfk-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .kfk-box { background: var(--kfk-panel); border: 1px solid var(--kfk-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .kfk-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--kfk-muted); margin-bottom: 8px; }
+
+    .kfk-partitions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .kfk-partition { flex: 1; min-width: 200px; border-radius: 8px; padding: 8px; border: 2px solid; }
+    .kfk-partition.p0 { border-color: var(--kfk-p0); }
+    .kfk-partition.p1 { border-color: var(--kfk-p1); }
+    .kfk-partition.p2 { border-color: var(--kfk-p2); }
+    .kfk-partition-title { font-weight: 700; font-size: 0.78rem; margin-bottom: 6px; }
+    .kfk-partition.p0 .kfk-partition-title { color: var(--kfk-p0); }
+    .kfk-partition.p1 .kfk-partition-title { color: var(--kfk-p1); }
+    .kfk-partition.p2 .kfk-partition-title { color: var(--kfk-p2); }
+    .kfk-msg-list { display: flex; flex-direction: column; gap: 3px; max-height: 220px; overflow-y: auto; }
+    .kfk-msg { font-family: ui-monospace, monospace; font-size: 0.7rem; background: #0a1128; border-radius: 5px; padding: 3px 7px; color: var(--kfk-text); }
+    .kfk-msg .kfk-off { color: var(--kfk-muted); }
+    .kfk-empty-log { color: var(--kfk-muted); font-size: 0.72rem; font-style: italic; }
+
+    .kfk-groups { display: flex; gap: 12px; flex-wrap: wrap; }
+    .kfk-group { flex: 1; min-width: 300px; border: 1px solid var(--kfk-border); border-radius: 8px; padding: 10px; }
+    .kfk-group-title { font-weight: 700; color: #fff; font-size: 0.82rem; margin-bottom: 4px; }
+    .kfk-group-actions { display: flex; gap: 6px; margin-bottom: 8px; flex-wrap: wrap; }
+    .kfk-consumer { background: #0a1128; border-radius: 7px; padding: 7px 9px; margin-bottom: 6px; }
+    .kfk-consumer-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
+    .kfk-consumer-name { font-family: ui-monospace, monospace; font-size: 0.76rem; color: #fff; }
+    .kfk-assigned { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 4px; }
+    .kfk-pchip { font-size: 0.62rem; font-family: ui-monospace, monospace; border-radius: 4px; padding: 1px 6px; border: 1px solid; }
+    .kfk-pchip.p0 { border-color: var(--kfk-p0); color: var(--kfk-p0); }
+    .kfk-pchip.p1 { border-color: var(--kfk-p1); color: var(--kfk-p1); }
+    .kfk-pchip.p2 { border-color: var(--kfk-p2); color: var(--kfk-p2); }
+    .kfk-idle { color: var(--kfk-muted); font-size: 0.68rem; font-style: italic; }
+    .kfk-inbox { font-size: 0.68rem; font-family: ui-monospace, monospace; color: var(--kfk-muted); max-height: 80px; overflow-y: auto; }
+    .kfk-inbox div.new { color: var(--kfk-good); }
+
+    .kfk-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .kfk-explain-panel, .kfk-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .kfk-explain-panel { flex: 1.3; }
+    .kfk-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .kfk-log div { color: var(--kfk-muted); }
+    .kfk-log div.good { color: var(--kfk-good); }
+    .kfk-log div.warn { color: var(--kfk-warn); }
+
+    details.kfk-notes { margin-top: 4px; background: var(--kfk-panel); border: 1px solid var(--kfk-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.kfk-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.kfk-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--kfk-muted); }
+    details.kfk-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--kfk-accent); }
+  </style>
+
+  <h3>Kafka Topic: Play With It</h3>
+  <div class="kfk-sub">A topic with 3 partitions, fed by 4 sensors. Send a reading and watch which partition it lands in -- the same sensor always lands in the same partition. Then poll with two independent consumer groups, add a second consumer to one of them, and watch the partitions get reassigned without losing anyone's place.</div>
+
+  <div class="kfk-controls">
+    <span style="font-size:0.78rem;color:var(--kfk-muted);">Producer: send a reading from</span>
+    <select id="kfkSensorSelect">
+      <option value="S1">Sensor S1</option>
+      <option value="S2">Sensor S2</option>
+      <option value="S3">Sensor S3</option>
+      <option value="S4">Sensor S4</option>
+    </select>
+    <button class="kfk-btn" id="kfkSendBtn">Send reading</button>
+    <button class="kfk-btn secondary" id="kfkSendBatchBtn">Send 8 random readings</button>
+    <button class="kfk-btn secondary" id="kfkResetBtn">Reset everything</button>
+  </div>
+
+  <div class="kfk-box">
+    <div class="kfk-panel-title">Topic: sensor-readings (3 partitions)</div>
+    <div class="kfk-partitions" id="kfkPartitions"></div>
+  </div>
+
+  <div class="kfk-box">
+    <div class="kfk-panel-title">Consumer groups (each group gets its own full copy of every message)</div>
+    <div class="kfk-groups" id="kfkGroups"></div>
+  </div>
+
+  <div class="kfk-panels">
+    <div class="kfk-explain-panel">
+      <div class="kfk-box" style="margin-bottom:0;">
+        <div class="kfk-panel-title">What's happening right now</div>
+        <div id="kfkExplain">Send a reading from any sensor. Watch which partition it lands in -- then send from the same sensor again and watch it land in the exact same partition, every time.</div>
+      </div>
+    </div>
+    <div class="kfk-side-panel-col">
+      <div class="kfk-box" style="margin-bottom:0;">
+        <div class="kfk-panel-title">Event log</div>
+        <div class="kfk-log" id="kfkLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="kfk-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>The partition routing is a real hash function</b> (djb2 over the key string, taken mod the partition count), not a random assignment dressed up to look deterministic -- that's exactly why the same sensor ID lands in the same partition every single time, in this widget and in real Kafka.</li>
+      <li><b>A rebalance never resets progress.</b> Click "+ Add consumer" on a group that already has messages polled, and watch the log confirm every partition's offset stayed exactly where it was -- ownership of a partition can move between consumer instances, but the read position belongs to the *group*, not to whichever consumer happens to be polling it at the moment.</li>
+      <li><b>More consumers than partitions just means idle consumers.</b> A group can never usefully have more active consumers than the topic has partitions -- try adding a third consumer to a group and watch it sit with nothing assigned.</li>
+      <li><b>"Replay" is the one thing that makes Kafka different from most message queues</b>: resetting a group's offsets re-delivers everything from the start, because the messages were never deleted on read in the first place -- only the group's bookmark moved.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const NUM_PARTITIONS = 3;
+    const SENSORS = ['S1', 'S2', 'S3', 'S4'];
+    const PCLASS = ['p0', 'p1', 'p2'];
+
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function djb2(str) {
+      let hash = 5381;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) + hash + str.charCodeAt(i)) >>> 0;
+      }
+      return hash;
+    }
+
+    function partitionForKey(key, numPartitions) {
+      return djb2(key) % numPartitions;
+    }
+
+    function makeTopic(numPartitions) {
+      return {
+        numPartitions,
+        partitions: Array.from({ length: numPartitions }, () => []),
+      };
+    }
+
+    function produce(topic, key, value) {
+      const p = partitionForKey(key, topic.numPartitions);
+      const offset = topic.partitions[p].length;
+      topic.partitions[p].push({ key, value, offset });
+      return { partition: p, offset };
+    }
+
+    function makeGroup(id) {
+      return { id, consumerIds: [], offsets: {} };
+    }
+
+    function assignment(group, numPartitions) {
+      const result = {};
+      if (group.consumerIds.length === 0) return result;
+      for (const id of group.consumerIds) result[id] = [];
+      for (let p = 0; p < numPartitions; p++) {
+        const owner = group.consumerIds[p % group.consumerIds.length];
+        result[owner].push(p);
+      }
+      return result;
+    }
+
+    function addConsumer(group, consumerId) {
+      if (group.consumerIds.includes(consumerId)) return;
+      group.consumerIds.push(consumerId);
+    }
+
+    function removeConsumer(group, consumerId) {
+      group.consumerIds = group.consumerIds.filter(id => id !== consumerId);
+    }
+
+    function poll(topic, group, consumerId) {
+      const assigned = assignment(group, topic.numPartitions)[consumerId] || [];
+      const messages = [];
+      for (const p of assigned) {
+        const from = group.offsets[p] || 0;
+        const log = topic.partitions[p];
+        for (let o = from; o < log.length; o++) {
+          messages.push({ partition: p, ...log[o] });
+        }
+        group.offsets[p] = log.length;
+      }
+      return messages;
+    }
+
+    function resetGroupOffsets(group) {
+      group.offsets = {};
+    }
+
+    // --- Widget state on top of the model ---
+
+    let topic, groups, consumerCounters, inboxes;
+
+    function reset() {
+      topic = makeTopic(NUM_PARTITIONS);
+      groups = [makeGroup('dashboard-group'), makeGroup('alerting-group')];
+      consumerCounters = { 'dashboard-group': 0, 'alerting-group': 0 };
+      inboxes = {}; // consumerId -> array of message strings, most recent first
+      addConsumer(groups[0], nextConsumerId('dashboard-group'));
+      addConsumer(groups[1], nextConsumerId('alerting-group'));
+      renderAll();
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Send a reading from any sensor. Watch which partition it lands in -- then send from the same sensor again and watch it land in the exact same partition, every time.';
+    }
+
+    function nextConsumerId(groupId) {
+      consumerCounters[groupId] += 1;
+      const id = groupId + '-c' + consumerCounters[groupId];
+      inboxes[id] = [];
+      return id;
+    }
+
+    const partitionsEl = document.getElementById('kfkPartitions');
+    const groupsEl = document.getElementById('kfkGroups');
+    const explainEl = document.getElementById('kfkExplain');
+    const logEl = document.getElementById('kfkLog');
+    const sensorSelect = document.getElementById('kfkSensorSelect');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderPartitions() {
+      partitionsEl.innerHTML = '';
+      topic.partitions.forEach((log_, p) => {
+        const div = document.createElement('div');
+        div.className = 'kfk-partition ' + PCLASS[p];
+        const list = log_.length
+          ? log_.map(m => '<div class="kfk-msg"><span class="kfk-off">[' + m.offset + ']</span> ' + m.key + ' = ' + m.value + '</div>').join('')
+          : '<div class="kfk-empty-log">no messages yet</div>';
+        div.innerHTML = '<div class="kfk-partition-title">Partition ' + p + ' (' + log_.length + ' msgs)</div><div class="kfk-msg-list">' + list + '</div>';
+        partitionsEl.appendChild(div);
+      });
+    }
+
+    function renderGroups() {
+      groupsEl.innerHTML = '';
+      groups.forEach(group => {
+        const a = assignment(group, topic.numPartitions);
+        const card = document.createElement('div');
+        card.className = 'kfk-group';
+        let html = '<div class="kfk-group-title">' + group.id + '</div>';
+        html += '<div class="kfk-group-actions">' +
+          '<button class="kfk-btn small" data-action="add" data-group="' + group.id + '">+ Add consumer</button>' +
+          '<button class="kfk-btn small secondary" data-action="remove" data-group="' + group.id + '"' + (group.consumerIds.length <= 1 ? ' disabled' : '') + '>- Remove consumer</button>' +
+          '<button class="kfk-btn small secondary" data-action="reset-offsets" data-group="' + group.id + '">Replay from start</button>' +
+          '</div>';
+        for (const consumerId of group.consumerIds) {
+          const assigned = a[consumerId] || [];
+          const chips = assigned.length
+            ? assigned.map(p => '<span class="kfk-pchip ' + PCLASS[p] + '">partition ' + p + '</span>').join('')
+            : '<span class="kfk-idle">idle -- no partitions assigned</span>';
+          const inboxLines = (inboxes[consumerId] || []).slice(0, 5).map((line, i) => '<div' + (i === 0 ? ' class="new"' : '') + '>' + line + '</div>').join('');
+          html += '<div class="kfk-consumer">' +
+            '<div class="kfk-consumer-head"><span class="kfk-consumer-name">' + consumerId + '</span>' +
+            '<button class="kfk-btn small" data-action="poll" data-group="' + group.id + '" data-consumer="' + consumerId + '"' + (assigned.length === 0 ? ' disabled' : '') + '>Poll</button></div>' +
+            '<div class="kfk-assigned">' + chips + '</div>' +
+            '<div class="kfk-inbox">' + (inboxLines || '<span class="kfk-idle">no messages polled yet</span>') + '</div>' +
+            '</div>';
+        }
+        card.innerHTML = html;
+        groupsEl.appendChild(card);
+      });
+    }
+
+    function renderAll() {
+      renderPartitions();
+      renderGroups();
+    }
+
+    function onSend(key) {
+      const value = (15 + Math.floor(Math.random() * 20)) + 'C';
+      const r = produce(topic, key, value);
+      renderAll();
+      log(key + ' -> partition ' + r.partition + ', offset ' + r.offset + ' (value ' + value + ')', 'good');
+      explainEl.textContent = key + ' hashed to partition ' + r.partition + '. Send from ' + key + ' again and it will land there again -- the routing depends only on the key, never on what else has happened.';
+    }
+
+    function onPoll(groupId, consumerId) {
+      const group = groups.find(g => g.id === groupId);
+      const messages = poll(topic, group, consumerId);
+      if (messages.length > 0) {
+        const lines = messages.map(m => 'p' + m.partition + '[' + m.offset + '] ' + m.key + '=' + m.value);
+        inboxes[consumerId] = [...lines.reverse(), ...(inboxes[consumerId] || [])];
+      }
+      renderAll();
+      if (messages.length === 0) {
+        log(consumerId + ' polled -- nothing new.', null);
+        explainEl.textContent = consumerId + ' has already read everything on its assigned partitions. Send more readings, or have another consumer produce some.';
+      } else {
+        log(consumerId + ' polled -- got ' + messages.length + ' new message(s).', 'good');
+        explainEl.textContent = consumerId + ' just advanced its offset on every partition it owns. Its groupmates never see these same messages again -- but a completely different group polling the same partitions would.';
+      }
+    }
+
+    function onAddConsumer(groupId) {
+      const group = groups.find(g => g.id === groupId);
+      const before = JSON.stringify(group.offsets);
+      const id = nextConsumerId(groupId);
+      addConsumer(group, id);
+      renderAll();
+      const unchanged = JSON.stringify(group.offsets) === before;
+      log('Rebalance: ' + id + ' joined ' + groupId + '. Offsets ' + (unchanged ? 'unchanged' : 'CHANGED (this should never happen)') + '.', 'warn');
+      explainEl.textContent = 'Adding a consumer triggers a rebalance -- partitions just got reassigned across ' + group.consumerIds.length + ' consumers in ' + groupId + '. Nobody’s read progress moved; only who’s responsible for reading next did.';
+    }
+
+    function onRemoveConsumer(groupId) {
+      const group = groups.find(g => g.id === groupId);
+      if (group.consumerIds.length <= 1) return;
+      const removed = group.consumerIds[group.consumerIds.length - 1];
+      removeConsumer(group, removed);
+      renderAll();
+      log('Rebalance: ' + removed + ' left ' + groupId + '. Its partitions were reassigned to the remaining consumer(s).', 'warn');
+      explainEl.textContent = removed + ' is gone, but nothing it had read is re-delivered -- the remaining consumer(s) pick up exactly where the group left off on those partitions.';
+    }
+
+    function onResetOffsets(groupId) {
+      const group = groups.find(g => g.id === groupId);
+      resetGroupOffsets(group);
+      for (const id of group.consumerIds) inboxes[id] = [];
+      renderAll();
+      log(groupId + ': offsets reset to 0 on every partition. This group will now re-read everything from the beginning.', 'good');
+      explainEl.textContent = 'Nothing was deleted from the topic to make this possible -- messages stick around regardless of who has read them. Resetting a group’s offsets is all it takes to replay history.';
+    }
+
+    document.getElementById('kfkSendBtn').addEventListener('click', () => onSend(sensorSelect.value));
+    document.getElementById('kfkSendBatchBtn').addEventListener('click', () => {
+      for (let i = 0; i < 8; i++) onSend(SENSORS[Math.floor(Math.random() * SENSORS.length)]);
+    });
+    document.getElementById('kfkResetBtn').addEventListener('click', reset);
+
+    groupsEl.addEventListener('click', (ev) => {
+      const btn = ev.target.closest('button[data-action]');
+      if (!btn || btn.disabled) return;
+      const action = btn.dataset.action;
+      const groupId = btn.dataset.group;
+      if (action === 'poll') onPoll(groupId, btn.dataset.consumer);
+      else if (action === 'add') onAddConsumer(groupId);
+      else if (action === 'remove') onRemoveConsumer(groupId);
+      else if (action === 'reset-offsets') onResetOffsets(groupId);
+    });
+
+    reset();
+  })();
+  </script>
+</div>
