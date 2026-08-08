@@ -40,6 +40,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
 | 🔠 **[Base64 Encoding](docs/source/base64_encoding.rst)** | Base64, ASCII, URL encoding, and hex, explained with analogies | Base64 alphabet, percent-encoding, MIME attachments, hex colors |
 | 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
+| 🎮 **[Index vs. Full Scan (Interactive)](docs/source/db_index_scan_interactive.rst)** | Interactive index vs. full scan -- same 20-country query, run two ways, real cost numbers | indexes, binary search, hash lookup, query planning |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
@@ -139,6 +140,7 @@ system-notes/
         ├── unicode_utf8_encoding.rst
         ├── base64_encoding.rst
         ├── databases_postgresql_mongodb_redis.rst
+        ├── db_index_scan_interactive.rst
         ├── image_formats.rst
         ├── threads_sync_interactive.rst
         ├── threads_processes_synchronization.rst

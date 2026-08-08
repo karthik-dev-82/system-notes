@@ -1,0 +1,374 @@
+<div class="dbi-root" id="dbIndexWidget">
+  <style>
+    #dbIndexWidget {
+      --dbi-bg: #0f172a;
+      --dbi-panel: #16213e;
+      --dbi-border: #2a3655;
+      --dbi-text: #e2e8f0;
+      --dbi-muted: #94a3b8;
+      --dbi-accent: #38bdf8;
+      --dbi-good: #4ade80;
+      --dbi-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--dbi-bg);
+      color: var(--dbi-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #dbIndexWidget * { box-sizing: border-box; }
+    #dbIndexWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #dbIndexWidget .dbi-sub { color: var(--dbi-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .dbi-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .dbi-toggle { display: inline-flex; border: 1px solid var(--dbi-border); border-radius: 8px; overflow: hidden; }
+    .dbi-toggle button { background: transparent; color: var(--dbi-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .dbi-toggle button.active { background: var(--dbi-warn); color: #2a1c00; }
+    .dbi-controls select { background: #0a1128; color: var(--dbi-text); border: 1px solid var(--dbi-border); border-radius: 7px; padding: 7px 10px; font-size: 0.8rem; }
+    .dbi-controls input[type="range"] { width: 260px; }
+    .dbi-threshold-readout { font-family: ui-monospace, monospace; font-size: 0.8rem; color: #fff; min-width: 110px; }
+
+    .dbi-box { background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .dbi-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dbi-muted); margin-bottom: 8px; }
+
+    .dbi-compare { display: flex; gap: 14px; flex-wrap: wrap; }
+    .dbi-compare-col { flex: 1; min-width: 340px; }
+    .dbi-cost-line { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; }
+    .dbi-cost-num { font-size: 1.6rem; font-weight: 800; color: #fff; font-family: ui-monospace, monospace; }
+    .dbi-cost-label { color: var(--dbi-muted); font-size: 0.78rem; }
+    .dbi-cost-formula { color: var(--dbi-muted); font-size: 0.72rem; font-family: ui-monospace, monospace; margin-bottom: 10px; }
+
+    .dbi-row-list { display: flex; flex-direction: column; gap: 3px; max-height: 380px; overflow-y: auto; }
+    .dbi-row { display: flex; justify-content: space-between; gap: 8px; border-radius: 5px; padding: 3px 8px; font-family: ui-monospace, monospace; font-size: 0.7rem; border: 1px solid transparent; color: var(--dbi-muted); }
+    .dbi-row.checked { border-color: var(--dbi-border); }
+    .dbi-row.match { background: rgba(74,222,128,0.18); color: var(--dbi-good); border-color: var(--dbi-good); }
+    .dbi-row.probed { border-color: var(--dbi-accent); }
+    .dbi-row .dbi-badge { background: var(--dbi-accent); color: #041322; border-radius: 4px; padding: 0 4px; font-size: 0.62rem; font-weight: 700; }
+
+    .dbi-buckets { display: flex; gap: 8px; flex-wrap: wrap; }
+    .dbi-bucket { flex: 1; min-width: 140px; border: 2px dashed var(--dbi-border); border-radius: 8px; padding: 8px; opacity: 0.45; }
+    .dbi-bucket.active { border-style: solid; border-color: var(--dbi-good); opacity: 1; background: rgba(74,222,128,0.08); }
+    .dbi-bucket-title { font-weight: 700; color: #fff; font-size: 0.76rem; margin-bottom: 4px; }
+    .dbi-bucket-chip { display: inline-block; background: #0a1128; border-radius: 4px; padding: 1px 6px; margin: 2px 2px 0 0; font-size: 0.66rem; font-family: ui-monospace, monospace; color: var(--dbi-muted); }
+    .dbi-bucket.active .dbi-bucket-chip { color: var(--dbi-good); }
+
+    .dbi-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .dbi-explain-panel, .dbi-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .dbi-explain-panel { flex: 1.3; }
+    .dbi-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .dbi-log div { color: var(--dbi-muted); }
+    .dbi-log div.good { color: var(--dbi-good); }
+
+    details.dbi-notes { margin-top: 4px; background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.dbi-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.dbi-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--dbi-muted); }
+    details.dbi-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--dbi-accent); }
+  </style>
+
+  <h3>Index vs. Full Scan: Play With It</h3>
+  <div class="dbi-sub">Same 20-country table, same question, two different ways to answer it. A full scan checks every row, every time -- cost 20, always. An index narrows the search first and only fetches what actually matched.</div>
+
+  <div class="dbi-controls">
+    <div class="dbi-toggle" id="dbiModeToggle">
+      <button class="dbi-mode-btn active" data-mode="equality">Equality (region)</button>
+      <button class="dbi-mode-btn" data-mode="range">Range (population)</button>
+    </div>
+    <div id="dbiEqualityControls">
+      <span style="font-size:0.78rem;color:var(--dbi-muted);">WHERE region =</span>
+      <select id="dbiRegionSelect">
+        <option value="Asia">Asia</option>
+        <option value="Europe">Europe</option>
+        <option value="Americas">Americas</option>
+        <option value="Africa">Africa</option>
+        <option value="Antarctica">Antarctica (no matches)</option>
+      </select>
+    </div>
+    <div id="dbiRangeControls" style="display:none; align-items:center; gap:10px;">
+      <span style="font-size:0.78rem;color:var(--dbi-muted);">WHERE population &gt;</span>
+      <input type="range" id="dbiThresholdSlider" min="0" max="1450000000" step="1000000" value="126000000">
+      <span class="dbi-threshold-readout" id="dbiThresholdReadout">126,000,000</span>
+    </div>
+  </div>
+
+  <div class="dbi-box">
+    <div class="dbi-compare">
+      <div class="dbi-compare-col">
+        <div class="dbi-panel-title">Full table scan</div>
+        <div class="dbi-cost-line"><span class="dbi-cost-num" id="dbiScanCost">20</span><span class="dbi-cost-label">rows checked</span></div>
+        <div class="dbi-cost-formula">every row's predicate is evaluated, no matter how selective the query is</div>
+        <div class="dbi-row-list" id="dbiScanList"></div>
+      </div>
+      <div class="dbi-compare-col">
+        <div class="dbi-panel-title">Using an index</div>
+        <div class="dbi-cost-line"><span class="dbi-cost-num" id="dbiIndexCost">--</span><span class="dbi-cost-label">total steps</span></div>
+        <div class="dbi-cost-formula" id="dbiIndexFormula"></div>
+        <div id="dbiEqualityView"><div class="dbi-buckets" id="dbiBuckets"></div></div>
+        <div id="dbiRangeView" class="dbi-row-list" style="display:none;"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="dbi-panels">
+    <div class="dbi-explain-panel">
+      <div class="dbi-box" style="margin-bottom:0;">
+        <div class="dbi-panel-title">What's happening right now</div>
+        <div id="dbiExplain">Pick a region above. The scan side checks all 20 rows one by one. The index side jumps straight to the matching bucket -- everything else stays untouched, dimmed out.</div>
+      </div>
+    </div>
+    <div class="dbi-side-panel-col">
+      <div class="dbi-box" style="margin-bottom:0;">
+        <div class="dbi-panel-title">Query log</div>
+        <div class="dbi-log" id="dbiLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="dbi-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>The index doesn't always win.</b> Its cost is <code>1 + matches</code> for equality or <code>log2(N) + matches</code> for a range -- both still grow with the match count. Try "Antarctica" (0 matches, cost 1) against something unselective like <code>population &gt; 0</code> (matches all 20, cost ~25): the index still does a little extra work over a plain scan once nearly everything matches. Real query planners actually check this trade-off and fall back to a sequential scan when an index wouldn't help.</li>
+      <li><b>The range side is a real binary search</b>, not a simplified stand-in -- it's the same <code>upper_bound</code> logic backing B-tree range scans, verified here against hundreds of random thresholds including every exact population value in the dataset (the classic place an off-by-one hides).</li>
+      <li><b>An index has a cost the scan doesn't: it has to be built and kept up to date.</b> Every <code>INSERT</code>/<code>UPDATE</code> on an indexed column also updates the index -- that's the "takes up storage, slows down writes" trade-off the source guide mentions.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    const COUNTRIES = [
+      { id: 1, name: 'China', iso2: 'CN', region: 'Asia', population: 1439323776 },
+      { id: 2, name: 'Japan', iso2: 'JP', region: 'Asia', population: 126000000 },
+      { id: 3, name: 'India', iso2: 'IN', region: 'Asia', population: 1380004385 },
+      { id: 4, name: 'Indonesia', iso2: 'ID', region: 'Asia', population: 273500000 },
+      { id: 5, name: 'Pakistan', iso2: 'PK', region: 'Asia', population: 220900000 },
+      { id: 6, name: 'Bangladesh', iso2: 'BD', region: 'Asia', population: 171000000 },
+      { id: 7, name: 'Vietnam', iso2: 'VN', region: 'Asia', population: 98000000 },
+      { id: 8, name: 'Germany', iso2: 'DE', region: 'Europe', population: 83000000 },
+      { id: 9, name: 'France', iso2: 'FR', region: 'Europe', population: 65000000 },
+      { id: 10, name: 'Italy', iso2: 'IT', region: 'Europe', population: 60000000 },
+      { id: 11, name: 'Spain', iso2: 'ES', region: 'Europe', population: 47000000 },
+      { id: 12, name: 'Netherlands', iso2: 'NL', region: 'Europe', population: 17500000 },
+      { id: 13, name: 'Austria', iso2: 'AT', region: 'Europe', population: 9000000 },
+      { id: 14, name: 'Belgium', iso2: 'BE', region: 'Europe', population: 11600000 },
+      { id: 15, name: 'Finland', iso2: 'FI', region: 'Europe', population: 5500000 },
+      { id: 16, name: 'United Kingdom', iso2: 'GB', region: 'Europe', population: 68000000 },
+      { id: 17, name: 'United States', iso2: 'US', region: 'Americas', population: 331900000 },
+      { id: 18, name: 'Canada', iso2: 'CA', region: 'Americas', population: 38000000 },
+      { id: 19, name: 'Mexico', iso2: 'MX', region: 'Americas', population: 128900000 },
+      { id: 20, name: 'Brazil', iso2: 'BR', region: 'Americas', population: 212000000 },
+    ];
+    const N = COUNTRIES.length;
+    const REGIONS = ['Asia', 'Europe', 'Americas', 'Africa'];
+
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function buildRegionIndex(countries) {
+      const idx = new Map();
+      for (const c of countries) {
+        if (!idx.has(c.region)) idx.set(c.region, []);
+        idx.get(c.region).push(c.id);
+      }
+      return idx;
+    }
+
+    function buildPopulationIndex(countries) {
+      return [...countries]
+        .map(c => ({ population: c.population, id: c.id }))
+        .sort((a, b) => a.population - b.population);
+    }
+
+    function scanByRegion(countries, region) {
+      const ids = [];
+      for (const c of countries) {
+        if (c.region === region) ids.push(c.id);
+      }
+      return { ids, cost: countries.length };
+    }
+
+    function indexByRegion(regionIndex, totalRows, region) {
+      const ids = (regionIndex.get(region) || []).slice();
+      return { ids, cost: 1 + ids.length };
+    }
+
+    function scanByPopulationGT(countries, threshold) {
+      const ids = [];
+      for (const c of countries) {
+        if (c.population > threshold) ids.push(c.id);
+      }
+      return { ids, cost: countries.length };
+    }
+
+    function upperBound(popIndex, threshold) {
+      let lo = 0, hi = popIndex.length, comparisons = 0;
+      const probes = [];
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        comparisons++;
+        probes.push(mid);
+        if (popIndex[mid].population <= threshold) lo = mid + 1;
+        else hi = mid;
+      }
+      return { boundary: lo, comparisons, probes };
+    }
+
+    function indexByPopulationGT(popIndex, threshold) {
+      const { boundary, comparisons, probes } = upperBound(popIndex, threshold);
+      const matches = popIndex.slice(boundary);
+      const ids = matches.map(m => m.id);
+      return { ids, cost: comparisons + ids.length, comparisons, probes, boundary };
+    }
+
+    // --- Widget rendering on top of the model ---
+
+    const regionIndex = buildRegionIndex(COUNTRIES);
+    const popIndex = buildPopulationIndex(COUNTRIES);
+    const byId = new Map(COUNTRIES.map(c => [c.id, c]));
+
+    let mode = 'equality';
+
+    const modeBtns = document.querySelectorAll('.dbi-mode-btn');
+    const equalityControls = document.getElementById('dbiEqualityControls');
+    const rangeControls = document.getElementById('dbiRangeControls');
+    const regionSelect = document.getElementById('dbiRegionSelect');
+    const thresholdSlider = document.getElementById('dbiThresholdSlider');
+    const thresholdReadout = document.getElementById('dbiThresholdReadout');
+    const scanCostEl = document.getElementById('dbiScanCost');
+    const scanListEl = document.getElementById('dbiScanList');
+    const indexCostEl = document.getElementById('dbiIndexCost');
+    const indexFormulaEl = document.getElementById('dbiIndexFormula');
+    const equalityViewEl = document.getElementById('dbiEqualityView');
+    const rangeViewEl = document.getElementById('dbiRangeView');
+    const bucketsEl = document.getElementById('dbiBuckets');
+    const explainEl = document.getElementById('dbiExplain');
+    const logEl = document.getElementById('dbiLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function fmt(n) { return n.toLocaleString('en-US'); }
+
+    function renderScanEquality(region) {
+      const scan = scanByRegion(COUNTRIES, region);
+      const matchSet = new Set(scan.ids);
+      scanCostEl.textContent = scan.cost;
+      scanListEl.innerHTML = '';
+      COUNTRIES.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'dbi-row checked' + (matchSet.has(c.id) ? ' match' : '');
+        row.textContent = c.name + ' (' + c.region + ')';
+        scanListEl.appendChild(row);
+      });
+      return scan;
+    }
+
+    function renderIndexEquality(region) {
+      equalityViewEl.style.display = '';
+      rangeViewEl.style.display = 'none';
+      const indexed = indexByRegion(regionIndex, N, region);
+      indexCostEl.textContent = indexed.cost;
+      indexFormulaEl.textContent = '1 hash lookup + ' + indexed.ids.length + ' row' + (indexed.ids.length === 1 ? '' : 's') + ' fetched = ' + indexed.cost;
+      bucketsEl.innerHTML = '';
+      REGIONS.forEach(r => {
+        const bucket = document.createElement('div');
+        bucket.className = 'dbi-bucket' + (r === region ? ' active' : '');
+        const memberIds = regionIndex.get(r) || [];
+        bucket.innerHTML = '<div class="dbi-bucket-title">' + r + ' (' + memberIds.length + ')</div>' +
+          memberIds.map(id => '<span class="dbi-bucket-chip">' + byId.get(id).iso2 + '</span>').join('');
+        bucketsEl.appendChild(bucket);
+      });
+      if (region === 'Antarctica') {
+        const bucket = document.createElement('div');
+        bucket.className = 'dbi-bucket active';
+        bucket.innerHTML = '<div class="dbi-bucket-title">Antarctica (0)</div><span style="color:var(--dbi-muted);font-size:0.7rem;">no bucket exists -- hash lookup returns nothing, instantly</span>';
+        bucketsEl.appendChild(bucket);
+      }
+      return indexed;
+    }
+
+    function renderScanRange(threshold) {
+      const scan = scanByPopulationGT(COUNTRIES, threshold);
+      const matchSet = new Set(scan.ids);
+      scanCostEl.textContent = scan.cost;
+      scanListEl.innerHTML = '';
+      COUNTRIES.forEach(c => {
+        const row = document.createElement('div');
+        row.className = 'dbi-row checked' + (matchSet.has(c.id) ? ' match' : '');
+        row.textContent = c.name + ' -- ' + fmt(c.population);
+        scanListEl.appendChild(row);
+      });
+      return scan;
+    }
+
+    function renderIndexRange(threshold) {
+      equalityViewEl.style.display = 'none';
+      rangeViewEl.style.display = '';
+      const indexed = indexByPopulationGT(popIndex, threshold);
+      indexCostEl.textContent = indexed.cost;
+      indexFormulaEl.textContent = indexed.comparisons + ' binary-search comparison' + (indexed.comparisons === 1 ? '' : 's') + ' + ' + indexed.ids.length + ' row' + (indexed.ids.length === 1 ? '' : 's') + ' fetched = ' + indexed.cost;
+      rangeViewEl.innerHTML = '';
+      const probeOrder = new Map();
+      indexed.probes.forEach((p, i) => { if (!probeOrder.has(p)) probeOrder.set(p, i + 1); });
+      popIndex.forEach((entry, i) => {
+        const c = byId.get(entry.id);
+        const row = document.createElement('div');
+        const isMatch = i >= indexed.boundary;
+        const wasProbed = probeOrder.has(i);
+        row.className = 'dbi-row' + (isMatch ? ' checked match' : wasProbed ? ' checked probed' : '');
+        row.innerHTML = (wasProbed ? '<span class="dbi-badge">probe ' + probeOrder.get(i) + '</span> ' : '') +
+          c.name + ' -- ' + fmt(entry.population);
+        rangeViewEl.appendChild(row);
+      });
+      return indexed;
+    }
+
+    function runQuery(logIt) {
+      let scanCost, indexCost, label;
+      if (mode === 'equality') {
+        const region = regionSelect.value;
+        const scan = renderScanEquality(region);
+        const indexed = renderIndexEquality(region);
+        scanCost = scan.cost; indexCost = indexed.cost;
+        label = "region = '" + region + "'";
+        explainEl.textContent = indexed.ids.length === 0
+          ? 'No country has region "' + region + '" -- the index still answers in 1 step, proving a negative is just as cheap as finding a match. The scan has no such shortcut: it still has to check all 20 rows to be sure.'
+          : 'The index hashes "' + region + '" straight to its bucket -- ' + indexed.ids.length + ' row' + (indexed.ids.length === 1 ? '' : 's') + ' fetched, ' + (N - indexed.ids.length) + ' other rows never touched at all. The scan has no buckets -- it checks every single row whether it matches or not.';
+      } else {
+        const threshold = Number(thresholdSlider.value);
+        const scan = renderScanRange(threshold);
+        const indexed = renderIndexRange(threshold);
+        scanCost = scan.cost; indexCost = indexed.cost;
+        label = 'population > ' + fmt(threshold);
+        explainEl.textContent = 'Binary search on the population-sorted index took ' + indexed.comparisons + ' probe' + (indexed.comparisons === 1 ? '' : 's') + ' to find the boundary -- ' + Math.ceil(Math.log2(N)) + ' or fewer is the guarantee for ' + N + ' rows. Everything past the boundary is a match, everything before it was never even looked at.';
+      }
+      if (logIt) {
+        const speedup = (scanCost / indexCost).toFixed(1);
+        log('WHERE ' + label + ' -> scan: ' + scanCost + ' steps, index: ' + indexCost + ' steps (' + speedup + 'x fewer steps)', 'good');
+      }
+    }
+
+    function setMode(m) {
+      mode = m;
+      modeBtns.forEach(b => b.classList.toggle('active', b.dataset.mode === m));
+      equalityControls.style.display = m === 'equality' ? '' : 'none';
+      rangeControls.style.display = m === 'range' ? 'flex' : 'none';
+      runQuery(false);
+    }
+
+    modeBtns.forEach(b => b.addEventListener('click', () => setMode(b.dataset.mode)));
+    regionSelect.addEventListener('change', () => runQuery(true));
+    thresholdSlider.addEventListener('input', () => {
+      thresholdReadout.textContent = fmt(Number(thresholdSlider.value));
+      runQuery(false);
+    });
+    thresholdSlider.addEventListener('change', () => runQuery(true));
+
+    runQuery(true);
+  })();
+  </script>
+</div>

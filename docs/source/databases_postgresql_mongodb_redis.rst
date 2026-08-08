@@ -800,6 +800,10 @@ Without one, you're searching every bin one by one. The directory
 helps you find things fast, but you have to keep it updated whenever
 items move.
 
+See :doc:`db_index_scan_interactive` to run this exact trade-off
+yourself against the live 20-country dataset -- same query, both
+ways, with the real step counts side by side.
+
 Types of Indexes in Our Dataset
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
