@@ -1,0 +1,431 @@
+<div class="usb-root" id="usbWidget">
+  <style>
+    #usbWidget {
+      --usb-bg: #0f172a;
+      --usb-panel: #16213e;
+      --usb-border: #2a3655;
+      --usb-text: #e2e8f0;
+      --usb-muted: #94a3b8;
+      --usb-accent: #38bdf8;
+      --usb-good: #4ade80;
+      --usb-bad: #f87171;
+      --usb-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--usb-bg);
+      color: var(--usb-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #usbWidget * { box-sizing: border-box; }
+    #usbWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #usbWidget .usb-sub { color: var(--usb-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .usb-box { background: var(--usb-panel); border: 1px solid var(--usb-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .usb-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--usb-muted); margin-bottom: 8px; }
+
+    .usb-catalog { display: flex; flex-wrap: wrap; gap: 8px; }
+    .usb-btn { background: var(--usb-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .usb-btn.secondary { background: transparent; color: var(--usb-text); border: 1px solid var(--usb-border); }
+    .usb-btn.small { padding: 4px 9px; font-size: 0.72rem; }
+    .usb-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    table.usb-table { border-collapse: collapse; width: 100%; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    table.usb-table th { text-align: left; color: var(--usb-muted); font-weight: 600; font-size: 0.68rem; padding: 4px 6px; border-bottom: 1px solid var(--usb-border); }
+    table.usb-table td { padding: 5px 6px; border-top: 1px solid var(--usb-border); vertical-align: middle; }
+    .usb-empty-row td { color: var(--usb-muted); font-style: italic; font-family: -apple-system, sans-serif; }
+
+    .usb-badge { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 0.7rem; font-weight: 700; }
+    .usb-badge.bound { background: rgba(74,222,128,0.18); color: var(--usb-good); }
+    .usb-badge.unclaimed { background: rgba(248,113,113,0.2); color: var(--usb-bad); }
+    .usb-badge.class-based { background: rgba(56,189,248,0.18); color: var(--usb-accent); }
+
+    .usb-driver-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .usb-driver-toggle { display: flex; align-items: center; gap: 6px; background: #0a1128; border: 1px solid var(--usb-border); border-radius: 7px; padding: 6px 10px; cursor: pointer; font-size: 0.76rem; font-family: ui-monospace, monospace; }
+    .usb-driver-toggle input { cursor: pointer; }
+    .usb-driver-hint { color: var(--usb-muted); font-size: 0.7rem; margin-top: 6px; font-family: -apple-system, sans-serif; }
+
+    .usb-devtree { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.7; }
+    .usb-devtree .none { color: var(--usb-muted); font-style: italic; font-family: -apple-system, sans-serif; }
+
+    .usb-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .usb-explain-panel, .usb-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .usb-explain-panel { flex: 1.3; }
+    .usb-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .usb-log div { color: var(--usb-muted); }
+    .usb-log div.good { color: var(--usb-good); }
+    .usb-log div.bad { color: var(--usb-bad); }
+    .usb-log div.warn { color: var(--usb-warn); }
+
+    .usb-write-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px; }
+    .usb-write-row select { background: #0a1128; color: var(--usb-text); border: 1px solid var(--usb-border); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+
+    details.usb-notes { margin-top: 4px; background: var(--usb-panel); border: 1px solid var(--usb-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.usb-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.usb-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--usb-muted); }
+    details.usb-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--usb-accent); }
+  </style>
+
+  <h3>USB Device Binding: Play With It</h3>
+  <div class="usb-sub">Plug in devices and watch the kernel actually decide how to handle each one: a standard USB class (CDC-ACM, Mass Storage, HID, UVC, UAC, Printer) always gets a built-in driver, but a vendor-specific chip only gets a <code>/dev</code> node if that exact chip's driver happens to be installed.</div>
+
+  <div class="usb-box">
+    <div class="usb-panel-title">Plug in a device</div>
+    <div class="usb-catalog" id="usbCatalog"></div>
+  </div>
+
+  <div class="usb-box">
+    <div class="usb-panel-title">Driver modules (vendor-specific serial chips only -- class drivers below are always built in)</div>
+    <div class="usb-driver-row" id="usbDriverToggles"></div>
+    <div class="usb-driver-hint">Toggling a driver off unbinds every currently-attached device that needs it -- exactly as unplugging its kernel module (<code>rmmod</code>) would. Toggling it back on binds them immediately, without needing to unplug and replug.</div>
+  </div>
+
+  <div class="usb-box">
+    <div class="usb-panel-title">USB bus -- attached devices</div>
+    <div style="overflow-x:auto;">
+      <table class="usb-table" id="usbAttachedTable"></table>
+    </div>
+  </div>
+
+  <div class="usb-box">
+    <div class="usb-panel-title">Live /dev tree</div>
+    <div class="usb-devtree" id="usbDevTree"></div>
+  </div>
+
+  <div class="usb-box">
+    <div class="usb-panel-title">Try writing to a device</div>
+    <div class="usb-write-row">
+      <select id="usbWriteSelect"></select>
+      <button class="usb-btn small" id="usbWriteViaNode">Write via its device node</button>
+      <button class="usb-btn small secondary" id="usbWriteViaRaw">Write via raw USB bus path</button>
+    </div>
+  </div>
+
+  <div class="usb-panels">
+    <div class="usb-explain-panel">
+      <div class="usb-box" style="margin-bottom:0;">
+        <div class="usb-panel-title">What's happening right now</div>
+        <div id="usbExplain">Plug in a device to see how the kernel decides whether -- and where -- it shows up in <code>/dev</code>.</div>
+      </div>
+    </div>
+    <div class="usb-side-panel-col">
+      <div class="usb-box" style="margin-bottom:0;">
+        <div class="usb-panel-title">Event log</div>
+        <div class="usb-log" id="usbLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="usb-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>Class vs. vendor chip is the real distinction, not a widget simplification.</b> A device that declares a standard USB class (CDC-ACM, Mass Storage, HID, UVC, UAC, Printer) in its descriptor gets claimed by a generic driver the kernel already ships -- that's why an Arduino Uno "just works" with no install step. A device with no standard class (declared as vendor-specific, <code>0xFF</code>) can only be claimed by a driver that matches its exact VID:PID -- FTDI, CP210x, CH340, and PL2303 adapters all fall in this bucket.</li>
+      <li><b><code>/dev/ttyUSB*</code> numbering is one shared pool across every vendor-chip driver</b>, not a separate counter per chip. Plug in a CH340 clone and then an FTDI adapter and you get <code>ttyUSB0</code> and <code>ttyUSB1</code> -- never two independent "ttyUSB0"s. <code>/dev/ttyACM*</code> is CDC-ACM's own separate pool.</li>
+      <li><b>Freed indices are reused, but never retroactively.</b> Unplugging <code>ttyUSB0</code> makes 0 the lowest free index again, so the next vendor-chip device to bind gets it. But a device that's already bound and sitting at <code>ttyUSB1</code> keeps that number for as long as it stays attached -- it does not get renumbered down to 0 just because a lower slot opened up. Try it: attach three vendor-chip devices, unplug the first, then toggle a driver off and back on for one of the others and watch its number survive unchanged.</li>
+      <li>The VID:PID pairs and node assignments here are representative examples for teaching the mechanism, not a database lookup -- the binding <i>logic</i> (class-match first, vendor-ID-match as the fallback, lowest-free-index allocation per shared pool) is the real thing being modeled.</li>
+      <li>See <a href="linux_devices.html">Complete Guide to Linux Devices</a> for the full write-up this widget is built from, including the block/character/network/terminal/pseudo device taxonomy this widget doesn't cover.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    const CLASS_DRIVERS = {
+      0x02: { name: 'cdc_acm', label: 'CDC-ACM (Communications)', pool: 'ttyACM' },
+      0x08: { name: 'usb_storage', label: 'Mass Storage', pool: 'sd' },
+      0x03: { name: 'usbhid', label: 'HID', pool: 'hidraw' },
+      0x0e: { name: 'uvcvideo', label: 'Video (UVC)', pool: 'video' },
+      0x01: { name: 'snd_usb_audio', label: 'Audio (UAC)', pool: 'pcmC' },
+      0x07: { name: 'usblp', label: 'Printer', pool: 'usbLp' },
+    };
+
+    const VENDOR_DRIVERS = ['ftdi_sio', 'cp210x', 'ch341', 'pl2303'];
+    const VENDOR_DRIVER_LABEL = {
+      ftdi_sio: 'ftdi_sio (FTDI chips)',
+      cp210x: 'cp210x (Silicon Labs -- ESP32 etc.)',
+      ch341: 'ch341 (CH340 clones)',
+      pl2303: 'pl2303 (Prolific, aging)',
+    };
+
+    const DEVICE_CATALOG = {
+      arduino_uno: { label: 'Arduino Uno', vid: '2341', pid: '0043', classCode: 0x02 },
+      esp32: { label: 'ESP32 Dev Board', vid: '10C4', pid: 'EA60', classCode: 0xff, vendorDriver: 'cp210x' },
+      arduino_clone: { label: 'Arduino Clone (CH340)', vid: '1A86', pid: '7523', classCode: 0xff, vendorDriver: 'ch341' },
+      ftdi_adapter: { label: 'USB-Serial Adapter (FTDI)', vid: '0403', pid: '6001', classCode: 0xff, vendorDriver: 'ftdi_sio' },
+      pl2303_cable: { label: 'USB-Serial Cable (PL2303)', vid: '067B', pid: '2303', classCode: 0xff, vendorDriver: 'pl2303' },
+      flash_drive: { label: 'USB Flash Drive', vid: '0781', pid: '5567', classCode: 0x08 },
+      mouse: { label: 'USB Mouse', vid: '046D', pid: 'C077', classCode: 0x03 },
+      webcam: { label: 'USB Webcam', vid: '0C45', pid: '6366', classCode: 0x0e },
+      speaker: { label: 'USB Speaker', vid: '0D8C', pid: '0014', classCode: 0x01 },
+      printer: { label: 'USB Printer', vid: '03F0', pid: '4E11', classCode: 0x07 },
+    };
+
+    const SD_LETTERS = 'abcdefghijklmnopqrstuvwxyz';
+
+    function lowestFreeIndex(usedSet) {
+      let i = 0;
+      while (usedSet.has(i)) i++;
+      return i;
+    }
+
+    function nodePath(pool, index) {
+      switch (pool) {
+        case 'ttyACM': return '/dev/ttyACM' + index;
+        case 'ttyUSB': return '/dev/ttyUSB' + index;
+        case 'sd': return '/dev/sd' + SD_LETTERS[index];
+        case 'hidraw': return '/dev/hidraw' + index;
+        case 'video': return '/dev/video' + index;
+        case 'pcmC': return '/dev/snd/pcmC' + index + 'D0p';
+        case 'usbLp': return '/dev/usb/lp' + index;
+        default: throw new Error('unknown pool ' + pool);
+      }
+    }
+
+    function createState() {
+      return {
+        nextBusDevNum: 1,
+        attached: [],
+        driverInstalled: { ftdi_sio: true, cp210x: true, ch341: true, pl2303: false },
+        nextInstanceId: 1,
+      };
+    }
+
+    function poolOf(catalogEntry) {
+      if (CLASS_DRIVERS[catalogEntry.classCode]) return CLASS_DRIVERS[catalogEntry.classCode].pool;
+      return 'ttyUSB';
+    }
+
+    function usedIndices(state, pool) {
+      const s = new Set();
+      for (const d of state.attached) {
+        if (d.nodePath !== null && d.pool === pool) s.add(d.index);
+      }
+      return s;
+    }
+
+    function tryBind(state, dev) {
+      const cat = DEVICE_CATALOG[dev.catalogKey];
+      const classDriver = CLASS_DRIVERS[cat.classCode];
+      let boundVia;
+      if (classDriver) {
+        boundVia = classDriver.name;
+      } else {
+        if (!state.driverInstalled[cat.vendorDriver]) return;
+        boundVia = cat.vendorDriver;
+      }
+      const pool = dev.pool;
+      const idx = lowestFreeIndex(usedIndices(state, pool));
+      dev.boundVia = boundVia;
+      dev.index = idx;
+      dev.nodePath = nodePath(pool, idx);
+    }
+
+    function unbind(dev) {
+      dev.boundVia = null;
+      dev.index = null;
+      dev.nodePath = null;
+    }
+
+    function plug(state, catalogKey) {
+      const cat = DEVICE_CATALOG[catalogKey];
+      const dev = {
+        instanceId: state.nextInstanceId++,
+        catalogKey: catalogKey,
+        busDevNum: state.nextBusDevNum++,
+        pool: poolOf(cat),
+        boundVia: null,
+        index: null,
+        nodePath: null,
+      };
+      state.attached.push(dev);
+      tryBind(state, dev);
+      return dev.instanceId;
+    }
+
+    function unplug(state, instanceId) {
+      const i = state.attached.findIndex(function (d) { return d.instanceId === instanceId; });
+      if (i === -1) throw new Error('not attached: ' + instanceId);
+      state.attached.splice(i, 1);
+    }
+
+    function setDriverInstalled(state, driverName, installed) {
+      const prevDevices = state.attached.filter(function (d) {
+        return DEVICE_CATALOG[d.catalogKey].vendorDriver === driverName;
+      });
+      state.driverInstalled[driverName] = installed;
+      if (!installed) {
+        prevDevices.forEach(function (d) { if (d.nodePath !== null) unbind(d); });
+      } else {
+        prevDevices.forEach(function (d) { if (d.nodePath === null) tryBind(state, d); });
+      }
+    }
+
+    // --- Widget state & UI ---
+
+    const state = createState();
+    const catalogEl = document.getElementById('usbCatalog');
+    const driverTogglesEl = document.getElementById('usbDriverToggles');
+    const attachedTableEl = document.getElementById('usbAttachedTable');
+    const devTreeEl = document.getElementById('usbDevTree');
+    const writeSelectEl = document.getElementById('usbWriteSelect');
+    const explainEl = document.getElementById('usbExplain');
+    const logEl = document.getElementById('usbLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    Object.keys(DEVICE_CATALOG).forEach(function (key) {
+      const cat = DEVICE_CATALOG[key];
+      const btn = document.createElement('button');
+      btn.className = 'usb-btn';
+      btn.textContent = '+ ' + cat.label;
+      btn.addEventListener('click', function () {
+        const id = plug(state, key);
+        const dev = state.attached.find(function (d) { return d.instanceId === id; });
+        if (dev.nodePath) {
+          log('Plugged in ' + cat.label + ' (VID:PID ' + cat.vid + ':' + cat.pid + ') -> bound as ' + dev.nodePath, 'good');
+          explainEl.textContent = cat.label + ' enumerated with VID:PID ' + cat.vid + ':' + cat.pid + '. ' +
+            (cat.vendorDriver
+              ? 'It declares a vendor-specific class, so the kernel matched it against the installed ' + cat.vendorDriver + ' driver by exact VID:PID and bound it as ' + dev.nodePath + '.'
+              : 'It declares the standard ' + CLASS_DRIVERS[cat.classCode].label + ' class, so a generic in-kernel driver claimed it immediately -- bound as ' + dev.nodePath + '.');
+        } else {
+          log('Plugged in ' + cat.label + ' (VID:PID ' + cat.vid + ':' + cat.pid + ') -> visible on the bus, but UNCLAIMED (no ' + cat.vendorDriver + ' driver installed)', 'bad');
+          explainEl.textContent = cat.label + ' enumerated on the USB bus (it would show up in lsusb with VID:PID ' + cat.vid + ':' + cat.pid + '), but it declares a vendor-specific class with no generic driver. Its ' + cat.vendorDriver + ' driver is not installed, so no /dev node was created -- toggle that driver on above to fix it without unplugging.';
+        }
+        renderAll();
+      });
+      catalogEl.appendChild(btn);
+    });
+
+    VENDOR_DRIVERS.forEach(function (name) {
+      const label = document.createElement('label');
+      label.className = 'usb-driver-toggle';
+      label.innerHTML = '<input type="checkbox" data-driver="' + name + '" ' + (state.driverInstalled[name] ? 'checked' : '') + '> ' + VENDOR_DRIVER_LABEL[name];
+      label.querySelector('input').addEventListener('change', function (ev) {
+        const installed = ev.target.checked;
+        setDriverInstalled(state, name, installed);
+        log((installed ? 'Loaded driver ' : 'Removed driver ') + name + (installed ? ' -- any attached matching device binds immediately.' : ' -- any attached matching device is unbound.'), installed ? 'good' : 'warn');
+        explainEl.textContent = installed
+          ? 'Driver ' + name + ' is now installed. Every currently-attached device that needs it just got bound to a /dev node, with no replugging required.'
+          : 'Driver ' + name + ' was just removed. Every currently-attached device that depended on it lost its /dev node -- it is still physically plugged in and visible on the bus, just unclaimed.';
+        renderAll();
+      });
+      driverTogglesEl.appendChild(label);
+    });
+
+    function renderAttachedTable() {
+      if (state.attached.length === 0) {
+        attachedTableEl.innerHTML = '<tr class="usb-empty-row"><td>Nothing plugged in yet.</td></tr>';
+        return;
+      }
+      let html = '<thead><tr><th>Device</th><th>Bus</th><th>VID:PID</th><th>Class</th><th>Status</th><th>Node</th><th></th></tr></thead><tbody>';
+      state.attached.forEach(function (d) {
+        const cat = DEVICE_CATALOG[d.catalogKey];
+        const classLabel = CLASS_DRIVERS[cat.classCode] ? CLASS_DRIVERS[cat.classCode].label : 'Vendor-specific (0xFF)';
+        let badge;
+        if (d.nodePath) {
+          badge = '<span class="usb-badge ' + (cat.vendorDriver ? 'bound' : 'class-based') + '">bound via ' + d.boundVia + '</span>';
+        } else {
+          badge = '<span class="usb-badge unclaimed">unclaimed</span>';
+        }
+        html += '<tr>' +
+          '<td>' + cat.label + '</td>' +
+          '<td>Bus 001 Dev ' + String(d.busDevNum).padStart(3, '0') + '</td>' +
+          '<td>' + cat.vid + ':' + cat.pid + '</td>' +
+          '<td>' + classLabel + '</td>' +
+          '<td>' + badge + '</td>' +
+          '<td>' + (d.nodePath || '<span class="usb-badge unclaimed" style="background:none;color:var(--usb-muted);">none</span>') + '</td>' +
+          '<td><button class="usb-btn small secondary" data-unplug="' + d.instanceId + '">Unplug</button></td>' +
+          '</tr>';
+      });
+      html += '</tbody>';
+      attachedTableEl.innerHTML = html;
+
+      attachedTableEl.querySelectorAll('[data-unplug]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = parseInt(btn.dataset.unplug, 10);
+          const dev = state.attached.find(function (d) { return d.instanceId === id; });
+          const cat = DEVICE_CATALOG[dev.catalogKey];
+          const freedNode = dev.nodePath;
+          unplug(state, id);
+          log('Unplugged ' + cat.label + (freedNode ? ' -- ' + freedNode + ' is released, its index becomes the lowest free slot again.' : ' (was already unclaimed).'), 'warn');
+          explainEl.textContent = freedNode
+            ? cat.label + ' was unplugged. ' + freedNode + ' is gone -- the next device that binds into that same pool will get that index back, but only devices bound *after* this point, not anything already bound at a higher index.'
+            : cat.label + ' (which was never claimed by a driver) was unplugged.';
+          renderAll();
+        });
+      });
+    }
+
+    function renderDevTree() {
+      const bound = state.attached.filter(function (d) { return d.nodePath !== null; });
+      if (bound.length === 0) {
+        devTreeEl.innerHTML = '<span class="none">No device nodes currently exist under /dev.</span>';
+        return;
+      }
+      const sorted = bound.slice().sort(function (a, b) { return a.nodePath.localeCompare(b.nodePath); });
+      devTreeEl.innerHTML = sorted.map(function (d) {
+        const cat = DEVICE_CATALOG[d.catalogKey];
+        return d.nodePath + '  <span style="color:var(--usb-muted)">-- ' + cat.label + ' (' + d.boundVia + ')</span>';
+      }).join('<br>');
+    }
+
+    function renderWriteSelect() {
+      const prev = writeSelectEl.value;
+      writeSelectEl.innerHTML = '';
+      state.attached.forEach(function (d) {
+        const cat = DEVICE_CATALOG[d.catalogKey];
+        const opt = document.createElement('option');
+        opt.value = d.instanceId;
+        opt.textContent = cat.label + (d.nodePath ? ' (' + d.nodePath + ')' : ' (unclaimed)');
+        writeSelectEl.appendChild(opt);
+      });
+      if (prev && state.attached.some(function (d) { return String(d.instanceId) === prev; })) {
+        writeSelectEl.value = prev;
+      }
+      const hasDevices = state.attached.length > 0;
+      document.getElementById('usbWriteViaNode').disabled = !hasDevices;
+      document.getElementById('usbWriteViaRaw').disabled = !hasDevices;
+    }
+
+    function renderAll() {
+      renderAttachedTable();
+      renderDevTree();
+      renderWriteSelect();
+    }
+
+    document.getElementById('usbWriteViaNode').addEventListener('click', function () {
+      const id = parseInt(writeSelectEl.value, 10);
+      const dev = state.attached.find(function (d) { return d.instanceId === id; });
+      if (!dev) return;
+      const cat = DEVICE_CATALOG[dev.catalogKey];
+      if (dev.nodePath) {
+        log('echo "data" > ' + dev.nodePath + '  -- succeeds. The driver understands the actual protocol ' + cat.label + ' speaks.', 'good');
+        explainEl.textContent = 'Writing to ' + dev.nodePath + ' works because the driver bound to this device (' + dev.boundVia + ') translates your bytes into whatever ' + cat.label + ' actually speaks -- serial framing, SCSI block commands, HID reports, whatever the case may be.';
+      } else {
+        log('No device node exists for ' + cat.label + ' -- nothing to write to.', 'bad');
+        explainEl.textContent = cat.label + ' has no /dev node because its driver (' + cat.vendorDriver + ') is not installed. Install it above, then try again.';
+      }
+    });
+
+    document.getElementById('usbWriteViaRaw').addEventListener('click', function () {
+      const id = parseInt(writeSelectEl.value, 10);
+      const dev = state.attached.find(function (d) { return d.instanceId === id; });
+      if (!dev) return;
+      const cat = DEVICE_CATALOG[dev.catalogKey];
+      log('echo "data" > /dev/bus/usb/001/' + String(dev.busDevNum).padStart(3, '0') + '  -- fails. That path is raw USB transport, not a protocol translator.', 'bad');
+      explainEl.textContent = 'The raw USB bus path only speaks USB transport-level requests, not the actual protocol ' + cat.label + ' speaks. Whatever driver bound this device (or failed to) is what creates the higher-level file that understands the device -- there is no way to skip that layer.';
+    });
+
+    renderAll();
+  })();
+  </script>
+</div>

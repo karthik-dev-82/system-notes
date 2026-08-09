@@ -180,6 +180,12 @@ default choice either way.
 USB Devices - Understanding the Layers
 -------------------------------------------
 
+.. seealso::
+   See :doc:`usb_binding_interactive` for a hands-on version of this
+   section -- plug devices in, watch class drivers bind instantly and
+   vendor-chip drivers fail until installed, and see exactly how
+   ``/dev/ttyUSB*`` numbering is allocated.
+
 The Key Concept
 ~~~~~~~~~~~~~~~~~~~
 

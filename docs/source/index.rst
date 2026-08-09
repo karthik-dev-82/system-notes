@@ -14,6 +14,7 @@ worth writing down and coming back to.
    system_monitoring_commands
    developer_commands
    linux_devices
+   usb_binding_interactive
 
 .. toctree::
    :hidden:
@@ -167,6 +168,9 @@ Shell & System Basics
    * - :doc:`linux_devices`
      - Block/char/network/terminal/pseudo devices, and USB layering
      - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
+   * - :doc:`usb_binding_interactive`
+     - Play With It: class vs. vendor-chip driver binding, live
+     - ``cdc_acm``, ``ftdi_sio``/``cp210x``/``ch341``/``pl2303``, minor numbers
 
 Networking
 -----------------
