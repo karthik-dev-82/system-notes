@@ -101,6 +101,12 @@ Commands:
 4. Terminal Devices (TTY)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+.. seealso::
+   See :doc:`tty_sessions_interactive` for a hands-on version of this
+   section -- open GUI terminals and SSH sessions and watch them share
+   one ``/dev/pts/N`` pool, switch virtual consoles without logging
+   anyone out, and see exactly what ``who`` is showing you.
+
 **What:** let humans interact with the computer through text.
 
 **Analogy:** a two-way walkie-talkie between you and Linux.

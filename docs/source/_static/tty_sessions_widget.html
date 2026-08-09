@@ -1,0 +1,409 @@
+<div class="tty-root" id="ttyWidget">
+  <style>
+    #ttyWidget {
+      --tty-bg: #0f172a;
+      --tty-panel: #16213e;
+      --tty-border: #2a3655;
+      --tty-text: #e2e8f0;
+      --tty-muted: #94a3b8;
+      --tty-accent: #38bdf8;
+      --tty-good: #4ade80;
+      --tty-bad: #f87171;
+      --tty-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--tty-bg);
+      color: var(--tty-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ttyWidget * { box-sizing: border-box; }
+    #ttyWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ttyWidget .tty-sub { color: var(--tty-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .tty-box { background: var(--tty-panel); border: 1px solid var(--tty-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .tty-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--tty-muted); margin-bottom: 8px; }
+
+    .tty-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .tty-btn { background: var(--tty-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .tty-btn.secondary { background: transparent; color: var(--tty-text); border: 1px solid var(--tty-border); }
+    .tty-btn.small { padding: 4px 9px; font-size: 0.72rem; }
+    .tty-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .tty-console-strip { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tty-console {
+      flex: 1; min-width: 90px; border: 2px solid var(--tty-border); border-radius: 8px; padding: 8px 10px;
+      font-family: ui-monospace, monospace; font-size: 0.76rem; cursor: pointer; background: #0a1128;
+    }
+    .tty-console.active { border-color: var(--tty-accent); box-shadow: 0 0 0 1px var(--tty-accent) inset; }
+    .tty-console .tty-console-name { font-weight: 700; color: #fff; }
+    .tty-console .tty-console-user { color: var(--tty-good); }
+    .tty-console .tty-console-empty { color: var(--tty-muted); font-style: italic; }
+    .tty-console.gui { border-style: dashed; }
+
+    table.tty-table { border-collapse: collapse; width: 100%; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    table.tty-table th { text-align: left; color: var(--tty-muted); font-weight: 600; font-size: 0.68rem; padding: 4px 6px; border-bottom: 1px solid var(--tty-border); }
+    table.tty-table td { padding: 5px 6px; border-top: 1px solid var(--tty-border); vertical-align: middle; }
+    .tty-empty-row td { color: var(--tty-muted); font-style: italic; font-family: -apple-system, sans-serif; }
+    .tty-kind-badge { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 0.68rem; font-weight: 700; }
+    .tty-kind-badge.gui-terminal { background: rgba(56,189,248,0.18); color: var(--tty-accent); }
+    .tty-kind-badge.ssh { background: rgba(74,222,128,0.18); color: var(--tty-good); }
+    .tty-kind-badge.virtual-console { background: rgba(251,191,36,0.18); color: var(--tty-warn); }
+    .tty-kind-badge.serial { background: rgba(248,113,113,0.18); color: var(--tty-bad); }
+    .tty-kind-badge.gui { background: rgba(148,163,184,0.18); color: var(--tty-muted); }
+
+    .tty-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .tty-explain-panel, .tty-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .tty-explain-panel { flex: 1.3; }
+    .tty-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .tty-log div { color: var(--tty-muted); }
+    .tty-log div.good { color: var(--tty-good); }
+    .tty-log div.bad { color: var(--tty-bad); }
+    .tty-log div.warn { color: var(--tty-warn); }
+
+    details.tty-notes { margin-top: 4px; background: var(--tty-panel); border: 1px solid var(--tty-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.tty-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.tty-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--tty-muted); }
+    details.tty-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--tty-accent); }
+  </style>
+
+  <h3>Terminal Sessions (TTY/PTY/Serial): Play With It</h3>
+  <div class="tty-sub">Open GUI terminals, SSH in, switch virtual consoles, and plug in a serial cable -- watch exactly which <code>/dev</code> device each one gets, and why <code>who</code> shows what it shows.</div>
+
+  <div class="tty-box">
+    <div class="tty-panel-title">Actions</div>
+    <div class="tty-actions">
+      <button class="tty-btn" id="ttyOpenGui">+ Open GUI terminal</button>
+      <button class="tty-btn" id="ttySshIn">+ SSH in</button>
+      <button class="tty-btn secondary" id="ttyConnectSerial">Connect serial cable</button>
+      <button class="tty-btn secondary" id="ttyDisconnectSerial">Disconnect serial cable</button>
+    </div>
+  </div>
+
+  <div class="tty-box">
+    <div class="tty-panel-title">Virtual consoles (Ctrl+Alt+F1..F6) -- click one to switch, exactly one is ever "active"</div>
+    <div class="tty-console-strip" id="ttyConsoleStrip"></div>
+    <div class="tty-actions" style="margin-top:10px;" id="ttyConsoleLoginActions"></div>
+  </div>
+
+  <div class="tty-box">
+    <div class="tty-panel-title">Open pseudo-terminal (PTY) sessions -- one shared <code>/dev/pts/N</code> pool</div>
+    <div style="overflow-x:auto;">
+      <table class="tty-table" id="ttyPtsTable"></table>
+    </div>
+  </div>
+
+  <div class="tty-box">
+    <div class="tty-panel-title"><code>who</code> -- all active login sessions right now</div>
+    <div style="overflow-x:auto;">
+      <table class="tty-table" id="ttyWhoTable"></table>
+    </div>
+  </div>
+
+  <div class="tty-panels">
+    <div class="tty-explain-panel">
+      <div class="tty-box" style="margin-bottom:0;">
+        <div class="tty-panel-title">What's happening right now</div>
+        <div id="ttyExplain">Open a terminal, SSH in, or switch a console to see how the kernel decides which device you land on.</div>
+      </div>
+    </div>
+    <div class="tty-side-panel-col">
+      <div class="tty-box" style="margin-bottom:0;">
+        <div class="tty-panel-title">Event log</div>
+        <div class="tty-log" id="ttyLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="tty-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>GUI terminals and SSH sessions share the exact same <code>/dev/pts/N</code> allocator.</b> There's nothing structurally different between opening a terminal emulator locally and SSHing in remotely -- both ask the kernel for the next pseudo-terminal, and both get the lowest currently-free index. That's the same "one shared pool, lowest free index" rule the <a href="usb_binding_interactive.html">USB device binding widget</a> shows for <code>/dev/ttyUSB*</code> -- not a coincidence, it's a general allocation pattern the kernel reuses across subsystems.</li>
+      <li><b>Freed pts indices are reused, but never retroactively</b> -- close pts/0 while pts/1 is still open, and pts/1 keeps its number. The next new session gets 0 back. Try it above: open three sessions, close the first, then open a fourth and watch it reuse the freed slot while the still-open second session is untouched.</li>
+      <li><b>Switching virtual consoles never logs anyone out.</b> A login session on <code>tty3</code> keeps running whether or not <code>tty3</code> is the one currently displayed -- "active" (what's on screen) and "logged in" (whether a session exists there) are independent bits of state.</li>
+      <li><b>The GUI session's console (modeled here as <code>tty1</code>) can't be logged out from this widget</b> -- historically the desktop often lived on <code>tty7</code>, but modern systemd/Wayland setups commonly put it on <code>tty1</code> or <code>tty2</code>; the exact number varies by distro, the "it's just another VC, permanently occupied" mechanism doesn't.</li>
+      <li><code>/dev/ttyS0</code> is a real physical wire -- only one login session can ever occupy it at a time, unlike the PTY pool which can grow to as many concurrent sessions as you open.</li>
+      <li>See <a href="linux_devices.html">Complete Guide to Linux Devices</a> for the full write-up this widget's terminal-device section is built from.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    const VC_COUNT = 6;
+    const GUI_VC = 1;
+
+    function lowestFreeIndex(usedSet) {
+      let i = 0;
+      while (usedSet.has(i)) i++;
+      return i;
+    }
+
+    function createState() {
+      const virtualConsoles = {};
+      for (let n = 1; n <= VC_COUNT; n++) {
+        virtualConsoles[n] = { loggedInUser: n === GUI_VC ? 'you (desktop session)' : null };
+      }
+      return {
+        nextInstanceId: 1,
+        ptsSessions: [],
+        virtualConsoles: virtualConsoles,
+        activeConsole: GUI_VC,
+        serialOccupant: null,
+      };
+    }
+
+    function usedPtsIndices(state) {
+      return new Set(state.ptsSessions.map(function (s) { return s.index; }));
+    }
+
+    function openGuiTerminal(state, user) {
+      const idx = lowestFreeIndex(usedPtsIndices(state));
+      const sess = { instanceId: state.nextInstanceId++, index: idx, kind: 'gui-terminal', user: user, fromAddress: null };
+      state.ptsSessions.push(sess);
+      return sess.instanceId;
+    }
+
+    function sshIn(state, user, fromAddress) {
+      const idx = lowestFreeIndex(usedPtsIndices(state));
+      const sess = { instanceId: state.nextInstanceId++, index: idx, kind: 'ssh', user: user, fromAddress: fromAddress };
+      state.ptsSessions.push(sess);
+      return sess.instanceId;
+    }
+
+    function closePtsSession(state, instanceId) {
+      const i = state.ptsSessions.findIndex(function (s) { return s.instanceId === instanceId; });
+      if (i === -1) throw new Error('no such pts session: ' + instanceId);
+      state.ptsSessions.splice(i, 1);
+    }
+
+    function switchConsole(state, n) {
+      if (n < 1 || n > VC_COUNT) throw new Error('bad console number ' + n);
+      state.activeConsole = n;
+    }
+
+    function loginOnConsole(state, n, user) {
+      if (n === GUI_VC) throw new Error('tty1 is the GUI session, not a login console');
+      if (state.virtualConsoles[n].loggedInUser !== null) return false;
+      state.virtualConsoles[n].loggedInUser = user;
+      return true;
+    }
+
+    function logoutConsole(state, n) {
+      if (n === GUI_VC) throw new Error('cannot log out the GUI session');
+      state.virtualConsoles[n].loggedInUser = null;
+    }
+
+    function connectSerial(state, user) {
+      if (state.serialOccupant !== null) return false;
+      state.serialOccupant = { user: user };
+      return true;
+    }
+
+    function disconnectSerial(state) {
+      state.serialOccupant = null;
+    }
+
+    function whoList(state) {
+      const rows = [];
+      for (let n = 1; n <= VC_COUNT; n++) {
+        const u = state.virtualConsoles[n].loggedInUser;
+        if (u !== null) rows.push({ device: 'tty' + n, user: u, kind: n === GUI_VC ? 'gui' : 'virtual-console' });
+      }
+      state.ptsSessions.forEach(function (s) {
+        rows.push({ device: 'pts/' + s.index, user: s.user, kind: s.kind, fromAddress: s.fromAddress });
+      });
+      if (state.serialOccupant) {
+        rows.push({ device: 'ttyS0', user: state.serialOccupant.user, kind: 'serial' });
+      }
+      return rows;
+    }
+
+    // --- Widget state & UI ---
+
+    const state = createState();
+    const USER_CYCLE = ['alice', 'bob', 'carol', 'dave'];
+    const ADDR_CYCLE = ['203.0.113.50', '198.51.100.7', '192.0.2.10'];
+    let userCounter = 0;
+    let addrCounter = 0;
+    function nextUser() { const u = USER_CYCLE[userCounter % USER_CYCLE.length]; userCounter++; return u; }
+    function nextAddr() { const a = ADDR_CYCLE[addrCounter % ADDR_CYCLE.length]; addrCounter++; return a; }
+
+    const consoleStripEl = document.getElementById('ttyConsoleStrip');
+    const consoleLoginActionsEl = document.getElementById('ttyConsoleLoginActions');
+    const ptsTableEl = document.getElementById('ttyPtsTable');
+    const whoTableEl = document.getElementById('ttyWhoTable');
+    const explainEl = document.getElementById('ttyExplain');
+    const logEl = document.getElementById('ttyLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderConsoleStrip() {
+      consoleStripEl.innerHTML = '';
+      for (let n = 1; n <= VC_COUNT; n++) {
+        const vc = state.virtualConsoles[n];
+        const div = document.createElement('div');
+        div.className = 'tty-console' + (state.activeConsole === n ? ' active' : '') + (n === GUI_VC ? ' gui' : '');
+        div.innerHTML = '<div class="tty-console-name">tty' + n + (n === GUI_VC ? ' (GUI)' : '') + '</div>' +
+          (vc.loggedInUser ? '<div class="tty-console-user">' + vc.loggedInUser + '</div>' : '<div class="tty-console-empty">no login</div>');
+        div.addEventListener('click', function () {
+          switchConsole(state, n);
+          log('Switched to tty' + n + ' (Ctrl+Alt+F' + n + ').', 'warn');
+          explainEl.textContent = 'tty' + n + ' is now the active (displayed) console. ' +
+            (vc.loggedInUser ? 'It already has a login session for ' + vc.loggedInUser + ', untouched by the switch.' : 'It has no login session yet -- log in below to create one.');
+          renderAll();
+        });
+        consoleStripEl.appendChild(div);
+      }
+    }
+
+    function renderConsoleLoginActions() {
+      consoleLoginActionsEl.innerHTML = '';
+      const n = state.activeConsole;
+      if (n === GUI_VC) {
+        consoleLoginActionsEl.innerHTML = '<span style="color:var(--tty-muted);font-size:0.78rem;">tty1 is the permanent GUI session -- nothing to log in or out of here.</span>';
+        return;
+      }
+      const vc = state.virtualConsoles[n];
+      if (vc.loggedInUser === null) {
+        const btn = document.createElement('button');
+        btn.className = 'tty-btn small';
+        btn.textContent = 'Log in on tty' + n;
+        btn.addEventListener('click', function () {
+          const user = nextUser();
+          loginOnConsole(state, n, user);
+          log('Logged in as ' + user + ' on tty' + n + '.', 'good');
+          explainEl.textContent = user + ' is now logged in on tty' + n + '. That session persists even if you switch to another console and back.';
+          renderAll();
+        });
+        consoleLoginActionsEl.appendChild(btn);
+      } else {
+        const btn = document.createElement('button');
+        btn.className = 'tty-btn small secondary';
+        btn.textContent = 'Log out of tty' + n;
+        btn.addEventListener('click', function () {
+          const user = vc.loggedInUser;
+          logoutConsole(state, n);
+          log(user + ' logged out of tty' + n + '.', 'warn');
+          explainEl.textContent = 'tty' + n + ' now shows an empty login prompt again.';
+          renderAll();
+        });
+        consoleLoginActionsEl.appendChild(btn);
+      }
+    }
+
+    function renderPtsTable() {
+      if (state.ptsSessions.length === 0) {
+        ptsTableEl.innerHTML = '<tr class="tty-empty-row"><td>No open pseudo-terminal sessions.</td></tr>';
+        return;
+      }
+      let html = '<thead><tr><th>Device</th><th>Origin</th><th>User</th><th>From</th><th></th></tr></thead><tbody>';
+      state.ptsSessions.forEach(function (s) {
+        html += '<tr>' +
+          '<td>/dev/pts/' + s.index + '</td>' +
+          '<td><span class="tty-kind-badge ' + s.kind + '">' + (s.kind === 'ssh' ? 'SSH' : 'GUI terminal') + '</span></td>' +
+          '<td>' + s.user + '</td>' +
+          '<td>' + (s.fromAddress || '<span style="color:var(--tty-muted)">local</span>') + '</td>' +
+          '<td><button class="tty-btn small secondary" data-close="' + s.instanceId + '">Close</button></td>' +
+          '</tr>';
+      });
+      html += '</tbody>';
+      ptsTableEl.innerHTML = html;
+
+      ptsTableEl.querySelectorAll('[data-close]').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          const id = parseInt(btn.dataset.close, 10);
+          const sess = state.ptsSessions.find(function (s) { return s.instanceId === id; });
+          const freedIndex = sess.index;
+          closePtsSession(state, id);
+          log('Closed /dev/pts/' + freedIndex + ' (' + sess.user + ').', 'warn');
+          explainEl.textContent = '/dev/pts/' + freedIndex + ' is gone. That index is the lowest free slot again for the next new GUI terminal or SSH session -- but any session still open above this one keeps its own number.';
+          renderAll();
+        });
+      });
+    }
+
+    function renderWhoTable() {
+      const rows = whoList(state);
+      if (rows.length === 0) {
+        whoTableEl.innerHTML = '<tr class="tty-empty-row"><td>Nobody logged in.</td></tr>';
+        return;
+      }
+      let html = '<thead><tr><th>User</th><th>Device</th><th>Type</th><th>From</th></tr></thead><tbody>';
+      rows.forEach(function (r) {
+        html += '<tr>' +
+          '<td>' + r.user + '</td>' +
+          '<td>' + r.device + '</td>' +
+          '<td><span class="tty-kind-badge ' + r.kind + '">' + r.kind + '</span></td>' +
+          '<td>' + (r.fromAddress || '<span style="color:var(--tty-muted)">--</span>') + '</td>' +
+          '</tr>';
+      });
+      html += '</tbody>';
+      whoTableEl.innerHTML = html;
+    }
+
+    function renderAll() {
+      renderConsoleStrip();
+      renderConsoleLoginActions();
+      renderPtsTable();
+      renderWhoTable();
+    }
+
+    document.getElementById('ttyOpenGui').addEventListener('click', function () {
+      const user = nextUser();
+      const id = openGuiTerminal(state, user);
+      const sess = state.ptsSessions.find(function (s) { return s.instanceId === id; });
+      log('Opened a GUI terminal for ' + user + ' -> /dev/pts/' + sess.index, 'good');
+      explainEl.textContent = 'A new terminal emulator window asked the kernel for a pseudo-terminal and got /dev/pts/' + sess.index + ' -- the lowest currently-free index in that shared pool.';
+      renderAll();
+    });
+
+    document.getElementById('ttySshIn').addEventListener('click', function () {
+      const user = nextUser();
+      const addr = nextAddr();
+      const id = sshIn(state, user, addr);
+      const sess = state.ptsSessions.find(function (s) { return s.instanceId === id; });
+      log('SSH session from ' + addr + ' as ' + user + ' -> /dev/pts/' + sess.index, 'good');
+      explainEl.textContent = user + ' just SSH’d in from ' + addr + ' and landed on /dev/pts/' + sess.index + ' -- the exact same allocator a local GUI terminal uses, just reached over the network instead of opened locally.';
+      renderAll();
+    });
+
+    document.getElementById('ttyConnectSerial').addEventListener('click', function () {
+      const user = nextUser();
+      const ok = connectSerial(state, user);
+      if (ok) {
+        log('Serial cable connected, ' + user + ' logged in on /dev/ttyS0.', 'good');
+        explainEl.textContent = user + ' is now on /dev/ttyS0, a real physical serial line -- unlike the PTY pool, there is only ever one of these, so nobody else can connect until it is freed.';
+      } else {
+        log('Serial cable connect attempt failed -- /dev/ttyS0 is already occupied by ' + state.serialOccupant.user + '.', 'bad');
+        explainEl.textContent = '/dev/ttyS0 already has ' + state.serialOccupant.user + ' logged in on it. A physical serial line can only carry one session at a time -- disconnect first.';
+      }
+      renderAll();
+    });
+
+    document.getElementById('ttyDisconnectSerial').addEventListener('click', function () {
+      if (state.serialOccupant === null) {
+        log('Nothing to disconnect -- /dev/ttyS0 is already free.', 'warn');
+        explainEl.textContent = '/dev/ttyS0 has no occupant right now.';
+      } else {
+        const user = state.serialOccupant.user;
+        disconnectSerial(state);
+        log('Serial cable disconnected -- ' + user + ' is off /dev/ttyS0.', 'warn');
+        explainEl.textContent = '/dev/ttyS0 is free again. The next connect can claim it immediately.';
+      }
+      renderAll();
+    });
+
+    renderAll();
+  })();
+  </script>
+</div>

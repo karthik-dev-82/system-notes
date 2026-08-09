@@ -23,6 +23,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🐳 **[Docker Dev Environment](docs/source/docker_dev_environment.rst)** | How the `development` repo's Docker dev container is built | `Dockerfile`, `devcontainer.json`, `docker-compose.yml` |
 | 🔌 **[Linux Devices](docs/source/linux_devices.rst)** | Block/char/network/terminal/pseudo devices, and USB layering | `/dev`, `lsblk`, `ttyACM`/`ttyUSB`, `udevadm`, PTYs |
 | 🎮 **[USB Device Binding (Interactive)](docs/source/usb_binding_interactive.rst)** | Interactive USB driver binding -- class vs. vendor-chip matching, live minor-number allocation | `cdc_acm`, `ftdi_sio`/`cp210x`/`ch341`/`pl2303`, `/dev/ttyUSB*` |
+| 🎮 **[Terminal Sessions (Interactive)](docs/source/tty_sessions_interactive.rst)** | Interactive PTY/console/serial session allocation -- shared pts pool, console switching, `who` | `/dev/pts/N`, `tty1`-`tty6`, `ttyS0`, `who` |
 | 🎮 **[Linux Filesystem Basics (Interactive)](docs/source/linux_fs_basics_interactive.rst)** | Interactive inodes/links and mounting/VFS -- the foundation OverlayFS builds on | inodes, hard links, symlinks, mount points, VFS |
 | 🎮 **[OverlayFS (Interactive)](docs/source/overlayfs_interactive.rst)** | Interactive OverlayFS -- read/write/delete across layers, watch copy-up and whiteouts | lowerdir, upperdir, merged view, copy-up, whiteouts |
 | 🎮 **[Process Address Space (Interactive)](docs/source/process_memory_layout_interactive.rst)** | Interactive process address space -- click code to see where it lands, then watch ASLR reshuffle it | text/data/bss/heap/mmap/stack segments, ASLR |
@@ -131,6 +132,7 @@ system-notes/
         ├── docker_dev_environment.rst
         ├── linux_devices.rst
         ├── usb_binding_interactive.rst
+        ├── tty_sessions_interactive.rst
         ├── linux_fs_basics_interactive.rst
         ├── overlayfs_interactive.rst
         ├── process_memory_layout_interactive.rst

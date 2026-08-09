@@ -15,6 +15,7 @@ worth writing down and coming back to.
    developer_commands
    linux_devices
    usb_binding_interactive
+   tty_sessions_interactive
 
 .. toctree::
    :hidden:
@@ -171,6 +172,9 @@ Shell & System Basics
    * - :doc:`usb_binding_interactive`
      - Play With It: class vs. vendor-chip driver binding, live
      - ``cdc_acm``, ``ftdi_sio``/``cp210x``/``ch341``/``pl2303``, minor numbers
+   * - :doc:`tty_sessions_interactive`
+     - Play With It: PTY/console/serial session allocation, live
+     - ``/dev/pts/N``, ``tty1``-``tty6``, ``ttyS0``, ``who``
 
 Networking
 -----------------
