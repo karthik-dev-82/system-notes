@@ -1,0 +1,378 @@
+<div class="cmd-root" id="cmdWidget">
+  <style>
+    #cmdWidget {
+      --cmd-bg: #0f172a;
+      --cmd-panel: #16213e;
+      --cmd-border: #2a3655;
+      --cmd-text: #e2e8f0;
+      --cmd-muted: #94a3b8;
+      --cmd-accent: #38bdf8;
+      --cmd-good: #4ade80;
+      --cmd-bad: #f87171;
+      --cmd-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cmd-bg);
+      color: var(--cmd-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cmdWidget * { box-sizing: border-box; }
+    #cmdWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cmdWidget .cmd-sub { color: var(--cmd-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cmd-box { background: var(--cmd-panel); border: 1px solid var(--cmd-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .cmd-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cmd-muted); margin-bottom: 8px; }
+
+    .cmd-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .cmd-btn { background: var(--cmd-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .cmd-btn.secondary { background: transparent; color: var(--cmd-text); border: 1px solid var(--cmd-border); }
+    .cmd-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .cmd-swatch { width: 22px; height: 22px; border-radius: 5px; border: 2px solid var(--cmd-border); cursor: pointer; padding: 0; }
+    .cmd-swatch.selected-color { border-color: #fff; }
+
+    .cmd-main { display: flex; gap: 14px; flex-wrap: wrap; }
+    .cmd-canvas-col { flex: 1.4; min-width: 300px; }
+    .cmd-history-col { flex: 1; min-width: 240px; }
+    svg#cmdCanvas { width: 100%; height: auto; background: #0a1128; border-radius: 8px; border: 1px solid var(--cmd-border); }
+    .cmd-shape { cursor: pointer; }
+    .cmd-shape.selected { stroke: #fff; stroke-width: 1.5; }
+
+    .cmd-history-list { max-height: 260px; overflow-y: auto; font-family: ui-monospace, monospace; font-size: 0.74rem; }
+    .cmd-history-item { padding: 5px 8px; border-radius: 6px; margin-bottom: 3px; cursor: pointer; border: 1px solid transparent; }
+    .cmd-history-item.applied { background: rgba(56,189,248,0.12); color: var(--cmd-text); }
+    .cmd-history-item.pending { background: transparent; color: var(--cmd-muted); opacity: 0.55; }
+    .cmd-history-item.current { border-color: var(--cmd-accent); }
+    .cmd-history-item .cmd-empty { color: var(--cmd-muted); font-style: italic; font-family: -apple-system, sans-serif; }
+
+    .cmd-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .cmd-explain-panel, .cmd-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .cmd-explain-panel { flex: 1.3; }
+    .cmd-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cmd-log div { color: var(--cmd-muted); }
+    .cmd-log div.good { color: var(--cmd-good); }
+    .cmd-log div.bad { color: var(--cmd-bad); }
+
+    details.cmd-notes { margin-top: 4px; background: var(--cmd-panel); border: 1px solid var(--cmd-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.cmd-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cmd-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cmd-muted); }
+    details.cmd-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cmd-accent); }
+  </style>
+
+  <h3>Command Pattern: Undo/Redo, Play With It</h3>
+  <div class="cmd-sub">Every action here -- add, move, recolor, delete -- is a command object carrying both a forward action and its exact inverse. Undo doesn't "go back in time"; it runs the inverse. Redo re-runs the original. Do something new after undoing, and the discarded branch is gone for good.</div>
+
+  <div class="cmd-box">
+    <div class="cmd-row">
+      <button class="cmd-btn" id="cmdAddCircle">+ Circle</button>
+      <button class="cmd-btn" id="cmdAddSquare">+ Square</button>
+      <button class="cmd-btn secondary" id="cmdDelete">Delete selected</button>
+      <span style="width:1px;height:20px;background:var(--cmd-border);"></span>
+      <button class="cmd-btn secondary" id="cmdNudgeLeft">&larr;</button>
+      <button class="cmd-btn secondary" id="cmdNudgeUp">&uarr;</button>
+      <button class="cmd-btn secondary" id="cmdNudgeDown">&darr;</button>
+      <button class="cmd-btn secondary" id="cmdNudgeRight">&rarr;</button>
+      <span style="width:1px;height:20px;background:var(--cmd-border);"></span>
+      <div class="cmd-row" id="cmdColorSwatches" style="gap:5px;"></div>
+    </div>
+  </div>
+
+  <div class="cmd-box">
+    <div class="cmd-row">
+      <button class="cmd-btn" id="cmdUndoBtn">&#8630; Undo</button>
+      <button class="cmd-btn" id="cmdRedoBtn">&#8631; Redo</button>
+      <button class="cmd-btn secondary" id="cmdResetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="cmd-main">
+    <div class="cmd-canvas-col">
+      <div class="cmd-panel-title">Canvas -- click a shape to select it</div>
+      <svg id="cmdCanvas" viewBox="0 0 100 60" xmlns="http://www.w3.org/2000/svg"></svg>
+    </div>
+    <div class="cmd-history-col">
+      <div class="cmd-box" style="margin-bottom:0;height:100%;">
+        <div class="cmd-panel-title">Command history -- click any entry to jump there</div>
+        <div class="cmd-history-list" id="cmdHistoryList"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cmd-panels">
+    <div class="cmd-explain-panel">
+      <div class="cmd-box" style="margin-bottom:0;">
+        <div class="cmd-panel-title">What's happening right now</div>
+        <div id="cmdExplain">Add a shape, move it around, recolor it, then hit Undo a few times and watch it unwind exactly in reverse.</div>
+      </div>
+    </div>
+    <div class="cmd-side-panel-col">
+      <div class="cmd-box" style="margin-bottom:0;">
+        <div class="cmd-panel-title">Event log</div>
+        <div class="cmd-log" id="cmdLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="cmd-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>A command must capture everything its inverse needs at creation time</b>, not compute it later. Deleting a shape here stores the shape's full data (position, color, everything) inside the delete command itself -- by the time you hit Undo, the shape is long gone from the canvas, so there's nowhere else that data could come from. This is the one detail that's easy to get wrong when hand-rolling undo/redo, and it's exactly what a real <code>std::function</code>-based command object has to get right.</li>
+      <li><b>Undo/redo history is a stack with one live branch, not a tree.</b> Do a few actions, undo a couple, then do something new -- the undone actions are gone permanently, not saved off to the side. Try it: undo twice, do something new, then hit Redo and watch it refuse to bring back what you just discarded.</li>
+      <li><b>In modern C++, a command is often just a lambda plus its inverse</b>, not a class hierarchy: <code>struct Command { std::function&lt;void()&gt; doIt, undoIt; };</code> captures everything it needs by closure. The Gang-of-Four version used a full abstract base class with a virtual <code>execute()</code>/<code>unexecute()</code> pair per command type -- <code>std::function</code> collapses that into one reusable struct.</li>
+      <li>Jumping to an arbitrary point in the history list (rather than clicking Undo/Redo one step at a time) is just repeated undo or redo under the hood -- there's no separate mechanism for it, which is exactly why a stack-based history can support it for free.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function createEditor() {
+      return { shapes: [], history: [], pointer: 0 };
+    }
+
+    function findShape(editor, id) {
+      return editor.shapes.find(function (s) { return s.id === id; });
+    }
+
+    function applyForward(editor, cmd) {
+      switch (cmd.type) {
+        case 'add':
+          editor.shapes.push(Object.assign({}, cmd.shape));
+          break;
+        case 'remove':
+          editor.shapes = editor.shapes.filter(function (s) { return s.id !== cmd.shapeId; });
+          break;
+        case 'move': {
+          const s = findShape(editor, cmd.shapeId);
+          s.x += cmd.dx;
+          s.y += cmd.dy;
+          break;
+        }
+        case 'recolor': {
+          const s = findShape(editor, cmd.shapeId);
+          s.color = cmd.newColor;
+          break;
+        }
+        default:
+          throw new Error('unknown command type ' + cmd.type);
+      }
+    }
+
+    function invert(cmd) {
+      switch (cmd.type) {
+        case 'add': return { type: 'remove', shapeId: cmd.shape.id };
+        case 'remove': return { type: 'add', shape: cmd.shape };
+        case 'move': return { type: 'move', shapeId: cmd.shapeId, dx: -cmd.dx, dy: -cmd.dy };
+        case 'recolor': return { type: 'recolor', shapeId: cmd.shapeId, newColor: cmd.oldColor };
+        default: throw new Error('unknown command type ' + cmd.type);
+      }
+    }
+
+    function execute(editor, cmd) {
+      applyForward(editor, cmd);
+      editor.history = editor.history.slice(0, editor.pointer);
+      editor.history.push(cmd);
+      editor.pointer++;
+    }
+
+    function undo(editor) {
+      if (editor.pointer === 0) return false;
+      editor.pointer--;
+      applyForward(editor, invert(editor.history[editor.pointer]));
+      return true;
+    }
+
+    function redo(editor) {
+      if (editor.pointer >= editor.history.length) return false;
+      applyForward(editor, editor.history[editor.pointer]);
+      editor.pointer++;
+      return true;
+    }
+
+    // --- Widget state ---
+
+    const COLORS = ['#f87171', '#4ade80', '#38bdf8', '#fbbf24', '#c084fc'];
+    const editor = createEditor();
+    let nextId = 1;
+    let selectedId = null;
+    let selectedColor = COLORS[0];
+
+    const canvas = document.getElementById('cmdCanvas');
+    const historyListEl = document.getElementById('cmdHistoryList');
+    const swatchesEl = document.getElementById('cmdColorSwatches');
+    const explainEl = document.getElementById('cmdExplain');
+    const logEl = document.getElementById('cmdLog');
+    const undoBtn = document.getElementById('cmdUndoBtn');
+    const redoBtn = document.getElementById('cmdRedoBtn');
+    const deleteBtn = document.getElementById('cmdDelete');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+      return el;
+    }
+
+    COLORS.forEach(function (color) {
+      const btn = document.createElement('button');
+      btn.className = 'cmd-swatch' + (color === selectedColor ? ' selected-color' : '');
+      btn.style.background = color;
+      btn.dataset.color = color;
+      btn.title = 'Recolor selected shape';
+      btn.addEventListener('click', function () {
+        selectedColor = color;
+        swatchesEl.querySelectorAll('.cmd-swatch').forEach(function (s) { s.classList.toggle('selected-color', s.dataset.color === color); });
+        if (selectedId !== null) {
+          const shape = findShape(editor, selectedId);
+          if (shape && shape.color !== color) {
+            execute(editor, { type: 'recolor', shapeId: selectedId, oldColor: shape.color, newColor: color });
+            log('Recolored shape ' + selectedId + ' to ' + color + '.', 'good');
+            explainEl.textContent = 'A recolor command captured the OLD color before changing it -- that captured value is exactly what undo will restore.';
+            renderAll();
+          }
+        }
+      });
+      swatchesEl.appendChild(btn);
+    });
+
+    function addShape(type) {
+      const id = nextId++;
+      const shape = { id: id, type: type, x: 20 + Math.random() * 60, y: 10 + Math.random() * 40, color: selectedColor };
+      execute(editor, { type: 'add', shape: shape });
+      selectedId = id;
+      log('Added ' + type + ' ' + id + '.', 'good');
+      explainEl.textContent = 'A new "add" command was pushed onto the history. Its inverse is simply "remove this shape" -- undo will run that inverse, not some generic rewind.';
+      renderAll();
+    }
+
+    document.getElementById('cmdAddCircle').addEventListener('click', function () { addShape('circle'); });
+    document.getElementById('cmdAddSquare').addEventListener('click', function () { addShape('square'); });
+
+    deleteBtn.addEventListener('click', function () {
+      if (selectedId === null) return;
+      const shape = findShape(editor, selectedId);
+      execute(editor, { type: 'remove', shapeId: selectedId, shape: Object.assign({}, shape) });
+      log('Deleted shape ' + selectedId + '.', 'good');
+      explainEl.textContent = 'The delete command captured a full snapshot of the shape before removing it -- position, color, everything. That snapshot is the only reason undo can bring it back later.';
+      selectedId = null;
+      renderAll();
+    });
+
+    function nudge(dx, dy) {
+      if (selectedId === null) return;
+      execute(editor, { type: 'move', shapeId: selectedId, dx: dx, dy: dy });
+      explainEl.textContent = 'A move command only stores the delta, so its inverse is just the same delta negated.';
+      renderAll();
+    }
+    document.getElementById('cmdNudgeLeft').addEventListener('click', function () { nudge(-5, 0); });
+    document.getElementById('cmdNudgeRight').addEventListener('click', function () { nudge(5, 0); });
+    document.getElementById('cmdNudgeUp').addEventListener('click', function () { nudge(0, -5); });
+    document.getElementById('cmdNudgeDown').addEventListener('click', function () { nudge(0, 5); });
+
+    undoBtn.addEventListener('click', function () {
+      const ok = undo(editor);
+      if (ok) {
+        log('Undo -> ran the inverse of the last applied command.', 'good');
+        explainEl.textContent = 'Undo did not "rewind" anything -- it looked up the last applied command and ran its stored inverse. The command itself still sits in history, just past the pointer now, waiting in case you redo.';
+      }
+      renderAll();
+    });
+    redoBtn.addEventListener('click', function () {
+      const ok = redo(editor);
+      if (ok) {
+        log('Redo -> re-ran the original command.', 'good');
+        explainEl.textContent = 'Redo re-executed the exact same original command, not a copy or a guess -- which is why it lands on precisely the same state undo had just left.';
+      } else {
+        log('Nothing to redo.', 'bad');
+        explainEl.textContent = 'There is nothing past the current pointer -- either you are at the end of history, or a new command already discarded whatever used to be there.';
+      }
+      renderAll();
+    });
+
+    document.getElementById('cmdResetBtn').addEventListener('click', function () {
+      editor.shapes = [];
+      editor.history = [];
+      editor.pointer = 0;
+      nextId = 1;
+      selectedId = null;
+      log('Reset.', 'good');
+      explainEl.textContent = 'Add a shape, move it around, recolor it, then hit Undo a few times and watch it unwind exactly in reverse.';
+      renderAll();
+    });
+
+    function renderCanvas() {
+      canvas.innerHTML = '';
+      editor.shapes.forEach(function (s) {
+        let el;
+        if (s.type === 'circle') {
+          el = svgEl('circle', { cx: s.x, cy: s.y, r: 6, fill: s.color });
+        } else {
+          el = svgEl('rect', { x: s.x - 6, y: s.y - 6, width: 12, height: 12, fill: s.color, rx: 1.5 });
+        }
+        el.setAttribute('class', 'cmd-shape' + (s.id === selectedId ? ' selected' : ''));
+        el.addEventListener('click', function () {
+          selectedId = s.id;
+          renderAll();
+        });
+        canvas.appendChild(el);
+      });
+    }
+
+    function describeCommand(cmd) {
+      switch (cmd.type) {
+        case 'add': return 'Add ' + cmd.shape.type + ' ' + cmd.shape.id;
+        case 'remove': return 'Delete shape ' + cmd.shapeId;
+        case 'move': return 'Move shape ' + cmd.shapeId + ' by (' + cmd.dx + ', ' + cmd.dy + ')';
+        case 'recolor': return 'Recolor shape ' + cmd.shapeId + ' to ' + cmd.newColor;
+        default: return cmd.type;
+      }
+    }
+
+    function renderHistory() {
+      if (editor.history.length === 0) {
+        historyListEl.innerHTML = '<div class="cmd-empty">No commands yet.</div>';
+        return;
+      }
+      let html = '';
+      editor.history.forEach(function (cmd, i) {
+        const applied = i < editor.pointer;
+        const isCurrent = i === editor.pointer - 1;
+        html += '<div class="cmd-history-item ' + (applied ? 'applied' : 'pending') + (isCurrent ? ' current' : '') + '" data-idx="' + i + '">' +
+          (i + 1) + '. ' + describeCommand(cmd) + '</div>';
+      });
+      historyListEl.innerHTML = html;
+      historyListEl.querySelectorAll('.cmd-history-item').forEach(function (item) {
+        item.addEventListener('click', function () {
+          const targetIdx = parseInt(item.dataset.idx, 10);
+          const targetPointer = targetIdx + 1;
+          while (editor.pointer < targetPointer) redo(editor);
+          while (editor.pointer > targetPointer) undo(editor);
+          log('Jumped to step ' + targetPointer + ' / ' + editor.history.length + '.', 'good');
+          explainEl.textContent = 'Jumping directly to a point in history is just repeated undo or redo -- there is no separate "jump" mechanism, because the stack already supports it.';
+          renderAll();
+        });
+      });
+    }
+
+    function renderAll() {
+      renderCanvas();
+      renderHistory();
+      undoBtn.disabled = editor.pointer === 0;
+      redoBtn.disabled = editor.pointer >= editor.history.length;
+      deleteBtn.disabled = selectedId === null;
+    }
+
+    renderAll();
+  })();
+  </script>
+</div>

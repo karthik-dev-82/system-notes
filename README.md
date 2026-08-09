@@ -77,6 +77,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[C++ Virtual Functions & vtables (Interactive)](docs/source/cpp_vtable_interactive.rst)** | Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak | vtable, vptr, dynamic dispatch, virtual destructor |
 | 🎮 **[C++ Exception Unwinding (Interactive)](docs/source/cpp_exception_unwind_interactive.rst)** | Interactive exception unwinding -- RAII cleanup during unwind, and why a destructor must never throw | stack unwinding, RAII, std::terminate, noexcept |
 | 🎮 **[C++ Singleton (Interactive)](docs/source/cpp_singleton_interactive.rst)** | Interactive C++11 thread-safe static init vs. a naive unsynchronized race | magic statics, double-checked locking, function-local static |
+| 🎮 **[C++ Command Pattern (Interactive)](docs/source/cpp_command_interactive.rst)** | Interactive undo/redo built from commands carrying their own inverse | Command pattern, undo/redo stack, std::function, lambdas |
 
 ### Python Notes
 
@@ -185,6 +186,7 @@ system-notes/
         ├── cpp_vtable_interactive.rst
         ├── cpp_exception_unwind_interactive.rst
         ├── cpp_singleton_interactive.rst
+        ├── cpp_command_interactive.rst
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
         ├── python_generators_interactive.rst

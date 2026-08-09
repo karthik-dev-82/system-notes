@@ -135,6 +135,7 @@ worth writing down and coming back to.
    cpp_vtable_interactive
    cpp_exception_unwind_interactive
    cpp_singleton_interactive
+   cpp_command_interactive
 
 .. toctree::
    :hidden:
@@ -470,6 +471,9 @@ C++ Notes
    * - :doc:`cpp_singleton_interactive`
      - Play With It: C++11 thread-safe static init vs. a naive unsynchronized race
      - magic statics, double-checked locking, function-local static
+   * - :doc:`cpp_command_interactive`
+     - Play With It: undo/redo built from commands carrying their own inverse
+     - Command pattern, undo/redo stack, std::function, lambdas
 
 Python Notes
 -----------------

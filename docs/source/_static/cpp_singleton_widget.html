@@ -137,6 +137,7 @@
       <li><b>Blocking, not busy-waiting, is the point.</b> In Safe mode, a thread that arrives while another is already constructing doesn't spin or retry -- it blocks until construction completes, then proceeds with the fully-built object. No thread ever observes a partially-constructed singleton.</li>
       <li>Double-checked locking (checking, then locking, then checking again) was the classic hand-rolled fix for this before C++11 -- and was itself notoriously easy to get wrong without a properly-placed memory fence. A function-local static makes the entire pattern unnecessary to write by hand.</li>
       <li><b>The bigger caution:</b> getting the synchronization right doesn't make Singleton a good default. It's still global state with the ability to be reached from anywhere, which makes testing and reasoning about dependencies harder -- prefer passing dependencies in explicitly where you can.</li>
+      <li>See the <a href="cpp_command_interactive.html">Command pattern widget</a> for another modern-C++ pattern from the same design-patterns material -- undo/redo, built from commands that carry their own inverse.</li>
     </ul>
   </details>
 
