@@ -108,6 +108,7 @@ worth writing down and coming back to.
    consistent_hashing_interactive
    hash_load_balancer
    kafka_topic_interactive
+   priority_inversion_interactive
 
 .. toctree::
    :hidden:
@@ -394,6 +395,9 @@ Concurrency & Distributed Systems
    * - :doc:`kafka_topic_interactive`
      - Interactive Kafka topic -- send keyed readings, watch partition routing, poll with consumer groups, rebalance live
      - partitions, consumer groups, offsets, rebalancing, replay
+   * - :doc:`priority_inversion_interactive`
+     - Interactive priority inversion -- the bug that nearly stranded Mars Pathfinder, and the priority-inheritance fix, side by side
+     - preemption, mutex, priority inheritance, real-time scheduling
 
 Robotics
 -----------------

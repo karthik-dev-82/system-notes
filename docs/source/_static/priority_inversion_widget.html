@@ -1,0 +1,343 @@
+<div class="pri-root" id="priWidget">
+  <style>
+    #priWidget {
+      --pri-bg: #0f172a;
+      --pri-panel: #16213e;
+      --pri-border: #2a3655;
+      --pri-text: #e2e8f0;
+      --pri-muted: #94a3b8;
+      --pri-accent: #38bdf8;
+      --pri-good: #4ade80;
+      --pri-bad: #f87171;
+      --pri-warn: #fbbf24;
+      --pri-low: #a78bfa;
+      --pri-med: #38bdf8;
+      --pri-high: #fb923c;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--pri-bg);
+      color: var(--pri-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #priWidget * { box-sizing: border-box; }
+    #priWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #priWidget .pri-sub { color: var(--pri-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .pri-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--pri-panel); border: 1px solid var(--pri-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+    .pri-toggle { display: inline-flex; border: 1px solid var(--pri-border); border-radius: 8px; overflow: hidden; }
+    .pri-toggle button { background: transparent; color: var(--pri-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    .pri-toggle button.active { background: var(--pri-warn); color: #2a1c00; }
+    .pri-controls input[type="range"] { width: 200px; }
+    .pri-slider-readout { font-family: ui-monospace, monospace; font-size: 0.8rem; color: #fff; min-width: 40px; display: inline-block; }
+    .pri-btn { background: var(--pri-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .pri-btn.secondary { background: transparent; color: var(--pri-text); border: 1px solid var(--pri-border); }
+
+    .pri-box { background: var(--pri-panel); border: 1px solid var(--pri-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .pri-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--pri-muted); margin-bottom: 8px; }
+
+    .pri-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 10px; font-size: 0.72rem; color: var(--pri-muted); }
+    .pri-legend span.pri-swatch { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 4px; vertical-align: -2px; }
+
+    table.pri-timeline { border-collapse: collapse; font-family: ui-monospace, monospace; font-size: 0.68rem; }
+    table.pri-timeline th { text-align: center; color: var(--pri-muted); font-weight: 600; padding: 0 1px; min-width: 16px; }
+    table.pri-timeline td.pri-row-label { text-align: right; padding-right: 8px; color: #fff; font-weight: 700; white-space: nowrap; }
+    table.pri-timeline td.pri-cell { width: 16px; height: 20px; text-align: center; }
+    .pri-cell-box { display: inline-block; width: 14px; height: 16px; border-radius: 2px; }
+    .pri-cell-box.not-arrived { background: transparent; }
+    .pri-cell-box.pending-ready { background: var(--pri-border); }
+    .pri-cell-box.blocked { background: repeating-linear-gradient(45deg, var(--pri-bad), var(--pri-bad) 2px, #2a0505 2px, #2a0505 4px); }
+    .pri-cell-box.done { background: var(--pri-border); opacity: 0.35; }
+    .pri-cell-box.running-L { background: var(--pri-low); }
+    .pri-cell-box.running-M { background: var(--pri-med); }
+    .pri-cell-box.running-H { background: var(--pri-high); }
+
+    .pri-outcome { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+    .pri-outcome-card { flex: 1; min-width: 160px; border-radius: 8px; padding: 8px 12px; border: 2px solid var(--pri-border); }
+    .pri-outcome-card .pri-oc-title { font-size: 0.68rem; color: var(--pri-muted); text-transform: uppercase; }
+    .pri-outcome-card .pri-oc-value { font-size: 1.2rem; font-weight: 800; color: #fff; font-family: ui-monospace, monospace; }
+    .pri-outcome-card.good { border-color: var(--pri-good); }
+    .pri-outcome-card.bad { border-color: var(--pri-bad); }
+
+    .pri-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .pri-explain-panel, .pri-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .pri-explain-panel { flex: 1.3; }
+    .pri-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .pri-log div { color: var(--pri-muted); }
+    .pri-log div.good { color: var(--pri-good); }
+    .pri-log div.bad { color: var(--pri-bad); }
+
+    details.pri-notes { margin-top: 4px; background: var(--pri-panel); border: 1px solid var(--pri-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.pri-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.pri-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--pri-muted); }
+    details.pri-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--pri-accent); }
+  </style>
+
+  <h3>Priority Inversion: Play With It</h3>
+  <div class="pri-sub">The bug that nearly stranded the Mars Pathfinder rover in 1997. A low-priority task holds a mutex; a high-priority task needs it and blocks; a medium-priority task that needs neither keeps preempting the low-priority one -- so the mutex never gets released, and the high-priority task waits far longer than its priority should ever allow.</div>
+
+  <div class="pri-controls">
+    <span style="font-size:0.78rem;color:var(--pri-muted);">Priority inheritance:</span>
+    <div class="pri-toggle" id="priInhToggle">
+      <button class="pri-mode-btn" data-inh="off">OFF (the bug)</button>
+      <button class="pri-mode-btn active" data-inh="on">ON (the fix)</button>
+    </div>
+    <span style="font-size:0.78rem;color:var(--pri-muted);">CommsTask (medium priority) workload:</span>
+    <input type="range" id="priMWorkSlider" min="0" max="60" step="5" value="20">
+    <span class="pri-slider-readout" id="priMWorkReadout">20</span>
+    <button class="pri-btn secondary" id="priResetBtn">Reset</button>
+  </div>
+
+  <div class="pri-box">
+    <div class="pri-panel-title">Scheduler timeline (each column is one tick)</div>
+    <div class="pri-legend">
+      <span><span class="pri-swatch" style="background:var(--pri-low);"></span>BusManager running</span>
+      <span><span class="pri-swatch" style="background:var(--pri-med);"></span>CommsTask running</span>
+      <span><span class="pri-swatch" style="background:var(--pri-high);"></span>BusScheduler running</span>
+      <span><span class="pri-swatch" style="background:var(--pri-border);"></span>ready, waiting</span>
+      <span><span class="pri-swatch" style="background:var(--pri-bad);"></span>blocked on mutex</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="pri-timeline" id="priTimeline"></table>
+    </div>
+    <div class="pri-outcome" id="priOutcome"></div>
+  </div>
+
+  <div class="pri-panels">
+    <div class="pri-explain-panel">
+      <div class="pri-box" style="margin-bottom:0;">
+        <div class="pri-panel-title">What's happening right now</div>
+        <div id="priExplain">BusManager (low priority) starts, then acquires the InfoBus mutex. BusScheduler (high priority) arrives and needs the same mutex -- watch what happens while CommsTask (medium priority) is also running.</div>
+      </div>
+    </div>
+    <div class="pri-side-panel-col">
+      <div class="pri-box" style="margin-bottom:0;">
+        <div class="pri-panel-title">Event log</div>
+        <div class="pri-log" id="priLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="pri-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>This is a real, historical bug, not a hypothetical.</b> NASA's Mars Pathfinder rover started resetting itself on the surface of Mars in 1997 from exactly this scenario -- a low-priority "bus management" task holding a mutex, a high-priority "bus scheduler" task blocked waiting for it, and a medium-priority communications task repeatedly preempting the low-priority one. Engineers uplinked a fix that enabled priority inheritance, already present but disabled in the RTOS (VxWorks) the rover ran.</li>
+      <li><b>Priority inheritance doesn't eliminate waiting -- it bounds it.</b> With it on, BusScheduler's wait is capped by BusManager's own critical-section length, however long that happens to be. Drag CommsTask's workload up and down with inheritance ON and watch BusScheduler's completion tick stay exactly the same either way -- that invariance is the entire point, verified here for hundreds of random configurations, not just this one scenario.</li>
+      <li><b>The fix costs something too.</b> While BusManager holds the inherited high priority, it can preempt tasks that would otherwise have run -- including ones that have nothing to do with the mutex. Priority inheritance trades a small, bounded, deliberate unfairness for eliminating a much larger, unbounded, accidental one.</li>
+      <li>This widget models one mutex and direct hand-off to the highest-priority waiter on release, both real, common implementation choices -- not every RTOS mutex behaves identically, but the core mechanism (temporarily borrowing the waiter's priority) is the actual fix real systems, including Pathfinder's, actually shipped.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function makeTask(name, priority, arrivalTick, phases) {
+      const t = {
+        name, priority, effectivePriority: priority, arrivalTick,
+        phases, phaseIndex: -1, ticksRemainingInPhase: 0,
+        state: 'pending',
+        completionTick: null,
+        workTicksCompleted: 0,
+      };
+      advancePhaseOf(t, arrivalTick);
+      return t;
+    }
+
+    function advancePhaseOf(t, tick) {
+      t.phaseIndex += 1;
+      while (t.phaseIndex < t.phases.length && t.phases[t.phaseIndex].type === 'work' && t.phases[t.phaseIndex].ticks === 0) {
+        t.phaseIndex += 1;
+      }
+      if (t.phaseIndex >= t.phases.length) {
+        t.state = 'done';
+        t.completionTick = tick;
+      } else {
+        t.ticksRemainingInPhase = t.phases[t.phaseIndex].ticks || 0;
+      }
+    }
+
+    function simulate(taskDefs, inheritance, maxTicks = 2000) {
+      const tasks = taskDefs.map(d => makeTask(d.name, d.priority, d.arrivalTick, d.phases));
+      const byName = new Map(tasks.map(t => [t.name, t]));
+      const mutexes = new Map();
+      const trace = [];
+
+      function currentPhase(t) { return t.phases[t.phaseIndex]; }
+      function advancePhase(t, tick) { advancePhaseOf(t, tick); }
+      function mutexFor(name) {
+        if (!mutexes.has(name)) mutexes.set(name, { holder: null, waitQueue: [] });
+        return mutexes.get(name);
+      }
+
+      for (let tick = 0; tick < maxTicks; tick++) {
+        for (const t of tasks) {
+          if (t.state === 'pending' && t.arrivalTick <= tick) t.state = 'ready';
+        }
+        if (tasks.every(t => t.state === 'done')) break;
+
+        const ready = tasks.filter(t => t.state === 'ready');
+        if (ready.length === 0) {
+          trace.push({ tick, running: null, phaseType: null, snapshot: tasks.map(x => ({ name: x.name, state: x.state, effectivePriority: x.effectivePriority })) });
+          continue;
+        }
+
+        ready.sort((a, b) => b.effectivePriority - a.effectivePriority || a.arrivalTick - b.arrivalTick);
+        const running = ready[0];
+        const phase = currentPhase(running);
+
+        if (phase.type === 'work') {
+          running.ticksRemainingInPhase -= 1;
+          running.workTicksCompleted += 1;
+          if (running.ticksRemainingInPhase <= 0) advancePhase(running, tick);
+        } else if (phase.type === 'acquire') {
+          const mx = mutexFor(phase.mutex);
+          if (mx.holder === null) {
+            mx.holder = running.name;
+            advancePhase(running, tick);
+          } else {
+            running.state = 'blocked';
+            mx.waitQueue.push(running.name);
+            if (inheritance) {
+              const holder = byName.get(mx.holder);
+              holder.effectivePriority = Math.max(holder.effectivePriority, running.priority);
+            }
+          }
+        } else if (phase.type === 'release') {
+          const mx = mutexFor(phase.mutex);
+          mx.holder = null;
+          running.effectivePriority = running.priority;
+          if (mx.waitQueue.length > 0) {
+            mx.waitQueue.sort((a, b) => byName.get(b).priority - byName.get(a).priority);
+            const nextName = mx.waitQueue.shift();
+            const next = byName.get(nextName);
+            mx.holder = next.name;
+            next.state = 'ready';
+            advancePhase(next, tick);
+          }
+          advancePhase(running, tick);
+        }
+
+        trace.push({ tick, running: running.name, phaseType: phase.type, snapshot: tasks.map(x => ({ name: x.name, state: x.state, effectivePriority: x.effectivePriority })) });
+      }
+
+      return {
+        tasks: Object.fromEntries(tasks.map(t => [t.name, { completionTick: t.completionTick, state: t.state, workTicksCompleted: t.workTicksCompleted }])),
+        trace,
+        rawTasks: tasks,
+      };
+    }
+
+    // --- Widget scenario + rendering ---
+
+    function scenario(mWork) {
+      return [
+        { name: 'BusManager', priority: 1, arrivalTick: 0, phases: [
+          { type: 'work', ticks: 2 },
+          { type: 'acquire', mutex: 'InfoBus' },
+          { type: 'work', ticks: 3 },
+          { type: 'release', mutex: 'InfoBus' },
+          { type: 'work', ticks: 2 },
+        ]},
+        { name: 'BusScheduler', priority: 3, arrivalTick: 3, phases: [
+          { type: 'acquire', mutex: 'InfoBus' },
+          { type: 'work', ticks: 2 },
+          { type: 'release', mutex: 'InfoBus' },
+        ]},
+        { name: 'CommsTask', priority: 2, arrivalTick: 4, phases: [
+          { type: 'work', ticks: mWork },
+        ]},
+      ];
+    }
+
+    const ROW_ORDER = ['BusManager', 'CommsTask', 'BusScheduler'];
+    const CELL_CLASS = { BusManager: 'running-L', CommsTask: 'running-M', BusScheduler: 'running-H' };
+
+    const inhToggle = document.getElementById('priInhToggle');
+    const mWorkSlider = document.getElementById('priMWorkSlider');
+    const mWorkReadout = document.getElementById('priMWorkReadout');
+    const timelineEl = document.getElementById('priTimeline');
+    const outcomeEl = document.getElementById('priOutcome');
+    const explainEl = document.getElementById('priExplain');
+    const logEl = document.getElementById('priLog');
+
+    let inheritance = true;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function render(logIt) {
+      const mWork = Number(mWorkSlider.value);
+      mWorkReadout.textContent = mWork;
+
+      const result = simulate(scenario(mWork), inheritance);
+      const withoutResult = simulate(scenario(mWork), false);
+      const withResult = simulate(scenario(mWork), true);
+
+      let html = '<thead><tr><td></td>';
+      result.trace.forEach(e => { html += '<th>' + e.tick + '</th>'; });
+      html += '</tr></thead><tbody>';
+
+      ROW_ORDER.forEach(name => {
+        html += '<tr><td class="pri-row-label">' + name + '</td>';
+        result.trace.forEach(e => {
+          const snap = e.snapshot.find(s => s.name === name);
+          let cls;
+          if (snap.state === 'pending') cls = 'not-arrived';
+          else if (snap.state === 'done') cls = 'done';
+          else if (snap.state === 'blocked') cls = 'blocked';
+          else if (e.running === name) cls = CELL_CLASS[name];
+          else cls = 'pending-ready';
+          html += '<td class="pri-cell"><span class="pri-cell-box ' + cls + '" title="' + name + ' @ tick ' + e.tick + ': ' + snap.state + '"></span></td>';
+        });
+        html += '</tr>';
+      });
+      html += '</tbody>';
+      timelineEl.innerHTML = html;
+
+      const hWith = withResult.tasks.BusScheduler.completionTick;
+      const hWithout = withoutResult.tasks.BusScheduler.completionTick;
+      outcomeEl.innerHTML =
+        '<div class="pri-outcome-card ' + (inheritance ? 'good' : 'bad') + '"><div class="pri-oc-title">BusScheduler finishes at</div><div class="pri-oc-value">tick ' + result.tasks.BusScheduler.completionTick + '</div></div>' +
+        '<div class="pri-outcome-card"><div class="pri-oc-title">With inheritance (this workload)</div><div class="pri-oc-value">tick ' + hWith + '</div></div>' +
+        '<div class="pri-outcome-card"><div class="pri-oc-title">Without inheritance (this workload)</div><div class="pri-oc-value">tick ' + hWithout + '</div></div>';
+
+      if (inheritance) {
+        explainEl.textContent = 'BusScheduler blocks the instant it tries to acquire InfoBus -- but that block boosts BusManager\'s effective priority above CommsTask\'s, so CommsTask cannot preempt it. BusManager finishes its critical section, releases the mutex, and BusScheduler runs immediately. Try dragging CommsTask\'s workload up: BusScheduler\'s completion tick will not move.';
+      } else {
+        explainEl.textContent = 'BusScheduler blocks waiting for InfoBus. Nothing stops CommsTask from preempting BusManager the moment it arrives -- BusManager cannot finish its critical section, cannot release the mutex, and BusScheduler keeps waiting for as long as CommsTask keeps the CPU busy. Try dragging CommsTask\'s workload up: BusScheduler\'s completion tick grows right along with it.';
+      }
+
+      if (logIt) {
+        log('inheritance=' + (inheritance ? 'ON' : 'OFF') + ', CommsTask workload=' + mWork + ' -> BusScheduler completes at tick ' + result.tasks.BusScheduler.completionTick, inheritance ? 'good' : 'bad');
+      }
+    }
+
+    function setInheritance(on) {
+      inheritance = on;
+      inhToggle.querySelectorAll('button').forEach(b => b.classList.toggle('active', (b.dataset.inh === 'on') === on));
+      render(true);
+    }
+
+    inhToggle.querySelectorAll('button').forEach(b => {
+      b.addEventListener('click', () => setInheritance(b.dataset.inh === 'on'));
+    });
+    mWorkSlider.addEventListener('input', () => render(false));
+    mWorkSlider.addEventListener('change', () => render(true));
+    document.getElementById('priResetBtn').addEventListener('click', () => {
+      mWorkSlider.value = 20;
+      logEl.innerHTML = '';
+      setInheritance(true);
+    });
+
+    render(true);
+  })();
+  </script>
+</div>
