@@ -71,6 +71,11 @@
     </div>
   </div>
 
+  <div class="slm-box" id="slmTrialsSummaryBox" style="display:none;">
+    <div class="slm-panel-title">100-trial aggregate (this exact path, fresh random noise each run)</div>
+    <div class="slm-summary" id="slmTrialsSummary"></div>
+  </div>
+
   <div class="slm-maps">
     <div class="slm-map-col">
       <div class="slm-map-title odom">Trusting raw odometry</div>
@@ -89,10 +94,6 @@
     <svg id="slmChartSvg" viewBox="0 0 300 110" xmlns="http://www.w3.org/2000/svg"></svg>
   </div>
 
-  <div class="slm-box" id="slmTrialsSummaryBox" style="display:none;">
-    <div class="slm-panel-title">100-trial aggregate (this exact path, fresh random noise each run)</div>
-    <div class="slm-summary" id="slmTrialsSummary"></div>
-  </div>
 
   <div class="slm-panels">
     <div class="slm-explain-panel">
@@ -451,9 +452,11 @@
       const avg = function (arr) { return arr.reduce(function (a, b) { return a + b; }, 0) / arr.length; };
       const wins = slamFinal.filter(function (e, i) { return e < odomFinal[i]; }).length;
       trialsBox.style.display = '';
+      trialsBox.style.borderColor = 'var(--slm-good)';
       trialsSummaryEl.innerHTML =
         'SLAM ended closer to the true position in <span class="slm-num" style="color:var(--slm-good);">' + wins + ' / ' + N + '</span> fresh random runs of this exact path.<br>' +
         'Average final position error -- odometry only: <span class="slm-num" style="color:var(--slm-bad);">' + avg(odomFinal).toFixed(2) + ' m</span>, scan matching: <span class="slm-num" style="color:var(--slm-good);">' + avg(slamFinal).toFixed(2) + ' m</span>.';
+      if (trialsBox.scrollIntoView) trialsBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
       log('Ran 100 fresh trials: SLAM won ' + wins + '/100, avg error ' + avg(odomFinal).toFixed(2) + 'm -> ' + avg(slamFinal).toFixed(2) + 'm.', 'good');
     }
 
