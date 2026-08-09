@@ -1,0 +1,331 @@
+<div class="spd-root" id="spdWidget">
+  <style>
+    #spdWidget {
+      --spd-bg: #0f172a;
+      --spd-panel: #16213e;
+      --spd-border: #2a3655;
+      --spd-text: #e2e8f0;
+      --spd-muted: #94a3b8;
+      --spd-accent: #38bdf8;
+      --spd-good: #4ade80;
+      --spd-bad: #f87171;
+      --spd-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--spd-bg);
+      color: var(--spd-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #spdWidget * { box-sizing: border-box; }
+    #spdWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #spdWidget .spd-sub { color: var(--spd-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .spd-box { background: var(--spd-panel); border: 1px solid var(--spd-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .spd-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--spd-muted); margin-bottom: 8px; }
+
+    .spd-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .spd-select-group { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+    .spd-select-group select { background: #0a1128; color: var(--spd-text); border: 1px solid var(--spd-border); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    .spd-btn { background: var(--spd-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .spd-btn.secondary { background: transparent; color: var(--spd-text); border: 1px solid var(--spd-border); }
+    .spd-btn.small { padding: 4px 9px; font-size: 0.72rem; }
+    .spd-btn[data-lvl="trace"] { background: #94a3b8; }
+    .spd-btn[data-lvl="debug"] { background: #38bdf8; }
+    .spd-btn[data-lvl="info"] { background: #4ade80; }
+    .spd-btn[data-lvl="warn"] { background: #fbbf24; }
+    .spd-btn[data-lvl="err"] { background: #fb923c; }
+    .spd-btn[data-lvl="critical"] { background: #f87171; }
+
+    .spd-sinks { display: flex; gap: 14px; flex-wrap: wrap; }
+    .spd-sink { flex: 1; min-width: 300px; }
+    .spd-sink-header { display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px; }
+    .spd-sink-name { font-weight: 700; color: #fff; font-size: 0.85rem; }
+    .spd-sink-pattern { font-family: ui-monospace, monospace; font-size: 0.68rem; color: var(--spd-muted); background: #0a1128; padding: 4px 8px; border-radius: 5px; margin-bottom: 8px; }
+    .spd-sink-feed { height: 170px; overflow-y: auto; background: #0a1128; border: 1px solid var(--spd-border); border-radius: 8px; padding: 8px 10px; font-family: ui-monospace, monospace; font-size: 0.72rem; line-height: 1.6; }
+    .spd-sink-feed .spd-empty { color: var(--spd-muted); font-style: italic; font-family: -apple-system, sans-serif; }
+    .spd-sink-feed .spd-color { color: var(--spd-good); font-weight: 700; }
+    .spd-sink-feed div[data-lvl="warn"] .spd-color { color: var(--spd-warn); }
+    .spd-sink-feed div[data-lvl="err"] .spd-color { color: #fb923c; }
+    .spd-sink-feed div[data-lvl="critical"] .spd-color { color: var(--spd-bad); }
+    .spd-sink-feed div[data-lvl="trace"] .spd-color { color: var(--spd-muted); }
+    .spd-sink-feed div[data-lvl="debug"] .spd-color { color: var(--spd-accent); }
+
+    .spd-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .spd-explain-panel, .spd-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .spd-explain-panel { flex: 1.3; }
+    .spd-log { height: 190px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .spd-log div { color: var(--spd-muted); }
+    .spd-log div.good { color: var(--spd-good); }
+    .spd-log div.bad { color: var(--spd-bad); }
+
+    details.spd-notes { margin-top: 4px; background: var(--spd-panel); border: 1px solid var(--spd-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.spd-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.spd-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--spd-muted); }
+    details.spd-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--spd-accent); }
+  </style>
+
+  <h3>spdlog Level-Filtering Cascade: Play With It</h3>
+  <div class="spd-sub">One logger, two sinks, each with its own level. Fire a log call at any level and watch exactly which sinks emit it -- the logger's own level is checked first and can block everyone; past that, each sink decides independently.</div>
+
+  <div class="spd-box">
+    <div class="spd-panel-title">Logger</div>
+    <div class="spd-row">
+      <div class="spd-select-group">
+        <span>Logger level (checked first, for everyone):</span>
+        <select id="spdLoggerLevel"></select>
+      </div>
+    </div>
+  </div>
+
+  <div class="spd-box">
+    <div class="spd-panel-title">Fire a log call</div>
+    <div class="spd-row" id="spdLogButtons"></div>
+  </div>
+
+  <div class="spd-sinks">
+    <div class="spd-box spd-sink">
+      <div class="spd-sink-header">
+        <span class="spd-sink-name">Console Sink</span>
+        <div class="spd-select-group">
+          <span>level:</span>
+          <select id="spdConsoleLevel"></select>
+        </div>
+      </div>
+      <div class="spd-sink-pattern" id="spdConsolePattern"></div>
+      <div class="spd-sink-feed" id="spdConsoleFeed"></div>
+    </div>
+    <div class="spd-box spd-sink">
+      <div class="spd-sink-header">
+        <span class="spd-sink-name">File Sink</span>
+        <div class="spd-select-group">
+          <span>level:</span>
+          <select id="spdFileLevel"></select>
+        </div>
+      </div>
+      <div class="spd-sink-pattern" id="spdFilePattern"></div>
+      <div class="spd-sink-feed" id="spdFileFeed"></div>
+    </div>
+  </div>
+
+  <div class="spd-panels">
+    <div class="spd-explain-panel">
+      <div class="spd-box" style="margin-bottom:0;">
+        <div class="spd-panel-title">What's happening right now</div>
+        <div id="spdExplain">Fire a log call above and see exactly which gate each sink cleared -- or didn't.</div>
+      </div>
+    </div>
+    <div class="spd-side-panel-col">
+      <div class="spd-box" style="margin-bottom:0;">
+        <div class="spd-panel-title">Event log</div>
+        <div class="spd-log" id="spdLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="spd-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>The logger's level is checked exactly once, before any sink ever sees the message.</b> A sink set to <code>trace</code> will never emit a message the logger itself already rejected -- there's no way for a permissive sink to "override" the logger's cutoff. That's the detail that's easy to get backwards: it's not "whichever gate is most permissive wins," it's "the logger gates first, then each sink gates again independently."</li>
+      <li><b>Two sinks on the same logger can genuinely disagree</b> about the same call. In the default configuration here (matching this project's own Quick Start Template), the console sink defaults to <code>debug</code> while the file sink defaults to <code>trace</code> -- so a <code>trace</code>-level call reaches the file but never the console, even though both are attached to the exact same logger.</li>
+      <li><code>set_level(spdlog::level::off)</code> is a real level, not a special case -- it's simply one step past <code>critical</code> in the ordering, so nothing ever clears that gate. Try setting a sink to <code>off</code> and firing a <code>critical</code> call at it.</li>
+      <li>The patterns shown above (<code>%T</code>, <code>%Y-%m-%d %H:%M:%S.%e</code>, <code>%n</code>, <code>%l</code>, <code>%v</code>, and the <code>%^</code>/<code>%$</code> color-range markers) are spdlog's real formatting flags, substituted here exactly as spdlog itself would -- not a simplified stand-in.</li>
+      <li>See <a href="spdlog_sinks_architecture.html">Understanding spdlog Sinks &amp; Architecture</a> for the full write-up this widget is built from, including the rotating file sink mechanism this widget doesn't cover.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    const LEVEL_ORDER = ['trace', 'debug', 'info', 'warn', 'err', 'critical', 'off'];
+    const MESSAGE_LEVELS = ['trace', 'debug', 'info', 'warn', 'err', 'critical'];
+    const LEVEL_LABEL = { trace: 'trace', debug: 'debug', info: 'info', warn: 'warn', err: 'err', critical: 'critical', off: 'off' };
+    const SAMPLE_MESSAGE = {
+      trace: 'Entering function calculate()',
+      debug: 'Variable x = 42',
+      info: 'Server started on port 8080',
+      warn: 'Disk space low: 10% remaining',
+      err: 'Failed to save file',
+      critical: 'Out of memory!',
+    };
+
+    function ordinal(level) {
+      const i = LEVEL_ORDER.indexOf(level);
+      if (i === -1) throw new Error('unknown level ' + level);
+      return i;
+    }
+
+    function shouldLog(messageLevel, gateLevel) {
+      return ordinal(messageLevel) >= ordinal(gateLevel);
+    }
+
+    function pad2(n) { return String(n).padStart(2, '0'); }
+
+    function formatPattern(pattern, ctx) {
+      const clock = ctx.clock;
+      const tokens = {
+        '%Y-%m-%d': clock.year + '-' + pad2(clock.month) + '-' + pad2(clock.day),
+        '%H:%M:%S': pad2(clock.hour) + ':' + pad2(clock.minute) + ':' + pad2(clock.second),
+        '%T': pad2(clock.hour) + ':' + pad2(clock.minute) + ':' + pad2(clock.second),
+        '%e': String(clock.millis).padStart(3, '0'),
+        '%n': ctx.loggerName,
+        '%l': ctx.level,
+        '%v': ctx.message,
+      };
+      const orderedKeys = Object.keys(tokens).sort(function (a, b) { return b.length - a.length; });
+      let out = pattern;
+      orderedKeys.forEach(function (key) { out = out.split(key).join(tokens[key]); });
+      out = out.replace('%^', '[[').replace('%$', ']]');
+      return out;
+    }
+
+    function createSink(id, name, level, pattern) {
+      return { id: id, name: name, level: level, pattern: pattern };
+    }
+
+    function createLogger(name, level, sinks) {
+      return { name: name, level: level, sinks: sinks };
+    }
+
+    function logCall(logger, messageLevel, message, clock) {
+      const loggerPasses = shouldLog(messageLevel, logger.level);
+      const results = logger.sinks.map(function (sink) {
+        if (!loggerPasses) {
+          return { sinkId: sink.id, emitted: false, reason: 'logger-level-cutoff' };
+        }
+        const sinkPasses = shouldLog(messageLevel, sink.level);
+        if (!sinkPasses) {
+          return { sinkId: sink.id, emitted: false, reason: 'sink-level-cutoff' };
+        }
+        const formatted = formatPattern(sink.pattern, {
+          clock: clock,
+          loggerName: logger.name,
+          level: messageLevel,
+          message: message,
+        });
+        return { sinkId: sink.id, emitted: true, formatted: formatted };
+      });
+      return { loggerPasses: loggerPasses, results: results };
+    }
+
+    // --- Widget state & UI ---
+
+    const CONSOLE_PATTERN = '[%T] [%^%l%$] %v';
+    const FILE_PATTERN = '[%Y-%m-%d %H:%M:%S.%e] [%n] [%l] %v';
+
+    const clock = { year: 2026, month: 3, day: 5, hour: 14, minute: 32, second: 15, millis: 0 };
+
+    const state = {
+      loggerLevel: 'trace',
+      logger: createLogger('app', 'trace', [
+        createSink('console', 'Console Sink', 'debug', CONSOLE_PATTERN),
+        createSink('file', 'File Sink', 'trace', FILE_PATTERN),
+      ]),
+    };
+
+    function sinkById(id) { return state.logger.sinks.find(function (s) { return s.id === id; }); }
+
+    const loggerLevelEl = document.getElementById('spdLoggerLevel');
+    const consoleLevelEl = document.getElementById('spdConsoleLevel');
+    const fileLevelEl = document.getElementById('spdFileLevel');
+    const logButtonsEl = document.getElementById('spdLogButtons');
+    const consoleFeedEl = document.getElementById('spdConsoleFeed');
+    const fileFeedEl = document.getElementById('spdFileFeed');
+    const explainEl = document.getElementById('spdExplain');
+    const logEl = document.getElementById('spdLog');
+
+    document.getElementById('spdConsolePattern').textContent = CONSOLE_PATTERN;
+    document.getElementById('spdFilePattern').textContent = FILE_PATTERN;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function populateLevelSelect(selectEl, current) {
+      selectEl.innerHTML = '';
+      LEVEL_ORDER.forEach(function (lvl) {
+        const opt = document.createElement('option');
+        opt.value = lvl;
+        opt.textContent = LEVEL_LABEL[lvl];
+        if (lvl === current) opt.selected = true;
+        selectEl.appendChild(opt);
+      });
+    }
+
+    populateLevelSelect(loggerLevelEl, state.loggerLevel);
+    populateLevelSelect(consoleLevelEl, sinkById('console').level);
+    populateLevelSelect(fileLevelEl, sinkById('file').level);
+
+    loggerLevelEl.addEventListener('change', function () {
+      state.loggerLevel = loggerLevelEl.value;
+      state.logger.level = state.loggerLevel;
+      log('Logger level set to ' + state.loggerLevel + '.', 'bad');
+      explainEl.textContent = 'The logger itself now requires at least "' + state.loggerLevel + '" before ANY sink is even consulted. Try firing a lower-level call -- it will be blocked before either sink gets a say, no matter how permissive their own levels are.';
+    });
+
+    consoleLevelEl.addEventListener('change', function () {
+      sinkById('console').level = consoleLevelEl.value;
+      log('Console sink level set to ' + consoleLevelEl.value + '.', 'bad');
+      explainEl.textContent = 'The console sink now requires at least "' + consoleLevelEl.value + '" -- independently of the logger and of the file sink.';
+    });
+
+    fileLevelEl.addEventListener('change', function () {
+      sinkById('file').level = fileLevelEl.value;
+      log('File sink level set to ' + fileLevelEl.value + '.', 'bad');
+      explainEl.textContent = 'The file sink now requires at least "' + fileLevelEl.value + '" -- independently of the logger and of the console sink.';
+    });
+
+    function appendFeedLine(feedEl, level, formatted) {
+      const empty = feedEl.querySelector('.spd-empty');
+      if (empty) empty.remove();
+      const div = document.createElement('div');
+      div.setAttribute('data-lvl', level);
+      const marked = formatted.replace('[[', '<span class="spd-color">').replace(']]', '</span>');
+      div.innerHTML = marked;
+      feedEl.appendChild(div);
+      feedEl.scrollTop = feedEl.scrollHeight;
+    }
+
+    MESSAGE_LEVELS.forEach(function (lvl) {
+      const btn = document.createElement('button');
+      btn.className = 'spd-btn small';
+      btn.setAttribute('data-lvl', lvl);
+      btn.textContent = 'log->' + lvl + '(...)';
+      btn.addEventListener('click', function () {
+        clock.millis = (clock.millis + 37) % 1000;
+        const message = SAMPLE_MESSAGE[lvl];
+        const outcome = logCall(state.logger, lvl, message, clock);
+        const consoleResult = outcome.results.find(function (r) { return r.sinkId === 'console'; });
+        const fileResult = outcome.results.find(function (r) { return r.sinkId === 'file'; });
+
+        if (!outcome.loggerPasses) {
+          log('logger->' + lvl + '("' + message + '") -- BLOCKED at the logger (level=' + state.logger.level + '); no sink was even consulted.', 'bad');
+          explainEl.textContent = 'This call never got past the logger own level ("' + state.logger.level + '"). Neither sink was consulted at all -- their individual levels never even come into play once the logger itself has already rejected the message.';
+        } else {
+          log('logger->' + lvl + '("' + message + '") -- passed the logger; console ' + (consoleResult.emitted ? 'EMITTED' : 'blocked') + ', file ' + (fileResult.emitted ? 'EMITTED' : 'blocked') + '.', consoleResult.emitted || fileResult.emitted ? 'good' : 'bad');
+          if (consoleResult.emitted) appendFeedLine(consoleFeedEl, lvl, consoleResult.formatted);
+          if (fileResult.emitted) appendFeedLine(fileFeedEl, lvl, fileResult.formatted);
+          explainEl.textContent = 'The logger passed this "' + lvl + '" call through. Console sink (level="' + sinkById('console').level + '") ' +
+            (consoleResult.emitted ? 'emitted it.' : 'blocked it on its own level.') + ' File sink (level="' + sinkById('file').level + '") ' +
+            (fileResult.emitted ? 'emitted it.' : 'blocked it on its own level.') +
+            (consoleResult.emitted !== fileResult.emitted ? ' Notice the two sinks disagreed on the exact same call -- that is the point.' : '');
+        }
+      });
+      logButtonsEl.appendChild(btn);
+    });
+
+    function renderEmptyFeeds() {
+      consoleFeedEl.innerHTML = '<span class="spd-empty">Nothing emitted yet.</span>';
+      fileFeedEl.innerHTML = '<span class="spd-empty">Nothing emitted yet.</span>';
+    }
+    renderEmptyFeeds();
+  })();
+  </script>
+</div>

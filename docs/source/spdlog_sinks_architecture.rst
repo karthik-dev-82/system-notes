@@ -248,6 +248,13 @@ without passing it around!
 Log Levels: The Volume Knob
 --------------------------------
 
+.. seealso::
+   See :doc:`spdlog_sinks_interactive` for a hands-on version of this
+   section -- fire a log call at any level and watch the logger's own
+   level gate it first, then watch each sink's own level gate it again
+   independently.
+
+
 spdlog has different "urgency" levels:
 
 .. list-table::

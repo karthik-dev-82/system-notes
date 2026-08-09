@@ -125,6 +125,7 @@ worth writing down and coming back to.
    :caption: C++ Notes
 
    spdlog_sinks_architecture
+   spdlog_sinks_interactive
    conan_package_manager
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
@@ -436,6 +437,9 @@ C++ Notes
    * - :doc:`spdlog_sinks_architecture`
      - spdlog logging architecture, sinks, and log levels
      - ``spdlog``, sinks, formatters, log levels, rotation
+   * - :doc:`spdlog_sinks_interactive`
+     - Play With It: logger-then-sink level cascade, live
+     - ``set_level``, ``trace``-``critical``/``off``, per-sink pattern
    * - :doc:`conan_package_manager`
      - Conan package manager for C++ -- conanfile structure, generators, and commands
      - ``conanfile.txt``, ``conanfile.py``, generators, ConanCenter
