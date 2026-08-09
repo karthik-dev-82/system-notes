@@ -1,0 +1,340 @@
+<div class="lid-root" id="lidWidget">
+  <style>
+    #lidWidget {
+      --lid-bg: #0f172a;
+      --lid-panel: #16213e;
+      --lid-border: #2a3655;
+      --lid-text: #e2e8f0;
+      --lid-muted: #94a3b8;
+      --lid-accent: #38bdf8;
+      --lid-good: #4ade80;
+      --lid-bad: #f87171;
+      --lid-warn: #fbbf24;
+      --lid-rock: #2b2118;
+      --lid-open: #1c2b3a;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--lid-bg);
+      color: var(--lid-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #lidWidget * { box-sizing: border-box; }
+    #lidWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #lidWidget .lid-sub { color: var(--lid-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .lid-box { background: var(--lid-panel); border: 1px solid var(--lid-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .lid-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--lid-muted); margin-bottom: 8px; }
+
+    .lid-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .lid-control-group { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+    .lid-control-group input[type="range"] { width: 140px; }
+    .lid-control-group select { background: #0a1128; color: var(--lid-text); border: 1px solid var(--lid-border); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    .lid-btn { background: var(--lid-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .lid-btn.secondary { background: transparent; color: var(--lid-text); border: 1px solid var(--lid-border); }
+
+    .lid-main { display: flex; gap: 14px; flex-wrap: wrap; }
+    .lid-svg-col { flex: 1.6; min-width: 340px; }
+    .lid-side-col { flex: 1; min-width: 260px; display: flex; flex-direction: column; gap: 14px; }
+
+    svg#lidSvg { width: 100%; height: auto; border-radius: 8px; background: var(--lid-rock); cursor: crosshair; }
+    .lid-legend { font-size: 0.7rem; color: var(--lid-muted); margin-top: 6px; }
+
+    .lid-formula { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.9; }
+    .lid-formula .lid-num { color: var(--lid-accent); font-weight: 700; }
+
+    .lid-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .lid-log div { color: var(--lid-muted); }
+    .lid-log div.good { color: var(--lid-good); }
+    .lid-log div.bad { color: var(--lid-bad); }
+
+    details.lid-notes { margin-top: 4px; background: var(--lid-panel); border: 1px solid var(--lid-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.lid-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.lid-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--lid-muted); }
+    details.lid-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--lid-accent); }
+  </style>
+
+  <h3>LIDAR Ray-Casting &amp; Point Clouds: Play With It</h3>
+  <div class="lid-sub">Click anywhere in the open tunnel to place the scanner. Real ray-vs-wall geometry, real round-trip time-of-flight math -- not a simplified stand-in.</div>
+
+  <div class="lid-box">
+    <div class="lid-row">
+      <div class="lid-control-group">
+        <span>Rays per scan:</span>
+        <input type="range" id="lidNumRays" min="8" max="120" step="1" value="36">
+        <span id="lidNumRaysLabel">36</span>
+      </div>
+      <div class="lid-control-group">
+        <span>Mode:</span>
+        <select id="lidMode">
+          <option value="terrestrial">Terrestrial (stationary tripod)</option>
+          <option value="mobile">Mobile (accumulates while moving)</option>
+        </select>
+      </div>
+      <button class="lid-btn secondary" id="lidClearBtn">Clear point cloud</button>
+    </div>
+  </div>
+
+  <div class="lid-main">
+    <div class="lid-svg-col">
+      <svg id="lidSvg" viewBox="0 0 75 68" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="lid-legend">Dark = solid rock. Lighter = open tunnel/chamber. Click inside the open area to move the scanner.</div>
+    </div>
+    <div class="lid-side-col">
+      <div class="lid-box" style="margin-bottom:0;">
+        <div class="lid-panel-title">Inspect one ray</div>
+        <div class="lid-control-group" style="margin-bottom:8px;">
+          <span>Ray #:</span>
+          <input type="range" id="lidRayIndex" min="0" max="35" step="1" value="0">
+          <span id="lidRayIndexLabel">0</span>
+        </div>
+        <div class="lid-formula" id="lidFormula"></div>
+      </div>
+      <div class="lid-box" style="margin-bottom:0;">
+        <div class="lid-panel-title">Event log</div>
+        <div class="lid-log" id="lidLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="lid-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>Every dot in the point cloud is a real ray-vs-wall intersection</b>, not a placed decoration -- the same ray-segment intersection math used here is the same category of geometry a real LIDAR's processing pipeline runs, just against real 3D surfaces instead of 2D wall segments.</li>
+      <li><b>The nanosecond timings are real</b>, not simplified for effect -- light travels at roughly 0.3 meters per nanosecond, so a wall 10 meters away really does produce a round-trip echo in the tens-of-nanoseconds range. That's exactly why LIDAR timing electronics have to be so precise: there's no room for slack at that timescale.</li>
+      <li><b>Terrestrial vs. Mobile is a real distinction in how the point cloud is built</b>, not just a labeling difference. A stationary tripod scan only ever sees the room from one vantage point -- anything behind an obstacle from that one position stays a permanent gap. Moving the scanner (Mobile mode) fills in those gaps from new angles, which is exactly why mobile LIDAR is what vehicles and robots use to build a usable map instead of just one static snapshot.</li>
+      <li>This widget places the scanner at a position <i>you already know</i> -- you just clicked it there. Real mobile LIDAR almost never has that luxury: the platform's own position is itself uncertain and has to be estimated at the same time the map is being built. That bootstrapping problem is exactly what the companion SLAM widget covers next.</li>
+      <li>See <a href="lidar_slam.html">LIDAR and SLAM for GPS-Denied Navigation</a> for the full write-up this widget is built from.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    const C_M_PER_NS = 0.299792458;
+
+    function distanceToTimeNs(distanceMeters) {
+      return (2 * distanceMeters) / C_M_PER_NS;
+    }
+
+    function raySegmentIntersect(origin, angle, a, b) {
+      const dx = Math.cos(angle);
+      const dy = Math.sin(angle);
+      const sx = b.x - a.x;
+      const sy = b.y - a.y;
+      const denom = dx * sy - dy * sx;
+      if (Math.abs(denom) < 1e-12) return null;
+      const ex = a.x - origin.x;
+      const ey = a.y - origin.y;
+      const t = (ex * sy - ey * sx) / denom;
+      const s = (ex * dy - ey * dx) / denom;
+      if (t < 0 || s < 0 || s > 1) return null;
+      return { t: t, point: { x: origin.x + dx * t, y: origin.y + dy * t } };
+    }
+
+    function castRay(origin, angle, walls, maxRange) {
+      let best = null;
+      for (const wall of walls) {
+        const hit = raySegmentIntersect(origin, angle, { x: wall.x1, y: wall.y1 }, { x: wall.x2, y: wall.y2 });
+        if (hit && hit.t <= maxRange && (best === null || hit.t < best.t)) {
+          best = hit;
+        }
+      }
+      if (best === null) return { hit: false, distance: null, point: null };
+      return { hit: true, distance: best.t, point: best.point };
+    }
+
+    function scanFn(origin, numRays, walls, maxRange) {
+      const rays = [];
+      for (let i = 0; i < numRays; i++) {
+        const angle = (2 * Math.PI * i) / numRays;
+        const result = castRay(origin, angle, walls, maxRange);
+        rays.push(Object.assign({ angle: angle }, result));
+      }
+      return rays;
+    }
+
+    function pointInPolygon(point, polygon) {
+      let inside = false;
+      const n = polygon.length;
+      for (let i = 0, j = n - 1; i < n; j = i++) {
+        const xi = polygon[i].x, yi = polygon[i].y;
+        const xj = polygon[j].x, yj = polygon[j].y;
+        const intersects = (yi > point.y) !== (yj > point.y) &&
+          point.x < ((xj - xi) * (point.y - yi)) / (yj - yi) + xi;
+        if (intersects) inside = !inside;
+      }
+      return inside;
+    }
+
+    // --- Fixed tunnel floor plan (a mining-style corridor opening into a chamber) ---
+
+    const POLYGON = [
+      { x: 5, y: 5 }, { x: 55, y: 5 }, { x: 55, y: 25 }, { x: 35, y: 25 },
+      { x: 35, y: 45 }, { x: 65, y: 45 }, { x: 65, y: 60 }, { x: 15, y: 60 },
+      { x: 15, y: 25 }, { x: 5, y: 25 },
+    ];
+    const WALLS = POLYGON.map(function (p, i) {
+      const next = POLYGON[(i + 1) % POLYGON.length];
+      return { x1: p.x, y1: p.y, x2: next.x, y2: next.y };
+    });
+    const MAX_RANGE = 150;
+
+    // --- Widget state ---
+
+    const state = {
+      scanner: { x: 30, y: 15 },
+      numRays: 36,
+      mode: 'terrestrial',
+      currentScan: [],
+      accumulated: [], // { x, y } hit points, only grown when the scanner actually MOVES in Mobile mode
+    };
+
+    const svg = document.getElementById('lidSvg');
+    const numRaysEl = document.getElementById('lidNumRays');
+    const numRaysLabelEl = document.getElementById('lidNumRaysLabel');
+    const modeEl = document.getElementById('lidMode');
+    const rayIndexEl = document.getElementById('lidRayIndex');
+    const rayIndexLabelEl = document.getElementById('lidRayIndexLabel');
+    const formulaEl = document.getElementById('lidFormula');
+    const logEl = document.getElementById('lidLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+      return el;
+    }
+
+    // Pure: recomputes the live scan for the current scanner position and ray
+    // count. Never touches the accumulated map -- so dragging the ray-count
+    // slider only changes the live preview, it never adds duplicate points
+    // to the map just because a re-render happened without the scanner moving.
+    function computeCurrentScan() {
+      state.currentScan = scanFn(state.scanner, state.numRays, WALLS, MAX_RANGE);
+    }
+
+    // Commits the current scan's hit points into the accumulated map. Only
+    // called when the scanner actually moves to a new position (or a mode
+    // switch/reset seeds the map from where the scanner already is).
+    function commitCurrentScanToMap() {
+      state.currentScan.forEach(function (r) {
+        if (r.hit) state.accumulated.push({ x: r.point.x, y: r.point.y });
+      });
+    }
+
+    function render() {
+      svg.innerHTML = '';
+      const polyPoints = POLYGON.map(function (p) { return p.x + ',' + p.y; }).join(' ');
+      svg.appendChild(svgEl('polygon', { points: polyPoints, fill: 'var(--lid-open)', stroke: '#4a5a75', 'stroke-width': '0.6' }));
+
+      // Rays (behind the point cloud and scanner)
+      state.currentScan.forEach(function (r, i) {
+        if (!r.hit) return;
+        const isSelected = i === parseInt(rayIndexEl.value, 10);
+        svg.appendChild(svgEl('line', {
+          x1: state.scanner.x, y1: state.scanner.y, x2: r.point.x, y2: r.point.y,
+          stroke: isSelected ? '#fbbf24' : 'rgba(56,189,248,0.35)',
+          'stroke-width': isSelected ? '0.5' : '0.15',
+        }));
+      });
+
+      // Point cloud: Mobile mode shows the accumulated map built up across
+      // every position visited so far; Terrestrial mode only ever shows the
+      // single scan taken from wherever the scanner is right now.
+      const cloudPoints = state.mode === 'mobile'
+        ? state.accumulated
+        : state.currentScan.filter(function (r) { return r.hit; }).map(function (r) { return { x: r.point.x, y: r.point.y }; });
+      cloudPoints.forEach(function (p) {
+        svg.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '0.5', fill: '#4ade80' }));
+      });
+
+      // Scanner
+      svg.appendChild(svgEl('circle', { cx: state.scanner.x, cy: state.scanner.y, r: '1.4', fill: '#38bdf8', stroke: '#fff', 'stroke-width': '0.3' }));
+
+      renderFormula();
+    }
+
+    function renderFormula() {
+      const idx = Math.min(parseInt(rayIndexEl.value, 10), state.currentScan.length - 1);
+      const ray = state.currentScan[idx];
+      if (!ray || !ray.hit) {
+        formulaEl.innerHTML = 'This ray never hit a wall within range.';
+        return;
+      }
+      const degrees = (ray.angle * 180 / Math.PI).toFixed(1);
+      const distance = ray.distance;
+      const timeNs = distanceToTimeNs(distance);
+      formulaEl.innerHTML =
+        'angle = <span class="lid-num">' + degrees + '&deg;</span><br>' +
+        'distance = <span class="lid-num">' + distance.toFixed(2) + ' m</span><br>' +
+        'round-trip time = 2 &times; distance / c<br>' +
+        '&nbsp;&nbsp;= 2 &times; ' + distance.toFixed(2) + ' / 0.2998 m/ns<br>' +
+        '&nbsp;&nbsp;= <span class="lid-num">' + timeNs.toFixed(2) + ' ns</span>';
+    }
+
+    function tryMoveScanner(x, y) {
+      if (!pointInPolygon({ x: x, y: y }, POLYGON)) {
+        log('Can’t place the scanner at (' + x.toFixed(1) + ', ' + y.toFixed(1) + ') -- that’s solid rock.', 'bad');
+        return;
+      }
+      state.scanner = { x: x, y: y };
+      computeCurrentScan();
+      if (state.mode === 'mobile') commitCurrentScanToMap();
+      log('Scanner moved to (' + x.toFixed(1) + ', ' + y.toFixed(1) + ') -- cast ' + state.numRays + ' rays' + (state.mode === 'mobile' ? ', added to the accumulated map.' : '.'), 'good');
+      render();
+    }
+
+    svg.addEventListener('click', function (ev) {
+      const rect = svg.getBoundingClientRect();
+      const viewBox = svg.viewBox.baseVal;
+      const x = viewBox.x + ((ev.clientX - rect.left) / rect.width) * viewBox.width;
+      const y = viewBox.y + ((ev.clientY - rect.top) / rect.height) * viewBox.height;
+      tryMoveScanner(x, y);
+    });
+
+    numRaysEl.addEventListener('input', function () {
+      state.numRays = parseInt(numRaysEl.value, 10);
+      numRaysLabelEl.textContent = state.numRays;
+      rayIndexEl.max = state.numRays - 1;
+      if (parseInt(rayIndexEl.value, 10) >= state.numRays) rayIndexEl.value = 0;
+      computeCurrentScan(); // live preview only -- the scanner hasn't moved, so the map is untouched
+      render();
+    });
+
+    modeEl.addEventListener('change', function () {
+      state.mode = modeEl.value;
+      state.accumulated = [];
+      computeCurrentScan();
+      if (state.mode === 'mobile') commitCurrentScanToMap();
+      log('Switched to ' + (state.mode === 'mobile' ? 'Mobile' : 'Terrestrial') + ' mode -- point cloud reset.', 'good');
+      render();
+    });
+
+    document.getElementById('lidClearBtn').addEventListener('click', function () {
+      state.accumulated = [];
+      if (state.mode === 'mobile') commitCurrentScanToMap();
+      log('Point cloud cleared.', 'good');
+      render();
+    });
+
+    rayIndexEl.addEventListener('input', function () {
+      rayIndexLabelEl.textContent = rayIndexEl.value;
+      render();
+    });
+
+    computeCurrentScan();
+    render();
+  })();
+  </script>
+</div>

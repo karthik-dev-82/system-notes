@@ -118,6 +118,7 @@ worth writing down and coming back to.
    :caption: Robotics
 
    lidar_slam
+   lidar_pointcloud_interactive
 
 .. toctree::
    :hidden:
@@ -422,6 +423,9 @@ Robotics
    * - :doc:`lidar_slam`
      - LIDAR and SLAM for navigation where GPS doesn't work
      - point clouds, localization, mapping, autonomous vehicles
+   * - :doc:`lidar_pointcloud_interactive`
+     - Play With It: ray-vs-wall geometry, real time-of-flight math, live
+     - ray casting, point cloud, terrestrial vs. mobile scanning
 
 C++ Notes
 -----------------

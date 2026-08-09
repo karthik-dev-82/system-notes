@@ -10,6 +10,13 @@ cases, but the same two technologies show up anywhere GPS doesn't work.
 LIDAR: Light Detection and Ranging
 ---------------------------------------
 
+.. seealso::
+   See :doc:`lidar_pointcloud_interactive` for a hands-on version of
+   this section -- click to place a scanner, cast real rays against
+   real walls, and see the exact round-trip time-of-flight math behind
+   every point-cloud dot.
+
+
 **The Bat Analogy:** think of how a bat navigates in the dark by
 sending out sound waves and listening for echoes. LIDAR works the same
 way, but uses laser light instead of sound.
