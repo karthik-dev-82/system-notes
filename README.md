@@ -35,6 +35,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
 | 🎮 **[LIDAR Point Clouds (Interactive)](docs/source/lidar_pointcloud_interactive.rst)** | Interactive LIDAR ray-casting -- real ray-vs-wall geometry, real round-trip time-of-flight math | ray casting, point cloud, terrestrial vs. mobile scanning |
+| 🎮 **[SLAM Scan Matching (Interactive)](docs/source/slam_scan_matching_interactive.rst)** | Interactive SLAM -- odometry drift vs. real ICP scan-matching correction, side by side, with a live 100-trial statistic | ICP, point-to-point matching, pose estimation, dead reckoning |
 | 🎮 **[SSH Handshake (Interactive)](docs/source/ssh_secure_shell_interactive.rst)** | Interactive SSH handshake -- a real toy-scale Diffie-Hellman exchange, host-key MITM detection, and both auth methods | Diffie-Hellman, host key fingerprints, password vs. public-key auth |
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
 | 🎮 **[DNS Resolution (Interactive)](docs/source/dns_resolution_interactive.rst)** | Interactive DNS resolver -- walk root/TLD/authoritative, then watch layered TTL caching and CNAME-following in action | recursive resolver, referral chain, TTL caching, CNAME |
@@ -146,6 +147,7 @@ system-notes/
         ├── kernel_networking_docker_internals.rst
         ├── lidar_slam.rst
         ├── lidar_pointcloud_interactive.rst
+        ├── slam_scan_matching_interactive.rst
         ├── ssh_secure_shell_interactive.rst
         ├── ssh_secure_shell.rst
         ├── dns_resolution_interactive.rst

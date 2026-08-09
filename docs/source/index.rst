@@ -119,6 +119,7 @@ worth writing down and coming back to.
 
    lidar_slam
    lidar_pointcloud_interactive
+   slam_scan_matching_interactive
 
 .. toctree::
    :hidden:
@@ -426,6 +427,9 @@ Robotics
    * - :doc:`lidar_pointcloud_interactive`
      - Play With It: ray-vs-wall geometry, real time-of-flight math, live
      - ray casting, point cloud, terrestrial vs. mobile scanning
+   * - :doc:`slam_scan_matching_interactive`
+     - Play With It: odometry drift vs. ICP scan-matching correction, live
+     - ICP, point-to-point matching, pose estimation, dead reckoning
 
 C++ Notes
 -----------------

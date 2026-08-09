@@ -67,6 +67,13 @@ Types Used in the Field
 SLAM: Simultaneous Localization and Mapping
 -------------------------------------------------
 
+.. seealso::
+   See :doc:`slam_scan_matching_interactive` for a hands-on version of
+   this section -- the same noisy motion command fed into raw dead
+   reckoning versus real ICP scan-matching correction, side by side,
+   with a live 100-trial statistic instead of a single anecdotal run.
+
+
 **The Blindfolded Explorer Analogy:** imagine you're blindfolded in an
 unknown room. As you walk and touch walls, you're doing two things at
 once:

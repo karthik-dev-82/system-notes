@@ -1,0 +1,467 @@
+<div class="slm-root" id="slmWidget">
+  <style>
+    #slmWidget {
+      --slm-bg: #0f172a;
+      --slm-panel: #16213e;
+      --slm-border: #2a3655;
+      --slm-text: #e2e8f0;
+      --slm-muted: #94a3b8;
+      --slm-accent: #38bdf8;
+      --slm-good: #4ade80;
+      --slm-bad: #f87171;
+      --slm-warn: #fbbf24;
+      --slm-open: #1c2b3a;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--slm-bg);
+      color: var(--slm-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #slmWidget * { box-sizing: border-box; }
+    #slmWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #slmWidget .slm-sub { color: var(--slm-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .slm-box { background: var(--slm-panel); border: 1px solid var(--slm-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .slm-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--slm-muted); margin-bottom: 8px; }
+
+    .slm-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .slm-btn { background: var(--slm-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .slm-btn.secondary { background: transparent; color: var(--slm-text); border: 1px solid var(--slm-border); }
+    .slm-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .slm-maps { display: flex; gap: 14px; flex-wrap: wrap; }
+    .slm-map-col { flex: 1; min-width: 280px; }
+    .slm-map-title { font-size: 0.78rem; font-weight: 700; margin-bottom: 6px; }
+    .slm-map-title.odom { color: var(--slm-bad); }
+    .slm-map-title.slam { color: var(--slm-good); }
+    svg.slm-svg { width: 100%; height: auto; border-radius: 8px; background: #2b2118; }
+    .slm-error-readout { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--slm-muted); margin-top: 4px; }
+
+    .slm-chart-box svg { width: 100%; height: auto; }
+
+    .slm-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .slm-explain-panel, .slm-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .slm-explain-panel { flex: 1.3; }
+    .slm-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .slm-log div { color: var(--slm-muted); }
+    .slm-log div.good { color: var(--slm-good); }
+    .slm-log div.bad { color: var(--slm-bad); }
+
+    .slm-summary { font-family: ui-monospace, monospace; font-size: 0.8rem; line-height: 1.8; }
+    .slm-summary .slm-num { font-weight: 700; }
+
+    details.slm-notes { margin-top: 4px; background: var(--slm-panel); border: 1px solid var(--slm-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.slm-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.slm-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--slm-muted); }
+    details.slm-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--slm-accent); }
+  </style>
+
+  <h3>SLAM: The Chicken-and-Egg Loop, Play With It</h3>
+  <div class="slm-sub">Same true path, same noisy odometry, fed into two different strategies for turning a LIDAR scan into a map. Left just trusts the noisy motion estimate. Right corrects that estimate by matching each new scan against the map built so far -- real point-to-point ICP, not a simplified stand-in.</div>
+
+  <div class="slm-box">
+    <div class="slm-row">
+      <button class="slm-btn" id="slmStepBtn">Take a step</button>
+      <button class="slm-btn secondary" id="slmResetBtn">New random run</button>
+      <button class="slm-btn secondary" id="slmTrialsBtn">Run 100 trials &amp; compare</button>
+      <span id="slmStepLabel" style="font-size:0.78rem;color:var(--slm-muted);"></span>
+    </div>
+  </div>
+
+  <div class="slm-maps">
+    <div class="slm-map-col">
+      <div class="slm-map-title odom">Trusting raw odometry</div>
+      <svg class="slm-svg" id="slmOdomSvg" viewBox="0 0 75 68" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="slm-error-readout" id="slmOdomError"></div>
+    </div>
+    <div class="slm-map-col">
+      <div class="slm-map-title slam">Correcting via scan matching</div>
+      <svg class="slm-svg" id="slmSlamSvg" viewBox="0 0 75 68" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="slm-error-readout" id="slmSlamError"></div>
+    </div>
+  </div>
+
+  <div class="slm-box slm-chart-box">
+    <div class="slm-panel-title">Position error vs. true pose, over the run so far</div>
+    <svg id="slmChartSvg" viewBox="0 0 300 110" xmlns="http://www.w3.org/2000/svg"></svg>
+  </div>
+
+  <div class="slm-box" id="slmTrialsSummaryBox" style="display:none;">
+    <div class="slm-panel-title">100-trial aggregate (this exact path, fresh random noise each run)</div>
+    <div class="slm-summary" id="slmTrialsSummary"></div>
+  </div>
+
+  <div class="slm-panels">
+    <div class="slm-explain-panel">
+      <div class="slm-box" style="margin-bottom:0;">
+        <div class="slm-panel-title">What's happening right now</div>
+        <div id="slmExplain">Click "Take a step" to move the robot along its path and watch both strategies react to the exact same noisy motion.</div>
+      </div>
+    </div>
+    <div class="slm-side-panel-col">
+      <div class="slm-box" style="margin-bottom:0;">
+        <div class="slm-panel-title">Event log</div>
+        <div class="slm-log" id="slmLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="slm-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>Both panels see the exact same real scan and the exact same noisy motion command at every step</b> -- the only difference is what each one does with that noisy command. The left panel just integrates it directly (classic dead reckoning). The right panel uses it only as a starting guess, then runs real ICP (Iterative Closest Point): match the new scan's points against the nearest points already in the map, fit the rigid rotation+translation that best aligns them, repeat a few times.</li>
+      <li><b>Scan matching does not win every single run.</b> Empirically, across many runs of this exact path, it ends closer to the true position in roughly 85% of them -- not 100%. Occasionally a lucky noise draw lets raw odometry end up closer by chance, or an unlucky scan gives ICP a poor match. Click "Run 100 trials &amp; compare" to see the real, live aggregate rather than taking that number on faith.</li>
+      <li><b>Point-to-point ICP has a small built-in residual error, even from a perfect starting guess.</b> Two scans taken from slightly different positions sample the same walls at different points along them -- so even flawless correction can't align two scans to exactly zero error. This is a genuine, well-known property of point-to-point ICP (as opposed to point-to-plane methods, which reduce but don't eliminate this either) -- not a bug being hidden here.</li>
+      <li><b>The real payoff isn't any single step, it's that the gap widens as the path gets longer.</b> Dead-reckoning error compounds step after step with no ceiling. Scan-matching error gets re-anchored near the map every single step, so it does not compound the same way -- watch the error chart's two lines diverge further apart the more steps you take.</li>
+      <li>This widget stops at scan-to-map matching. It deliberately does not cover <b>loop closure</b> -- recognizing you've returned to a previously-mapped place and using that to retroactively correct the entire trajectory -- which is the other major technique real SLAM systems use and a natural next widget if this territory gets revisited.</li>
+      <li>See the companion <a href="lidar_pointcloud_interactive.html">LIDAR ray-casting widget</a> for the sensor half of this picture in isolation, and <a href="lidar_slam.html">LIDAR and SLAM for GPS-Denied Navigation</a> for the full write-up both widgets are built from.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function raySegmentIntersect(origin, angle, a, b) {
+      const dx = Math.cos(angle);
+      const dy = Math.sin(angle);
+      const sx = b.x - a.x;
+      const sy = b.y - a.y;
+      const denom = dx * sy - dy * sx;
+      if (Math.abs(denom) < 1e-12) return null;
+      const ex = a.x - origin.x;
+      const ey = a.y - origin.y;
+      const t = (ex * sy - ey * sx) / denom;
+      const s = (ex * dy - ey * dx) / denom;
+      if (t < 0 || s < 0 || s > 1) return null;
+      return { t: t, point: { x: origin.x + dx * t, y: origin.y + dy * t } };
+    }
+
+    function castRay(origin, angle, walls, maxRange) {
+      let best = null;
+      for (const wall of walls) {
+        const hit = raySegmentIntersect(origin, angle, { x: wall.x1, y: wall.y1 }, { x: wall.x2, y: wall.y2 });
+        if (hit && hit.t <= maxRange && (best === null || hit.t < best.t)) best = hit;
+      }
+      if (best === null) return { hit: false, distance: null, point: null };
+      return { hit: true, distance: best.t, point: best.point };
+    }
+
+    function scanFn(origin, headingOffset, numRays, walls, maxRange) {
+      const rays = [];
+      for (let i = 0; i < numRays; i++) {
+        const angle = headingOffset + (2 * Math.PI * i) / numRays;
+        const result = castRay(origin, angle, walls, maxRange);
+        rays.push(Object.assign({ angle: angle }, result));
+      }
+      return rays;
+    }
+
+    function worldToLocal(worldPoint, pose) {
+      const dx = worldPoint.x - pose.x;
+      const dy = worldPoint.y - pose.y;
+      const c = Math.cos(-pose.theta);
+      const s = Math.sin(-pose.theta);
+      return { x: dx * c - dy * s, y: dx * s + dy * c };
+    }
+
+    function localToWorld(localPoint, pose) {
+      const c = Math.cos(pose.theta);
+      const s = Math.sin(pose.theta);
+      return {
+        x: pose.x + localPoint.x * c - localPoint.y * s,
+        y: pose.y + localPoint.x * s + localPoint.y * c,
+      };
+    }
+
+    function applyMotion(pose, command) {
+      const theta = pose.theta + command.turn;
+      return {
+        x: pose.x + Math.cos(theta) * command.distance,
+        y: pose.y + Math.sin(theta) * command.distance,
+        theta: theta,
+      };
+    }
+
+    function fitRigidTransform(sourcePoints, targetPoints) {
+      const n = sourcePoints.length;
+      let csx = 0, csy = 0, ctx = 0, cty = 0;
+      for (let i = 0; i < n; i++) {
+        csx += sourcePoints[i].x; csy += sourcePoints[i].y;
+        ctx += targetPoints[i].x; cty += targetPoints[i].y;
+      }
+      csx /= n; csy /= n; ctx /= n; cty /= n;
+      let crossSum = 0, dotSum = 0;
+      for (let i = 0; i < n; i++) {
+        const ax = sourcePoints[i].x - csx, ay = sourcePoints[i].y - csy;
+        const bx = targetPoints[i].x - ctx, by = targetPoints[i].y - cty;
+        crossSum += ax * by - ay * bx;
+        dotSum += ax * bx + ay * by;
+      }
+      const theta = Math.atan2(crossSum, dotSum);
+      const c = Math.cos(theta), s = Math.sin(theta);
+      const tx = ctx - (csx * c - csy * s);
+      const ty = cty - (csx * s + csy * c);
+      return { x: tx, y: ty, theta: theta };
+    }
+
+    function nearestPoint(point, pointList) {
+      let best = null, bestDist = Infinity;
+      for (const p of pointList) {
+        const d = (p.x - point.x) * (p.x - point.x) + (p.y - point.y) * (p.y - point.y);
+        if (d < bestDist) { bestDist = d; best = p; }
+      }
+      return { point: best, distSq: bestDist };
+    }
+
+    function icpAlign(scanLocal, mapWorld, initialGuess, iterations, maxCorrespondenceDist) {
+      let pose = initialGuess;
+      for (let iter = 0; iter < iterations; iter++) {
+        const transformed = scanLocal.map(function (p) { return localToWorld(p, pose); });
+        const matchedSource = [];
+        const matchedTarget = [];
+        for (let i = 0; i < transformed.length; i++) {
+          const res = nearestPoint(transformed[i], mapWorld);
+          if (res.point && res.distSq <= maxCorrespondenceDist * maxCorrespondenceDist) {
+            matchedSource.push(scanLocal[i]);
+            matchedTarget.push(res.point);
+          }
+        }
+        if (matchedSource.length < 3) break;
+        pose = fitRigidTransform(matchedSource, matchedTarget);
+      }
+      return pose;
+    }
+
+    // --- Environment: same tunnel as the LIDAR widget, for continuity ---
+
+    const POLYGON = [
+      { x: 5, y: 5 }, { x: 55, y: 5 }, { x: 55, y: 25 }, { x: 35, y: 25 },
+      { x: 35, y: 45 }, { x: 65, y: 45 }, { x: 65, y: 60 }, { x: 15, y: 60 },
+      { x: 15, y: 25 }, { x: 5, y: 25 },
+    ];
+    const WALLS = POLYGON.map(function (p, i) {
+      const next = POLYGON[(i + 1) % POLYGON.length];
+      return { x1: p.x, y1: p.y, x2: next.x, y2: next.y };
+    });
+
+    // Verified path: waypoints confirmed inside the tunnel, commands derived
+    // to reproduce them exactly (see the model's Node test suite).
+    const COMMANDS = [
+      { turn: 0.133, distance: 15.133 }, { turn: 2.099, distance: 11.402 }, { turn: -0.197, distance: 6.708 },
+      { turn: -0.339, distance: 8.062 }, { turn: 0.197, distance: 6.325 }, { turn: -0.785, distance: 6.708 },
+      { turn: -0.91, distance: 10.198 }, { turn: -0.395, distance: 10.198 }, { turn: 0.717, distance: 8.062 },
+      { turn: 2.218, distance: 7.616 }, { turn: 0.537, distance: 15.133 }, { turn: 0.426, distance: 9.434 },
+    ];
+    const START_POSE = { x: 20, y: 13, theta: 0 };
+    const NUM_RAYS = 60, MAX_RANGE = 150, ICP_ITERATIONS = 8, MAX_CORR_DIST = 3;
+
+    function noisyCommand(cmd) {
+      return {
+        turn: cmd.turn + (Math.random() - 0.5) * 0.08,
+        distance: cmd.distance * (1 + (Math.random() - 0.5) * 0.1),
+      };
+    }
+
+    // --- Widget state ---
+
+    function freshState() {
+      return {
+        stepIndex: 0,
+        trueState: Object.assign({}, START_POSE),
+        odomEstimate: Object.assign({}, START_POSE),
+        slamEstimate: Object.assign({}, START_POSE),
+        odomMap: [],
+        slamMap: [],
+        odomTrail: [{ x: START_POSE.x, y: START_POSE.y }],
+        slamTrail: [{ x: START_POSE.x, y: START_POSE.y }],
+        trueTrail: [{ x: START_POSE.x, y: START_POSE.y }],
+        errorHistory: [],
+      };
+    }
+    let state = freshState();
+
+    const stepBtn = document.getElementById('slmStepBtn');
+    const resetBtn = document.getElementById('slmResetBtn');
+    const trialsBtn = document.getElementById('slmTrialsBtn');
+    const stepLabelEl = document.getElementById('slmStepLabel');
+    const odomSvg = document.getElementById('slmOdomSvg');
+    const slamSvg = document.getElementById('slmSlamSvg');
+    const odomErrorEl = document.getElementById('slmOdomError');
+    const slamErrorEl = document.getElementById('slmSlamError');
+    const chartSvg = document.getElementById('slmChartSvg');
+    const trialsBox = document.getElementById('slmTrialsSummaryBox');
+    const trialsSummaryEl = document.getElementById('slmTrialsSummary');
+    const explainEl = document.getElementById('slmExplain');
+    const logEl = document.getElementById('slmLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function svgEl(tag, attrs) {
+      const el = document.createElementNS('http://www.w3.org/2000/svg', tag);
+      Object.keys(attrs).forEach(function (k) { el.setAttribute(k, attrs[k]); });
+      return el;
+    }
+
+    function renderMap(svg, mapPoints, trail, trueTrail, estColor) {
+      svg.innerHTML = '';
+      const polyPoints = POLYGON.map(function (p) { return p.x + ',' + p.y; }).join(' ');
+      svg.appendChild(svgEl('polygon', { points: polyPoints, fill: 'var(--slm-open)', stroke: '#4a5a75', 'stroke-width': '0.6' }));
+
+      mapPoints.forEach(function (p) {
+        svg.appendChild(svgEl('circle', { cx: p.x, cy: p.y, r: '0.4', fill: '#94a3b8', opacity: '0.8' }));
+      });
+
+      if (trueTrail.length > 1) {
+        svg.appendChild(svgEl('polyline', {
+          points: trueTrail.map(function (p) { return p.x + ',' + p.y; }).join(' '),
+          fill: 'none', stroke: '#ffffff', 'stroke-width': '0.3', 'stroke-dasharray': '1,1',
+        }));
+      }
+      if (trail.length > 1) {
+        svg.appendChild(svgEl('polyline', {
+          points: trail.map(function (p) { return p.x + ',' + p.y; }).join(' '),
+          fill: 'none', stroke: estColor, 'stroke-width': '0.4',
+        }));
+      }
+
+      const truePos = trueTrail[trueTrail.length - 1];
+      svg.appendChild(svgEl('circle', { cx: truePos.x, cy: truePos.y, r: '1.1', fill: 'none', stroke: '#ffffff', 'stroke-width': '0.35' }));
+
+      const estPos = trail[trail.length - 1];
+      svg.appendChild(svgEl('circle', { cx: estPos.x, cy: estPos.y, r: '1.0', fill: estColor }));
+    }
+
+    function renderChart() {
+      chartSvg.innerHTML = '';
+      const history = state.errorHistory;
+      const maxError = Math.max(1, ...history.map(function (h) { return Math.max(h.odomError, h.slamError); }));
+      const w = 300, h = 110, padL = 26, padB = 16, padT = 8, padR = 8;
+      const plotW = w - padL - padR, plotH = h - padT - padB;
+
+      chartSvg.appendChild(svgEl('line', { x1: padL, y1: padT, x2: padL, y2: h - padB, stroke: '#2a3655', 'stroke-width': 1 }));
+      chartSvg.appendChild(svgEl('line', { x1: padL, y1: h - padB, x2: w - padR, y2: h - padB, stroke: '#2a3655', 'stroke-width': 1 }));
+
+      const label0 = svgEl('text', { x: 2, y: h - padB + 4, fill: '#94a3b8', 'font-size': '7' });
+      label0.textContent = '0';
+      chartSvg.appendChild(label0);
+      const labelMax = svgEl('text', { x: 2, y: padT + 6, fill: '#94a3b8', 'font-size': '7' });
+      labelMax.textContent = maxError.toFixed(1);
+      chartSvg.appendChild(labelMax);
+
+      if (history.length < 2) return;
+      const n = history.length;
+      function xAt(i) { return padL + (plotW * i) / Math.max(1, n - 1); }
+      function yAt(err) { return padT + plotH - (plotH * err) / maxError; }
+
+      const odomPts = history.map(function (hh, i) { return xAt(i) + ',' + yAt(hh.odomError); }).join(' ');
+      const slamPts = history.map(function (hh, i) { return xAt(i) + ',' + yAt(hh.slamError); }).join(' ');
+      chartSvg.appendChild(svgEl('polyline', { points: odomPts, fill: 'none', stroke: '#f87171', 'stroke-width': '1.5' }));
+      chartSvg.appendChild(svgEl('polyline', { points: slamPts, fill: 'none', stroke: '#4ade80', 'stroke-width': '1.5' }));
+    }
+
+    function render() {
+      renderMap(odomSvg, state.odomMap, state.odomTrail, state.trueTrail, '#f87171');
+      renderMap(slamSvg, state.slamMap, state.slamTrail, state.trueTrail, '#4ade80');
+      renderChart();
+      const last = state.errorHistory[state.errorHistory.length - 1];
+      odomErrorEl.textContent = last ? 'position error: ' + last.odomError.toFixed(2) + ' m' : 'position error: --';
+      slamErrorEl.textContent = last ? 'position error: ' + last.slamError.toFixed(2) + ' m' : 'position error: --';
+      stepLabelEl.textContent = 'Step ' + state.stepIndex + ' / ' + COMMANDS.length;
+      stepBtn.disabled = state.stepIndex >= COMMANDS.length;
+    }
+
+    function takeStep() {
+      if (state.stepIndex >= COMMANDS.length) return;
+      const command = COMMANDS[state.stepIndex];
+      state.trueState = applyMotion(state.trueState, command);
+      const noisy = noisyCommand(command);
+
+      const scanLocal = scanFn(state.trueState, 0, NUM_RAYS, WALLS, MAX_RANGE)
+        .filter(function (r) { return r.hit; })
+        .map(function (r) { return worldToLocal(r.point, state.trueState); });
+
+      state.odomEstimate = applyMotion(state.odomEstimate, noisy);
+      const odomNewPoints = scanLocal.map(function (p) { return localToWorld(p, state.odomEstimate); });
+      state.odomMap = state.odomMap.concat(odomNewPoints);
+
+      const predicted = applyMotion(state.slamEstimate, noisy);
+      state.slamEstimate = state.slamMap.length > 0
+        ? icpAlign(scanLocal, state.slamMap, predicted, ICP_ITERATIONS, MAX_CORR_DIST)
+        : predicted;
+      const slamNewPoints = scanLocal.map(function (p) { return localToWorld(p, state.slamEstimate); });
+      state.slamMap = state.slamMap.concat(slamNewPoints);
+
+      state.odomTrail.push({ x: state.odomEstimate.x, y: state.odomEstimate.y });
+      state.slamTrail.push({ x: state.slamEstimate.x, y: state.slamEstimate.y });
+      state.trueTrail.push({ x: state.trueState.x, y: state.trueState.y });
+
+      const odomError = Math.hypot(state.odomEstimate.x - state.trueState.x, state.odomEstimate.y - state.trueState.y);
+      const slamError = Math.hypot(state.slamEstimate.x - state.trueState.x, state.slamEstimate.y - state.trueState.y);
+      state.errorHistory.push({ odomError: odomError, slamError: slamError });
+      state.stepIndex++;
+
+      log('Step ' + state.stepIndex + ': odometry error ' + odomError.toFixed(2) + ' m, scan-matched error ' + slamError.toFixed(2) + ' m.', slamError < odomError ? 'good' : 'bad');
+      explainEl.textContent = 'Both strategies just received the exact same noisy motion command and the exact same real LIDAR scan. Odometry-only integrated the noise directly, landing ' + odomError.toFixed(2) + ' m from the true position. Scan matching used that same noisy command only as a starting guess, then corrected it against the map built so far, landing ' + slamError.toFixed(2) + ' m off instead.';
+      render();
+    }
+
+    function resetRun() {
+      state = freshState();
+      log('Started a new random run.', 'good');
+      explainEl.textContent = 'Click "Take a step" to move the robot along its path and watch both strategies react to the exact same noisy motion.';
+      trialsBox.style.display = 'none';
+      render();
+    }
+
+    function runTrialsSummary() {
+      const N = 100;
+      let odomFinal = [], slamFinal = [];
+      for (let t = 0; t < N; t++) {
+        let trueState = Object.assign({}, START_POSE);
+        let odomEstimate = Object.assign({}, START_POSE);
+        let slamEstimate = Object.assign({}, START_POSE);
+        let odomMap = [], slamMap = [];
+        COMMANDS.forEach(function (command) {
+          trueState = applyMotion(trueState, command);
+          const noisy = noisyCommand(command);
+          const scanLocal = scanFn(trueState, 0, NUM_RAYS, WALLS, MAX_RANGE)
+            .filter(function (r) { return r.hit; })
+            .map(function (r) { return worldToLocal(r.point, trueState); });
+
+          odomEstimate = applyMotion(odomEstimate, noisy);
+          odomMap = odomMap.concat(scanLocal.map(function (p) { return localToWorld(p, odomEstimate); }));
+
+          const predicted = applyMotion(slamEstimate, noisy);
+          slamEstimate = slamMap.length > 0 ? icpAlign(scanLocal, slamMap, predicted, ICP_ITERATIONS, MAX_CORR_DIST) : predicted;
+          slamMap = slamMap.concat(scanLocal.map(function (p) { return localToWorld(p, slamEstimate); }));
+        });
+        odomFinal.push(Math.hypot(odomEstimate.x - trueState.x, odomEstimate.y - trueState.y));
+        slamFinal.push(Math.hypot(slamEstimate.x - trueState.x, slamEstimate.y - trueState.y));
+      }
+      const avg = function (arr) { return arr.reduce(function (a, b) { return a + b; }, 0) / arr.length; };
+      const wins = slamFinal.filter(function (e, i) { return e < odomFinal[i]; }).length;
+      trialsBox.style.display = '';
+      trialsSummaryEl.innerHTML =
+        'SLAM ended closer to the true position in <span class="slm-num" style="color:var(--slm-good);">' + wins + ' / ' + N + '</span> fresh random runs of this exact path.<br>' +
+        'Average final position error -- odometry only: <span class="slm-num" style="color:var(--slm-bad);">' + avg(odomFinal).toFixed(2) + ' m</span>, scan matching: <span class="slm-num" style="color:var(--slm-good);">' + avg(slamFinal).toFixed(2) + ' m</span>.';
+      log('Ran 100 fresh trials: SLAM won ' + wins + '/100, avg error ' + avg(odomFinal).toFixed(2) + 'm -> ' + avg(slamFinal).toFixed(2) + 'm.', 'good');
+    }
+
+    stepBtn.addEventListener('click', takeStep);
+    resetBtn.addEventListener('click', resetRun);
+    trialsBtn.addEventListener('click', runTrialsSummary);
+
+    render();
+  })();
+  </script>
+</div>
