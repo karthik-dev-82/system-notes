@@ -5,6 +5,7 @@ Index vs. Full Scan: Play With It
 
    This page is part of a small series built on the same 20-country
    dataset used throughout :doc:`databases_postgresql_mongodb_redis`
+   (see :doc:`db_country_dataset` for the full table)
    -- the "Ultimate Guide" that introduces PostgreSQL, MongoDB, and
    Redis through a kitchen/restaurant analogy. Where that guide
    explains the *idea* of an index with a spice-warehouse story, this

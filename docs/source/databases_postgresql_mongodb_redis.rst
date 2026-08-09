@@ -37,6 +37,9 @@ Example countries in our dataset:
 * Brazil (212 million people, Americas region)
 * And 16 more!
 
+See :doc:`db_country_dataset` for the full table -- all 20 countries,
+every field, in one place.
+
 This dataset is useful for learning because it:
 
 * Uses realistic, relatable numbers

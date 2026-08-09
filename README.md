@@ -44,6 +44,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
 | 🔠 **[Base64 Encoding](docs/source/base64_encoding.rst)** | Base64, ASCII, URL encoding, and hex, explained with analogies | Base64 alphabet, percent-encoding, MIME attachments, hex colors |
 | 🗄️ **[Databases: PostgreSQL, MongoDB & Redis](docs/source/databases_postgresql_mongodb_redis.rst)** | PostgreSQL, MongoDB, and Redis compared with a kitchen analogy | joins, documents, key-value, ACID, indexes, sorted sets |
+| 📋 **[The 20-Country Dataset](docs/source/db_country_dataset.rst)** | The full dataset reused across every database page, in one place | id, iso2, region, population, gdpPerCapita, currency, capital |
 | 🎮 **[Index vs. Full Scan (Interactive)](docs/source/db_index_scan_interactive.rst)** | Interactive index vs. full scan -- same 20-country query, run two ways, real cost numbers | indexes, binary search, hash lookup, query planning |
 | 🎮 **[Redis Data Structures (Interactive)](docs/source/db_redis_structures_interactive.rst)** | Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data | hashes, sorted sets, leaderboards, set intersection, TTL/expiry |
 | 🎮 **[ACID Transaction Atomicity (Interactive)](docs/source/db_acid_transaction_interactive.rst)** | Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row | transactions, atomicity, rollback, foreign keys, referential integrity |
@@ -158,6 +159,7 @@ system-notes/
         ├── unicode_utf8_encoding.rst
         ├── base64_encoding.rst
         ├── databases_postgresql_mongodb_redis.rst
+        ├── db_country_dataset.rst
         ├── db_index_scan_interactive.rst
         ├── db_redis_structures_interactive.rst
         ├── db_acid_transaction_interactive.rst

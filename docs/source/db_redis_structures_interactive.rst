@@ -4,9 +4,10 @@ Redis Data Structures: Play With It
 .. note::
 
    Second in a small series built on the same 20-country dataset from
-   :doc:`databases_postgresql_mongodb_redis`. See
-   :doc:`db_index_scan_interactive` for the first: index vs. full scan
-   on the PostgreSQL side of that guide.
+   :doc:`databases_postgresql_mongodb_redis` (full table:
+   :doc:`db_country_dataset`). See :doc:`db_index_scan_interactive`
+   for the first: index vs. full scan on the PostgreSQL side of that
+   guide.
 
 The source guide's fast-food-counter analogy for Redis covers four
 genuinely different structures under one roof: hashes (bins), sorted

@@ -95,6 +95,7 @@ worth writing down and coming back to.
    :caption: Databases
 
    databases_postgresql_mongodb_redis
+   db_country_dataset
    db_index_scan_interactive
    db_redis_structures_interactive
    db_acid_transaction_interactive
@@ -369,6 +370,9 @@ Databases
    * - :doc:`databases_postgresql_mongodb_redis`
      - PostgreSQL, MongoDB, and Redis compared with a kitchen analogy
      - joins, documents, key-value, ACID, indexes, sorted sets
+   * - :doc:`db_country_dataset`
+     - The full 20-country dataset reused across every database page, in one place
+     - id, iso2, region, population, gdpPerCapita, currency, capital
    * - :doc:`db_index_scan_interactive`
      - Interactive index vs. full scan -- same 20-country query, run two ways, real cost numbers
      - indexes, binary search, hash lookup, query planning

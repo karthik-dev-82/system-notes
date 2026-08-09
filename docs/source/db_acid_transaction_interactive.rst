@@ -4,8 +4,8 @@ ACID Transaction Atomicity: Play With It
 .. note::
 
    Third and last in a small series built on the same 20-country
-   dataset from :doc:`databases_postgresql_mongodb_redis`. See
-   :doc:`db_index_scan_interactive` and
+   dataset from :doc:`databases_postgresql_mongodb_redis` (full table:
+   :doc:`db_country_dataset`). See :doc:`db_index_scan_interactive` and
    :doc:`db_redis_structures_interactive` for the first two.
 
 The guide's own example for atomicity is inserting a new country and
