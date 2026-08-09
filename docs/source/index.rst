@@ -134,6 +134,7 @@ worth writing down and coming back to.
    cpp_move_semantics_interactive
    cpp_vtable_interactive
    cpp_exception_unwind_interactive
+   cpp_singleton_interactive
 
 .. toctree::
    :hidden:
@@ -466,6 +467,9 @@ C++ Notes
    * - :doc:`cpp_exception_unwind_interactive`
      - Interactive exception unwinding -- RAII cleanup during unwind, and why a destructor must never throw
      - stack unwinding, RAII, std::terminate, noexcept
+   * - :doc:`cpp_singleton_interactive`
+     - Play With It: C++11 thread-safe static init vs. a naive unsynchronized race
+     - magic statics, double-checked locking, function-local static
 
 Python Notes
 -----------------

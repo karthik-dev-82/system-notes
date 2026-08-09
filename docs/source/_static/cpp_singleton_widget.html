@@ -1,0 +1,373 @@
+<div class="sgl-root" id="sglWidget">
+  <style>
+    #sglWidget {
+      --sgl-bg: #0f172a;
+      --sgl-panel: #16213e;
+      --sgl-border: #2a3655;
+      --sgl-text: #e2e8f0;
+      --sgl-muted: #94a3b8;
+      --sgl-accent: #38bdf8;
+      --sgl-good: #4ade80;
+      --sgl-bad: #f87171;
+      --sgl-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--sgl-bg);
+      color: var(--sgl-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #sglWidget * { box-sizing: border-box; }
+    #sglWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #sglWidget .sgl-sub { color: var(--sgl-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .sgl-box { background: var(--sgl-panel); border: 1px solid var(--sgl-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .sgl-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sgl-muted); margin-bottom: 8px; }
+
+    .sgl-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .sgl-control-group { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+    .sgl-control-group input[type="range"] { width: 120px; }
+    .sgl-control-group select { background: #0a1128; color: var(--sgl-text); border: 1px solid var(--sgl-border); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    .sgl-btn { background: var(--sgl-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; }
+    .sgl-btn.secondary { background: transparent; color: var(--sgl-text); border: 1px solid var(--sgl-border); }
+
+    .sgl-threads { display: flex; flex-wrap: wrap; gap: 10px; }
+    .sgl-thread-ctrl { display: flex; align-items: center; gap: 6px; background: #0a1128; border: 1px solid var(--sgl-border); border-radius: 7px; padding: 6px 10px; font-size: 0.74rem; font-family: ui-monospace, monospace; }
+    .sgl-thread-ctrl input[type="range"] { width: 90px; }
+
+    table.sgl-timeline { border-collapse: collapse; font-family: ui-monospace, monospace; font-size: 0.68rem; }
+    table.sgl-timeline th { text-align: center; color: var(--sgl-muted); font-weight: 600; padding: 0 1px; min-width: 15px; }
+    table.sgl-timeline td.sgl-row-label { text-align: right; padding-right: 8px; color: #fff; font-weight: 700; white-space: nowrap; }
+    table.sgl-timeline td.sgl-cell { width: 15px; height: 20px; text-align: center; border-radius: 2px; }
+    .sgl-cell-box { display: inline-block; width: 12px; height: 16px; border-radius: 3px; }
+    .sgl-cell-box.idle { background: transparent; }
+    .sgl-cell-box.constructing { background: var(--sgl-accent); }
+    .sgl-cell-box.waiting { background: var(--sgl-warn); opacity: 0.6; }
+    .sgl-cell-box.have { background: var(--sgl-good); }
+
+    table.sgl-summary { border-collapse: collapse; width: 100%; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    table.sgl-summary th { text-align: left; color: var(--sgl-muted); font-weight: 600; font-size: 0.68rem; padding: 4px 6px; border-bottom: 1px solid var(--sgl-border); }
+    table.sgl-summary td { padding: 5px 6px; border-top: 1px solid var(--sgl-border); }
+    .sgl-badge { display: inline-block; padding: 2px 7px; border-radius: 5px; font-size: 0.7rem; font-weight: 700; }
+    .sgl-badge.ok { background: rgba(74,222,128,0.18); color: var(--sgl-good); }
+    .sgl-badge.orphan { background: rgba(248,113,113,0.2); color: var(--sgl-bad); }
+
+    .sgl-count { font-family: ui-monospace, monospace; font-weight: 700; padding: 6px 12px; border-radius: 6px; display: inline-block; }
+    .sgl-count.ok { background: rgba(74,222,128,0.18); color: var(--sgl-good); }
+    .sgl-count.bad { background: rgba(248,113,113,0.2); color: var(--sgl-bad); }
+
+    .sgl-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .sgl-explain-panel, .sgl-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .sgl-explain-panel { flex: 1.3; }
+    .sgl-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .sgl-log div { color: var(--sgl-muted); }
+    .sgl-log div.good { color: var(--sgl-good); }
+    .sgl-log div.bad { color: var(--sgl-bad); }
+    .sgl-log div.warn { color: var(--sgl-warn); }
+
+    details.sgl-notes { margin-top: 4px; background: var(--sgl-panel); border: 1px solid var(--sgl-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.sgl-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.sgl-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--sgl-muted); }
+    details.sgl-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--sgl-accent); }
+  </style>
+
+  <h3>Singleton: Thread-Safe Static Init, Play With It</h3>
+  <div class="sgl-sub">Several threads call <code>getInstance()</code> at nearly the same moment. Watch whether the constructor runs once, exactly as C++11 guarantees for a function-local static -- or whether it races and runs twice, exactly like the naive <code>if (!instance) instance = new T();</code> pattern that thread-safe statics replaced.</div>
+
+  <div class="sgl-box">
+    <div class="sgl-row">
+      <div class="sgl-control-group">
+        <span>Mode:</span>
+        <select id="sglMode">
+          <option value="safe">Safe -- C++11 function-local static</option>
+          <option value="unsafe">Unsafe -- naive if (!instance), no lock</option>
+        </select>
+      </div>
+      <div class="sgl-control-group">
+        <span>Construction takes:</span>
+        <input type="range" id="sglDuration" min="1" max="8" step="1" value="4">
+        <span id="sglDurationLabel">4</span> ticks
+      </div>
+      <button class="sgl-btn secondary" id="sglRandomizeBtn">Randomize arrival ticks</button>
+    </div>
+  </div>
+
+  <div class="sgl-box">
+    <div class="sgl-panel-title">Threads -- when each one calls getInstance()</div>
+    <div class="sgl-threads" id="sglThreadControls"></div>
+  </div>
+
+  <div class="sgl-box">
+    <div class="sgl-panel-title">Timeline (each column is one tick)</div>
+    <div style="overflow-x:auto;">
+      <table class="sgl-timeline" id="sglTimeline"></table>
+    </div>
+  </div>
+
+  <div class="sgl-box">
+    <div class="sgl-row" style="margin-bottom:10px;">
+      <span class="sgl-panel-title" style="margin:0;">Constructor ran:</span>
+      <span class="sgl-count" id="sglCount"></span>
+    </div>
+    <table class="sgl-summary" id="sglSummaryTable"></table>
+  </div>
+
+  <div class="sgl-panels">
+    <div class="sgl-explain-panel">
+      <div class="sgl-box" style="margin-bottom:0;">
+        <div class="sgl-panel-title">What's happening right now</div>
+        <div id="sglExplain">Adjust the arrival ticks so two or more threads overlap, then compare Safe vs. Unsafe mode.</div>
+      </div>
+    </div>
+    <div class="sgl-side-panel-col">
+      <div class="sgl-box" style="margin-bottom:0;">
+        <div class="sgl-panel-title">Event log</div>
+        <div class="sgl-log" id="sglLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="sgl-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>"Magic statics" is a real, named C++11 guarantee</b> (formally: concurrent execution shall not enter the initialization of a function-local static variable while it's already being initialized by another thread). The compiler inserts a hidden guard variable and blocking synchronization around it automatically -- that's the entire mechanism this widget models as the Safe mode.</li>
+      <li><b>The Unsafe mode isn't a strawman.</b> <code>if (!instance) instance = new T();</code> with no lock was a genuinely common pre-C++11 pattern, and it fails in exactly the way shown here: two threads can both read <code>instance</code> as null before either one's write lands, so both construct, and whichever write finishes last silently wins -- the other thread's object is orphaned, not an error, just quietly wrong. Try spacing the arrival ticks far apart in Unsafe mode: with no overlap, it behaves correctly, which is exactly why this class of bug is so easy to ship undetected.</li>
+      <li><b>Blocking, not busy-waiting, is the point.</b> In Safe mode, a thread that arrives while another is already constructing doesn't spin or retry -- it blocks until construction completes, then proceeds with the fully-built object. No thread ever observes a partially-constructed singleton.</li>
+      <li>Double-checked locking (checking, then locking, then checking again) was the classic hand-rolled fix for this before C++11 -- and was itself notoriously easy to get wrong without a properly-placed memory fence. A function-local static makes the entire pattern unnecessary to write by hand.</li>
+      <li><b>The bigger caution:</b> getting the synchronization right doesn't make Singleton a good default. It's still global state with the ability to be reached from anywhere, which makes testing and reasoning about dependencies harder -- prefer passing dependencies in explicitly where you can.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function simulateSafe(threads, constructionDuration) {
+      const sorted = threads.slice().sort(function (a, b) { return a.arrivalTick - b.arrivalTick || a.id - b.id; });
+      let guardState = 'NOT_STARTED';
+      let completionTick = null;
+      let constructionCount = 0;
+      let instanceId = 0;
+      const waiting = [];
+      const results = [];
+
+      function releaseWaitingIfDue(nowTick) {
+        if (guardState === 'COMPLETE') {
+          while (waiting.length > 0) {
+            const w = waiting.shift();
+            results.push({ id: w.id, arrivalTick: w.arrivalTick, obtainedTick: Math.max(nowTick, completionTick), instanceId: instanceId });
+          }
+        }
+      }
+
+      for (const t of sorted) {
+        releaseWaitingIfDue(t.arrivalTick);
+        if (guardState === 'COMPLETE') {
+          results.push({ id: t.id, arrivalTick: t.arrivalTick, obtainedTick: t.arrivalTick, instanceId: instanceId });
+        } else if (guardState === 'NOT_STARTED') {
+          guardState = 'IN_PROGRESS';
+          constructionCount++;
+          instanceId = constructionCount;
+          completionTick = t.arrivalTick + constructionDuration;
+          results.push({ id: t.id, arrivalTick: t.arrivalTick, obtainedTick: completionTick, instanceId: instanceId, isWinner: true });
+        } else {
+          waiting.push(t);
+        }
+      }
+      if (guardState === 'IN_PROGRESS' || guardState === 'COMPLETE') {
+        guardState = 'COMPLETE';
+        releaseWaitingIfDue(completionTick);
+      }
+      return { results: results, constructionCount: constructionCount, completionTick: completionTick };
+    }
+
+    function simulateUnsafe(threads, constructionDuration) {
+      const sorted = threads.slice().sort(function (a, b) { return a.arrivalTick - b.arrivalTick || a.id - b.id; });
+      const inFlight = [];
+      let sharedInstanceId = null;
+      let constructionCount = 0;
+      const results = [];
+
+      function applyCompletedWrites(uptoTick) {
+        inFlight.sort(function (a, b) { return a.finishTick - b.finishTick; });
+        for (const c of inFlight) {
+          if (c.finishTick <= uptoTick) sharedInstanceId = c.instanceId;
+        }
+      }
+
+      for (const t of sorted) {
+        applyCompletedWrites(t.arrivalTick);
+        const sawNull = sharedInstanceId === null;
+        if (sawNull) {
+          constructionCount++;
+          const myInstanceId = constructionCount;
+          const finishTick = t.arrivalTick + constructionDuration;
+          inFlight.push({ finishTick: finishTick, instanceId: myInstanceId });
+          results.push({ id: t.id, arrivalTick: t.arrivalTick, obtainedTick: finishTick, instanceId: myInstanceId, constructedOwn: true });
+        } else {
+          results.push({ id: t.id, arrivalTick: t.arrivalTick, obtainedTick: t.arrivalTick, instanceId: sharedInstanceId, constructedOwn: false });
+        }
+      }
+      const finalTick = Math.max.apply(null, [0].concat(inFlight.map(function (c) { return c.finishTick; })));
+      applyCompletedWrites(finalTick);
+      return { results: results, constructionCount: constructionCount, finalInstanceId: sharedInstanceId };
+    }
+
+    // --- Widget state ---
+
+    const THREAD_COUNT = 4;
+    const state = {
+      mode: 'safe',
+      duration: 4,
+      arrivals: [0, 1, 2, 8],
+    };
+
+    const modeEl = document.getElementById('sglMode');
+    const durationEl = document.getElementById('sglDuration');
+    const durationLabelEl = document.getElementById('sglDurationLabel');
+    const threadControlsEl = document.getElementById('sglThreadControls');
+    const timelineEl = document.getElementById('sglTimeline');
+    const countEl = document.getElementById('sglCount');
+    const summaryTableEl = document.getElementById('sglSummaryTable');
+    const explainEl = document.getElementById('sglExplain');
+    const logEl = document.getElementById('sglLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    for (let i = 0; i < THREAD_COUNT; i++) {
+      const wrap = document.createElement('div');
+      wrap.className = 'sgl-thread-ctrl';
+      wrap.innerHTML = 'Thread ' + (i + 1) + ': <input type="range" min="0" max="15" step="1" value="' + state.arrivals[i] + '" data-idx="' + i + '"> <span data-label="' + i + '">' + state.arrivals[i] + '</span>';
+      threadControlsEl.appendChild(wrap);
+    }
+
+    function threadsFromState() {
+      return state.arrivals.map(function (tick, i) { return { id: i, arrivalTick: tick }; });
+    }
+
+    function runSimulation() {
+      const threads = threadsFromState();
+      return state.mode === 'safe' ? simulateSafe(threads, state.duration) : simulateUnsafe(threads, state.duration);
+    }
+
+    function renderTimeline(result) {
+      const maxTick = Math.max.apply(null, result.results.map(function (r) { return r.obtainedTick; })) + 1;
+      let html = '<thead><tr><th></th>';
+      for (let tick = 0; tick < maxTick; tick++) html += '<th>' + tick + '</th>';
+      html += '</tr></thead><tbody>';
+
+      for (let i = 0; i < THREAD_COUNT; i++) {
+        const r = result.results.find(function (x) { return x.id === i; });
+        html += '<tr><td class="sgl-row-label">T' + (i + 1) + '</td>';
+        for (let tick = 0; tick < maxTick; tick++) {
+          let cls = 'idle';
+          if (tick >= r.arrivalTick) {
+            if (state.mode === 'safe') {
+              if (r.isWinner && tick < r.obtainedTick) cls = 'constructing';
+              else if (!r.isWinner && tick < r.obtainedTick) cls = 'waiting';
+              else if (tick >= r.obtainedTick) cls = 'have';
+            } else {
+              if (r.constructedOwn && tick < r.obtainedTick) cls = 'constructing';
+              else if (tick >= r.obtainedTick) cls = 'have';
+            }
+          }
+          html += '<td class="sgl-cell"><span class="sgl-cell-box ' + cls + '" title="tick ' + tick + '"></span></td>';
+        }
+        html += '</tr>';
+      }
+      html += '</tbody>';
+      timelineEl.innerHTML = html;
+    }
+
+    function renderSummary(result) {
+      countEl.textContent = result.constructionCount + ' time' + (result.constructionCount === 1 ? '' : 's');
+      countEl.className = 'sgl-count ' + (result.constructionCount === 1 ? 'ok' : 'bad');
+
+      let html = '<thead><tr><th>Thread</th><th>Called at tick</th><th>Got instance at tick</th><th>Instance #</th><th></th></tr></thead><tbody>';
+      const canonicalId = state.mode === 'unsafe' ? result.finalInstanceId : result.results[0].instanceId;
+      result.results.slice().sort(function (a, b) { return a.id - b.id; }).forEach(function (r) {
+        const orphaned = state.mode === 'unsafe' && r.instanceId !== canonicalId;
+        html += '<tr>' +
+          '<td>T' + (r.id + 1) + '</td>' +
+          '<td>' + r.arrivalTick + '</td>' +
+          '<td>' + r.obtainedTick + '</td>' +
+          '<td>#' + r.instanceId + '</td>' +
+          '<td>' + (orphaned ? '<span class="sgl-badge orphan">holds an orphaned instance</span>' : '<span class="sgl-badge ok">canonical instance</span>') + '</td>' +
+          '</tr>';
+      });
+      html += '</tbody>';
+      summaryTableEl.innerHTML = html;
+    }
+
+    function render(logIt) {
+      const result = runSimulation();
+      renderTimeline(result);
+      renderSummary(result);
+      if (logIt) {
+        if (state.mode === 'safe') {
+          log('Ran with arrivals [' + state.arrivals.join(', ') + ']: constructor ran exactly ' + result.constructionCount + ' time.', 'good');
+        } else {
+          // A single construction here is NOT the same as "safe" -- it just
+          // means this particular set of arrival ticks didn't happen to
+          // overlap. The code is still unsynchronized either way.
+          const cls = result.constructionCount === 1 ? 'warn' : 'bad';
+          log('Ran with arrivals [' + state.arrivals.join(', ') + ']: constructor ran ' + result.constructionCount + ' time' + (result.constructionCount === 1 ? '' : 's') + (result.constructionCount > 1 ? ' -- a real race, not simulated for effect.' : ' -- no overlap this time, so no race triggered (the code is still unsynchronized).'), cls);
+        }
+        explainEl.textContent = state.mode === 'safe'
+          ? 'Every thread is funneled through the same guard. Whichever thread arrives first becomes the sole constructor; every other overlapping arrival blocks until that construction finishes, then all of them -- including the winner -- reference the exact same instance.'
+          : (result.constructionCount > 1
+            ? 'Two or more threads read the shared pointer as null before any of their writes had landed, so each independently constructed its own object. Whichever finish last overwrites the shared pointer -- any thread whose own object didn’t win that race is now quietly holding a different, orphaned instance.'
+            : 'These arrivals didn’t overlap within the construction window, so even the unsynchronized version happened to behave correctly this time -- which is exactly why this bug is so easy to miss in testing.');
+      }
+    }
+
+    threadControlsEl.querySelectorAll('input[type="range"]').forEach(function (input) {
+      input.addEventListener('input', function () {
+        const idx = parseInt(input.dataset.idx, 10);
+        state.arrivals[idx] = parseInt(input.value, 10);
+        threadControlsEl.querySelector('[data-label="' + idx + '"]').textContent = input.value;
+        render(false);
+      });
+      input.addEventListener('change', function () {
+        render(true);
+      });
+    });
+
+    modeEl.addEventListener('change', function () {
+      state.mode = modeEl.value;
+      log('Switched to ' + (state.mode === 'safe' ? 'Safe (C++11 static local)' : 'Unsafe (naive if(!ptr), no lock)') + ' mode.', 'good');
+      render(true);
+    });
+
+    durationEl.addEventListener('input', function () {
+      state.duration = parseInt(durationEl.value, 10);
+      durationLabelEl.textContent = state.duration;
+      render(false);
+    });
+    durationEl.addEventListener('change', function () {
+      render(true);
+    });
+
+    document.getElementById('sglRandomizeBtn').addEventListener('click', function () {
+      state.arrivals = state.arrivals.map(function () { return Math.floor(Math.random() * 12); });
+      threadControlsEl.querySelectorAll('input[type="range"]').forEach(function (input) {
+        const idx = parseInt(input.dataset.idx, 10);
+        input.value = state.arrivals[idx];
+        threadControlsEl.querySelector('[data-label="' + idx + '"]').textContent = state.arrivals[idx];
+      });
+      log('Randomized arrival ticks.', 'good');
+      render(true);
+    });
+
+    render(true);
+  })();
+  </script>
+</div>
