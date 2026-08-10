@@ -3,8 +3,15 @@ Python Sequences: Play With It
 
 ``list``, "stack", "queue" and ``deque`` all answer the same question
 -- *in what order do things come out?* -- but they differ in exactly
-one thing: which end(s) you're allowed to touch cheaply. Get that one
-question right and the rest follows:
+one thing: which end(s) you're allowed to touch cheaply. (``list`` and
+``deque`` are both genuine, formally-registered
+``collections.abc.Sequence`` types -- checked directly with
+``isinstance(collections.deque(), collections.abc.Sequence)``, which
+is ``True``, even though a deque can't be sliced; the ABC only
+requires ``__getitem__`` and ``__len__``, not slicing. "Stack" and
+"queue" aren't separate types at all -- they're just LIFO/FIFO usage
+patterns layered on top of those two.) Get that one question right and
+the rest follows:
 
 * **A list is a dynamic array.** Under the hood it's one contiguous
   block of memory, over-allocated with spare room at the end so most
