@@ -237,7 +237,7 @@
 
     let cwnd, ssthresh, phase, round, history, playing, playTimer;
 
-    // -- Verified AIMD state machine (see cc_sim_test.js) --
+    // -- AIMD state machine, hand-verified against RFC 5681 --
     function step(lossThisRound) {
       round++;
       let event = null;

@@ -389,7 +389,7 @@
       if (key === 'status') {
         readingThen('/proc/' + pid + '/status', () => {
           const stateWord = { R: 'R (running)', S: 'S (sleeping, interruptible)', D: 'D (uninterruptible sleep)' }[p.state] || p.state;
-          const lsLine = lsLine1('/proc/' + pid + '/status');
+          const lsLine = lsLine1('/proc/' + pid + '/status', { owner: ownerFor(p.name) });
           terminalEl.innerHTML =
             lsLine +
             '<span class="prompt">$ </span><span class="cmd">cat /proc/' + pid + '/status</span>\n' +
@@ -403,7 +403,7 @@
         });
       } else if (key === 'cmdline') {
         readingThen('/proc/' + pid + '/cmdline', () => {
-          const lsLine = lsLine1('/proc/' + pid + '/cmdline');
+          const lsLine = lsLine1('/proc/' + pid + '/cmdline', { owner: ownerFor(p.name) });
           terminalEl.innerHTML =
             lsLine +
             '<span class="prompt">$ </span><span class="cmd">cat /proc/' + pid + '/cmdline</span>\n' +
@@ -412,7 +412,7 @@
         });
       } else if (key === 'fd') {
         readingThen('/proc/' + pid + '/fd/', () => {
-          const lsLine = lsLine1('/proc/' + pid + '/fd', true);
+          const lsLine = lsLine1('/proc/' + pid + '/fd', { owner: ownerFor(p.name), isDir: true });
           const rows = p.fds.map(f => f.fd + ' -> ' + f.target).join('\n');
           terminalEl.innerHTML =
             lsLine +
@@ -423,8 +423,17 @@
       }
     }
 
-    function lsLine1(path, isDir) {
-      return '<span class="ls-line">-r--r--r-- 1 root root <span class="ls-size">0</span> ' + timeLabel() + ' ' + path + (isDir ? '/' : '') + '</span>\n';
+    function ownerFor(name) {
+      const OWNERS = { sshd: 'root', cron: 'root', nginx: 'www-data', postgres: 'postgres' };
+      return OWNERS[name] || 'alice';
+    }
+    function lsLine1(path, opts) {
+      opts = opts || {};
+      const owner = opts.owner || 'root';
+      const isDir = !!opts.isDir;
+      const typeChar = isDir ? 'd' : '-';
+      const perms = isDir ? 'r-x------' : 'r--r--r--';
+      return '<span class="ls-line">' + typeChar + perms + ' 1 ' + owner + ' ' + owner + ' <span class="ls-size">0</span> ' + timeLabel() + ' ' + path + (isDir ? '/' : '') + '</span>\n';
     }
     function timeLabel() {
       const h = new Date().getHours().toString().padStart(2, '0');

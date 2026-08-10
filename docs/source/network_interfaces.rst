@@ -134,7 +134,9 @@ door, and garage door. Each is a real, physical entrance.
 talking to yourself in the mirror!
 
 * **Name:** ``lo`` (loopback)
-* **IP Address:** Always ``127.0.0.1`` (or ``localhost``)
+* **IP Address:** Conventionally ``127.0.0.1`` (or ``localhost``) -- but
+  the whole ``127.0.0.0/8`` block (16+ million addresses) routes to
+  loopback, not just that one address
 
 **Analogy:** It's like sending a letter to yourself. You write it, put it in
 your own mailbox, and take it back out. It never leaves your house!

@@ -170,7 +170,11 @@ computer and never stopped!
    # 0.87 = load average last 15 minutes
    # 2/456 = 2 running processes / 456 total processes
 
-What's "load average"? The number of processes waiting for CPU time.
+What's "load average"? The number of processes waiting for CPU time,
+plus processes stuck in uninterruptible I/O wait (state ``D`` -- see
+below). That second part is why a box can show a high load average
+while CPU usage looks idle: it is not "busy," it is "blocked," most
+often on slow disk or network I/O.
 
 **Analogy:** like the line at a coffee shop:
 

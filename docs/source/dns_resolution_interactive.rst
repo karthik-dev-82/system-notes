@@ -15,11 +15,15 @@ its *own* clock.
 Play With It
 ------------------
 
-Resolve a name cold and watch all three hops happen. Resolve a
-*second* name under the same TLD and watch the root hop get skipped
--- the resolver already knows who runs ``.com``, it just doesn't know
-who runs this particular domain yet. Advance the virtual clock past a
-300-second answer TTL (but nowhere near the 2-day referral TTLs) and
+Resolve ``example.com`` cold and watch all three hops happen. Then
+resolve ``other-example.com`` -- a *different* domain, but still under
+``.com`` -- and watch the root hop get skipped while the TLD and
+authoritative hops still fire: the resolver already knows who runs
+``.com``, it just doesn't know who runs this particular domain yet.
+Resolve ``www.example.com`` next and compare: since that name is in
+the *same* zone as the first query, even the TLD hop is now cached,
+and only the authoritative hop happens. Advance the virtual clock past
+a 300-second answer TTL (but nowhere near the 2-day referral TTLs) and
 re-resolve: exactly one hop happens, not three.
 
 .. raw:: html

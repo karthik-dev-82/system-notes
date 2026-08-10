@@ -198,7 +198,8 @@ The ``Dockerfile`` also installs the full Rust toolchain via
 ``rustup``, then uses ``cargo`` to build several modern CLI tools:
 ``bat``, ``eza``, ``bottom``, ``procs``, ``dust``, ``delta``, and
 ``hyperfine``. The generated ``~/.bashrc`` then aliases the classics
-over to them -- ``cat`` -> ``bat``, ``ls``/``la``/``l`` -> ``eza``,
+over to them -- ``cat`` -> ``bat``, ``ll``/``la``/``l`` -> ``eza``
+(plain ``ls`` is never aliased -- only its longer variants are),
 ``find`` -> ``fd``, ``grep`` -> ``rg``, ``ps`` -> ``procs``, ``top`` ->
 ``bottom``. If a command feels unusually fast or colorful in this
 container, that's why.
@@ -432,10 +433,8 @@ File System: Where Everything Lives
    !theme plain
    skinparam backgroundColor #FEFEFE
    folder "/" as root {
-     folder "home" {
-       folder "developer" {
-         folder "workspace" #FFEB3B
-       }
+     folder "workspaces" {
+       folder "development" #FFEB3B
      }
      folder "opt" {
        folder "ros/jazzy" #E3F2FD
@@ -450,7 +449,7 @@ File System: Where Everything Lives
        folder "lib"
      }
    }
-   note right of workspace
+   note right of development
      YOUR PROJECT FILES
      (mounted from host)
    end note
@@ -459,7 +458,7 @@ File System: Where Everything Lives
      Boost, gRPC
    end note
    note bottom of root
-     The "workspace" folder is special:
+     The "development" folder is special:
      it's YOUR files from your computer,
      shared with the container!
 
@@ -469,7 +468,12 @@ File System: Where Everything Lives
 **Key paths** (all verified against the actual ``Dockerfile`` and
 ``docker-compose.yml``):
 
-* ``/home/developer/workspace`` → your project files (mounted/shared)
+* ``/workspaces/development`` → your project files (mounted/shared).
+  This is VS Code's own default mount path for the plain-Dockerfile
+  flow described above -- ``/home/developer/workspace`` only shows up
+  if you switch to the Compose-based flow (see
+  :ref:`docker-compose-workflow`), since that path comes from
+  ``docker-compose.yml``'s volume mount, not from the ``Dockerfile``.
 * ``/opt/ros/jazzy`` → ROS2 installation
 * ``/opt/python-dev`` → the Python virtualenv with pytest, black, poetry,
   numpy, pandas, fastapi, etc.
@@ -491,7 +495,7 @@ How File Mounting Works
      }
    }
    rectangle "Docker Container" as container {
-     folder "/home/developer/workspace/" as container_workspace #FFF9C4 {
+     folder "/workspaces/development/" as container_workspace #FFF9C4 {
        file "main.cpp"
        file "README.md"
        folder "src/"
@@ -650,8 +654,9 @@ Rust & Modern CLI Tools
 * ``bat`` (better ``cat``), ``eza`` (better ``ls``), ``bottom`` (better
   ``top``), ``procs`` (better ``ps``), ``dust`` (disk usage), ``delta``
   (better diffs), ``hyperfine`` (benchmarking)
-* Aliased over the originals in ``~/.bashrc``: ``cat``/``ls``/``find``/
-  ``grep``/``ps``/``top`` all quietly point at the Rust versions
+* Aliased over the originals in ``~/.bashrc``: ``cat``/``find``/
+  ``grep``/``ps``/``top`` all quietly point at the Rust versions, and
+  so do ``ll``/``la``/``l`` (plain ``ls`` itself is left alone)
 
 Key Concepts to Remember
 -----------------------------
@@ -695,7 +700,7 @@ Key Concepts to Remember
 
    Host Computer          Container
    ─────────────         ──────────
-   project/      <──────> /home/developer/workspace/
+   project/      <──────> /workspaces/development/
       main.cpp              main.cpp
 
    Same file, two views!

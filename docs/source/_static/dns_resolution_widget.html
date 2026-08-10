@@ -71,6 +71,7 @@
         <option value="blog.example.com.">blog.example.com (CNAME -&gt; example.com)</option>
         <option value="shop.example.com.">shop.example.com (A, different TTL)</option>
         <option value="example.org.">example.org (different TLD)</option>
+        <option value="other-example.com.">other-example.com (different .com zone)</option>
         <option value="nope.example.com.">nope.example.com (does not exist)</option>
       </select>
     </label>
@@ -113,9 +114,10 @@
       'blog.example.com.': 'example.com.',
       'shop.example.com.': 'example.com.',
       'nope.example.com.': 'example.com.',
-      'example.org.': 'example.org.'
+      'example.org.': 'example.org.',
+      'other-example.com.': 'other-example.com.'
     };
-    var TLD_OF = { 'example.com.': 'com.', 'example.org.': 'org.' };
+    var TLD_OF = { 'example.com.': 'com.', 'example.org.': 'org.', 'other-example.com.': 'com.' };
     var ROOT_NS_TTL = 172800;
     var ZONE_NS_TTL = 172800;
     var NEG_TTL = 60;
@@ -129,6 +131,9 @@
       },
       'example.org.': {
         'example.org.|A': { kind: 'A', value: '51.68.12.4', ttl: 300 }
+      },
+      'other-example.com.': {
+        'other-example.com.|A': { kind: 'A', value: '203.0.113.50', ttl: 300 }
       }
     };
 
