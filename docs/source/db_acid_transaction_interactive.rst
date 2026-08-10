@@ -3,10 +3,12 @@ ACID Transaction Atomicity: Play With It
 
 .. note::
 
-   Third and last in a small series built on the same 20-country
-   dataset from :doc:`databases_postgresql_mongodb_redis` (full table:
+   Third in a small series built on the same 20-country dataset from
+   :doc:`databases_postgresql_mongodb_redis` (full table:
    :doc:`db_country_dataset`). See :doc:`db_index_scan_interactive` and
-   :doc:`db_redis_structures_interactive` for the first two.
+   :doc:`db_redis_structures_interactive` for the first two, and
+   :doc:`db_composite_index_interactive` for a fourth, on composite
+   indexes and the leftmost prefix rule.
 
 The guide's own example for atomicity is inserting a new country and
 its capital together: Kenya, then Nairobi. "If EITHER insert fails,

@@ -99,6 +99,7 @@ worth writing down and coming back to.
    db_index_scan_interactive
    db_redis_structures_interactive
    db_acid_transaction_interactive
+   db_composite_index_interactive
 
 .. toctree::
    :hidden:
@@ -382,6 +383,9 @@ Databases
    * - :doc:`db_acid_transaction_interactive`
      - Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row
      - transactions, atomicity, rollback, foreign keys, referential integrity
+   * - :doc:`db_composite_index_interactive`
+     - Play With It: composite indexes and the leftmost prefix rule, live
+     - composite index, leftmost prefix, covering index, query planner
 
 Concurrency & Distributed Systems
 -----------------------------------------

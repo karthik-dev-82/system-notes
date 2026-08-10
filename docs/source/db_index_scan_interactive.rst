@@ -10,7 +10,9 @@ Index vs. Full Scan: Play With It
    Redis through a kitchen/restaurant analogy. Where that guide
    explains the *idea* of an index with a spice-warehouse story, this
    page lets you run the exact same query two different ways and
-   watch the real cost difference for yourself.
+   watch the real cost difference for yourself. See
+   :doc:`db_composite_index_interactive` for the multi-column version
+   of this same idea.
 
 An index isn't a speed boost applied after the fact -- it's a
 completely different search strategy, chosen instead of a full scan

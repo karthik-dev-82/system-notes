@@ -1,0 +1,415 @@
+<div class="cix-root" id="cixWidget">
+  <style>
+    #cixWidget {
+      --cix-bg: #0f172a;
+      --cix-panel: #16213e;
+      --cix-border: #2a3655;
+      --cix-text: #e2e8f0;
+      --cix-muted: #94a3b8;
+      --cix-accent: #38bdf8;
+      --cix-good: #4ade80;
+      --cix-bad: #f87171;
+      --cix-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cix-bg);
+      color: var(--cix-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cixWidget * { box-sizing: border-box; }
+    #cixWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cixWidget .cix-sub { color: var(--cix-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cix-box { background: var(--cix-panel); border: 1px solid var(--cix-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px; }
+    .cix-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cix-muted); margin-bottom: 8px; }
+
+    .cix-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+    .cix-index-slot { display: flex; align-items: center; gap: 6px; font-size: 0.78rem; }
+    .cix-index-slot select { background: #0a1128; color: var(--cix-text); border: 1px solid var(--cix-border); border-radius: 6px; padding: 5px 8px; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    .cix-arrow { color: var(--cix-muted); }
+
+    table.cix-query-table { border-collapse: collapse; width: 100%; font-size: 0.78rem; }
+    table.cix-query-table th { text-align: left; color: var(--cix-muted); font-weight: 600; font-size: 0.68rem; padding: 4px 6px; border-bottom: 1px solid var(--cix-border); }
+    table.cix-query-table td { padding: 6px 6px; border-top: 1px solid var(--cix-border); vertical-align: middle; }
+    table.cix-query-table select, table.cix-query-table input[type="number"] { background: #0a1128; color: var(--cix-text); border: 1px solid var(--cix-border); border-radius: 6px; padding: 4px 6px; font-size: 0.76rem; font-family: ui-monospace, monospace; width: 100px; }
+    .cix-select-check { display: flex; align-items: center; gap: 5px; font-size: 0.76rem; }
+
+    .cix-prefix-strip { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+    .cix-col-chip { padding: 6px 12px; border-radius: 6px; font-family: ui-monospace, monospace; font-size: 0.78rem; font-weight: 700; border: 2px solid var(--cix-border); }
+    .cix-col-chip.used { background: rgba(74,222,128,0.18); border-color: var(--cix-good); color: var(--cix-good); }
+    .cix-col-chip.stopped { background: rgba(251,191,36,0.18); border-color: var(--cix-warn); color: var(--cix-warn); }
+    .cix-col-chip.unused { background: transparent; color: var(--cix-muted); opacity: 0.6; }
+
+    .cix-verdict { font-family: ui-monospace, monospace; font-weight: 700; padding: 8px 14px; border-radius: 8px; display: inline-block; margin-bottom: 4px; }
+    .cix-verdict.good { background: rgba(74,222,128,0.18); color: var(--cix-good); }
+    .cix-verdict.warn { background: rgba(251,191,36,0.18); color: var(--cix-warn); }
+    .cix-verdict.bad { background: rgba(248,113,113,0.2); color: var(--cix-bad); }
+
+    .cix-stat-row { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+    .cix-stat { background: #0a1128; border: 1px solid var(--cix-border); border-radius: 8px; padding: 8px 14px; font-family: ui-monospace, monospace; font-size: 0.78rem; }
+    .cix-stat .cix-stat-num { font-size: 1.1rem; font-weight: 700; color: #fff; }
+
+    .cix-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    .cix-explain-panel, .cix-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .cix-explain-panel { flex: 1.3; }
+    .cix-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cix-log div { color: var(--cix-muted); }
+    .cix-log div.good { color: var(--cix-good); }
+    .cix-log div.bad { color: var(--cix-bad); }
+
+    details.cix-notes { margin-top: 4px; background: var(--cix-panel); border: 1px solid var(--cix-border); border-radius: 10px; padding: 12px 16px; font-size: 0.85rem; line-height: 1.6; }
+    details.cix-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cix-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cix-muted); }
+    details.cix-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cix-accent); }
+  </style>
+
+  <h3>Composite Indexes &amp; the Leftmost Prefix Rule: Play With It</h3>
+  <div class="cix-sub">A composite index on (A, B, C) can serve a query on A, on A+B, or on A+B+C -- but not B alone, not C alone, not B+C. Build an index, build a query against the same 20-country dataset, and see exactly which prefix gets used and why.</div>
+
+  <div class="cix-box">
+    <div class="cix-panel-title">Composite index definition (column order matters)</div>
+    <div class="cix-row" id="cixIndexSlots"></div>
+  </div>
+
+  <div class="cix-box">
+    <div class="cix-panel-title">Query -- WHERE conditions and SELECT columns</div>
+    <div style="overflow-x:auto;">
+      <table class="cix-query-table" id="cixQueryTable"></table>
+    </div>
+  </div>
+
+  <div class="cix-box">
+    <div class="cix-panel-title">Index columns, left to right -- which ones actually got used</div>
+    <div class="cix-prefix-strip" id="cixPrefixStrip"></div>
+    <div id="cixVerdicts"></div>
+    <div class="cix-stat-row" id="cixStats"></div>
+  </div>
+
+  <div class="cix-panels">
+    <div class="cix-explain-panel">
+      <div class="cix-box" style="margin-bottom:0;">
+        <div class="cix-panel-title">What's happening right now</div>
+        <div id="cixExplain">Adjust the index or the query above and watch which columns are actually usable for narrowing the search.</div>
+      </div>
+    </div>
+    <div class="cix-side-panel-col">
+      <div class="cix-box" style="margin-bottom:0;">
+        <div class="cix-panel-title">Event log</div>
+        <div class="cix-log" id="cixLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="cix-notes">
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>The leftmost prefix rule is exactly what it sounds like.</b> A B-Tree composite index is sorted by its first column, then by its second column within each value of the first, and so on. Skip the first column entirely and the rest of that sort order is useless for narrowing a search -- there's no way to jump straight to "currency = EUR" in an index sorted by region first.</li>
+      <li><b>A range condition is the last column usable for seeking</b>, even if later columns have their own conditions. The index can narrow down to "everyone in Europe, population between X and Y" in one seek, but anything after that range column has to be checked row by row on whatever the seek already turned up -- the sort order past a range isn't reliable anymore.</li>
+      <li><b>"Usable for seeking" and "covering" are two different, independent properties.</b> A column that can't be used to narrow the search can still be read for free if it's part of the index -- composite indexes store every one of their columns together in each entry. A query only needs a full table row (an extra lookup per matching row) if it needs a column the index doesn't carry at all.</li>
+      <li><b>Column order is a real design decision, not a formality.</b> Reorder the same two columns in the index definition above and watch which queries suddenly stop being able to use it at all.</li>
+      <li>See <a href="db_index_scan_interactive.html">Index vs. Full Scan: Play With It</a> for the more basic single-column version of this same idea, and <a href="db_country_dataset.html">The 20-Country Dataset</a> for the full data this widget queries against.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function analyzeIndexUsage(indexColumns, whereConditions, selectColumns) {
+      const usedPrefix = [];
+      let stoppedReason = 'exhausted';
+      for (const col of indexColumns) {
+        const cond = whereConditions[col];
+        if (!cond) { stoppedReason = 'gap'; break; }
+        usedPrefix.push(col);
+        if (cond.op === 'range') { stoppedReason = 'range'; break; }
+      }
+      const usedSet = new Set(usedPrefix);
+      const residualWhereColumns = Object.keys(whereConditions).filter(function (c) { return !usedSet.has(c); });
+      const indexColumnSet = new Set(indexColumns);
+      const neededColumns = new Set(Object.keys(whereConditions).concat(selectColumns));
+      const isCovering = Array.from(neededColumns).every(function (c) { return indexColumnSet.has(c); });
+      return { usedPrefix: usedPrefix, stoppedReason: stoppedReason, residualWhereColumns: residualWhereColumns, isCovering: isCovering };
+    }
+
+    function matchesCondition(row, column, cond) {
+      const value = row[column];
+      if (cond.op === 'eq') return value === cond.value;
+      if (cond.op === 'range') {
+        if (cond.gt !== undefined && !(value > cond.gt)) return false;
+        if (cond.lt !== undefined && !(value < cond.lt)) return false;
+        return true;
+      }
+      throw new Error('unknown op ' + cond.op);
+    }
+
+    function applyQuery(rows, indexColumns, whereConditions, selectColumns) {
+      const analysis = analyzeIndexUsage(indexColumns, whereConditions, selectColumns);
+      const seekCandidates = rows.filter(function (row) {
+        return analysis.usedPrefix.every(function (col) { return matchesCondition(row, col, whereConditions[col]); });
+      });
+      const finalMatches = seekCandidates.filter(function (row) {
+        return analysis.residualWhereColumns.every(function (col) { return matchesCondition(row, col, whereConditions[col]); });
+      });
+      return { analysis: analysis, seekCandidateCount: seekCandidates.length, finalMatchCount: finalMatches.length };
+    }
+
+    // --- The same 20-country dataset used throughout this series ---
+
+    const COUNTRIES = [
+      { id: 1, name: 'China', iso2: 'CN', region: 'Asia', population: 1439323776, gdpPerCapita: 12556, currency: 'CNY', capital: 'Beijing' },
+      { id: 2, name: 'Japan', iso2: 'JP', region: 'Asia', population: 126000000, gdpPerCapita: 42928.92, currency: 'JPY', capital: 'Tokyo' },
+      { id: 3, name: 'India', iso2: 'IN', region: 'Asia', population: 1380004385, gdpPerCapita: 2100, currency: 'INR', capital: 'New Delhi' },
+      { id: 4, name: 'Indonesia', iso2: 'ID', region: 'Asia', population: 273500000, gdpPerCapita: 4292, currency: 'IDR', capital: 'Jakarta' },
+      { id: 5, name: 'Pakistan', iso2: 'PK', region: 'Asia', population: 220900000, gdpPerCapita: 1543, currency: 'PKR', capital: 'Islamabad' },
+      { id: 6, name: 'Bangladesh', iso2: 'BD', region: 'Asia', population: 171000000, gdpPerCapita: 2600, currency: 'BDT', capital: 'Dhaka' },
+      { id: 7, name: 'Vietnam', iso2: 'VN', region: 'Asia', population: 98000000, gdpPerCapita: 4300, currency: 'VND', capital: 'Hanoi' },
+      { id: 8, name: 'Germany', iso2: 'DE', region: 'Europe', population: 83000000, gdpPerCapita: 48000, currency: 'EUR', capital: 'Berlin' },
+      { id: 9, name: 'France', iso2: 'FR', region: 'Europe', population: 65000000, gdpPerCapita: 40000, currency: 'EUR', capital: 'Paris' },
+      { id: 10, name: 'Italy', iso2: 'IT', region: 'Europe', population: 60000000, gdpPerCapita: 34000, currency: 'EUR', capital: 'Rome' },
+      { id: 11, name: 'Spain', iso2: 'ES', region: 'Europe', population: 47000000, gdpPerCapita: 27000, currency: 'EUR', capital: 'Madrid' },
+      { id: 12, name: 'Netherlands', iso2: 'NL', region: 'Europe', population: 17500000, gdpPerCapita: 55000, currency: 'EUR', capital: 'Amsterdam' },
+      { id: 13, name: 'Austria', iso2: 'AT', region: 'Europe', population: 9000000, gdpPerCapita: 50000, currency: 'EUR', capital: 'Vienna' },
+      { id: 14, name: 'Belgium', iso2: 'BE', region: 'Europe', population: 11600000, gdpPerCapita: 46000, currency: 'EUR', capital: 'Brussels' },
+      { id: 15, name: 'Finland', iso2: 'FI', region: 'Europe', population: 5500000, gdpPerCapita: 48000, currency: 'EUR', capital: 'Helsinki' },
+      { id: 16, name: 'United Kingdom', iso2: 'GB', region: 'Europe', population: 68000000, gdpPerCapita: 41000, currency: 'GBP', capital: 'London' },
+      { id: 17, name: 'United States', iso2: 'US', region: 'Americas', population: 331900000, gdpPerCapita: 65298.73, currency: 'USD', capital: 'Washington D.C.' },
+      { id: 18, name: 'Canada', iso2: 'CA', region: 'Americas', population: 38000000, gdpPerCapita: 52000, currency: 'CAD', capital: 'Ottawa' },
+      { id: 19, name: 'Mexico', iso2: 'MX', region: 'Americas', population: 128900000, gdpPerCapita: 10000, currency: 'MXN', capital: 'Mexico City' },
+      { id: 20, name: 'Brazil', iso2: 'BR', region: 'Americas', population: 212000000, gdpPerCapita: 8900, currency: 'BRL', capital: 'Brasília' },
+    ];
+
+    const CANDIDATE_COLUMNS = ['region', 'currency', 'population', 'gdpPerCapita'];
+    const CATEGORICAL = { region: true, currency: true };
+    const REGIONS = Array.from(new Set(COUNTRIES.map(function (c) { return c.region; }))).sort();
+    const CURRENCIES = Array.from(new Set(COUNTRIES.map(function (c) { return c.currency; }))).sort();
+    const SELECT_CANDIDATES = ['name', 'region', 'currency', 'population', 'gdpPerCapita', 'capital'];
+
+    // --- Widget state ---
+
+    const state = {
+      indexColumns: ['region', 'currency', null],
+      whereEnabled: { region: true, currency: true, population: false, gdpPerCapita: false },
+      whereValue: { region: 'Europe', currency: 'EUR' },
+      whereRange: { population: { gt: 0, lt: 1500000000 }, gdpPerCapita: { gt: 0, lt: 70000 } },
+      selectEnabled: { name: true, capital: true },
+    };
+
+    const indexSlotsEl = document.getElementById('cixIndexSlots');
+    const queryTableEl = document.getElementById('cixQueryTable');
+    const prefixStripEl = document.getElementById('cixPrefixStrip');
+    const verdictsEl = document.getElementById('cixVerdicts');
+    const statsEl = document.getElementById('cixStats');
+    const explainEl = document.getElementById('cixExplain');
+    const logEl = document.getElementById('cixLog');
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function currentIndexColumns() {
+      return state.indexColumns.filter(function (c) { return c !== null; });
+    }
+
+    function currentWhereConditions() {
+      const conds = {};
+      CANDIDATE_COLUMNS.forEach(function (col) {
+        if (!state.whereEnabled[col]) return;
+        if (CATEGORICAL[col]) {
+          conds[col] = { op: 'eq', value: state.whereValue[col] };
+        } else {
+          conds[col] = { op: 'range', gt: state.whereRange[col].gt, lt: state.whereRange[col].lt };
+        }
+      });
+      return conds;
+    }
+
+    function currentSelectColumns() {
+      return SELECT_CANDIDATES.filter(function (c) { return state.selectEnabled[c]; });
+    }
+
+    function renderIndexSlots() {
+      indexSlotsEl.innerHTML = '';
+      for (let slot = 0; slot < 3; slot++) {
+        if (slot > 0) {
+          const arrow = document.createElement('span');
+          arrow.className = 'cix-arrow';
+          arrow.textContent = '→';
+          indexSlotsEl.appendChild(arrow);
+        }
+        const wrap = document.createElement('div');
+        wrap.className = 'cix-index-slot';
+        const select = document.createElement('select');
+        select.dataset.slot = slot;
+        const noneOpt = document.createElement('option');
+        noneOpt.value = '';
+        noneOpt.textContent = '(none)';
+        select.appendChild(noneOpt);
+        CANDIDATE_COLUMNS.forEach(function (col) {
+          const usedElsewhere = state.indexColumns.some(function (c, i) { return c === col && i !== slot; });
+          if (usedElsewhere) return;
+          const opt = document.createElement('option');
+          opt.value = col;
+          opt.textContent = col;
+          if (state.indexColumns[slot] === col) opt.selected = true;
+          select.appendChild(opt);
+        });
+        if (state.indexColumns[slot] === null) select.value = '';
+        const disabled = slot > 0 && state.indexColumns[slot - 1] === null;
+        select.disabled = disabled;
+        select.addEventListener('change', function () {
+          state.indexColumns[slot] = select.value || null;
+          if (state.indexColumns[slot] === null) {
+            for (let i = slot + 1; i < 3; i++) state.indexColumns[i] = null;
+          }
+          log('Index redefined as (' + currentIndexColumns().join(', ') + ').', 'good');
+          explainEl.textContent = 'The index is now sorted by ' + currentIndexColumns().join(', then by ') + '. Column order is part of the index\\u2019s definition, not just a label.';
+          renderAll();
+        });
+        wrap.appendChild(select);
+        indexSlotsEl.appendChild(wrap);
+      }
+    }
+
+    function renderQueryTable() {
+      let html = '<thead><tr><th>Column</th><th>WHERE condition</th><th>Needed in SELECT?</th></tr></thead><tbody>';
+      CANDIDATE_COLUMNS.forEach(function (col) {
+        html += '<tr><td><b>' + col + '</b></td><td>';
+        html += '<label style="margin-right:8px;"><input type="checkbox" data-where="' + col + '" ' + (state.whereEnabled[col] ? 'checked' : '') + '> use</label>';
+        if (CATEGORICAL[col]) {
+          const options = col === 'region' ? REGIONS : CURRENCIES;
+          html += '<select data-where-value="' + col + '" ' + (state.whereEnabled[col] ? '' : 'disabled') + '>';
+          options.forEach(function (v) {
+            html += '<option value="' + v + '"' + (state.whereValue[col] === v ? ' selected' : '') + '>' + v + '</option>';
+          });
+          html += '</select> (equals)';
+        } else {
+          html += 'range: <input type="number" data-where-gt="' + col + '" value="' + state.whereRange[col].gt + '" ' + (state.whereEnabled[col] ? '' : 'disabled') + '> to ';
+          html += '<input type="number" data-where-lt="' + col + '" value="' + state.whereRange[col].lt + '" ' + (state.whereEnabled[col] ? '' : 'disabled') + '>';
+        }
+        html += '</td><td><label class="cix-select-check"><input type="checkbox" data-select="' + col + '" ' + (state.selectEnabled[col] ? 'checked' : '') + '> include</label></td></tr>';
+      });
+      ['name', 'capital'].forEach(function (col) {
+        html += '<tr><td><b>' + col + '</b></td><td style="color:var(--cix-muted);">(display-only field, never filtered)</td><td><label class="cix-select-check"><input type="checkbox" data-select="' + col + '" ' + (state.selectEnabled[col] ? 'checked' : '') + '> include</label></td></tr>';
+      });
+      html += '</tbody>';
+      queryTableEl.innerHTML = html;
+
+      queryTableEl.querySelectorAll('[data-where]').forEach(function (input) {
+        input.addEventListener('change', function () {
+          state.whereEnabled[input.dataset.where] = input.checked;
+          log((input.checked ? 'Added' : 'Removed') + ' a WHERE condition on ' + input.dataset.where + '.', 'good');
+          renderAll();
+        });
+      });
+      queryTableEl.querySelectorAll('[data-where-value]').forEach(function (sel) {
+        sel.addEventListener('change', function () {
+          state.whereValue[sel.dataset.whereValue] = sel.value;
+          log('Set ' + sel.dataset.whereValue + ' = ' + sel.value + '.', 'good');
+          renderAll();
+        });
+      });
+      queryTableEl.querySelectorAll('[data-where-gt]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+          state.whereRange[inp.dataset.whereGt].gt = parseFloat(inp.value);
+          log('Set ' + inp.dataset.whereGt + ' lower bound to ' + inp.value + '.', 'good');
+          renderAll();
+        });
+      });
+      queryTableEl.querySelectorAll('[data-where-lt]').forEach(function (inp) {
+        inp.addEventListener('change', function () {
+          state.whereRange[inp.dataset.whereLt].lt = parseFloat(inp.value);
+          log('Set ' + inp.dataset.whereLt + ' upper bound to ' + inp.value + '.', 'good');
+          renderAll();
+        });
+      });
+      queryTableEl.querySelectorAll('[data-select]').forEach(function (input) {
+        input.addEventListener('change', function () {
+          state.selectEnabled[input.dataset.select] = input.checked;
+          log((input.checked ? 'Added' : 'Removed') + ' ' + input.dataset.select + ' from SELECT.', 'good');
+          renderAll();
+        });
+      });
+    }
+
+    function renderResult() {
+      const indexColumns = currentIndexColumns();
+      const whereConditions = currentWhereConditions();
+      const selectColumns = currentSelectColumns();
+
+      prefixStripEl.innerHTML = '';
+      if (indexColumns.length === 0) {
+        prefixStripEl.innerHTML = '<span style="color:var(--cix-muted);">Define an index above to see the analysis.</span>';
+        verdictsEl.innerHTML = '';
+        statsEl.innerHTML = '';
+        return;
+      }
+
+      const result = applyQuery(COUNTRIES, indexColumns, whereConditions, selectColumns);
+      const analysis = result.analysis;
+      const usedSet = new Set(analysis.usedPrefix);
+      const stopIdx = analysis.usedPrefix.length;
+
+      indexColumns.forEach(function (col, i) {
+        const chip = document.createElement('span');
+        chip.className = 'cix-col-chip ' + (usedSet.has(col) ? (i === stopIdx - 1 && analysis.stoppedReason === 'range' ? 'stopped' : 'used') : 'unused');
+        chip.textContent = col;
+        prefixStripEl.appendChild(chip);
+      });
+
+      let verdictHtml = '';
+      if (analysis.usedPrefix.length === 0) {
+        verdictHtml += '<div class="cix-verdict bad">Index NOT usable for seeking -- full scan needed.</div><br>';
+      } else if (analysis.stoppedReason === 'exhausted' && analysis.residualWhereColumns.length === 0) {
+        verdictHtml += '<div class="cix-verdict good">Full index seek -- every WHERE condition narrows the search.</div><br>';
+      } else {
+        verdictHtml += '<div class="cix-verdict warn">Partial seek on (' + analysis.usedPrefix.join(', ') + ') -- ' +
+          (analysis.stoppedReason === 'range' ? 'a range condition stops the usable prefix here.' : 'a gap in the index columns stops the usable prefix here.') +
+          '</div><br>';
+      }
+      if (analysis.residualWhereColumns.length > 0) {
+        verdictHtml += '<div class="cix-verdict warn">Residual filter needed on: ' + analysis.residualWhereColumns.join(', ') + '.</div><br>';
+      }
+      verdictHtml += '<div class="cix-verdict ' + (analysis.isCovering ? 'good' : 'bad') + '">' +
+        (analysis.isCovering ? 'Covering -- answered entirely from the index, table never touched.' : 'NOT covering -- a row lookup is needed for every matching row.') +
+        '</div>';
+      verdictsEl.innerHTML = verdictHtml;
+
+      statsEl.innerHTML =
+        '<div class="cix-stat">Rows in dataset<br><span class="cix-stat-num">' + COUNTRIES.length + '</span></div>' +
+        '<div class="cix-stat">Index-seek candidates<br><span class="cix-stat-num">' + result.seekCandidateCount + '</span></div>' +
+        '<div class="cix-stat">Final matching rows<br><span class="cix-stat-num">' + result.finalMatchCount + '</span></div>';
+
+      return { analysis: analysis, result: result };
+    }
+
+    function renderAll() {
+      renderIndexSlots();
+      renderQueryTable();
+      const r = renderResult();
+      if (r) {
+        const a = r.analysis;
+        if (a.usedPrefix.length === 0) {
+          explainEl.textContent = 'None of the query\\u2019s WHERE conditions land on the index\\u2019s first column, so the sorted structure is useless here -- the database has no way to jump to the right starting point.';
+        } else if (a.residualWhereColumns.length > 0) {
+          explainEl.textContent = 'The seek narrows things down using ' + a.usedPrefix.join(' then ') + ', but ' + a.residualWhereColumns.join(', ') + ' could not be used for narrowing -- ' +
+            (a.stoppedReason === 'range' ? 'a range condition is always the last usable column.' : 'a column in between with no condition breaks the prefix.') +
+            ' Those conditions get rechecked row by row on whatever the seek already found.';
+        } else {
+          explainEl.textContent = 'Every WHERE condition lines up with the index\\u2019s column order, so the entire query narrows down in one seek -- no residual filtering needed.';
+        }
+      }
+    }
+
+    renderAll();
+    log('Loaded with index (region, currency) and a query on both, matching the source guide\\u2019s own EUR example.', 'good');
+  })();
+  </script>
+</div>

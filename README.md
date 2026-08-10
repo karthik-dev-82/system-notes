@@ -48,6 +48,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Index vs. Full Scan (Interactive)](docs/source/db_index_scan_interactive.rst)** | Interactive index vs. full scan -- same 20-country query, run two ways, real cost numbers | indexes, binary search, hash lookup, query planning |
 | 🎮 **[Redis Data Structures (Interactive)](docs/source/db_redis_structures_interactive.rst)** | Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data | hashes, sorted sets, leaderboards, set intersection, TTL/expiry |
 | 🎮 **[ACID Transaction Atomicity (Interactive)](docs/source/db_acid_transaction_interactive.rst)** | Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row | transactions, atomicity, rollback, foreign keys, referential integrity |
+| 🎮 **[Composite Indexes (Interactive)](docs/source/db_composite_index_interactive.rst)** | Interactive composite indexes and the leftmost prefix rule -- which columns actually narrow a search vs. fall back to row-by-row rechecking | composite index, leftmost prefix, covering index, query planner |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
 | 🎮 **[8b/10b Line Encoding (Interactive)](docs/source/8b10b_encoding_interactive.rst)** | Interactive 8b/10b-style line coding -- send a byte, watch running disparity keep the wire from ever going flat | running disparity, DC balance, clock recovery, sub-block encoding |
 | 🎮 **[CAN Bus Arbitration (Interactive)](docs/source/can_arbitration_interactive.rst)** | Interactive CAN bus arbitration -- pick contending nodes, watch the real bit-by-bit priority race | dominant/recessive bits, wired-AND, bitwise arbitration, priority |
@@ -163,6 +164,7 @@ system-notes/
         ├── db_index_scan_interactive.rst
         ├── db_redis_structures_interactive.rst
         ├── db_acid_transaction_interactive.rst
+        ├── db_composite_index_interactive.rst
         ├── image_formats.rst
         ├── 8b10b_encoding_interactive.rst
         ├── can_arbitration_interactive.rst
