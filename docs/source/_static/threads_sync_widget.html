@@ -356,11 +356,14 @@
         write back) because that's genuinely what it compiles down to at the machine level -- there's no
         single atomic "increment" instruction happening here, which is exactly why two threads can interleave
         in the middle of it.</li>
-      <li>Notice that "No Synchronization" doesn't <i>always</i> produce a wrong answer -- try stepping the
-        threads in strict turns and you'll get the correct result even with zero locking. That's the genuinely
-        dangerous part of race conditions: the bug is real and always possible, but it doesn't announce itself
-        every run, which is exactly why they're notorious for passing testing and then showing up in
-        production under load.</li>
+      <li>Notice that "No Synchronization" doesn't <i>always</i> produce a wrong answer -- if you fully finish
+        one thread's read/increment/write before ever touching the other, you'll get the correct result even
+        with zero locking. That's really just serialization in disguise, though: the moment a step from one
+        thread actually lands between the other thread's read and write, a lost update becomes possible. Try
+        alternating single steps (A, B, A, B, ...) and watch it lose an update almost immediately -- that's the
+        genuinely dangerous part of race conditions: the bug is real and always possible the instant the
+        threads truly interleave, but it doesn't announce itself on every run, which is exactly why they're
+        notorious for passing testing and then showing up in production under load.</li>
       <li>A mutex is a counting semaphore with <code>N=1</code> -- there's no separate mechanism, just a
         special case. The general form shows up constantly in real systems: a database connection pool is a
         semaphore sized to the pool's connection limit; a thread pool's work queue is bounded the same way.</li>

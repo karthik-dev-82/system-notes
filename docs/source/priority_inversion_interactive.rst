@@ -51,9 +51,14 @@ Toggle priority inheritance on and off, then drag the medium-priority
 task's workload up and down. With inheritance **off**, watch
 BusScheduler's completion tick grow right along with how much
 unrelated work CommsTask has to do. With inheritance **on**, watch it
-stay exactly where it is, no matter how much you increase that
-workload -- verified here for hundreds of randomized configurations,
-not just this one scenario.
+stay exactly where it is across that entire workload range -- verified
+here by rerunning this exact scenario at every value the slider
+allows, not just one anecdotal setting. (That invariance is specific
+to workload on the *already-blocked* path; a medium-priority task
+that delays BusScheduler *before* it ever reaches the mutex isn't
+something priority inheritance protects against, since inheritance
+only ever helps once a lower-priority task is actually holding the
+contested lock.)
 
 .. raw:: html
    :file: _static/priority_inversion_widget.html

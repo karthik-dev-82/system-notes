@@ -200,8 +200,21 @@
       });
       return moved / keys.length;
     }
+    function consistentReshufflePct(keys, ringBefore, ringAfter) {
+      let moved = 0;
+      keys.forEach(k => {
+        const pos = ringPos(k);
+        if (assign(pos, ringBefore) !== assign(pos, ringAfter)) moved++;
+      });
+      return moved / keys.length;
+    }
 
+    // Small set, individually visible as dots on the ring.
     const KEYS = Array.from({ length: 28 }, (_, i) => 'user' + (i + 1));
+    // Larger, invisible sample used only to compute the headline percentages --
+    // 28 keys is too few for the naive-modulo side to converge anywhere near
+    // its textbook value on any single add/remove event.
+    const STAT_KEYS = Array.from({ length: 2000 }, (_, i) => 'statkey' + i);
     const COLORS = ['#4ade80', '#38bdf8', '#c084fc', '#fbbf24', '#fb7185', '#2dd4bf', '#a3e635', '#f472b6'];
 
     const svg = document.getElementById('chSvg');
@@ -329,18 +342,22 @@
 
     function reassignAndAnimate(newServers, eventLabel, eventCls) {
       const before = assignments;
+      const ringBefore = buildRing(servers, vnodes);
       const ring = buildRing(newServers, vnodes);
       const after = assignAll(KEYS, ring);
       const moved = KEYS.filter(k => before[k] !== after[k]);
 
-      const naivePct = naiveModuloReshufflePct(KEYS, servers, newServers);
-      const consistentPct = moved.length / KEYS.length;
+      // Headline percentages come from a 2000-key sample -- large enough to
+      // land near the textbook ~75% (naive) / ~25% (consistent) figures,
+      // unlike the 28 keys drawn on the ring.
+      const naivePct = naiveModuloReshufflePct(STAT_KEYS, servers, newServers);
+      const consistentPct = consistentReshufflePct(STAT_KEYS, ringBefore, ring);
       naivePctEl.textContent = (naivePct * 100).toFixed(0) + '%';
       consistentPctEl.textContent = (consistentPct * 100).toFixed(0) + '%';
 
       servers = newServers;
       assignments = after;
-      log(eventLabel + ' -- ' + moved.length + '/' + KEYS.length + ' keys moved (' + (consistentPct * 100).toFixed(0) + '%). Naive modulo would have moved ' + (naivePct * 100).toFixed(0) + '%.', eventCls);
+      log(eventLabel + ' -- ' + moved.length + '/' + KEYS.length + ' visible keys moved. Across a 2000-key sample: consistent hashing moved ' + (consistentPct * 100).toFixed(0) + '%, naive modulo would have moved ' + (naivePct * 100).toFixed(0) + '%.', eventCls);
       if (moved.length > 0) {
         log('Moved: ' + moved.join(', '), eventCls);
       }

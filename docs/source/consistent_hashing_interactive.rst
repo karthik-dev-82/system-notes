@@ -25,14 +25,24 @@ Reading the Comparison Panel
 ------------------------------------
 
 Every time you add or remove a server, the panel on the right computes
-*two* numbers for that exact same event, on the exact same set of
-keys: what naive modulo hashing (``key_hash % server_count``,
-recomputed from scratch) would have done, versus what actually
-happened on the ring. That's not a canned statistic -- it's the same
-comparison from :doc:`hash_load_balancer` recomputed live, so you can
-watch the gap between the two approaches hold up under server counts
-and events you chose yourself, not just the one worked example in the
-text.
+*two* numbers for that exact same event: what naive modulo hashing
+(``key_hash % server_count``, recomputed from scratch) would have
+done, versus what actually happened on the ring -- each measured
+against a large hidden sample of keys, not just the handful drawn as
+dots, so the numbers are stable across reloads rather than swinging
+with which few keys happen to be visible.
+
+The part that reliably holds is the *order of magnitude*: naive
+modulo always reshuffles the large majority of keys, consistent
+hashing always reshuffles dramatically fewer. The exact
+consistent-hashing percentage moves around more than the "~25%"
+headline figure suggests, though -- with only a handful of real
+servers, exactly how much ring space the new or removed server ends
+up owning is genuine variance, not measurement error, and it gets
+worse at low virtual-node counts (see below). That's not a canned
+statistic -- it's the same comparison from :doc:`hash_load_balancer`
+recomputed live, so you're seeing the real spread, not a number
+tuned to always land on the textbook figure.
 
 Why the Virtual-Node Slider Matters
 --------------------------------------------

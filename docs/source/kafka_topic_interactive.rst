@@ -126,8 +126,11 @@ Walking Through What You Just Saw
   among however many consumers are now in it. The widget's log
   explicitly confirms the one thing that's easy to assume breaks here
   and doesn't: nobody's read progress resets. The offset belongs to
-  the *partition*, not to whichever consumer instance happens to be
-  reading it at the moment.
+  the *group's* tracking of that partition, not to whichever consumer
+  instance happens to be reading it at the moment -- which is exactly
+  why two different groups (``dashboard-group`` and
+  ``alerting-group``) can each be at a completely different offset on
+  the same partition.
 * **"Replay from start"** resets a group's offsets back to zero. Since
   Kafka never deleted anything to let you read it the first time,
   this is all it takes to reprocess an entire topic's history from
