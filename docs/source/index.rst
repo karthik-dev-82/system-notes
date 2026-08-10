@@ -134,6 +134,7 @@ worth writing down and coming back to.
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
    cpp_move_semantics_interactive
+   cpp_ranges_interactive
    cpp_vtable_interactive
    cpp_exception_unwind_interactive
    cpp_singleton_interactive
@@ -470,6 +471,9 @@ C++ Notes
    * - :doc:`cpp_move_semantics_interactive`
      - Interactive move semantics -- copy vs move construction cost, made countable
      - move constructor, std::move, moved-from state, noexcept
+   * - :doc:`cpp_ranges_interactive`
+     - Play With It: build a std::views pipeline, watch it stay lazy, and see order and short-circuiting change results
+     - views::filter, views::transform, views::take, laziness, views vs actions
    * - :doc:`cpp_vtable_interactive`
      - Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak
      - vtable, vptr, dynamic dispatch, virtual destructor

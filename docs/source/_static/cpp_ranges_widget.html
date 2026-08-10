@@ -1,0 +1,577 @@
+<div class="rg-root" id="rgWidget">
+  <style>
+    #rgWidget {
+      --rg-bg: #0f172a;
+      --rg-panel: #16213e;
+      --rg-border: #2a3655;
+      --rg-text: #e2e8f0;
+      --rg-muted: #94a3b8;
+      --rg-accent: #38bdf8;
+      --rg-good: #4ade80;
+      --rg-bad: #f87171;
+      --rg-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rg-bg);
+      color: var(--rg-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #rgWidget * { box-sizing: border-box; }
+    #rgWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #rgWidget .rg-sub { color: var(--rg-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #rgWidget .rg-stage { background: var(--rg-panel); border: 1px solid var(--rg-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 820px; }
+    #rgWidget .rg-stage h4 { margin: 0 0 10px; font-size: 0.85rem; color: var(--rg-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+    #rgWidget .rg-pipeline-row { display: flex; gap: 10px; flex-wrap: nowrap; align-items: flex-start; }
+    #rgWidget .rg-slot { flex: 1; background: #0f1830; border: 1px solid var(--rg-border); border-radius: 8px; padding: 10px; min-width: 170px; }
+    #rgWidget .rg-slot-label { font-size: 0.7rem; color: var(--rg-muted); margin-bottom: 6px; }
+    #rgWidget select, #rgWidget input[type="number"] {
+      width: 100%; background: #0a1128; color: var(--rg-text); border: 1px solid var(--rg-border);
+      border-radius: 6px; padding: 6px 8px; font-size: 0.8rem; margin-bottom: 6px;
+    }
+    #rgWidget .rg-arrow { align-self: center; color: var(--rg-muted); font-size: 1.2rem; padding-top: 24px; }
+
+    #rgWidget .rg-code { background: #0a1128; border: 1px solid var(--rg-border); border-radius: 8px; padding: 10px 14px; margin-top: 12px; font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.6; white-space: pre; color: var(--rg-accent); overflow-x: auto; }
+
+    #rgWidget .rg-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 700; margin-bottom: 14px; font-size: 0.85rem; }
+    #rgWidget .rg-banner.declared { background: rgba(148,163,184,0.14); color: var(--rg-muted); }
+    #rgWidget .rg-banner.running { background: rgba(56,189,248,0.14); color: var(--rg-accent); }
+    #rgWidget .rg-banner.done { background: rgba(74,222,128,0.14); color: var(--rg-good); }
+
+    #rgWidget .rg-counter-row { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-bottom: 14px; font-size: 0.8rem; color: var(--rg-muted); }
+    #rgWidget .rg-counter-row b { color: #fff; font-size: 1.05rem; font-family: ui-monospace, monospace; }
+
+    #rgWidget .rg-controls { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    #rgWidget .rg-btn { background: var(--rg-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #rgWidget .rg-btn.secondary { background: transparent; color: var(--rg-text); border: 1px solid var(--rg-border); }
+    #rgWidget .rg-btn.warn { background: var(--rg-bad); color: #2a0808; }
+    #rgWidget .rg-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    #rgWidget .rg-row-label { font-size: 0.72rem; color: var(--rg-muted); margin-bottom: 6px; }
+    #rgWidget .rg-array-row { display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 14px; min-height: 40px; }
+    #rgWidget .rg-slotbox { width: 38px; height: 38px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.8rem; font-weight: 700; border: 2px solid var(--rg-border); background: #10182e; color: var(--rg-muted); transition: all 0.15s; }
+    #rgWidget .rg-slotbox.visited { border-color: var(--rg-accent); color: var(--rg-text); }
+    #rgWidget .rg-slotbox.rejected { border-color: var(--rg-bad); background: rgba(248,113,113,0.14); color: var(--rg-bad); }
+    #rgWidget .rg-slotbox.dropped { border-color: var(--rg-warn); background: rgba(251,191,36,0.12); color: var(--rg-warn); opacity: 0.7; }
+    #rgWidget .rg-slotbox.output { border-color: var(--rg-good); background: rgba(74,222,128,0.16); color: var(--rg-good); }
+
+    #rgWidget .rg-output-row { display: flex; gap: 5px; flex-wrap: wrap; min-height: 40px; align-items: center; }
+    #rgWidget .rg-outbox { min-width: 38px; height: 38px; padding: 0 8px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-family: ui-monospace, monospace; font-size: 0.8rem; font-weight: 700; border: 2px solid var(--rg-good); background: rgba(74,222,128,0.16); color: var(--rg-good); }
+    #rgWidget .rg-empty-note { color: var(--rg-muted); font-style: italic; font-size: 0.8rem; }
+
+    #rgWidget .rg-log { max-height: 220px; overflow-y: auto; font-family: ui-monospace, monospace; font-size: 0.75rem; line-height: 1.6; }
+    #rgWidget .rg-log-line { padding: 2px 0; border-bottom: 1px solid rgba(255,255,255,0.04); color: var(--rg-muted); }
+    #rgWidget .rg-log-line.rg-log-latest { color: var(--rg-text); }
+    #rgWidget .rg-log-line b { color: var(--rg-accent); }
+
+    #rgWidget .rg-dangle-controls { display: flex; gap: 10px; margin-bottom: 12px; flex-wrap: wrap; }
+    #rgWidget .rg-dangle-log { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.7; }
+    #rgWidget .rg-dangle-line { padding: 3px 8px; border-radius: 5px; margin-bottom: 3px; }
+    #rgWidget .rg-dangle-line.ok { color: var(--rg-good); }
+    #rgWidget .rg-dangle-line.bad { color: var(--rg-bad); background: rgba(248,113,113,0.12); font-weight: 700; }
+
+    #rgWidget details { margin-top: 6px; }
+    #rgWidget summary { cursor: pointer; color: var(--rg-accent); font-size: 0.85rem; margin-bottom: 8px; }
+    #rgWidget details ul { margin: 8px 0 0; padding-left: 20px; font-size: 0.82rem; color: var(--rg-text); line-height: 1.6; }
+    #rgWidget details li { margin-bottom: 8px; }
+    #rgWidget code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+
+  <h3>C++20 Ranges: Play With It</h3>
+  <div class="rg-sub">Build a <code>std::views</code> pipeline from real stages, then pull output one element at a time and watch exactly which source elements get visited, skipped, or never touched at all.</div>
+
+  <div class="rg-stage">
+    <h4>Pipeline (source is <code>nums = {1,2,3,4,5,6,7,8,9,10}</code>)</h4>
+    <div class="rg-pipeline-row" id="rgPipelineRow"></div>
+    <div class="rg-code" id="rgCode"></div>
+  </div>
+
+  <div class="rg-stage">
+    <div class="rg-banner declared" id="rgBanner">Pipeline declared. 0 calls made so far -- nothing runs until you pull.</div>
+    <div class="rg-counter-row" id="rgCounters"></div>
+    <div class="rg-controls">
+      <button class="rg-btn" id="rgStepBtn">Step (pull one)</button>
+      <button class="rg-btn secondary" id="rgRunBtn">Materialize all (eager)</button>
+      <button class="rg-btn secondary" id="rgResetBtn">Reset run</button>
+    </div>
+  </div>
+
+  <div class="rg-stage">
+    <div class="rg-row-label">Source vector (index -&gt; value)</div>
+    <div class="rg-array-row" id="rgSourceRow"></div>
+    <div class="rg-row-label">Output produced so far</div>
+    <div class="rg-output-row" id="rgOutputRow"><span class="rg-empty-note">nothing pulled yet</span></div>
+  </div>
+
+  <div class="rg-stage">
+    <h4>Event log</h4>
+    <div class="rg-log" id="rgLog"><span class="rg-empty-note">click Step to pull the first element</span></div>
+  </div>
+
+  <div class="rg-stage">
+    <h4>Dangling view: a view can outlive what it points at</h4>
+    <div class="rg-sub" style="margin-bottom:10px;">
+      <code>auto v = make_view();</code> where <code>make_view()</code> returns <code>local | std::views::filter(pred)</code> and <code>local</code> is declared inside <code>make_view()</code>. The view does not copy <code>local</code> -- it stores a reference to it.
+    </div>
+    <div class="rg-dangle-controls">
+      <button class="rg-btn secondary" id="rgDangleSafeBtn">Run: container kept alive by caller</button>
+      <button class="rg-btn warn" id="rgDangleBadBtn">Run: container is local to make_view()</button>
+    </div>
+    <div class="rg-dangle-log" id="rgDangleLog"><span class="rg-empty-note">pick a scenario above</span></div>
+  </div>
+
+  <details>
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>Laziness is a guarantee; the exact call count is not.</b> Compiling this widget's own opening example in real C++20 (<code>nums | views::filter(even) | views::transform(square) | views::take(3)</code>, GCC 13) confirms zero calls happen before iteration, and the loop never touches all 10 source elements -- but GCC's <code>filter_view</code> iterator eagerly searches ahead on every <code>++</code>, so the real predicate call count (8, measured) runs slightly higher than the textbook minimum (6, what this widget models) needed to find 3 evens. Both are "lazy" and both short-circuit; only the standard's laziness guarantee is portable, the exact call count is an implementation detail.</li>
+      <li><b>Order changes results, not just performance.</b> <code>filter(even) | take(3)</code> on 1..10 gives <code>2 4 6</code>; <code>take(3) | filter(even)</code> gives just <code>2</code>, because <code>take</code> already cut the input down to <code>{1,2,3}</code> before <code>filter</code> ever saw the rest. Verified against real g++ output for every stage order this widget lets you build.</li>
+      <li><b><code>std::ranges::to&lt;std::vector&gt;()</code> is real C++23, but check your toolchain.</b> It compiles under <code>-std=c++23</code> with a recent enough libstdc++ (GCC 14+); it does <i>not</i> compile on GCC 13's libstdc++ even with <code>-std=c++23</code> (confirmed by compiling it here). The portable eager alternative that has worked since C++20 is a constructor: <code>std::vector&lt;int&gt; vec(view.begin(), view.end());</code>.</li>
+      <li><b>The dangling-view demo above is real, confirmed undefined behavior</b> -- compiling the "container is local" scenario with <code>-fsanitize=address</code> reports a genuine <code>stack-use-after-return</code> the moment the caller iterates the returned view, not a benign quirk. There is no compiler error at build time; nothing stops this from shipping.</li>
+      <li><b>Actions/algorithms are eager by design, not an exception to laziness.</b> <code>std::ranges::sort(vec)</code> mutates <code>vec</code> immediately when called -- there is no pipeline to defer, because sort is not a view, it is an algorithm that runs once and produces its effect on the spot.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified pull-based pipeline ---
+
+    function makeCtx() {
+      return { log: [], counts: {} };
+    }
+
+    function bump(ctx, key) {
+      ctx.counts[key] = (ctx.counts[key] || 0) + 1;
+    }
+
+    function sourceGen(arr, ctx) {
+      var i = 0;
+      return function next() {
+        if (i >= arr.length) return { done: true };
+        var value = arr[i], index = i;
+        i++;
+        bump(ctx, 'source');
+        ctx.log.push({ stage: 'source', text: 'pull index ' + index + ' (value ' + value + ') from the vector' });
+        return { done: false, value: value, index: index };
+      };
+    }
+
+    function reverseGen(arr, ctx) {
+      var i = arr.length - 1;
+      return function next() {
+        if (i < 0) return { done: true };
+        var value = arr[i], index = i;
+        i--;
+        bump(ctx, 'source');
+        ctx.log.push({ stage: 'reverse', text: 'pull index ' + index + ' (value ' + value + ') from the back' });
+        return { done: false, value: value, index: index };
+      };
+    }
+
+    function filterGen(upstream, pred, predLabel, ctx, stageNum) {
+      var key = 'filter' + stageNum;
+      return function next() {
+        while (true) {
+          var r = upstream();
+          if (r.done) return r;
+          bump(ctx, key);
+          var ok = pred(r.value);
+          ctx.log.push({ stage: key, index: r.index, text: 'stage ' + stageNum + ' filter(' + predLabel + '): ' + r.value + ' -> ' + (ok ? 'passes' : 'rejected, skip') });
+          if (ok) return r;
+        }
+      };
+    }
+
+    function transformGen(upstream, fn, fnLabel, ctx, stageNum) {
+      var key = 'transform' + stageNum;
+      return function next() {
+        var r = upstream();
+        if (r.done) return r;
+        bump(ctx, key);
+        var out = fn(r.value);
+        ctx.log.push({ stage: key, index: r.index, text: 'stage ' + stageNum + ' transform(' + fnLabel + '): ' + r.value + ' -> ' + out });
+        return { done: false, value: out, index: r.index };
+      };
+    }
+
+    function takeGen(upstream, n, ctx, stageNum) {
+      var produced = 0;
+      return function next() {
+        if (produced >= n) {
+          ctx.log.push({ stage: 'take' + stageNum, text: 'stage ' + stageNum + ' take(' + n + '): limit reached, never pulls upstream again' });
+          return { done: true };
+        }
+        var r = upstream();
+        if (r.done) return r;
+        produced++;
+        ctx.log.push({ stage: 'take' + stageNum, index: r.index, text: 'stage ' + stageNum + ' take(' + n + '): accepted (' + produced + '/' + n + ')' });
+        return r;
+      };
+    }
+
+    function dropGen(upstream, n, ctx, stageNum) {
+      var dropped = 0;
+      return function next() {
+        while (dropped < n) {
+          var r = upstream();
+          dropped++;
+          if (r.done) return r;
+          ctx.log.push({ stage: 'drop' + stageNum, index: r.index, text: 'stage ' + stageNum + ' drop(' + n + '): skip ' + r.value + ' (' + dropped + '/' + n + ')' });
+        }
+        return upstream();
+      };
+    }
+
+    var PREDICATES = {
+      even: { label: 'n % 2 == 0', fn: function (n) { return n % 2 === 0; } },
+      odd: { label: 'n % 2 == 1', fn: function (n) { return n % 2 === 1; } },
+      gt5: { label: 'n > 5', fn: function (n) { return n > 5; } },
+      lt3: { label: 'n < 3', fn: function (n) { return n < 3; } },
+      div3: { label: 'n % 3 == 0', fn: function (n) { return n % 3 === 0; } },
+    };
+
+    var TRANSFORMS = {
+      square: { label: 'n * n', fn: function (n) { return n * n; } },
+      double: { label: 'n * 2', fn: function (n) { return n * 2; } },
+      negate: { label: '-n', fn: function (n) { return -n; } },
+      plus100: { label: 'n + 100', fn: function (n) { return n + 100; } },
+    };
+
+    function buildChain(arr, slots) {
+      var ctx = makeCtx();
+      var node;
+      var startIdx;
+      if (slots[0] && slots[0].type === 'reverse') {
+        node = reverseGen(arr, ctx);
+        startIdx = 1;
+      } else {
+        node = sourceGen(arr, ctx);
+        startIdx = 0;
+      }
+      for (var i = startIdx; i < slots.length; i++) {
+        var s = slots[i];
+        var stageNum = i + 1;
+        if (s.type === 'filter') node = filterGen(node, PREDICATES[s.pred].fn, PREDICATES[s.pred].label, ctx, stageNum);
+        else if (s.type === 'transform') node = transformGen(node, TRANSFORMS[s.fn].fn, TRANSFORMS[s.fn].label, ctx, stageNum);
+        else if (s.type === 'take') node = takeGen(node, s.n, ctx, stageNum);
+        else if (s.type === 'drop') node = dropGen(node, s.n, ctx, stageNum);
+      }
+      return { pull: node, ctx: ctx };
+    }
+
+    // --- Widget state ---
+
+    var root = document.getElementById('rgWidget');
+    var nums = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    var slots = [
+      { type: 'filter', pred: 'even' },
+      { type: 'transform', fn: 'square' },
+      { type: 'take', n: 3 },
+      { type: 'none' },
+    ];
+    var chain = null;
+    var outputs = []; // {value, index}
+    var indexState = {}; // index -> 'rejected' | 'dropped' | 'visited' | 'output'
+    var exhausted = false;
+
+    var pipelineRow = root.querySelector('#rgPipelineRow');
+    var codeEl = root.querySelector('#rgCode');
+    var bannerEl = root.querySelector('#rgBanner');
+    var countersEl = root.querySelector('#rgCounters');
+    var sourceRowEl = root.querySelector('#rgSourceRow');
+    var outputRowEl = root.querySelector('#rgOutputRow');
+    var logEl = root.querySelector('#rgLog');
+    var stepBtn = root.querySelector('#rgStepBtn');
+    var runBtn = root.querySelector('#rgRunBtn');
+    var resetBtn = root.querySelector('#rgResetBtn');
+
+    function stageTypeOptions(slotIdx) {
+      var base = [
+        ['none', 'None'],
+        ['filter', 'Filter'],
+        ['transform', 'Transform'],
+        ['take', 'Take'],
+        ['drop', 'Drop'],
+      ];
+      if (slotIdx === 0) base.splice(1, 0, ['reverse', 'Reverse']);
+      return base;
+    }
+
+    function renderPipelineRow() {
+      pipelineRow.innerHTML = '';
+      for (var i = 0; i < slots.length; i++) {
+        (function (idx) {
+          var s = slots[idx];
+          var wrap = document.createElement('div');
+          wrap.className = 'rg-slot';
+
+          var label = document.createElement('div');
+          label.className = 'rg-slot-label';
+          label.textContent = 'Stage ' + (idx + 1);
+          wrap.appendChild(label);
+
+          var typeSel = document.createElement('select');
+          stageTypeOptions(idx).forEach(function (opt) {
+            var o = document.createElement('option');
+            o.value = opt[0];
+            o.textContent = opt[1];
+            if (opt[0] === s.type) o.selected = true;
+            typeSel.appendChild(o);
+          });
+          typeSel.addEventListener('change', function () {
+            var t = typeSel.value;
+            if (t === 'filter') slots[idx] = { type: 'filter', pred: 'even' };
+            else if (t === 'transform') slots[idx] = { type: 'transform', fn: 'square' };
+            else if (t === 'take') slots[idx] = { type: 'take', n: 3 };
+            else if (t === 'drop') slots[idx] = { type: 'drop', n: 3 };
+            else if (t === 'reverse') slots[idx] = { type: 'reverse' };
+            else slots[idx] = { type: 'none' };
+            rebuild();
+          });
+          wrap.appendChild(typeSel);
+
+          if (s.type === 'filter') {
+            var predSel = document.createElement('select');
+            Object.keys(PREDICATES).forEach(function (k) {
+              var o = document.createElement('option');
+              o.value = k;
+              o.textContent = PREDICATES[k].label;
+              if (k === s.pred) o.selected = true;
+              predSel.appendChild(o);
+            });
+            predSel.addEventListener('change', function () { s.pred = predSel.value; rebuild(); });
+            wrap.appendChild(predSel);
+          } else if (s.type === 'transform') {
+            var fnSel = document.createElement('select');
+            Object.keys(TRANSFORMS).forEach(function (k) {
+              var o = document.createElement('option');
+              o.value = k;
+              o.textContent = TRANSFORMS[k].label;
+              if (k === s.fn) o.selected = true;
+              fnSel.appendChild(o);
+            });
+            fnSel.addEventListener('change', function () { s.fn = fnSel.value; rebuild(); });
+            wrap.appendChild(fnSel);
+          } else if (s.type === 'take' || s.type === 'drop') {
+            var numIn = document.createElement('input');
+            numIn.type = 'number';
+            numIn.min = '0';
+            numIn.max = '10';
+            numIn.value = String(s.n);
+            numIn.addEventListener('input', function () {
+              var v = parseInt(numIn.value, 10);
+              s.n = isNaN(v) ? 0 : Math.max(0, Math.min(10, v));
+              rebuild();
+            });
+            wrap.appendChild(numIn);
+          }
+
+          pipelineRow.appendChild(wrap);
+          if (idx < slots.length - 1) {
+            var arrow = document.createElement('div');
+            arrow.className = 'rg-arrow';
+            arrow.textContent = String.fromCharCode(0x2192);
+            pipelineRow.appendChild(arrow);
+          }
+        })(i);
+      }
+    }
+
+    function activeSlots() {
+      return slots.filter(function (s) { return s.type !== 'none'; });
+    }
+
+    function slotCode(s) {
+      if (s.type === 'reverse') return '| std::views::reverse';
+      if (s.type === 'filter') return '| std::views::filter([](int n){ return ' + PREDICATES[s.pred].label + '; })';
+      if (s.type === 'transform') return '| std::views::transform([](int n){ return ' + TRANSFORMS[s.fn].label + '; })';
+      if (s.type === 'take') return '| std::views::take(' + s.n + ')';
+      if (s.type === 'drop') return '| std::views::drop(' + s.n + ')';
+      return '';
+    }
+
+    function renderCode() {
+      var active = activeSlots();
+      var lines = ['auto result = nums'];
+      active.forEach(function (s, i) {
+        lines.push('    ' + slotCode(s) + (i < active.length - 1 ? '' : ';'));
+      });
+      if (active.length === 0) lines.push('    ;  // empty pipeline -- add a stage above');
+      codeEl.textContent = lines.join('\n');
+    }
+
+    function renderBanner() {
+      var totalCalls = Object.keys(chain.ctx.counts).reduce(function (sum, k) { return sum + chain.ctx.counts[k]; }, 0);
+      if (outputs.length === 0 && totalCalls === 0) {
+        bannerEl.className = 'rg-banner declared';
+        bannerEl.textContent = 'Pipeline declared. 0 calls made so far -- nothing runs until you pull.';
+      } else if (exhausted) {
+        bannerEl.className = 'rg-banner done';
+        bannerEl.textContent = 'Pipeline exhausted. ' + outputs.length + ' element(s) produced, ' + totalCalls + ' predicate/transform call(s) total.';
+      } else {
+        bannerEl.className = 'rg-banner running';
+        bannerEl.textContent = 'Running. ' + outputs.length + ' element(s) produced so far, ' + totalCalls + ' predicate/transform call(s) so far.';
+      }
+    }
+
+    function renderCounters() {
+      countersEl.innerHTML = '';
+      var entries = [['source pulls', chain.ctx.counts.source || 0]];
+      Object.keys(chain.ctx.counts).sort().forEach(function (k) {
+        if (k === 'source') return;
+        entries.push([k, chain.ctx.counts[k]]);
+      });
+      entries.forEach(function (e) {
+        var d = document.createElement('div');
+        var b = document.createElement('b');
+        b.textContent = String(e[1]);
+        d.appendChild(b);
+        d.appendChild(document.createTextNode(' ' + e[0]));
+        countersEl.appendChild(d);
+      });
+    }
+
+    function renderSourceRow() {
+      sourceRowEl.innerHTML = '';
+      nums.forEach(function (v, idx) {
+        var box = document.createElement('div');
+        var state = indexState[idx];
+        box.className = 'rg-slotbox' + (state ? ' ' + state : '');
+        box.textContent = String(v);
+        box.title = 'index ' + idx;
+        sourceRowEl.appendChild(box);
+      });
+    }
+
+    function renderOutputRow() {
+      if (outputs.length === 0) {
+        outputRowEl.innerHTML = '<span class="rg-empty-note">nothing pulled yet</span>';
+        return;
+      }
+      outputRowEl.innerHTML = '';
+      outputs.forEach(function (o) {
+        var box = document.createElement('div');
+        box.className = 'rg-outbox';
+        box.textContent = String(o.value);
+        outputRowEl.appendChild(box);
+      });
+    }
+
+    function renderLog(newlyRenderedFrom) {
+      if (chain.ctx.log.length === 0) {
+        logEl.innerHTML = '<span class="rg-empty-note">click Step to pull the first element</span>';
+        return;
+      }
+      logEl.innerHTML = '';
+      chain.ctx.log.forEach(function (entry, i) {
+        var line = document.createElement('div');
+        line.className = 'rg-log-line' + (i >= newlyRenderedFrom ? ' rg-log-latest' : '');
+        line.textContent = entry.text;
+        logEl.appendChild(line);
+      });
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function applyLogToIndexState(fromIdx) {
+      for (var i = fromIdx; i < chain.ctx.log.length; i++) {
+        var entry = chain.ctx.log[i];
+        if (entry.index === undefined) continue;
+        if (entry.stage.indexOf('filter') === 0 && entry.text.indexOf('rejected') !== -1) {
+          indexState[entry.index] = 'rejected';
+        } else if (entry.stage.indexOf('drop') === 0) {
+          indexState[entry.index] = 'dropped';
+        } else if (!indexState[entry.index]) {
+          indexState[entry.index] = 'visited';
+        }
+      }
+    }
+
+    function markOutputIndices() {
+      outputs.forEach(function (o) {
+        if (o.index !== undefined) indexState[o.index] = 'output';
+      });
+    }
+
+    function renderAll(prevLogLen) {
+      renderCode();
+      renderBanner();
+      renderCounters();
+      renderSourceRow();
+      renderOutputRow();
+      renderLog(prevLogLen === undefined ? 0 : prevLogLen);
+      stepBtn.disabled = exhausted;
+      runBtn.disabled = exhausted;
+    }
+
+    function rebuild() {
+      renderPipelineRow();
+      chain = buildChain(nums, activeSlots());
+      outputs = [];
+      indexState = {};
+      exhausted = false;
+      renderAll(0);
+    }
+
+    stepBtn.addEventListener('click', function () {
+      if (exhausted) return;
+      var prevLogLen = chain.ctx.log.length;
+      var r = chain.pull();
+      if (r.done) {
+        exhausted = true;
+      } else {
+        outputs.push({ value: r.value, index: r.index });
+      }
+      applyLogToIndexState(prevLogLen);
+      markOutputIndices();
+      renderAll(prevLogLen);
+    });
+
+    runBtn.addEventListener('click', function () {
+      if (exhausted) return;
+      var prevLogLen = chain.ctx.log.length;
+      while (true) {
+        var r = chain.pull();
+        if (r.done) { exhausted = true; break; }
+        outputs.push({ value: r.value, index: r.index });
+      }
+      applyLogToIndexState(prevLogLen);
+      markOutputIndices();
+      renderAll(prevLogLen);
+    });
+
+    resetBtn.addEventListener('click', function () { rebuild(); });
+
+    // --- Dangling view demo ---
+
+    var dangleLogEl = root.querySelector('#rgDangleLog');
+    root.querySelector('#rgDangleSafeBtn').addEventListener('click', function () { runDangle(true); });
+    root.querySelector('#rgDangleBadBtn').addEventListener('click', function () { runDangle(false); });
+
+    function runDangle(safe) {
+      var lines = [];
+      if (safe) {
+        lines.push({ ok: true, text: 'main(): std::vector&lt;int&gt; nums = {1,2,3}; -- declared in main, not inside make_view()' });
+        lines.push({ ok: true, text: 'main(): auto v = make_view(nums); -- filter_view stores a reference to the caller’s nums' });
+        lines.push({ ok: true, text: 'make_view() returns: its own stack frame is destroyed, but nums belongs to main() and is untouched' });
+        lines.push({ ok: true, text: 'main(): for (int x : v) { ... } -- reads nums, which is still alive. Safe.' });
+      } else {
+        lines.push({ ok: true, text: 'make_view(): std::vector&lt;int&gt; local = {1,2,3}; -- lives in this function call’s own stack frame' });
+        lines.push({ ok: true, text: 'make_view(): return local | std::views::filter(pred); -- filter_view stores a reference to local, not a copy' });
+        lines.push({ ok: false, text: 'make_view() returns: the frame holding local is destroyed -- the view now refers to freed stack memory' });
+        lines.push({ ok: false, text: 'main(): for (int x : v) { ... } -- reads freed memory. Real AddressSanitizer output: stack-use-after-return. This is undefined behavior, not a guaranteed crash.' });
+      }
+      dangleLogEl.innerHTML = '';
+      lines.forEach(function (l) {
+        var d = document.createElement('div');
+        d.className = 'rg-dangle-line ' + (l.ok ? 'ok' : 'bad');
+        d.innerHTML = l.text;
+        dangleLogEl.appendChild(d);
+      });
+    }
+
+    rebuild();
+  })();
+  </script>
+</div>

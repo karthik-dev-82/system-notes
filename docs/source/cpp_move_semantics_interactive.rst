@@ -77,3 +77,7 @@ to destroy or reassign, but its contents shouldn't be assumed. Writing
 your own move constructor to leave a specific, documented empty state
 (as this one does) is good practice precisely because it's stronger
 than the minimum the language requires.
+
+See :doc:`cpp_ranges_interactive` for the other half of "avoid the
+copy" in modern C++ -- a ``std::views`` pipeline that never
+materializes its data at all, rather than moving data you already own.

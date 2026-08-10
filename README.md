@@ -76,6 +76,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
 | 🎮 **[C++ RAII & Smart Pointers (Interactive)](docs/source/cpp_raii_smart_pointers_interactive.rst)** | Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak | RAII, unique_ptr, shared_ptr, weak_ptr, reference counting |
 | 🎮 **[C++ Move Semantics (Interactive)](docs/source/cpp_move_semantics_interactive.rst)** | Interactive move semantics -- copy vs move construction cost, made countable | move constructor, std::move, moved-from state, noexcept |
+| 🎮 **[C++20 Ranges (Interactive)](docs/source/cpp_ranges_interactive.rst)** | Build a std::views pipeline, watch it stay lazy, and see order and short-circuiting change results | views::filter, views::transform, views::take, laziness, views vs actions |
 | 🎮 **[C++ Virtual Functions & vtables (Interactive)](docs/source/cpp_vtable_interactive.rst)** | Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak | vtable, vptr, dynamic dispatch, virtual destructor |
 | 🎮 **[C++ Exception Unwinding (Interactive)](docs/source/cpp_exception_unwind_interactive.rst)** | Interactive exception unwinding -- RAII cleanup during unwind, and why a destructor must never throw | stack unwinding, RAII, std::terminate, noexcept |
 | 🎮 **[C++ Singleton (Interactive)](docs/source/cpp_singleton_interactive.rst)** | Interactive C++11 thread-safe static init vs. a naive unsynchronized race | magic statics, double-checked locking, function-local static |
@@ -187,6 +188,7 @@ system-notes/
         ├── cpp_memory_interactive.rst
         ├── cpp_raii_smart_pointers_interactive.rst
         ├── cpp_move_semantics_interactive.rst
+        ├── cpp_ranges_interactive.rst
         ├── cpp_vtable_interactive.rst
         ├── cpp_exception_unwind_interactive.rst
         ├── cpp_singleton_interactive.rst
@@ -218,8 +220,11 @@ system-notes/
             ├── cpp_unique_ptr_widget.html
             ├── cpp_shared_ptr_widget.html
             ├── cpp_move_semantics_widget.html
+            ├── cpp_ranges_widget.html
             ├── cpp_vtable_widget.html
             ├── cpp_exception_unwind_widget.html
+            ├── cpp_singleton_widget.html
+            ├── cpp_command_widget.html
             ├── py_list_widget.html
             ├── py_stack_widget.html
             ├── py_queue_widget.html
