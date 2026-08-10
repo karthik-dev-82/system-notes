@@ -132,7 +132,7 @@
   <details class="sgl-notes">
     <summary>Worth knowing, beyond what's interactive here</summary>
     <ul>
-      <li><b>"Magic statics" is a real, named C++11 guarantee</b> (formally: concurrent execution shall not enter the initialization of a function-local static variable while it's already being initialized by another thread). The compiler inserts a hidden guard variable and blocking synchronization around it automatically -- that's the entire mechanism this widget models as the Safe mode.</li>
+      <li><b>"Magic statics" is the common informal name</b> for a real C++11 guarantee -- the standard itself doesn't use that phrase, it just requires that concurrent execution shall not enter the initialization of a function-local static variable while it's already being initialized by another thread. The compiler inserts a hidden guard variable and blocking synchronization around it automatically -- that's the entire mechanism this widget models as the Safe mode.</li>
       <li><b>The Unsafe mode isn't a strawman.</b> <code>if (!instance) instance = new T();</code> with no lock was a genuinely common pre-C++11 pattern, and it fails in exactly the way shown here: two threads can both read <code>instance</code> as null before either one's write lands, so both construct, and whichever write finishes last silently wins -- the other thread's object is orphaned, not an error, just quietly wrong. Try spacing the arrival ticks far apart in Unsafe mode: with no overlap, it behaves correctly, which is exactly why this class of bug is so easy to ship undetected.</li>
       <li><b>Blocking, not busy-waiting, is the point.</b> In Safe mode, a thread that arrives while another is already constructing doesn't spin or retry -- it blocks until construction completes, then proceeds with the fully-built object. No thread ever observes a partially-constructed singleton.</li>
       <li>Double-checked locking (checking, then locking, then checking again) was the classic hand-rolled fix for this before C++11 -- and was itself notoriously easy to get wrong without a properly-placed memory fence. A function-local static makes the entire pattern unnecessary to write by hand.</li>
@@ -164,7 +164,10 @@
       }
 
       for (const t of sorted) {
-        releaseWaitingIfDue(t.arrivalTick);
+        if (guardState === 'IN_PROGRESS' && t.arrivalTick >= completionTick) {
+          guardState = 'COMPLETE';
+          releaseWaitingIfDue(completionTick);
+        }
         if (guardState === 'COMPLETE') {
           results.push({ id: t.id, arrivalTick: t.arrivalTick, obtainedTick: t.arrivalTick, instanceId: instanceId });
         } else if (guardState === 'NOT_STARTED') {

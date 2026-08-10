@@ -32,9 +32,11 @@ is a leak waiting to happen. A ``unique_ptr``'s destructor runs no
 matter which path leaves the function -- there's no line to forget.
 
 The second tab is about the other half of what makes ``unique_ptr``
-safe: it cannot be copied, only moved. ``std::move`` doesn't duplicate
-anything -- it transfers the underlying pointer to the new owner and
-leaves the old variable empty, so "two owners, one block" (the
+safe: it cannot be copied, only moved. ``std::move`` itself doesn't
+transfer anything -- it just marks the source as movable so the move
+constructor can steal its pointer and leave the old variable empty
+(see :doc:`cpp_move_semantics_interactive` for exactly how that
+split works). Either way, "two owners, one block" (the
 use-after-free/double-free bug from the previous page) becomes a
 state the type genuinely cannot represent, not a rule you have to
 remember to follow.

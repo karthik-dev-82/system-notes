@@ -70,7 +70,9 @@ destructor, ever." Since C++11, destructors are implicitly
 ``noexcept`` by default anyway (unless a base class or member's
 destructor explicitly isn't), which turns that rule from a convention
 programmers have to remember into something the compiler enforces --
-throwing from a ``noexcept`` function calls ``std::terminate()``
+throwing from a ``noexcept`` function calls ``std::terminate()``.
+Whether the stack is unwound first is left implementation-defined by
+the standard, but in practice GCC and Clang both terminate
 immediately, before unwinding even begins.
 
 The Theme, One Last Time
