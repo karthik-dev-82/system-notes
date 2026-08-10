@@ -42,17 +42,25 @@ next.
 Step through it and the wording "``await`` blocks" turns out to be
 backwards: nothing blocks. ``outer`` and ``middle`` both go idle
 almost immediately, and the loop is free to run other work (there
-just isn't any here) while ``inner`` sleeps. Only once ``inner``
-actually finishes does the wakeup ripple back up the chain, one link
-at a time.
+just isn't any here) while ``inner`` sleeps.
 
 .. raw:: html
    :file: _static/py_await_chain_widget.html
 
-That one-tick-per-link ripple is a real, visible cost of nesting
-``await`` calls, not just a teaching simplification invented for this
-widget -- every layer of delegation is one more round trip through the
-scheduler before a result reaches the top.
+Here's the part that's easy to get backwards: chaining bare ``await``
+calls like this costs *nothing* extra. ``outer``, ``middle``, and
+``inner`` are not three separately-scheduled tasks taking turns --
+only ``inner``'s ``asyncio.sleep()`` is ever a real suspension point.
+The moment that sleep resolves, control unwinds straight back up
+through ``middle`` and ``outer`` synchronously, in a single step, all
+on the same tick -- confirmed directly against real ``asyncio``
+(tracing a concurrently-running sibling task shows it gets zero
+chances to interleave between ``inner`` finishing and ``outer``
+returning; they all happen back-to-back in one event-loop callback).
+This is exactly what ``yield from``-style generator delegation looks
+like under the hood, and it's why "await delegates, it doesn't block"
+is the accurate way to describe nesting -- not "each layer adds
+latency."
 
 See Also
 -------------

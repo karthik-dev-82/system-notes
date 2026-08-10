@@ -35,9 +35,9 @@
     .ac-frame-detail { font-family: ui-monospace, monospace; font-size: 0.74rem; color: var(--ac-muted); margin-top: 6px; }
     .ac-frame-src { font-family: ui-monospace, monospace; font-size: 0.72rem; color: var(--ac-muted); white-space: pre; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--ac-border); }
     .ac-state-tag { font-size: 0.66rem; font-weight: 700; text-transform: uppercase; padding: 2px 7px; border-radius: 5px; }
-    .ac-state-tag.ready { background: rgba(74,222,128,0.18); color: var(--ac-good); }
+    .ac-state-tag.idle { background: rgba(148,163,184,0.12); color: var(--ac-muted); }
     .ac-state-tag.sleeping { background: rgba(148,163,184,0.18); color: var(--ac-muted); }
-    .ac-state-tag.waiting { background: rgba(56,189,248,0.18); color: var(--ac-accent); }
+    .ac-state-tag.suspended { background: rgba(56,189,248,0.18); color: var(--ac-accent); }
     .ac-state-tag.done { background: rgba(74,222,128,0.18); color: var(--ac-good); }
     .ac-arrow { text-align: center; color: var(--ac-muted); font-size: 0.9rem; }
 
@@ -66,80 +66,98 @@
   (function() {
     var root = document.getElementById('acWidget');
 
-    function* innerGen(log) {
-      yield { type: 'sleep', ticks: 3 };
-      log.push('inner finished its sleep(3)');
-      return 'inner-result';
+    // --- Model: identical to the standalone Node-verified state machine.
+    // outer() awaits middle() awaits inner() as BARE coroutines (no
+    // separate asyncio.Task per frame). Real asyncio drives that whole
+    // chain as ONE task -- JS's `yield*` generator delegation is the
+    // structural equivalent of Python's await-chaining, not a convenient
+    // trick standing in for it. ---
+
+    var SLEEP_TICKS = 3;
+
+    function makeChainGenerator(log) {
+      function* innerGen() {
+        log.push({ id: 'inner', text: 'awaits sleep(' + SLEEP_TICKS + ')' });
+        yield { type: 'sleep', ticks: SLEEP_TICKS };
+        log.push({ id: 'inner', text: 'finished its sleep(' + SLEEP_TICKS + ')' });
+        return 'inner-result';
+      }
+      function* middleGen() {
+        log.push({ id: 'middle', text: 'awaits inner()' });
+        var received = yield* innerGen();
+        log.push({ id: 'middle', text: 'received "' + received + '" from inner' });
+        return received + ' -> relayed by middle';
+      }
+      function* outerGen() {
+        log.push({ id: 'outer', text: 'awaits middle()' });
+        var received = yield* middleGen();
+        log.push({ id: 'outer', text: 'received "' + received + '" from middle' });
+        return received + ' -> relayed by outer';
+      }
+      return outerGen();
     }
-    function* middleGen(log) {
-      var received = yield { type: 'await', target: 'inner' };
-      log.push('middle received "' + received + '" from inner');
-      return received + ' -> relayed by middle';
+
+    function makeTask() {
+      var log = [];
+      var gen = makeChainGenerator(log);
+      return { gen: gen, log: log, state: 'ready', wakeAtTick: 0, result: undefined };
     }
-    function* outerGen(log) {
-      var received = yield { type: 'await', target: 'middle' };
-      log.push('outer received "' + received + '" from middle');
-      return received + ' -> relayed by outer';
+
+    function runOneTick(task, tick) {
+      if (task.state === 'sleeping' && task.wakeAtTick <= tick) task.state = 'ready';
+      if (task.state !== 'ready') return [];
+      var startLen = task.log.length;
+      var r = task.gen.next();
+      var entries = task.log.slice(startLen).map(function(e) { return { tick: tick, id: e.id, text: e.text }; });
+      if (r.done) {
+        task.state = 'done';
+        task.result = r.value;
+        entries.push({ tick: tick, id: 'outer', text: 'chain finished, returned "' + r.value + '"' });
+      } else if (r.value.type === 'sleep') {
+        task.state = 'sleeping';
+        task.wakeAtTick = tick + r.value.ticks;
+      }
+      return entries;
     }
 
     var FRAMES = [
-      { id: 'inner', label: 'inner()', src: 'async def inner():\n    await asyncio.sleep(3)\n    return "inner-result"' },
+      { id: 'inner', label: 'inner()', src: 'async def inner():\n    await asyncio.sleep(' + SLEEP_TICKS + ')\n    return "inner-result"' },
       { id: 'middle', label: 'middle()', src: 'async def middle():\n    r = await inner()\n    return r + " -> relayed by middle"' },
       { id: 'outer', label: 'outer()', src: 'async def outer():\n    r = await middle()\n    return r + " -> relayed by outer"' }
     ];
-
-    function makeTasks() {
-      var log = [];
-      var tasks = {
-        inner: { id: 'inner', gen: innerGen(log), state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined },
-        middle: { id: 'middle', gen: middleGen(log), state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined },
-        outer: { id: 'outer', gen: outerGen(log), state: 'ready', wakeAtTick: 0, waitingOn: null, result: undefined, sendValue: undefined }
-      };
-      return { tasks: tasks, log: log };
-    }
-
-    function runOneTick(tasks, ids, tick) {
-      var trace = [];
-      ids.forEach(function(id) {
-        var t = tasks[id];
-        if (t.state === 'sleeping' && t.wakeAtTick <= tick) t.state = 'ready';
-        if (t.state === 'waiting' && tasks[t.waitingOn].state === 'done') {
-          t.state = 'ready';
-          t.sendValue = tasks[t.waitingOn].result;
-        }
-      });
-      ids.forEach(function(id) {
-        var t = tasks[id];
-        if (t.state !== 'ready') return;
-        var r = t.gen.next(t.sendValue);
-        t.sendValue = undefined;
-        if (r.done) {
-          trace.push({ tick: tick, id: id, text: id + ' finished, returned "' + r.value + '"' });
-          t.state = 'done';
-          t.result = r.value;
-        } else if (r.value.type === 'sleep') {
-          t.state = 'sleeping';
-          t.wakeAtTick = tick + r.value.ticks;
-          trace.push({ tick: tick, id: id, text: id + ' awaits sleep(' + r.value.ticks + ')' });
-        } else if (r.value.type === 'await') {
-          t.state = 'waiting';
-          t.waitingOn = r.value.target;
-          trace.push({ tick: tick, id: id, text: id + ' awaits ' + r.value.target + '()' });
-        }
-      });
-      return trace;
-    }
-
-    function allDone(tasks, ids) {
-      return ids.every(function(id) { return tasks[id].state === 'done'; });
-    }
 
     function escapeHtml(s) {
       return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    var IDS = ['inner', 'middle', 'outer'];
-    var state = { tasks: null, tick: 0, log: [] };
+    // Per-frame display state, derived from the shared log -- there is only
+    // ONE scheduled task underneath; this is purely for showing each frame's
+    // individual status, not a separate scheduling mechanism.
+    function frameStateFor(id, log) {
+      var started = log.some(function(e) { return e.id === id && e.text.indexOf('awaits') === 0; });
+      var finished = log.some(function(e) {
+        return e.id === id && (e.text.indexOf('finished') === 0 || e.text.indexOf('received') === 0);
+      });
+      if (finished) return 'done';
+      if (started) return id === 'inner' ? 'sleeping' : 'suspended';
+      return 'idle';
+    }
+
+    function detailFor(id, frameState, task, log) {
+      if (frameState === 'sleeping') return 'sleeping, wakes at tick ' + task.wakeAtTick;
+      if (frameState === 'suspended') return 'delegated to its callee -- not doing anything, not polled again until it returns';
+      if (frameState === 'done') {
+        var entry = log.slice().reverse().find(function(e) { return e.id === id; });
+        return entry ? 'done at tick ' + entry.tick + ' -- ' + entry.text : 'done';
+      }
+      return 'not started yet';
+    }
+
+    // state.log is the tick-stamped display log (what render() shows);
+    // state.task.log is the raw, un-stamped log the generators push into,
+    // used only by runOneTick's internal diffing -- they are deliberately
+    // two different arrays with the same underlying entries.
+    var state = { task: null, tick: 0, log: [] };
 
     var chainEl = document.getElementById('acChain');
     var logEl = document.getElementById('acLog');
@@ -147,16 +165,15 @@
     var noteEl = document.getElementById('acNote');
 
     function reset() {
-      var built = makeTasks();
-      state.tasks = built.tasks;
+      state.task = makeTask();
       state.tick = 0;
       state.log = [];
       render();
     }
 
     function stepOnce() {
-      if (allDone(state.tasks, IDS)) return;
-      var entries = runOneTick(state.tasks, IDS, state.tick);
+      if (state.task.state === 'done') return;
+      var entries = runOneTick(state.task, state.tick);
       state.log = state.log.concat(entries);
       state.tick += 1;
       render();
@@ -164,24 +181,17 @@
 
     function runToCompletion() {
       var guard = 0;
-      while (!allDone(state.tasks, IDS) && guard < 1000) { stepOnce(); guard += 1; }
-    }
-
-    function detailFor(t) {
-      if (t.state === 'sleeping') return 'sleeping, wakes at tick ' + t.wakeAtTick;
-      if (t.state === 'waiting') return 'awaiting ' + t.waitingOn + '() -- has not resumed yet';
-      if (t.state === 'done') return 'returned "' + t.result + '"';
-      return 'ready to run next tick';
+      while (state.task.state !== 'done' && guard < 1000) { stepOnce(); guard += 1; }
     }
 
     function render() {
       tickBadge.textContent = 'tick ' + state.tick;
 
       chainEl.innerHTML = FRAMES.map(function(f, i) {
-        var t = state.tasks[f.id];
-        var html = '<div class="ac-frame' + (t.state === 'done' ? ' done' : '') + '">' +
-          '<div class="ac-frame-head"><span>' + f.label + '</span><span class="ac-state-tag ' + t.state + '">' + t.state + '</span></div>' +
-          '<div class="ac-frame-detail">' + detailFor(t) + '</div>' +
+        var frameState = frameStateFor(f.id, state.log);
+        var html = '<div class="ac-frame' + (frameState === 'done' ? ' done' : '') + '">' +
+          '<div class="ac-frame-head"><span>' + f.label + '</span><span class="ac-state-tag ' + frameState + '">' + frameState + '</span></div>' +
+          '<div class="ac-frame-detail">' + detailFor(f.id, frameState, state.task, state.log) + '</div>' +
           '<div class="ac-frame-src">' + escapeHtml(f.src) + '</div>' +
           '</div>';
         if (i < FRAMES.length - 1) html += '<div class="ac-arrow">&uarr; awaited by</div>';
@@ -192,7 +202,7 @@
         return '<div class="ac-log-line">tick ' + e.tick + ', <b>' + e.id + '</b>: ' + e.text + '</div>';
       }).join('') || '<span class="ac-empty">Click "Step one tick" to start.</span>';
 
-      var done = allDone(state.tasks, IDS);
+      var done = state.task.state === 'done';
       document.getElementById('acStepBtn').disabled = done;
       document.getElementById('acRunBtn').disabled = done;
     }
@@ -201,7 +211,7 @@
     document.getElementById('acRunBtn').addEventListener('click', runToCompletion);
     document.getElementById('acResetBtn').addEventListener('click', reset);
 
-    noteEl.textContent = 'Notice outer and middle both go "waiting" almost immediately -- neither one is doing any work while inner sleeps, and neither is the event loop. outer only receives a value once middle is done, and middle only receives one once inner is -- one extra tick of scheduling latency per link in the chain, which is why outer finishes at tick 5, not tick 3.';
+    noteEl.textContent = 'Notice all three frames finish on the exact same tick (' + SLEEP_TICKS + ') that inner\u2019s sleep elapses -- not one tick apart. Chaining bare await calls costs nothing extra: once inner\u2019s real suspension point resolves, control unwinds straight back up through middle and outer synchronously, in one step, because they were never separately scheduled tasks to begin with -- only inner\u2019s sleep was ever a real suspension point.';
 
     reset();
   })();

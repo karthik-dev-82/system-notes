@@ -112,7 +112,12 @@
       var total = 0;
       while (true) {
         var x = yield { value: total, locals: { total: total }, line: 4 };
-        if (x === undefined) continue;
+        if (x === undefined) {
+          // Matches real Python exactly: calling next() instead of send()
+          // here means x is None, and `total += None` really does raise
+          // this TypeError -- verified directly against CPython.
+          throw new Error("TypeError: unsupported operand type(s) for +=: 'int' and 'NoneType'");
+        }
         total += x;
         log.push({ text: 'received ' + x + ', total now ' + total });
       }
@@ -151,12 +156,21 @@
       }
 
       var result;
-      if (action === 'throw') {
-        result = ctrl.gen.throw(new Error(sendValue));
-      } else if (action === 'close') {
-        result = ctrl.gen.return(undefined);
-      } else {
-        result = ctrl.gen.next(action === 'send' ? sendValue : undefined);
+      try {
+        if (action === 'throw') {
+          result = ctrl.gen.throw(new Error(sendValue));
+        } else if (action === 'close') {
+          result = ctrl.gen.return(undefined);
+        } else {
+          result = ctrl.gen.next(action === 'send' ? sendValue : undefined);
+        }
+      } catch (e) {
+        // An uncaught error inside the generator body closes it for good --
+        // matches real Python, where an unhandled exception exhausts the
+        // generator and any further next() raises StopIteration.
+        ctrl.state = 'exhausted';
+        ctrl.lastYielded = undefined;
+        throw e;
       }
 
       if (result.done) {

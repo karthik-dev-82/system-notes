@@ -51,7 +51,7 @@ Why Append Is O(1) *Amortized*, Not O(1)
 
 CPython does not grow a list by exactly one slot per ``append()`` --
 that would make every single append touch the allocator. Instead it
-over-allocates, following (as of Python 3.11+) this exact rule from
+over-allocates, following (as of Python 3.9+) this exact rule from
 ``list_resize``:
 
 .. code-block:: text
@@ -64,7 +64,7 @@ land in already-reserved space and cost nothing but a write; only the
 rare append that overflows the current capacity pays for a fresh
 allocation and a full copy. Average the cheap and expensive appends
 together over a long run and you get O(1) *amortized* -- which is a
-precise claim, not a hand-wave. (Versions before 3.11 used a different
+precise claim, not a hand-wave. (Versions before 3.9 used a different
 formula and a different sequence -- the exact numbers have moved
 across releases, but the geometric-over-allocation idea itself hasn't.)
 

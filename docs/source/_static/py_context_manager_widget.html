@@ -65,7 +65,7 @@
 value = mgr.__enter__()          <span style="color:var(--cx-muted)"># if this raises, __exit__ is never called</span>
 try:
     BODY(value)
-except Exception as exc:
+except BaseException as exc:
     if not mgr.__exit__(type(exc), exc, tb):
         raise                    <span style="color:var(--cx-muted)"># __exit__ returned falsy -> propagate</span>
 else:
