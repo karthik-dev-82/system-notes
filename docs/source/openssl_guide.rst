@@ -393,7 +393,10 @@ Create Certificates (Self-Signed)
 passphrase. For a dev server that needs to start up unattended,
 that's what you want -- without it, ``openssl`` prompts you for a
 passphrase and bakes it into ``key.pem``, so your server would need
-that passphrase typed in by hand every time it starts.
+that passphrase typed in by hand every time it starts. OpenSSL 3.0
+deprecated the name (though it still works with no warning as of
+3.0.13) in favor of the clearer ``-noenc``, which does exactly the
+same thing -- newer scripts should prefer ``-noenc``.
 
 Use case: testing HTTPS on your development server.
 

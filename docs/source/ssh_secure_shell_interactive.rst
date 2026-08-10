@@ -16,9 +16,11 @@ Pick a host-key scenario -- first connection, a host you've already
 trusted, or a host whose key has changed since last time -- and an
 authentication method, then start the connection. Watch two things at
 once: the private boxes above the wire (what each side computes and
-never sends), and the eavesdropper's log below it (exactly what's
-visible to anyone watching the wire, and the moment it turns to
-ciphertext).
+never sends), and the eavesdropper's log below it (what's actually
+visible to anyone watching the wire, the moment it turns to
+ciphertext, and a few local-only client decisions -- like the
+first-connection trust prompt -- clearly marked as such, since those
+never touch the wire at all).
 
 .. raw:: html
    :file: _static/ssh_handshake_widget.html

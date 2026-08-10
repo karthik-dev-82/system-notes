@@ -124,7 +124,8 @@ Unicode defines the code point. UTF-8 defines how to store those
 numbers efficiently.
 
 * English letters -> 1 byte
-* Malayalam/Chinese -> 2-3 bytes
+* Accented Latin/Cyrillic/Greek letters -> 2 bytes
+* Malayalam/Chinese -> 3 bytes
 * Emojis -> 4 bytes
 
 Think of it like envelope sizes -- small letters need small envelopes,

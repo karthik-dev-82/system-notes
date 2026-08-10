@@ -74,6 +74,14 @@ following the X.509 standard, which this widget replaces with a
 simplified, human-readable field list. The cryptographic guarantee is
 identical; the wire format is not.
 
+These four checks are also not the *entire* story, even in a real TLS
+stack: a real client additionally checks whether the certificate has
+been **revoked** since it was issued (via a CRL or OCSP), something
+this widget doesn't model at all. A cert can pass all four checks here
+and still be one a real browser would reject, if its issuing CA had
+since revoked it -- revocation checking is a fifth, independent gate,
+not a variant of any of the four above.
+
 See Also
 -------------
 

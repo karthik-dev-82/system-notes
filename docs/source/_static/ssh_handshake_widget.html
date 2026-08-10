@@ -72,6 +72,7 @@
     .sh-log div.plain { color: var(--sh-warn); }
     .sh-log div.cipher { color: #64748b; font-style: italic; }
     .sh-log div.bad { color: var(--sh-bad); font-weight: 700; }
+    .sh-log div.local { color: var(--sh-muted); font-style: italic; opacity: 0.75; }
 
     details.sh-notes { margin-top: 14px; background: var(--sh-panel); border: 1px solid var(--sh-border); border-radius: 10px; padding: 12px 16px; min-width: 840px; font-size: 0.85rem; line-height: 1.6; }
     details.sh-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
@@ -94,8 +95,8 @@
       <button class="sh-auth-btn active" data-auth="password">Password</button>
       <button class="sh-auth-btn" data-auth="pubkey">Public Key</button>
     </div>
-    <label>Speed: <span id="shSpeedVal">1x</span>
-      <input type="range" id="shSpeedSlider" min="0.4" max="2.5" step="0.1" value="1">
+    <label>Speed: <span id="shSpeedVal">0.5x</span>
+      <input type="range" id="shSpeedSlider" min="0.3" max="2.5" step="0.1" value="0.5">
     </label>
     <button class="sh-btn" id="shStartBtn">Start Connection</button>
     <button class="sh-btn secondary" id="shResetBtn">Reset</button>
@@ -142,7 +143,7 @@
     </div>
     <div class="sh-side-panel-col">
       <div class="sh-box">
-        <div class="sh-panel-title">Eavesdropper's view (only what's on the wire)</div>
+        <div class="sh-panel-title">Eavesdropper's view (wire traffic, plus local-only notes marked as such)</div>
         <div class="sh-log" id="shLog"></div>
       </div>
     </div>
@@ -348,6 +349,7 @@
     }
 
     let a, b, A, B;
+    let sessionId; // stand-in for the real session identifier established during key exchange
 
     function stepDhInit() {
       setPhase('Diffie-Hellman exchange');
@@ -378,17 +380,17 @@
     function checkHostKey(fp) {
       setPhase('Host key verification');
       if (hostScenario === 'first') {
-        log('client: no known_hosts entry for this host yet', null);
+        log('(local, not on the wire) client: no known_hosts entry for this host yet', 'local');
         explainEl.textContent = 'The authenticity of this host can’t be established from anything trusted yet -- a real client would prompt "are you sure you want to continue connecting (yes/no)?" here.';
         after(scaled(700), () => {
-          log('client: (yes) -- trusting it on first use', 'plain');
+          log('(local, not on the wire) client: (yes) -- trusting it on first use', 'local');
           knownHostsEl.textContent = fp + ' (just saved)';
           knownHostsEl.className = '';
-          log('Permanently added host to known_hosts', null);
+          log('(local, not on the wire) Permanently added host to known_hosts', 'local');
           after(scaled(400), stepDeriveKeys);
         });
       } else if (hostScenario === 'known') {
-        log('client: fingerprint matches known_hosts -- continuing', null);
+        log('(local, not on the wire) client: fingerprint matches known_hosts -- continuing', 'local');
         explainEl.textContent = 'The fingerprint the server just presented matches the one saved from a previous connection. No prompt needed -- this is the common case on every connection after the first.';
         after(scaled(400), stepDeriveKeys);
       } else {
@@ -419,6 +421,7 @@
     function stepDeriveKeys() {
       const secretC = modpow(B, a, P);
       const secretS = modpow(A, b, P);
+      sessionId = secretC;
       clientSecretEl.innerHTML = '<b>' + secretC + '</b> (matches server -- never sent!)';
       serverSecretEl.innerHTML = '<b>' + secretS + '</b> (matches client -- never sent!)';
       log('sees NEWKEYS exchanged both ways -- content unreadable from here on', 'cipher');
@@ -447,22 +450,20 @@
       } else {
         clientKeyLine.style.display = '';
         serverKeyLine.style.display = '';
-        const nonce = randInt(2, 30);
-        const p1 = spawnPacket('🔒 challenge', 'enc', 's2c');
-        log('ciphertext blob -- cannot read: auth challenge', 'cipher');
-        explainEl.textContent = 'The server picks a random challenge and asks the client to prove it holds the matching private key by signing it. The private key itself is never sent -- only a signature computed from it.';
-        flyTo(p1, 's2c', scaled(700), () => {
-          const sig = modpow(nonce, D, N);
-          log('client (locally, never sent): sig = ' + nonce + '^7 mod 33 = ' + sig, null);
-          const p2 = spawnPacket('🔒 signature', 'enc', 'c2s');
-          log('ciphertext blob -- cannot read: signature', 'cipher');
-          flyTo(p2, 'c2s', scaled(700), () => {
-            const verified = modpow(sig, E, N);
-            log('server (locally): ' + sig + '^3 mod 33 = ' + verified + ' -- matches challenge (' + nonce + ')', null);
-            const p3 = spawnPacket('🔒 AUTH OK', 'enc', 's2c');
-            log('ciphertext blob -- cannot read: auth result', 'cipher');
-            flyTo(p3, 's2c', scaled(600), stepSessionOpen);
-          });
+        // Real SSH pubkey auth doesn't wait for a server-issued challenge --
+        // the client proactively signs the session identifier from the key
+        // exchange step and sends the signature unprompted (RFC 4252 SS7).
+        const sig = modpow(sessionId, D, N);
+        log('client (locally, never sent): sig = ' + sessionId + '^7 mod 33 = ' + sig, 'local');
+        const p1 = spawnPacket('🔒 signature', 'enc', 'c2s');
+        log('ciphertext blob -- cannot read: pubkey auth request + signature', 'cipher');
+        explainEl.textContent = 'The client signs the session identifier from the key exchange step to prove it holds the matching private key, and sends that signature unprompted -- real SSH does not wait for the server to issue a challenge first. The private key itself is never sent, only the signature.';
+        flyTo(p1, 'c2s', scaled(700), () => {
+          const verified = modpow(sig, E, N);
+          log('server (locally): ' + sig + '^3 mod 33 = ' + verified + ' -- matches session ID (' + sessionId + ')', 'local');
+          const p2 = spawnPacket('🔒 AUTH OK', 'enc', 's2c');
+          log('ciphertext blob -- cannot read: auth result', 'cipher');
+          flyTo(p2, 's2c', scaled(600), stepSessionOpen);
         });
       }
     }
@@ -474,7 +475,7 @@
       bannerEl.className = 'sh-banner ok';
       bannerEl.textContent = authMethod === 'password'
         ? 'Session established with password auth. Every command and response from here shares the exact same encrypted tunnel that key exchange built -- the eavesdropper never saw the password, only the ciphertext around it.'
-        : 'Session established with public-key auth. The private key never left the client -- only a signature did, and that signature can’t be replayed against a different future challenge.';
+        : 'Session established with public-key auth. The private key never left the client -- only a signature did, and that signature is bound to this specific session identifier, so it can’t be replayed against a different future session.';
       const p1 = spawnPacket('🔒 ls -la', 'enc', 'c2s');
       log('ciphertext blob -- cannot read: shell command', 'cipher');
       flyTo(p1, 'c2s', scaled(600), () => {
