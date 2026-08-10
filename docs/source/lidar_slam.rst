@@ -119,8 +119,10 @@ unreliably noisy) in plenty of ordinary places, not just mines:
 * **Caves and underwater** -- no signal penetration at all
 * **Dense forest canopy** -- heavy attenuation
 * **Other planets/moons** -- there's no GPS constellation to receive
-  from in the first place (this is exactly why Mars rovers use
-  LIDAR/vision-based navigation)
+  from in the first place (this is exactly why Mars rovers navigate
+  using stereo cameras and wheel odometry instead -- Curiosity and
+  Perseverance don't carry a scanning LIDAR unit; their autonomous
+  driving and hazard avoidance is vision-based, not laser-based)
 
 LIDAR + SLAM is the standard answer to all of these: build your own
 local reference frame from the environment itself, instead of relying
@@ -132,21 +134,26 @@ Why SLAM Is Hard in GPS-Denied Environments
 .. uml::
 
    !theme plain
-   package "GPS-Denied Challenges" as challenges #LightBlue {
+   package "SLAM Algorithm Challenges" as challenges #LightBlue {
    }
-   rectangle "No GPS Signal" as gps #LightSalmon
+   rectangle "Drift & Loop Closure" as drift #LightSalmon
    rectangle "Repetitive Geometry" as geo #LightGreen
    rectangle "Dust and Moisture" as dust #GreenYellow
    rectangle "Dynamic Environment" as dynamic #LightBlue
-   challenges --> gps
+   challenges --> drift
    challenges --> geo
    challenges --> dust
    challenges --> dynamic
-   note bottom of gps
-     No satellite line-of-sight
+   note bottom of drift
+     Every scan-match has small error
      ..
-     True underground, indoors,
-     or off-world
+     Errors compound over a long run
+     ..
+     Fix: recognize a place you've
+     already mapped ("loop closure")
+     and snap the accumulated error
+     back down -- but that recognition
+     step is its own hard problem
    end note
    note bottom of geo
      Many tunnels/corridors/rooms
@@ -244,11 +251,6 @@ The Simple Truth
   this place look like?" at the same time
 * **Together** = a system that can navigate and map places humans can't
   safely or easily reach, or that GPS simply can't see into
-
-Think of it as giving robots the ability to explore and remember a
-space the way you might explore and remember a building you've walked
-through -- except they do it in pitch darkness, with laser precision,
-and without ever needing a satellite signal.
 
 Going Deeper
 ----------------
