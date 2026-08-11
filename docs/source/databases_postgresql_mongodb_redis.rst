@@ -184,8 +184,8 @@ ready.
    note right of leaderboard #LightBlue
      1. China (1.4B)
      2. India (1.4B)
-     3. USA (331M)
-     4. Japan (126M)
+     3. USA (331.9M)
+     4. Indonesia (273.5M)
    end note
    note right of combos #LightBlue
      Americas: USA, Brazil
@@ -206,7 +206,7 @@ Real-world example with our data:
 .. code-block:: text
 
    # Instant lookup - like grabbing a burger
-   HGET country:US population  # -> 331000000 (in <1 millisecond!)
+   HGET country:US population  # -> 331900000 (in <1 millisecond!)
 
    # Check the popularity leaderboard
    ZREVRANGE population_ranking 0 4  # -> Top 5 countries instantly
@@ -380,7 +380,7 @@ Everything organized in quick-access structures for instant service:
 
 .. code-block:: text
 
-   country:US -> {name: "USA", pop: 331000000, capital: "DC", region: "Americas"}
+   country:US -> {name: "USA", pop: 331900000, capital: "DC", region: "Americas"}
    country:CN -> {name: "China", pop: 1439323776, capital: "Beijing", region: "Asia"}
    country:DE -> {name: "Germany", pop: 83000000, capital: "Berlin", region: "Europe"}
 
@@ -576,7 +576,8 @@ Example 3: Population Rankings (Fast Food Counter)
 
    # Countries with population between 100M-500M?
    ZRANGEBYSCORE population_ranking 100000000 500000000
-   # -> [Pakistan, Indonesia, USA, ...]
+   # -> [Japan, Mexico, Bangladesh, Brazil, Pakistan, Indonesia, USA]
+   # (ZRANGEBYSCORE returns ascending order -- lowest score first)
 
 Why Redis? The leaderboard is pre-computed and ready to serve -- no
 calculation needed at query time. Perfect for dashboards and
