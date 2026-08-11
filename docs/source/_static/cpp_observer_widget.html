@@ -1,0 +1,296 @@
+<div class="obs-root" id="obsWidget">
+  <style>
+    #obsWidget {
+      --obs-bg: #0f172a;
+      --obs-panel: #16213e;
+      --obs-border: #2a3655;
+      --obs-text: #e2e8f0;
+      --obs-muted: #94a3b8;
+      --obs-accent: #38bdf8;
+      --obs-good: #4ade80;
+      --obs-bad: #f87171;
+      --obs-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--obs-bg);
+      color: var(--obs-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #obsWidget * { box-sizing: border-box; }
+    #obsWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #obsWidget .obs-sub { color: var(--obs-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #obsWidget .obs-stage { background: var(--obs-panel); border: 1px solid var(--obs-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 780px; }
+
+    #obsWidget .obs-toggle { display: inline-flex; border: 1px solid var(--obs-border); border-radius: 8px; overflow: hidden; margin-right: 10px; }
+    #obsWidget .obs-toggle button { background: transparent; color: var(--obs-muted); border: none; padding: 8px 16px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
+    #obsWidget .obs-toggle button.active { background: var(--obs-warn); color: #2a1c00; }
+    #obsWidget .obs-toggle button.active.bad { background: var(--obs-bad); color: #2a0505; }
+
+    #obsWidget .obs-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    #obsWidget .obs-btn { background: var(--obs-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #obsWidget .obs-btn.secondary { background: transparent; color: var(--obs-text); border: 1px solid var(--obs-border); }
+    #obsWidget .obs-btn.warn { background: var(--obs-warn); color: #2a1c00; }
+    #obsWidget .obs-btn.bad { background: var(--obs-bad); color: #2a0505; }
+    #obsWidget .obs-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    #obsWidget .obs-btn.tiny { padding: 4px 9px; font-size: 0.72rem; border-radius: 6px; }
+
+    #obsWidget .obs-list { display: flex; flex-direction: column; gap: 8px; margin-bottom: 8px; }
+    #obsWidget .obs-row { display: flex; align-items: center; gap: 10px; background: #0f1830; border: 1px solid var(--obs-border); border-radius: 8px; padding: 8px 12px; }
+    #obsWidget .obs-row.destroyed { border-color: var(--obs-bad); opacity: 0.55; }
+    #obsWidget .obs-row.pruned { display: none; }
+    #obsWidget .obs-name { font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700; min-width: 130px; }
+    #obsWidget .obs-state { font-size: 0.72rem; color: var(--obs-muted); flex: 1; }
+    #obsWidget .obs-state.destroyed-tag { color: var(--obs-bad); font-weight: 700; }
+
+    #obsWidget .obs-banner { text-align: center; padding: 12px 14px; border-radius: 8px; font-weight: 700; margin-bottom: 14px; font-size: 0.85rem; line-height: 1.6; }
+    #obsWidget .obs-banner.ok { background: rgba(74,222,128,0.12); color: var(--obs-good); }
+    #obsWidget .obs-banner.crash { background: rgba(248,113,113,0.14); color: var(--obs-bad); text-align: left; white-space: pre-line; font-family: ui-monospace, monospace; }
+    #obsWidget .obs-banner.declared { background: rgba(148,163,184,0.12); color: var(--obs-muted); }
+
+    #obsWidget .obs-log { height: 190px; overflow-y: auto; font-size: 0.78rem; line-height: 1.6; font-family: ui-monospace, monospace; background: var(--obs-panel); border: 1px solid var(--obs-border); border-radius: 10px; padding: 12px 14px; }
+    #obsWidget .obs-log div { color: var(--obs-muted); }
+    #obsWidget .obs-log div.update { color: var(--obs-good); }
+    #obsWidget .obs-log div.skip { color: var(--obs-warn); }
+    #obsWidget .obs-log div.crash { color: var(--obs-bad); font-weight: 700; }
+    #obsWidget .obs-empty-note { color: var(--obs-muted); font-style: italic; font-size: 0.8rem; }
+
+    #obsWidget details { margin-top: 14px; background: var(--obs-panel); border: 1px solid var(--obs-border); border-radius: 10px; padding: 12px 16px; }
+    #obsWidget summary { cursor: pointer; color: var(--obs-accent); font-weight: 700; }
+    #obsWidget details ul { margin: 10px 0 0; padding-left: 20px; font-size: 0.85rem; color: var(--obs-text); line-height: 1.6; }
+    #obsWidget details li { margin-bottom: 8px; }
+    #obsWidget code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+
+  <h3>Observer Pattern: Play With It</h3>
+  <div class="obs-sub">A StockTicker notifies every subscribed observer on a price update. Destroy an observer without unsubscribing it first, then hit Notify -- in Unsafe mode watch it crash for real; in Safe mode watch it get skipped and cleaned up instead.</div>
+
+  <div class="obs-stage">
+    <div class="obs-controls">
+      <span style="font-size:0.78rem;color:var(--obs-muted);">Subject holds observers as:</span>
+      <div class="obs-toggle" id="obsModeToggle">
+        <button class="obs-mode-btn active bad" data-mode="unsafe">Unsafe (raw pointer)</button>
+        <button class="obs-mode-btn" data-mode="safe">Safe (weak_ptr)</button>
+      </div>
+    </div>
+    <div class="obs-list" id="obsList"></div>
+    <div class="obs-controls">
+      <button class="obs-btn secondary" id="obsAddBtn">+ Add Observer</button>
+      <button class="obs-btn" id="obsNotifyBtn">Notify (price update)</button>
+      <button class="obs-btn secondary" id="obsResetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="obs-banner declared" id="obsBanner">3 observers subscribed. Destroy one without unsubscribing, then click Notify.</div>
+
+  <div class="obs-stage">
+    <div class="obs-log" id="obsLog"><span class="obs-empty-note">click Notify to see the subject walk its observer list</span></div>
+  </div>
+
+  <details>
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>The crash above is real, not decorative.</b> Compiling the exact shape of Unsafe mode's C++ (a <code>std::vector&lt;Observer*&gt;</code> the subject iterates on every notify) and destroying one observer without unsubscribing produces a genuine <code>AddressSanitizer: heap-use-after-free</code> the moment <code>notify()</code> reaches it -- not a simulated error state. The observers <i>before</i> the destroyed one in the list really do get updated first; the ones <i>after</i> it never run at all, because the process is gone by the time the loop would reach them.</li>
+      <li><b>Unsubscribing before destroying works too -- in either mode.</b> The bug isn't "raw pointers are always wrong," it's "nothing enforces that you remember to unsubscribe." Try the Unsubscribe button before Destroy in Unsafe mode: no crash, because the subject's list never had a chance to go stale in the first place. The discipline works; it's just manual, silent to skip, and only caught by whatever happens to run over that exact pointer afterward.</li>
+      <li><b><code>weak_ptr::lock()</code> is what makes Safe mode safe.</b> The subject stores a <code>std::weak_ptr&lt;Observer&gt;</code> per subscriber instead of a raw pointer. A <code>weak_ptr</code> doesn't keep the object alive and doesn't go dangling when it dies -- calling <code>.lock()</code> either returns a live <code>shared_ptr</code> or an empty one, safely, with no possibility of touching freed memory. This is the standard, idiomatic C++ fix for exactly this lifetime mismatch, not a widget-specific trick.</li>
+      <li>See <a href="cpp_command_interactive.html">the Command pattern widget</a> and <a href="cpp_singleton_interactive.html">the Singleton widget</a> for the other modern-C++ pattern widgets in this series.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function createTicker(mode) {
+      return { mode: mode, observers: [], nextId: 1 };
+    }
+    function addObserver(ticker, name) {
+      var obs = { id: ticker.nextId++, name: name, subscribed: true, destroyed: false };
+      ticker.observers.push(obs);
+      return obs.id;
+    }
+    function unsubscribe(ticker, obsId) {
+      ticker.observers = ticker.observers.filter(function (o) { return o.id !== obsId; });
+    }
+    function destroyObserver(ticker, obsId) {
+      var obs = ticker.observers.filter(function (o) { return o.id === obsId; })[0];
+      if (obs) obs.destroyed = true;
+    }
+    function notify(ticker, price) {
+      var events = [];
+      if (ticker.mode === 'unsafe') {
+        for (var i = 0; i < ticker.observers.length; i++) {
+          var obs = ticker.observers[i];
+          if (obs.destroyed) {
+            events.push({ type: 'crash', obsId: obs.id, name: obs.name });
+            return { crashed: true, events: events };
+          }
+          events.push({ type: 'update', obsId: obs.id, name: obs.name, price: price });
+        }
+        return { crashed: false, events: events };
+      } else {
+        var survivors = [];
+        for (var j = 0; j < ticker.observers.length; j++) {
+          var o2 = ticker.observers[j];
+          if (o2.destroyed) {
+            events.push({ type: 'expired-skip', obsId: o2.id, name: o2.name });
+          } else {
+            events.push({ type: 'update', obsId: o2.id, name: o2.name, price: price });
+            survivors.push(o2);
+          }
+        }
+        ticker.observers = survivors;
+        return { crashed: false, events: events };
+      }
+    }
+
+    // --- Widget state ---
+
+    var root = document.getElementById('obsWidget');
+    var NAME_POOL = ['Dashboard A', 'Dashboard B', 'Logger', 'Mobile App', 'Alert System', 'Analytics'];
+    var ticker;
+    var crashed = false;
+    var nextPrice = 100;
+
+    var listEl = root.querySelector('#obsList');
+    var bannerEl = root.querySelector('#obsBanner');
+    var logEl = root.querySelector('#obsLog');
+    var notifyBtn = root.querySelector('#obsNotifyBtn');
+    var addBtn = root.querySelector('#obsAddBtn');
+    var resetBtn = root.querySelector('#obsResetBtn');
+    var modeButtons = root.querySelectorAll('.obs-mode-btn');
+
+    function currentMode() {
+      var active = root.querySelector('.obs-mode-btn.active');
+      return active ? active.getAttribute('data-mode') : 'unsafe';
+    }
+
+    function renderList() {
+      listEl.innerHTML = '';
+      ticker.observers.forEach(function (obs) {
+        var row = document.createElement('div');
+        row.className = 'obs-row' + (obs.destroyed ? ' destroyed' : '');
+
+        var name = document.createElement('div');
+        name.className = 'obs-name';
+        name.textContent = obs.name;
+        row.appendChild(name);
+
+        var state = document.createElement('div');
+        state.className = 'obs-state' + (obs.destroyed ? ' destroyed-tag' : '');
+        state.textContent = obs.destroyed ? 'destroyed, still in subject’s list' : 'alive, subscribed';
+        row.appendChild(state);
+
+        if (!obs.destroyed) {
+          var unsubBtn = document.createElement('button');
+          unsubBtn.className = 'obs-btn secondary tiny';
+          unsubBtn.textContent = 'Unsubscribe';
+          unsubBtn.disabled = crashed;
+          unsubBtn.addEventListener('click', function () {
+            unsubscribe(ticker, obs.id);
+            renderAll();
+          });
+          row.appendChild(unsubBtn);
+
+          var destroyBtn = document.createElement('button');
+          destroyBtn.className = 'obs-btn bad tiny';
+          destroyBtn.textContent = 'Destroy (no unsubscribe)';
+          destroyBtn.disabled = crashed;
+          destroyBtn.addEventListener('click', function () {
+            destroyObserver(ticker, obs.id);
+            renderAll();
+          });
+          row.appendChild(destroyBtn);
+        }
+
+        listEl.appendChild(row);
+      });
+    }
+
+    function renderBanner() {
+      if (crashed) {
+        bannerEl.className = 'obs-banner crash';
+        bannerEl.textContent =
+          'AddressSanitizer: heap-use-after-free\n' +
+          'READ inside Subject::notify() -- one of the destroyed observers is still in the list.\n' +
+          'The process is gone. No observer after this point in the list ever got notified.';
+      } else {
+        var aliveCount = ticker.observers.filter(function (o) { return !o.destroyed; }).length;
+        var destroyedCount = ticker.observers.filter(function (o) { return o.destroyed; }).length;
+        bannerEl.className = 'obs-banner ok';
+        bannerEl.textContent = aliveCount + ' observer(s) subscribed' + (destroyedCount ? ', ' + destroyedCount + ' destroyed but still in the list' : '') + '.';
+      }
+    }
+
+    function renderLog(events) {
+      if (events === undefined) {
+        if (logEl.children.length === 0) {
+          logEl.innerHTML = '<span class="obs-empty-note">click Notify to see the subject walk its observer list</span>';
+        }
+        return;
+      }
+      logEl.innerHTML = '';
+      events.forEach(function (e) {
+        var line = document.createElement('div');
+        if (e.type === 'update') {
+          line.className = 'update';
+          line.textContent = e.name + ': update(' + e.price + ') -- received';
+        } else if (e.type === 'expired-skip') {
+          line.className = 'skip';
+          line.textContent = e.name + ': weak_ptr expired -- lock() returned null, skipped safely, pruned from the list';
+        } else {
+          line.className = 'crash';
+          line.textContent = e.name + ': CRASH -- dereferenced a destroyed observer (heap-use-after-free)';
+        }
+        logEl.appendChild(line);
+      });
+    }
+
+    function renderAll(events) {
+      renderList();
+      renderBanner();
+      renderLog(events);
+      notifyBtn.disabled = crashed;
+      addBtn.disabled = crashed;
+    }
+
+    function rebuild() {
+      ticker = createTicker(currentMode());
+      ['Dashboard A', 'Dashboard B', 'Logger'].forEach(function (n) { addObserver(ticker, n); });
+      crashed = false;
+      nextPrice = 100;
+      logEl.innerHTML = '';
+      renderAll();
+    }
+
+    modeButtons.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        modeButtons.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        rebuild();
+      });
+    });
+
+    notifyBtn.addEventListener('click', function () {
+      if (crashed) return;
+      var result = notify(ticker, nextPrice);
+      nextPrice += 1;
+      crashed = result.crashed;
+      renderAll(result.events);
+    });
+
+    addBtn.addEventListener('click', function () {
+      if (crashed) return;
+      var name = NAME_POOL[ticker.nextId % NAME_POOL.length] + ' #' + ticker.nextId;
+      addObserver(ticker, name);
+      renderAll();
+    });
+
+    resetBtn.addEventListener('click', function () { rebuild(); });
+
+    rebuild();
+  })();
+  </script>
+</div>

@@ -139,6 +139,7 @@ worth writing down and coming back to.
    cpp_exception_unwind_interactive
    cpp_singleton_interactive
    cpp_command_interactive
+   cpp_observer_interactive
 
 .. toctree::
    :hidden:
@@ -486,6 +487,9 @@ C++ Notes
    * - :doc:`cpp_command_interactive`
      - Play With It: undo/redo built from commands carrying their own inverse
      - Command pattern, undo/redo stack, std::function, lambdas
+   * - :doc:`cpp_observer_interactive`
+     - Play With It: a real heap-use-after-free when an observer is destroyed without unsubscribing, and the weak_ptr fix
+     - Observer pattern, weak_ptr, lock(), dangling pointer
 
 Python Notes
 -----------------

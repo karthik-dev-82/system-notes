@@ -36,5 +36,5 @@ guarantee replaced.
        return instance;                          // ...and both construct; one gets silently orphaned
    }
 
-See :doc:`cpp_command_interactive` for another modern-C++ pattern
-widget from the same design-patterns material.
+See :doc:`cpp_command_interactive` and :doc:`cpp_observer_interactive` for the other
+modern-C++ pattern widgets in this series.
