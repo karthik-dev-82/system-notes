@@ -52,12 +52,16 @@ Sort the numbers into three groups and a pattern falls out immediately:
    * - Category
      - What's in it
      - Why
-   * - **Faster now** (3x-25x)
-     - Main memory, compression, SSD reads, datacenter round trips,
+   * - **Faster now, substantially** (3x-10x)
+     - SSD reads (random and sequential), datacenter round trips,
        sequential disk reads
-     - Real engineering progress: DDR5 over DDR3, NVMe over spinning
-       disks and even SATA SSDs, 10/25/100 Gbps datacenter fabrics
-       over 1 Gbps
+     - Real engineering progress: NVMe over spinning disks and even
+       SATA SSDs, 10/25/100 Gbps datacenter fabrics over 1 Gbps
+   * - **Faster now, modestly** (1.4x-1.5x)
+     - Main memory, compression
+     - DDR5 over DDR3 narrowed end-to-end latency, but not
+       dramatically -- most of the win from newer RAM generations is
+       in bandwidth, not this kind of single-access latency
    * - **Essentially unchanged**
      - Mutex lock/unlock, HDD seek time, a packet's round trip to
        Europe

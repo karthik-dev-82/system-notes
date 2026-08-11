@@ -57,11 +57,12 @@ specific chip's datasheet:
      - Physically moving a read/write head across a spinning platter
 
 The relative story hasn't changed even though the absolute numbers
-have: a page cache hit is still on the order of *tens of thousands of
-times* faster than going to storage, whatever that storage is. NVMe's
-big contribution is shrinking the penalty for a *miss* -- roughly
-100x faster than the spinning disks this mechanism was originally
-designed around -- which is also why the page cache matters slightly
+have: a page cache hit is still on the order of *hundreds to
+thousands of times* faster than an NVMe or SATA SSD miss, and *tens
+of thousands of times* faster than the spinning-disk miss this
+mechanism was originally designed around. NVMe's big contribution is
+shrinking the penalty for a *miss* -- roughly 100x faster than those
+spinning disks -- which is also why the page cache matters slightly
 less than it used to, and considerably more than "slightly less"
 still implies.
 
