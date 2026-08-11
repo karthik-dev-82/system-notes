@@ -83,6 +83,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[C++ Command Pattern (Interactive)](docs/source/cpp_command_interactive.rst)** | Interactive undo/redo built from commands carrying their own inverse | Command pattern, undo/redo stack, std::function, lambdas |
 | 🎮 **[C++ Observer Pattern (Interactive)](docs/source/cpp_observer_interactive.rst)** | A real heap-use-after-free when an observer is destroyed without unsubscribing, and the weak_ptr fix | Observer pattern, weak_ptr, lock(), dangling pointer |
 | 🎮 **[C++ Strategy Pattern (Interactive)](docs/source/cpp_strategy_interactive.rst)** | Swap pricing algorithms at runtime on the same cart, and see what adding a new one actually costs vs. an if/else chain | Strategy pattern, open/closed principle, polymorphism |
+| 🎮 **[C++ Decorator Pattern (Interactive)](docs/source/cpp_decorator_interactive.rst)** | Real gzip + real AES-GCM, wrapped in two different orders, on the same data | Decorator pattern, CompressionStream, SubtleCrypto, composability |
 
 ### Python Notes
 
@@ -197,6 +198,7 @@ system-notes/
         ├── cpp_command_interactive.rst
         ├── cpp_observer_interactive.rst
         ├── cpp_strategy_interactive.rst
+        ├── cpp_decorator_interactive.rst
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
         ├── python_generators_interactive.rst
@@ -231,6 +233,7 @@ system-notes/
             ├── cpp_command_widget.html
             ├── cpp_observer_widget.html
             ├── cpp_strategy_widget.html
+            ├── cpp_decorator_widget.html
             ├── py_list_widget.html
             ├── py_stack_widget.html
             ├── py_queue_widget.html

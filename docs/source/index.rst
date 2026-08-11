@@ -141,6 +141,7 @@ worth writing down and coming back to.
    cpp_command_interactive
    cpp_observer_interactive
    cpp_strategy_interactive
+   cpp_decorator_interactive
 
 .. toctree::
    :hidden:
@@ -494,6 +495,9 @@ C++ Notes
    * - :doc:`cpp_strategy_interactive`
      - Play With It: swap pricing algorithms at runtime on the same cart, and see what adding a new one actually costs vs. an if/else chain
      - Strategy pattern, open/closed principle, polymorphism
+   * - :doc:`cpp_decorator_interactive`
+     - Play With It: real gzip + real AES-GCM, wrapped in two different orders, on the same data
+     - Decorator pattern, CompressionStream, SubtleCrypto, composability
 
 Python Notes
 -----------------

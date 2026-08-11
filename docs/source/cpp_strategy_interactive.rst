@@ -70,5 +70,5 @@ itself has zero new lines, because it was never coupled to *which*
 strategies exist in the first place.
 
 See :doc:`cpp_command_interactive`, :doc:`cpp_singleton_interactive`,
-and :doc:`cpp_observer_interactive` for the other modern-C++ pattern
-widgets in this series.
+:doc:`cpp_observer_interactive`, and :doc:`cpp_decorator_interactive` for
+the other modern-C++ pattern widgets in this series.

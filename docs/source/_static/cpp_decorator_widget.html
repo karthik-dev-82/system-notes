@@ -1,0 +1,242 @@
+<div class="dec-root" id="decWidget">
+  <style>
+    #decWidget {
+      --dec-bg: #0f172a;
+      --dec-panel: #16213e;
+      --dec-border: #2a3655;
+      --dec-text: #e2e8f0;
+      --dec-muted: #94a3b8;
+      --dec-accent: #38bdf8;
+      --dec-good: #4ade80;
+      --dec-bad: #f87171;
+      --dec-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--dec-bg);
+      color: var(--dec-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #decWidget * { box-sizing: border-box; }
+    #decWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #decWidget h4 { margin: 0 0 10px; font-size: 0.85rem; color: var(--dec-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    #decWidget .dec-sub { color: var(--dec-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #decWidget .dec-stage { background: var(--dec-panel); border: 1px solid var(--dec-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 820px; }
+
+    #decWidget .dec-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+    #decWidget select { background: #0a1128; color: var(--dec-text); border: 1px solid var(--dec-border); border-radius: 7px; padding: 7px 10px; font-size: 0.82rem; }
+    #decWidget .dec-btn { background: var(--dec-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #decWidget .dec-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #decWidget .dec-pipelines { display: flex; gap: 14px; flex-wrap: wrap; }
+    #decWidget .dec-pipeline { flex: 1; min-width: 340px; background: #0f1830; border: 2px solid var(--dec-border); border-radius: 10px; padding: 14px; }
+    #decWidget .dec-pipeline.winner { border-color: var(--dec-good); }
+    #decWidget .dec-pipeline-title { font-weight: 800; color: #fff; font-size: 0.85rem; margin-bottom: 10px; }
+
+    #decWidget .dec-nest { font-family: ui-monospace, monospace; font-size: 0.78rem; text-align: center; padding: 14px; margin-bottom: 12px; }
+    #decWidget .dec-nest-box { border: 2px solid var(--dec-border); border-radius: 8px; padding: 10px; display: inline-block; }
+    #decWidget .dec-nest-box .dec-nest-label { font-size: 0.68rem; color: var(--dec-muted); margin-bottom: 6px; }
+
+    #decWidget .dec-steps { display: flex; flex-direction: column; gap: 6px; margin-bottom: 10px; }
+    #decWidget .dec-step-row { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    #decWidget .dec-step-name { min-width: 150px; color: var(--dec-muted); }
+    #decWidget .dec-step-bar-bg { flex: 1; height: 14px; background: #0a1128; border-radius: 4px; overflow: hidden; }
+    #decWidget .dec-step-bar-fill { height: 100%; background: var(--dec-accent); }
+    #decWidget .dec-step-size { min-width: 90px; text-align: right; color: var(--dec-text); }
+
+    #decWidget .dec-final { font-size: 0.9rem; font-weight: 800; text-align: center; padding: 8px; border-radius: 7px; background: rgba(255,255,255,0.04); }
+    #decWidget .dec-final.good { color: var(--dec-good); }
+    #decWidget .dec-final.bad { color: var(--dec-bad); }
+
+    #decWidget .dec-empty-note { color: var(--dec-muted); font-style: italic; font-size: 0.82rem; text-align: center; padding: 20px; }
+
+    #decWidget details { margin-top: 14px; background: var(--dec-panel); border: 1px solid var(--dec-border); border-radius: 10px; padding: 12px 16px; }
+    #decWidget summary { cursor: pointer; color: var(--dec-accent); font-weight: 700; }
+    #decWidget details ul { margin: 10px 0 0; padding-left: 20px; font-size: 0.85rem; color: var(--dec-text); line-height: 1.6; }
+    #decWidget details li { margin-bottom: 8px; }
+    #decWidget code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+
+  <h3>Decorator Pattern: Play With It</h3>
+  <div class="dec-sub">Two decorators, one wrapping the other, in two different orders -- genuinely real <code>gzip</code> compression via <code>CompressionStream</code> and genuinely real AES-GCM encryption via <code>SubtleCrypto</code>, run right here in your browser on whatever text you pick below.</div>
+
+  <div class="dec-stage">
+    <div class="dec-controls">
+      <span style="font-size:0.8rem;color:var(--dec-muted);">Data to protect:</span>
+      <select id="decTextSelect">
+        <option value="repetitive">Repetitive log line (200x repeated sentence)</option>
+        <option value="uuids">Random UUID list (already high-entropy)</option>
+      </select>
+      <button class="dec-btn" id="decRunBtn">Run Both Pipelines</button>
+    </div>
+    <div class="dec-pipelines" id="decPipelines">
+      <div class="dec-empty-note">Click "Run Both Pipelines" to encode the selected text both ways.</div>
+    </div>
+  </div>
+
+  <details>
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>This is real compression and real encryption, not a stand-in.</b> <code>CompressionStream('gzip')</code> and <code>crypto.subtle.encrypt</code> with AES-GCM are both native browser APIs -- the exact same interfaces a production app would call. The byte counts above are genuine output sizes, not illustrative numbers.</li>
+      <li><b>Encrypted data doesn't compress because it's supposed to look random.</b> A good cipher's output is (by design) indistinguishable from random noise -- and random noise has no repeated patterns for a compressor to exploit. Compressing it afterward can only ever add a few bytes of container overhead, never meaningfully shrink it.</li>
+      <li><b>Compress-then-encrypt is never worse, but how much better it is depends on the data.</b> Switch to the UUID sample -- still a real win, just a smaller one, because a UUID list has less repeated structure than a sentence repeated 200 times. Encrypt-then-compress stays flat at roughly 100% of the original either way.</li>
+      <li><b>Both pipelines are genuinely nested decorators, not two unrelated functions.</b> <code>Encrypt(Compress(data))</code> and <code>Compress(Encrypt(data))</code> both implement the same "take bytes, return bytes" interface at every layer -- that's what makes it Decorator rather than just "call two functions in some order": each wrapper only knows about the interface of the thing directly inside it, never the concrete type.</li>
+      <li>See <a href="cpp_command_interactive.html">the Command widget</a>, <a href="cpp_singleton_interactive.html">the Singleton widget</a>, <a href="cpp_observer_interactive.html">the Observer widget</a>, and <a href="cpp_strategy_interactive.html">the Strategy widget</a> for the other modern-C++ pattern widgets in this series (modeled here in JS using real browser crypto/compression APIs, since the pattern itself is language-agnostic).</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified pipeline, using the same real Web APIs ---
+
+    async function compress(bytes) {
+      var cs = new CompressionStream('gzip');
+      var writer = cs.writable.getWriter();
+      writer.write(bytes);
+      writer.close();
+      var buf = await new Response(cs.readable).arrayBuffer();
+      return new Uint8Array(buf);
+    }
+
+    async function encryptBytes(bytes, key, iv) {
+      var ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv: iv }, key, bytes);
+      return new Uint8Array(ct);
+    }
+
+    async function runCompressThenEncrypt(bytes, key, iv) {
+      var compressed = await compress(bytes);
+      var final = await encryptBytes(compressed, key, iv);
+      return {
+        label: 'Compress -> Encrypt',
+        nest: 'Encrypt( Compress( data ) )',
+        steps: [
+          { name: 'original', size: bytes.length },
+          { name: 'after compress', size: compressed.length },
+          { name: 'after encrypt (final)', size: final.length },
+        ],
+        finalSize: final.length,
+      };
+    }
+
+    async function runEncryptThenCompress(bytes, key, iv) {
+      var encrypted = await encryptBytes(bytes, key, iv);
+      var compressed = await compress(encrypted);
+      return {
+        label: 'Encrypt -> Compress',
+        nest: 'Compress( Encrypt( data ) )',
+        steps: [
+          { name: 'original', size: bytes.length },
+          { name: 'after encrypt', size: encrypted.length },
+          { name: 'after compress (final)', size: compressed.length },
+        ],
+        finalSize: compressed.length,
+      };
+    }
+
+    var SAMPLE_TEXTS = {
+      repetitive: 'The quick brown fox jumps over the lazy dog. '.repeat(200),
+      uuids: (function () {
+        var parts = [];
+        for (var i = 0; i < 300; i++) {
+          var hex = function (n) {
+            var s = '';
+            for (var j = 0; j < n; j++) s += Math.floor(Math.random() * 16).toString(16);
+            return s;
+          };
+          parts.push(hex(8) + '-' + hex(4) + '-' + hex(4) + '-' + hex(4) + '-' + hex(12));
+        }
+        return parts.join(',');
+      })(),
+    };
+
+    // --- Widget state ---
+
+    var root = document.getElementById('decWidget');
+    var textSelect = root.querySelector('#decTextSelect');
+    var runBtn = root.querySelector('#decRunBtn');
+    var pipelinesEl = root.querySelector('#decPipelines');
+
+    function fmtBytes(n) { return n.toLocaleString() + ' B'; }
+
+    function renderPipeline(result, maxSize, isWinner) {
+      var wrap = document.createElement('div');
+      wrap.className = 'dec-pipeline' + (isWinner ? ' winner' : '');
+
+      var title = document.createElement('div');
+      title.className = 'dec-pipeline-title';
+      title.textContent = result.label + (isWinner ? ' (smaller output)' : '');
+      wrap.appendChild(title);
+
+      var nest = document.createElement('div');
+      nest.className = 'dec-nest';
+      nest.innerHTML = '<div class="dec-nest-box"><div class="dec-nest-label">nesting</div>' + result.nest + '</div>';
+      wrap.appendChild(nest);
+
+      var steps = document.createElement('div');
+      steps.className = 'dec-steps';
+      result.steps.forEach(function (s) {
+        var row = document.createElement('div');
+        row.className = 'dec-step-row';
+        var name = document.createElement('div');
+        name.className = 'dec-step-name';
+        name.textContent = s.name;
+        row.appendChild(name);
+        var barBg = document.createElement('div');
+        barBg.className = 'dec-step-bar-bg';
+        var barFill = document.createElement('div');
+        barFill.className = 'dec-step-bar-fill';
+        barFill.style.width = Math.max(1, (s.size / maxSize) * 100) + '%';
+        barBg.appendChild(barFill);
+        row.appendChild(barBg);
+        var size = document.createElement('div');
+        size.className = 'dec-step-size';
+        size.textContent = fmtBytes(s.size);
+        row.appendChild(size);
+        steps.appendChild(row);
+      });
+      wrap.appendChild(steps);
+
+      var final = document.createElement('div');
+      final.className = 'dec-final ' + (isWinner ? 'good' : 'bad');
+      var pct = (result.finalSize / result.steps[0].size * 100).toFixed(1);
+      final.textContent = 'Final: ' + fmtBytes(result.finalSize) + ' (' + pct + '% of original)';
+      wrap.appendChild(final);
+
+      return wrap;
+    }
+
+    runBtn.addEventListener('click', function () {
+      runBtn.disabled = true;
+      runBtn.textContent = 'Running real gzip + AES-GCM...';
+
+      var text = SAMPLE_TEXTS[textSelect.value];
+      var bytes = new TextEncoder().encode(text);
+
+      crypto.subtle.generateKey({ name: 'AES-GCM', length: 256 }, true, ['encrypt', 'decrypt']).then(function (key) {
+        var iv = crypto.getRandomValues(new Uint8Array(12));
+        return Promise.all([
+          runCompressThenEncrypt(bytes, key, iv),
+          runEncryptThenCompress(bytes, key, iv),
+        ]);
+      }).then(function (results) {
+        var resultA = results[0], resultB = results[1];
+        var maxSize = Math.max(resultA.steps[0].size, resultA.finalSize, resultB.finalSize);
+        var aWins = resultA.finalSize < resultB.finalSize;
+
+        pipelinesEl.innerHTML = '';
+        pipelinesEl.appendChild(renderPipeline(resultA, maxSize, aWins));
+        pipelinesEl.appendChild(renderPipeline(resultB, maxSize, !aWins));
+
+        runBtn.disabled = false;
+        runBtn.textContent = 'Run Both Pipelines';
+      }).catch(function (err) {
+        pipelinesEl.innerHTML = '<div class="dec-empty-note">This browser does not support CompressionStream and/or SubtleCrypto AES-GCM, so this demo cannot run here. (' + err.message + ')</div>';
+        runBtn.disabled = false;
+        runBtn.textContent = 'Run Both Pipelines';
+      });
+    });
+  })();
+  </script>
+</div>

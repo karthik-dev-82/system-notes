@@ -40,5 +40,6 @@ action truncates past the current point.
    void undo() { if (pointer > 0) history[--pointer].undoIt(); }
    void redo() { if (pointer < history.size()) history[pointer++].doIt(); }
 
-See :doc:`cpp_singleton_interactive`, :doc:`cpp_observer_interactive`, and :doc:`cpp_strategy_interactive`
-for the other modern-C++ pattern widgets in this series.
+See :doc:`cpp_singleton_interactive`, :doc:`cpp_observer_interactive`,
+:doc:`cpp_strategy_interactive`, and :doc:`cpp_decorator_interactive` for
+the other modern-C++ pattern widgets in this series.
