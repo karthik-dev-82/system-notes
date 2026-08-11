@@ -29,6 +29,7 @@ worth writing down and coming back to.
    docker_packet_journey_interactive
    kernel_networking_docker_internals
    dns_resolution_interactive
+   rest_api_interactive
 
 .. toctree::
    :hidden:
@@ -219,6 +220,9 @@ Networking
    * - :doc:`dns_resolution_interactive`
      - Interactive DNS resolver -- walk root/TLD/authoritative, then watch layered TTL caching and CNAME-following in action
      - recursive resolver, referral chain, TTL caching, CNAME
+   * - :doc:`rest_api_interactive`
+     - Tutorial + Play With It: a real in-browser REST API -- resources, HTTP methods, status codes, and genuine idempotency behavior
+     - GET/POST/PUT/PATCH/DELETE, safe vs. idempotent, status codes, statelessness
 
 Containers & Filesystems
 ------------------------------

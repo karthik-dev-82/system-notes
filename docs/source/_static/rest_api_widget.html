@@ -1,0 +1,354 @@
+<div class="rap-root" id="restApiWidget">
+  <style>
+    #restApiWidget {
+      --rap-bg: #0f172a;
+      --rap-panel: #16213e;
+      --rap-border: #2a3655;
+      --rap-text: #e2e8f0;
+      --rap-muted: #94a3b8;
+      --rap-accent: #38bdf8;
+      --rap-good: #4ade80;
+      --rap-bad: #f87171;
+      --rap-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rap-bg);
+      color: var(--rap-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #restApiWidget * { box-sizing: border-box; }
+    #restApiWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #restApiWidget h4 { margin: 0 0 10px; font-size: 0.85rem; color: var(--rap-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    #restApiWidget .rap-sub { color: var(--rap-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #restApiWidget .rap-stage { background: var(--rap-panel); border: 1px solid var(--rap-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 840px; }
+
+    #restApiWidget .rap-request-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+    #restApiWidget select, #restApiWidget input[type="text"] { background: #0a1128; color: var(--rap-text); border: 1px solid var(--rap-border); border-radius: 7px; padding: 7px 10px; font-size: 0.85rem; font-family: ui-monospace, monospace; }
+    #restApiWidget select#rapMethod { font-weight: 800; min-width: 100px; }
+    #restApiWidget input#rapPath { flex: 1; min-width: 200px; }
+    #restApiWidget .rap-badge { font-size: 0.68rem; padding: 3px 8px; border-radius: 20px; font-weight: 700; white-space: nowrap; }
+    #restApiWidget .rap-badge.safe { background: rgba(74,222,128,0.16); color: var(--rap-good); }
+    #restApiWidget .rap-badge.unsafe { background: rgba(148,163,184,0.16); color: var(--rap-muted); }
+    #restApiWidget .rap-badge.idem { background: rgba(56,189,248,0.16); color: var(--rap-accent); }
+    #restApiWidget .rap-badge.notidem { background: rgba(248,113,113,0.16); color: var(--rap-bad); }
+
+    #restApiWidget textarea#rapBody { width: 100%; background: #0a1128; color: var(--rap-text); border: 1px solid var(--rap-border); border-radius: 7px; padding: 8px 10px; font-size: 0.8rem; font-family: ui-monospace, monospace; min-height: 60px; margin-bottom: 10px; }
+    #restApiWidget textarea#rapBody:disabled { opacity: 0.4; }
+
+    #restApiWidget .rap-btn { background: var(--rap-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #restApiWidget .rap-btn.secondary { background: transparent; color: var(--rap-text); border: 1px solid var(--rap-border); }
+    #restApiWidget .rap-btn.tiny { padding: 5px 10px; font-size: 0.74rem; }
+
+    #restApiWidget .rap-presets { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+
+    #restApiWidget .rap-cols { display: flex; gap: 14px; flex-wrap: wrap; }
+    #restApiWidget .rap-col { flex: 1; min-width: 320px; }
+
+    #restApiWidget .rap-response { font-family: ui-monospace, monospace; font-size: 0.8rem; background: #0a1128; border: 1px solid var(--rap-border); border-radius: 8px; padding: 12px; white-space: pre-wrap; word-break: break-word; min-height: 90px; }
+    #restApiWidget .rap-status-line { font-weight: 800; margin-bottom: 6px; }
+    #restApiWidget .rap-status-line.s2 { color: var(--rap-good); }
+    #restApiWidget .rap-status-line.s4 { color: var(--rap-bad); }
+    #restApiWidget .rap-status-line.s0 { color: var(--rap-muted); }
+
+    #restApiWidget .rap-state-list { font-family: ui-monospace, monospace; font-size: 0.8rem; background: #0a1128; border: 1px solid var(--rap-border); border-radius: 8px; padding: 12px; min-height: 90px; }
+    #restApiWidget .rap-state-item { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    #restApiWidget .rap-empty-note { color: var(--rap-muted); font-style: italic; }
+
+    #restApiWidget .rap-log { height: 150px; overflow-y: auto; font-size: 0.76rem; font-family: ui-monospace, monospace; background: #0a1128; border: 1px solid var(--rap-border); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+    #restApiWidget .rap-log div { padding: 2px 0; color: var(--rap-muted); }
+    #restApiWidget .rap-log div .rap-log-status { font-weight: 700; }
+    #restApiWidget .rap-log div .rap-log-status.g { color: var(--rap-good); }
+    #restApiWidget .rap-log div .rap-log-status.r { color: var(--rap-bad); }
+
+    #restApiWidget details { margin-top: 14px; background: var(--rap-panel); border: 1px solid var(--rap-border); border-radius: 10px; padding: 12px 16px; }
+    #restApiWidget summary { cursor: pointer; color: var(--rap-accent); font-weight: 700; }
+    #restApiWidget details ul { margin: 10px 0 0; padding-left: 20px; font-size: 0.85rem; color: var(--rap-text); line-height: 1.6; }
+    #restApiWidget details li { margin-bottom: 8px; }
+    #restApiWidget code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+
+  <h3>REST API: Play With It</h3>
+  <div class="rap-sub">A real, in-browser <code>/books</code> API -- every request below is actually routed and handled, with real status codes computed from the current server state, not canned responses.</div>
+
+  <div class="rap-stage">
+    <h4>Build a request</h4>
+    <div class="rap-presets" id="rapPresets"></div>
+    <div class="rap-request-row">
+      <select id="rapMethod">
+        <option>GET</option>
+        <option>POST</option>
+        <option>PUT</option>
+        <option>PATCH</option>
+        <option>DELETE</option>
+      </select>
+      <input type="text" id="rapPath" value="/books" />
+      <span class="rap-badge" id="rapSafeBadge"></span>
+      <span class="rap-badge" id="rapIdemBadge"></span>
+      <button class="rap-btn" id="rapSendBtn">Send</button>
+      <button class="rap-btn secondary" id="rapResetBtn">Reset server</button>
+    </div>
+    <textarea id="rapBody">{"title": "Dune", "author": "Frank Herbert"}</textarea>
+
+    <div class="rap-cols">
+      <div class="rap-col">
+        <h4>Response</h4>
+        <div class="rap-response" id="rapResponse"><span class="rap-empty-note">send a request to see a real response</span></div>
+      </div>
+      <div class="rap-col">
+        <h4>Server state (in memory, right now)</h4>
+        <div class="rap-state-list" id="rapState"></div>
+      </div>
+    </div>
+
+    <h4 style="margin-top:14px;">Request log</h4>
+    <div class="rap-log" id="rapLog"><span class="rap-empty-note">nothing sent yet</span></div>
+  </div>
+
+  <details>
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>"Idempotent" means the resulting server state converges, not that the response is identical every time.</b> Delete book 1 twice: the first call returns <code>204</code>, the second returns <code>404</code> (there's nothing left to delete) -- two different status codes, but the server ends up in exactly the same state (book 1 absent) either way. That's what idempotent actually means per RFC 9110, and it's a common point of confusion.</li>
+      <li><b>PUT can create, not just replace.</b> <code>PUT /books/99</code> on an id that doesn't exist yet creates it and returns <code>201</code>, exactly like POST -- the difference isn't "create vs. update," it's <i>who chooses the URI</i>. PUT requests a specific URI from the client; POST asks the server to pick one for a new subordinate resource under the collection. Try <code>PUT /books/50</code> here.</li>
+      <li><b>PATCH is genuinely not guaranteed idempotent, and this widget can prove it, not just assert it.</b> The "Increment views" preset sends <code>{"op": "increment", "field": "views"}</code> -- click Send twice and watch the value go up by 2, not converge. A PATCH that sets an absolute value would be idempotent in practice, but nothing about PATCH *guarantees* that -- unlike PUT, where idempotency is part of the method's contract.</li>
+      <li><b>GET is safe: it never appears in "what changed" because it can't.</b> Sending GET requests never alters the server-state panel above, no matter how many times you send one -- try it against a path that doesn't exist and watch it 404 without touching anything else.</li>
+      <li>Real production REST APIs add authentication, pagination, rate limiting, and content negotiation on top of this -- but the request/response/status-code mechanics here, including the PUT-creates and PATCH-isn't-idempotent behavior, are the real HTTP semantics from RFC 9110, not a simplified version of them.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    function createServer() {
+      return { books: {}, nextId: 1 };
+    }
+
+    function clone(obj) { return JSON.parse(JSON.stringify(obj)); }
+
+    function handleRequest(server, method, path, body) {
+      var collectionMatch = path === '/books';
+      var itemMatch = /^\/books\/(\d+)$/.exec(path);
+
+      if (!collectionMatch && !itemMatch) {
+        return { status: 404, body: { error: 'no such route' } };
+      }
+
+      if (collectionMatch) {
+        if (method === 'GET') {
+          return { status: 200, body: Object.values(server.books).map(clone) };
+        }
+        if (method === 'POST') {
+          if (body === undefined || body === null || typeof body !== 'object') {
+            return { status: 400, body: { error: 'request body must be a JSON object' } };
+          }
+          var id = server.nextId++;
+          var created = Object.assign({ id: id }, body);
+          server.books[id] = created;
+          return { status: 201, headers: { Location: '/books/' + id }, body: clone(created) };
+        }
+        return { status: 405, headers: { Allow: 'GET, POST' }, body: { error: 'method not allowed on /books' } };
+      }
+
+      var itemId = parseInt(itemMatch[1], 10);
+      var exists = Object.prototype.hasOwnProperty.call(server.books, itemId);
+
+      if (method === 'GET') {
+        if (!exists) return { status: 404, body: { error: 'no book with id ' + itemId } };
+        return { status: 200, body: clone(server.books[itemId]) };
+      }
+      if (method === 'PUT') {
+        if (body === undefined || body === null || typeof body !== 'object') {
+          return { status: 400, body: { error: 'request body must be a JSON object' } };
+        }
+        var replaced = Object.assign({}, body, { id: itemId });
+        var wasNew = !exists;
+        server.books[itemId] = replaced;
+        return { status: wasNew ? 201 : 200, body: clone(replaced) };
+      }
+      if (method === 'PATCH') {
+        if (!exists) return { status: 404, body: { error: 'no book with id ' + itemId + ' to patch' } };
+        if (body === undefined || body === null || typeof body !== 'object') {
+          return { status: 400, body: { error: 'request body must be a JSON object' } };
+        }
+        if (body.op === 'increment' && typeof body.field === 'string') {
+          var current = server.books[itemId][body.field];
+          server.books[itemId][body.field] = (typeof current === 'number' ? current : 0) + 1;
+        } else {
+          Object.assign(server.books[itemId], body);
+        }
+        return { status: 200, body: clone(server.books[itemId]) };
+      }
+      if (method === 'DELETE') {
+        if (!exists) return { status: 404, body: { error: 'no book with id ' + itemId } };
+        delete server.books[itemId];
+        return { status: 204, body: null };
+      }
+      return { status: 405, headers: { Allow: 'GET, PUT, PATCH, DELETE' }, body: { error: 'method not allowed on /books/:id' } };
+    }
+
+    // --- Widget state ---
+
+    var root = document.getElementById('restApiWidget');
+    var server = createServer();
+    var seq = 0;
+
+    var methodSel = root.querySelector('#rapMethod');
+    var pathInput = root.querySelector('#rapPath');
+    var bodyArea = root.querySelector('#rapBody');
+    var sendBtn = root.querySelector('#rapSendBtn');
+    var resetBtn = root.querySelector('#rapResetBtn');
+    var safeBadge = root.querySelector('#rapSafeBadge');
+    var idemBadge = root.querySelector('#rapIdemBadge');
+    var responseEl = root.querySelector('#rapResponse');
+    var stateEl = root.querySelector('#rapState');
+    var logEl = root.querySelector('#rapLog');
+    var presetsEl = root.querySelector('#rapPresets');
+
+    var METHOD_INFO = {
+      GET: { safe: true, idem: true },
+      POST: { safe: false, idem: false },
+      PUT: { safe: false, idem: true },
+      PATCH: { safe: false, idem: null },
+      DELETE: { safe: false, idem: true },
+    };
+
+    var PRESETS = [
+      { label: 'Create a book', method: 'POST', path: '/books', body: '{"title": "Dune", "author": "Frank Herbert"}' },
+      { label: 'Send that same POST again', method: 'POST', path: '/books', body: '{"title": "Dune", "author": "Frank Herbert"}' },
+      { label: 'PUT a new id (50)', method: 'PUT', path: '/books/50', body: '{"title": "Foundation"}' },
+      { label: 'Replace book 1', method: 'PUT', path: '/books/1', body: '{"title": "Dune (2nd ed.)"}' },
+      { label: 'Partial update (title only)', method: 'PATCH', path: '/books/1', body: '{"title": "Dune (revised)"}' },
+      { label: 'Increment views (not idempotent)', method: 'PATCH', path: '/books/1', body: '{"op": "increment", "field": "views"}' },
+      { label: 'Delete book 1', method: 'DELETE', path: '/books/1', body: '' },
+      { label: 'GET the collection', method: 'GET', path: '/books', body: '' },
+    ];
+
+    function bodyNeeded(method) { return method === 'POST' || method === 'PUT' || method === 'PATCH'; }
+
+    function updateBadges() {
+      var info = METHOD_INFO[methodSel.value];
+      safeBadge.className = 'rap-badge ' + (info.safe ? 'safe' : 'unsafe');
+      safeBadge.textContent = info.safe ? 'safe' : 'not safe';
+      if (info.idem === true) { idemBadge.className = 'rap-badge idem'; idemBadge.textContent = 'idempotent'; }
+      else if (info.idem === false) { idemBadge.className = 'rap-badge notidem'; idemBadge.textContent = 'not idempotent'; }
+      else { idemBadge.className = 'rap-badge notidem'; idemBadge.textContent = 'not guaranteed idempotent'; }
+      bodyArea.disabled = !bodyNeeded(methodSel.value);
+    }
+
+    function renderState() {
+      var ids = Object.keys(server.books);
+      if (ids.length === 0) {
+        stateEl.innerHTML = '<span class="rap-empty-note">no books in memory</span>';
+        return;
+      }
+      stateEl.innerHTML = '';
+      ids.forEach(function (id) {
+        var div = document.createElement('div');
+        div.className = 'rap-state-item';
+        div.textContent = JSON.stringify(server.books[id]);
+        stateEl.appendChild(div);
+      });
+    }
+
+    function renderResponse(result) {
+      var statusClass = result.status === 0 ? 's0' : (result.status >= 400 ? 's4' : 's2');
+      var lines = [];
+      var line = document.createElement('div');
+      line.className = 'rap-status-line ' + statusClass;
+      line.textContent = result.status + ' ' + statusText(result.status);
+      responseEl.innerHTML = '';
+      responseEl.appendChild(line);
+      if (result.headers) {
+        Object.keys(result.headers).forEach(function (h) {
+          var hLine = document.createElement('div');
+          hLine.textContent = h + ': ' + result.headers[h];
+          responseEl.appendChild(hLine);
+        });
+      }
+      var bodyLine = document.createElement('div');
+      bodyLine.style.marginTop = '8px';
+      bodyLine.textContent = result.body === null || result.body === undefined ? '(no body)' : JSON.stringify(result.body, null, 2);
+      responseEl.appendChild(bodyLine);
+    }
+
+    function statusText(code) {
+      var map = { 200: 'OK', 201: 'Created', 204: 'No Content', 400: 'Bad Request', 404: 'Not Found', 405: 'Method Not Allowed' };
+      return map[code] || '';
+    }
+
+    function appendLog(method, path, status) {
+      seq++;
+      var line = document.createElement('div');
+      var cls = status >= 400 ? 'r' : 'g';
+
+      line.appendChild(document.createTextNode('#' + seq + '\u00a0\u00a0'));
+      var methodEl = document.createElement('b');
+      methodEl.textContent = method;
+      line.appendChild(methodEl);
+      line.appendChild(document.createTextNode(' ' + path + ' \u2192 '));
+      var statusEl = document.createElement('span');
+      statusEl.className = 'rap-log-status ' + cls;
+      statusEl.textContent = String(status);
+      line.appendChild(statusEl);
+
+      if (logEl.querySelector('.rap-empty-note')) logEl.innerHTML = '';
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function send() {
+      var method = methodSel.value;
+      var path = pathInput.value.trim();
+      var body;
+      if (bodyNeeded(method)) {
+        var raw = bodyArea.value.trim();
+        if (raw === '') {
+          body = undefined;
+        } else {
+          try {
+            body = JSON.parse(raw);
+          } catch (e) {
+            renderResponse({ status: 400, body: { error: 'invalid JSON in request body: ' + e.message } });
+            appendLog(method, path, 400);
+            return;
+          }
+        }
+      }
+      var result = handleRequest(server, method, path, body);
+      renderResponse(result);
+      renderState();
+      appendLog(method, path, result.status);
+    }
+
+    methodSel.addEventListener('change', updateBadges);
+    sendBtn.addEventListener('click', send);
+    resetBtn.addEventListener('click', function () {
+      server = createServer();
+      seq = 0;
+      responseEl.innerHTML = '<span class="rap-empty-note">send a request to see a real response</span>';
+      logEl.innerHTML = '<span class="rap-empty-note">nothing sent yet</span>';
+      renderState();
+    });
+
+    presetsEl.innerHTML = '';
+    PRESETS.forEach(function (p) {
+      var btn = document.createElement('button');
+      btn.className = 'rap-btn secondary tiny';
+      btn.textContent = p.label;
+      btn.addEventListener('click', function () {
+        methodSel.value = p.method;
+        pathInput.value = p.path;
+        bodyArea.value = p.body;
+        updateBadges();
+      });
+      presetsEl.appendChild(btn);
+    });
+
+    updateBadges();
+    renderState();
+  })();
+  </script>
+</div>
