@@ -134,6 +134,7 @@ worth writing down and coming back to.
    conan_package_manager
    cpp_memory_interactive
    cpp_raii_smart_pointers_interactive
+   cpp_smart_pointers_interactive
    cpp_move_semantics_interactive
    cpp_ranges_interactive
    cpp_vtable_interactive
@@ -475,6 +476,9 @@ C++ Notes
    * - :doc:`cpp_raii_smart_pointers_interactive`
      - Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak
      - RAII, unique_ptr, shared_ptr, weak_ptr, reference counting
+   * - :doc:`cpp_smart_pointers_interactive`
+     - Play With It: unique_ptr, shared_ptr, and weak_ptr side by side -- the strong-count/weak-count control block, lock(), and why weak_ptr never keeps an object alive
+     - unique_ptr, shared_ptr, weak_ptr, control block, lock(), expired()
    * - :doc:`cpp_move_semantics_interactive`
      - Interactive move semantics -- copy vs move construction cost, made countable
      - move constructor, std::move, moved-from state, noexcept

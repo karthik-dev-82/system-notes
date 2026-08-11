@@ -76,6 +76,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 📦 **[Conan Package Manager Guide](docs/source/conan_package_manager.rst)** | Conan package manager for C++ -- conanfile structure, generators, and commands | `conanfile.txt`, `conanfile.py`, generators, ConanCenter |
 | 🎮 **[C++ Memory (Interactive)](docs/source/cpp_memory_interactive.rst)** | Interactive C++ memory bugs -- dangling references, heap leaks, use-after-free, double-free | stack frames, heap allocation, raw pointers, undefined behavior |
 | 🎮 **[C++ RAII & Smart Pointers (Interactive)](docs/source/cpp_raii_smart_pointers_interactive.rst)** | Interactive RAII and smart pointers -- unique_ptr ownership/move, shared_ptr refcounting and the circular-reference leak | RAII, unique_ptr, shared_ptr, weak_ptr, reference counting |
+| 🎮 **[unique_ptr vs shared_ptr vs weak_ptr (Interactive)](docs/source/cpp_smart_pointers_interactive.rst)** | Play With It: all three ownership models side by side -- the strong-count/weak-count control block, lock(), and why weak_ptr never keeps an object alive | unique_ptr, shared_ptr, weak_ptr, control block, lock(), expired() |
 | 🎮 **[C++ Move Semantics (Interactive)](docs/source/cpp_move_semantics_interactive.rst)** | Interactive move semantics -- copy vs move construction cost, made countable | move constructor, std::move, moved-from state, noexcept |
 | 🎮 **[C++20 Ranges (Interactive)](docs/source/cpp_ranges_interactive.rst)** | Build a std::views pipeline, watch it stay lazy, and see order and short-circuiting change results | views::filter, views::transform, views::take, laziness, views vs actions |
 | 🎮 **[C++ Virtual Functions & vtables (Interactive)](docs/source/cpp_vtable_interactive.rst)** | Interactive virtual dispatch and vtables -- plus the classic non-virtual-destructor leak | vtable, vptr, dynamic dispatch, virtual destructor |
@@ -192,6 +193,7 @@ system-notes/
         ├── conan_package_manager.rst
         ├── cpp_memory_interactive.rst
         ├── cpp_raii_smart_pointers_interactive.rst
+        ├── cpp_smart_pointers_interactive.rst
         ├── cpp_move_semantics_interactive.rst
         ├── cpp_ranges_interactive.rst
         ├── cpp_vtable_interactive.rst
@@ -227,6 +229,7 @@ system-notes/
             ├── cpp_memory_widget.html
             ├── cpp_unique_ptr_widget.html
             ├── cpp_shared_ptr_widget.html
+            ├── cpp_smart_pointers_widget.html
             ├── cpp_move_semantics_widget.html
             ├── cpp_ranges_widget.html
             ├── cpp_vtable_widget.html

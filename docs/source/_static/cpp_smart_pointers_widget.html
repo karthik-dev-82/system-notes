@@ -1,0 +1,360 @@
+<div class="smp-root" id="smpWidget">
+  <style>
+    #smpWidget {
+      --smp-bg: #0f172a;
+      --smp-panel: #16213e;
+      --smp-border: #2a3655;
+      --smp-text: #e2e8f0;
+      --smp-muted: #94a3b8;
+      --smp-accent: #38bdf8;
+      --smp-good: #4ade80;
+      --smp-bad: #f87171;
+      --smp-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--smp-bg);
+      color: var(--smp-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #smpWidget * { box-sizing: border-box; }
+    #smpWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #smpWidget h4 { margin: 0 0 10px; font-size: 0.85rem; color: var(--smp-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    #smpWidget .smp-sub { color: var(--smp-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #smpWidget .smp-stage { background: var(--smp-panel); border: 1px solid var(--smp-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 840px; }
+
+    #smpWidget .smp-btn { background: var(--smp-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 14px; font-weight: 700; font-size: 0.8rem; cursor: pointer; }
+    #smpWidget .smp-btn.secondary { background: transparent; color: var(--smp-text); border: 1px solid var(--smp-border); }
+    #smpWidget .smp-btn.bad { background: var(--smp-bad); color: #2a0505; }
+    #smpWidget .smp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    #smpWidget .smp-controls { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+
+    /* unique_ptr panel */
+    #smpWidget .smp-up-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+    #smpWidget .smp-up-slot { min-width: 160px; border: 2px solid var(--smp-border); border-radius: 8px; padding: 10px 14px; text-align: center; font-family: ui-monospace, monospace; font-size: 0.82rem; }
+    #smpWidget .smp-up-slot.owns { border-color: var(--smp-accent); background: rgba(56,189,248,0.08); }
+    #smpWidget .smp-up-slot .smp-up-name { font-weight: 800; color: #fff; margin-bottom: 4px; }
+    #smpWidget .smp-up-arrow { color: var(--smp-muted); font-size: 1.3rem; }
+    #smpWidget .smp-compile-error { margin-top: 10px; background: #2a0808; border: 1px solid var(--smp-bad); border-radius: 8px; padding: 10px 12px; font-family: ui-monospace, monospace; font-size: 0.76rem; color: #ffb4b4; white-space: pre-wrap; display: none; }
+    #smpWidget .smp-compile-error.show { display: block; }
+
+    /* shared/weak panel */
+    #smpWidget .smp-object-box { text-align: center; padding: 16px; border-radius: 10px; border: 2px solid var(--smp-border); margin-bottom: 14px; font-family: ui-monospace, monospace; }
+    #smpWidget .smp-object-box.alive { border-color: var(--smp-good); background: rgba(74,222,128,0.08); }
+    #smpWidget .smp-object-box.dead { border-color: var(--smp-bad); background: rgba(248,113,113,0.08); }
+    #smpWidget .smp-object-state { font-weight: 800; font-size: 1rem; margin-bottom: 6px; }
+    #smpWidget .smp-object-state.alive { color: var(--smp-good); }
+    #smpWidget .smp-object-state.dead { color: var(--smp-bad); }
+    #smpWidget .smp-counts-row { display: flex; gap: 20px; justify-content: center; font-size: 0.85rem; color: var(--smp-muted); }
+    #smpWidget .smp-counts-row b { color: #fff; font-size: 1.1rem; font-family: ui-monospace, monospace; }
+
+    #smpWidget .smp-handle-cols { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; }
+    #smpWidget .smp-handle-col { flex: 1; min-width: 260px; }
+    #smpWidget .smp-handle-list { display: flex; flex-direction: column; gap: 6px; min-height: 40px; }
+    #smpWidget .smp-handle-item { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--smp-border); border-radius: 7px; padding: 6px 10px; font-family: ui-monospace, monospace; font-size: 0.78rem; background: #0a1128; }
+    #smpWidget .smp-handle-item.strong { border-left: 3px solid var(--smp-good); }
+    #smpWidget .smp-handle-item.weak { border-left: 3px solid var(--smp-accent); }
+    #smpWidget .smp-handle-item.expired { opacity: 0.5; border-left-color: var(--smp-bad); }
+    #smpWidget .smp-empty-note { color: var(--smp-muted); font-style: italic; font-size: 0.8rem; }
+
+    #smpWidget .smp-log { height: 160px; overflow-y: auto; font-size: 0.78rem; line-height: 1.6; font-family: ui-monospace, monospace; background: #0a1128; border: 1px solid var(--smp-border); border-radius: 8px; padding: 10px 12px; margin-top: 12px; }
+    #smpWidget .smp-log div { color: var(--smp-muted); }
+    #smpWidget .smp-log div.good { color: var(--smp-good); }
+    #smpWidget .smp-log div.bad { color: var(--smp-bad); font-weight: 700; }
+    #smpWidget .smp-log div.info { color: var(--smp-accent); }
+
+    #smpWidget details { margin-top: 14px; background: var(--smp-panel); border: 1px solid var(--smp-border); border-radius: 10px; padding: 12px 16px; }
+    #smpWidget summary { cursor: pointer; color: var(--smp-accent); font-weight: 700; }
+    #smpWidget details ul { margin: 10px 0 0; padding-left: 20px; font-size: 0.85rem; color: var(--smp-text); line-height: 1.6; }
+    #smpWidget details li { margin-bottom: 8px; }
+    #smpWidget code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+
+  <h3>unique_ptr vs. shared_ptr vs. weak_ptr: Play With It</h3>
+  <div class="smp-sub">Three different answers to "who's responsible for freeing this," side by side.</div>
+
+  <div class="smp-stage">
+    <h4>unique_ptr -- exactly one owner, ever</h4>
+    <div class="smp-up-row" id="smpUpRow"></div>
+    <div class="smp-controls">
+      <button class="smp-btn" id="smpUpMoveBtn">Move to holder B</button>
+      <button class="smp-btn secondary" id="smpUpCopyBtn">Try to copy it</button>
+      <button class="smp-btn secondary" id="smpUpResetBtn">Reset</button>
+    </div>
+    <div class="smp-compile-error" id="smpUpError"></div>
+  </div>
+
+  <div class="smp-stage">
+    <h4>shared_ptr + weak_ptr -- one control block, two very different relationships to it</h4>
+    <div class="smp-object-box" id="smpObjectBox">
+      <div class="smp-object-state" id="smpObjectState"></div>
+      <div class="smp-counts-row">
+        <div>strong (shared_ptr) count: <b id="smpStrongCount">0</b></div>
+        <div>weak (weak_ptr) count: <b id="smpWeakCount">0</b></div>
+      </div>
+    </div>
+    <div class="smp-handle-cols">
+      <div class="smp-handle-col">
+        <div style="font-size:0.78rem;color:var(--smp-muted);margin-bottom:6px;">shared_ptr handles (owners)</div>
+        <div class="smp-handle-list" id="smpStrongList"></div>
+        <div class="smp-controls">
+          <button class="smp-btn" id="smpCopySharedBtn">+ copy a shared_ptr</button>
+        </div>
+      </div>
+      <div class="smp-handle-col">
+        <div style="font-size:0.78rem;color:var(--smp-muted);margin-bottom:6px;">weak_ptr handles (observers)</div>
+        <div class="smp-handle-list" id="smpWeakList"></div>
+        <div class="smp-controls">
+          <button class="smp-btn secondary" id="smpCreateWeakBtn">+ observe with a weak_ptr</button>
+          <button class="smp-btn secondary" id="smpLockBtn">try .lock() on a weak_ptr</button>
+        </div>
+      </div>
+    </div>
+    <div class="smp-controls">
+      <button class="smp-btn secondary" id="smpSharedResetBtn">Reset this demo</button>
+    </div>
+    <div class="smp-log" id="smpLog"><span class="smp-empty-note">try dropping every shared_ptr while a weak_ptr is still watching</span></div>
+  </div>
+
+  <details>
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>A <code>weak_ptr</code> existing never keeps the object alive.</b> Copy a <code>shared_ptr</code>, create a <code>weak_ptr</code> from it, then drop every <code>shared_ptr</code> -- the object dies immediately, with the <code>weak_ptr</code> just quietly becoming expired. It never contributed to the strong count, so it never had a vote in when the object dies.</li>
+      <li><b>You cannot conjure a brand-new <code>shared_ptr</code> once the object is gone.</b> The "copy a shared_ptr" button disables itself the instant the strong count hits zero -- there's nothing left to copy <i>from</i>. The only way to get a live <code>shared_ptr</code> back at that point is <code>.lock()</code>, and it correctly returns nothing once expired.</li>
+      <li><b>The control block can outlive the object.</b> Once the last <code>shared_ptr</code> drops, the managed object is destroyed -- but the small bookkeeping block (the counts themselves) sticks around as long as any <code>weak_ptr</code> still references it. That's a real, small piece of memory that stays allocated purely so a lingering <code>weak_ptr</code> has something safe to ask "are you still there?"</li>
+      <li><b><code>unique_ptr</code> doesn't have any of this machinery.</b> There's no control block, no counting -- just one pointer and a promise the compiler enforces: copying is a compile error, full stop. That's why it's the default choice whenever ownership genuinely isn't shared; there's nothing to get wrong.</li>
+      <li>See <a href="cpp_raii_smart_pointers_interactive.html">the RAII &amp; Smart Pointers page</a> for the heap-leak and circular-reference scenarios these types were built to fix, and <a href="cpp_observer_interactive.html">the Observer pattern widget</a> for <code>weak_ptr</code> solving a real dangling-pointer bug end to end.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified control-block state machine ---
+
+    function makeControlBlock() {
+      var cb = { strong: 0, weak: 0, alive: true, nextHandleId: 1, strongHandles: [], weakHandles: [] };
+      cb.strong = 1;
+      cb.strongHandles.push(cb.nextHandleId++);
+      return cb;
+    }
+
+    function copyShared(cb) {
+      if (!cb.alive) return null;
+      cb.strong++;
+      var id = cb.nextHandleId++;
+      cb.strongHandles.push(id);
+      return id;
+    }
+
+    function dropShared(cb, handleId) {
+      var i = cb.strongHandles.indexOf(handleId);
+      if (i === -1) return false;
+      cb.strongHandles.splice(i, 1);
+      cb.strong--;
+      if (cb.strong === 0) cb.alive = false;
+      return true;
+    }
+
+    function createWeak(cb) {
+      cb.weak++;
+      var id = cb.nextHandleId++;
+      cb.weakHandles.push(id);
+      return id;
+    }
+
+    function dropWeak(cb, handleId) {
+      var i = cb.weakHandles.indexOf(handleId);
+      if (i === -1) return false;
+      cb.weakHandles.splice(i, 1);
+      cb.weak--;
+      return true;
+    }
+
+    function isExpired(cb) { return !cb.alive; }
+
+    function lockWeak(cb) {
+      if (!cb.alive) return null;
+      cb.strong++;
+      var id = cb.nextHandleId++;
+      cb.strongHandles.push(id);
+      return id;
+    }
+
+    function controlBlockReclaimed(cb) {
+      return cb.strong === 0 && cb.weak === 0;
+    }
+
+    // --- Widget state: unique_ptr panel ---
+
+    var root = document.getElementById('smpWidget');
+    var upRow = root.querySelector('#smpUpRow');
+    var upMoveBtn = root.querySelector('#smpUpMoveBtn');
+    var upCopyBtn = root.querySelector('#smpUpCopyBtn');
+    var upResetBtn = root.querySelector('#smpUpResetBtn');
+    var upErrorEl = root.querySelector('#smpUpError');
+    var upOwner = 'A'; // 'A' | 'B' | null (moved-from both, never happens here, but kept general)
+
+    function renderUnique() {
+      upRow.innerHTML = '';
+      ['A', 'B'].forEach(function (slot) {
+        var box = document.createElement('div');
+        box.className = 'smp-up-slot' + (upOwner === slot ? ' owns' : '');
+        var name = document.createElement('div');
+        name.className = 'smp-up-name';
+        name.textContent = 'holder ' + slot;
+        box.appendChild(name);
+        var state = document.createElement('div');
+        state.textContent = upOwner === slot ? 'owns the Widget' : 'empty (nullptr)';
+        box.appendChild(state);
+        upRow.appendChild(box);
+        if (slot === 'A') {
+          var arrow = document.createElement('div');
+          arrow.className = 'smp-up-arrow';
+          arrow.textContent = String.fromCharCode(0x2192);
+          upRow.appendChild(arrow);
+        }
+      });
+      upMoveBtn.textContent = upOwner === 'A' ? 'Move to holder B' : 'Move to holder A';
+    }
+
+    upMoveBtn.addEventListener('click', function () {
+      upOwner = upOwner === 'A' ? 'B' : 'A';
+      upErrorEl.className = 'smp-compile-error';
+      renderUnique();
+    });
+    upCopyBtn.addEventListener('click', function () {
+      upErrorEl.className = 'smp-compile-error show';
+      upErrorEl.textContent =
+        'error: use of deleted function ‘unique_ptr(const unique_ptr&)’\n' +
+        'note: ‘unique_ptr(const unique_ptr&)’ is implicitly declared as deleted\n' +
+        '  because the copy constructor exists only for move-only semantics.';
+    });
+    upResetBtn.addEventListener('click', function () {
+      upOwner = 'A';
+      upErrorEl.className = 'smp-compile-error';
+      renderUnique();
+    });
+
+    // --- Widget state: shared_ptr / weak_ptr panel ---
+
+    var cb = makeControlBlock();
+    var initialHandleId = cb.strongHandles[0];
+
+    var objectBox = root.querySelector('#smpObjectBox');
+    var objectState = root.querySelector('#smpObjectState');
+    var strongCountEl = root.querySelector('#smpStrongCount');
+    var weakCountEl = root.querySelector('#smpWeakCount');
+    var strongListEl = root.querySelector('#smpStrongList');
+    var weakListEl = root.querySelector('#smpWeakList');
+    var copySharedBtn = root.querySelector('#smpCopySharedBtn');
+    var createWeakBtn = root.querySelector('#smpCreateWeakBtn');
+    var lockBtn = root.querySelector('#smpLockBtn');
+    var sharedResetBtn = root.querySelector('#smpSharedResetBtn');
+    var logEl = root.querySelector('#smpLog');
+
+    function log(msg, cls) {
+      if (logEl.querySelector('.smp-empty-note')) logEl.innerHTML = '';
+      var line = document.createElement('div');
+      if (cls) line.className = cls;
+      line.textContent = msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function renderShared() {
+      objectBox.className = 'smp-object-box ' + (cb.alive ? 'alive' : 'dead');
+      objectState.className = 'smp-object-state ' + (cb.alive ? 'alive' : 'dead');
+      objectState.textContent = cb.alive ? 'Widget: ALIVE' : 'Widget: DESTROYED' + (cb.weak > 0 ? ' (control block still allocated)' : '');
+      strongCountEl.textContent = String(cb.strong);
+      weakCountEl.textContent = String(cb.weak);
+
+      strongListEl.innerHTML = '';
+      if (cb.strongHandles.length === 0) {
+        strongListEl.innerHTML = '<span class="smp-empty-note">no owners left</span>';
+      } else {
+        cb.strongHandles.forEach(function (id) {
+          var item = document.createElement('div');
+          item.className = 'smp-handle-item strong';
+          var label = document.createElement('span');
+          label.textContent = 'shared_ptr #' + id;
+          item.appendChild(label);
+          var dropBtn = document.createElement('button');
+          dropBtn.className = 'smp-btn bad';
+          dropBtn.style.padding = '3px 8px';
+          dropBtn.style.fontSize = '0.7rem';
+          dropBtn.textContent = 'drop';
+          dropBtn.addEventListener('click', function () {
+            dropShared(cb, id);
+            log('shared_ptr #' + id + ' dropped' + (!cb.alive ? ' -- strong count hit 0, Widget destroyed' : ''), !cb.alive ? 'bad' : null);
+            renderShared();
+          });
+          item.appendChild(dropBtn);
+          strongListEl.appendChild(item);
+        });
+      }
+
+      weakListEl.innerHTML = '';
+      if (cb.weakHandles.length === 0) {
+        weakListEl.innerHTML = '<span class="smp-empty-note">no observers</span>';
+      } else {
+        cb.weakHandles.forEach(function (id) {
+          var item = document.createElement('div');
+          item.className = 'smp-handle-item weak' + (!cb.alive ? ' expired' : '');
+          var label = document.createElement('span');
+          label.textContent = 'weak_ptr #' + id + (!cb.alive ? ' (expired)' : '');
+          item.appendChild(label);
+          var dropBtn = document.createElement('button');
+          dropBtn.className = 'smp-btn secondary';
+          dropBtn.style.padding = '3px 8px';
+          dropBtn.style.fontSize = '0.7rem';
+          dropBtn.textContent = 'drop';
+          dropBtn.addEventListener('click', function () {
+            dropWeak(cb, id);
+            log('weak_ptr #' + id + ' dropped' + (controlBlockReclaimed(cb) ? ' -- control block fully reclaimed now' : ''), null);
+            renderShared();
+          });
+          item.appendChild(dropBtn);
+          weakListEl.appendChild(item);
+        });
+      }
+
+      copySharedBtn.disabled = !cb.alive;
+      lockBtn.disabled = cb.weakHandles.length === 0;
+    }
+
+    copySharedBtn.addEventListener('click', function () {
+      var id = copyShared(cb);
+      if (id === null) {
+        log('copy failed -- nothing alive to copy from', 'bad');
+      } else {
+        log('shared_ptr #' + id + ' created (copy) -- strong count now ' + cb.strong, 'good');
+      }
+      renderShared();
+    });
+    createWeakBtn.addEventListener('click', function () {
+      var id = createWeak(cb);
+      log('weak_ptr #' + id + ' created -- observing only, strong count unchanged (' + cb.strong + ')', 'info');
+      renderShared();
+    });
+    lockBtn.addEventListener('click', function () {
+      var result = lockWeak(cb);
+      if (result === null) {
+        log('.lock() returned an empty shared_ptr -- the Widget is gone, nothing to lock', 'bad');
+      } else {
+        log('.lock() succeeded -- got shared_ptr #' + result + ', strong count temporarily ' + cb.strong, 'good');
+      }
+      renderShared();
+    });
+    sharedResetBtn.addEventListener('click', function () {
+      cb = makeControlBlock();
+      logEl.innerHTML = '<span class="smp-empty-note">try dropping every shared_ptr while a weak_ptr is still watching</span>';
+      renderShared();
+    });
+
+    renderUnique();
+    renderShared();
+  })();
+  </script>
+</div>

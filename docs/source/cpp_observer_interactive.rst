@@ -68,6 +68,11 @@ consequence of forgetting is silent until something happens to walk
 over that exact pointer. ``weak_ptr`` doesn't make the discipline
 unnecessary so much as make it unnecessary to enforce by hand.
 
+See :doc:`cpp_smart_pointers_interactive` for ``weak_ptr`` on its own,
+without an Observer's subject/notify machinery around it -- just the
+strong-count/weak-count/``lock()`` mechanism by itself, next to
+``unique_ptr`` and ``shared_ptr`` for comparison.
+
 See :doc:`cpp_command_interactive`, :doc:`cpp_singleton_interactive`,
 :doc:`cpp_strategy_interactive`, and :doc:`cpp_decorator_interactive` for
 the other modern-C++ pattern widgets in this series.

@@ -84,3 +84,7 @@ can (exactly one owner); ``shared_ptr`` exists for the cases where
 ownership is genuinely shared and can't be simplified away. Neither
 one is "smarter" than the other in the abstract -- the right choice is
 whichever ownership model actually matches what your code is doing.
+
+See :doc:`cpp_smart_pointers_interactive` for all three ownership
+models -- including ``weak_ptr`` with its own dedicated demo instead
+of just the code block above -- side by side.
