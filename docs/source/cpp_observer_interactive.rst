@@ -68,5 +68,6 @@ consequence of forgetting is silent until something happens to walk
 over that exact pointer. ``weak_ptr`` doesn't make the discipline
 unnecessary so much as make it unnecessary to enforce by hand.
 
-See :doc:`cpp_command_interactive` and :doc:`cpp_singleton_interactive`
-for the other modern-C++ pattern widgets in this series.
+See :doc:`cpp_command_interactive`, :doc:`cpp_singleton_interactive`, and
+:doc:`cpp_strategy_interactive` for the other modern-C++ pattern widgets
+in this series.

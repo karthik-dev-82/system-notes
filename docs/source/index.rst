@@ -140,6 +140,7 @@ worth writing down and coming back to.
    cpp_singleton_interactive
    cpp_command_interactive
    cpp_observer_interactive
+   cpp_strategy_interactive
 
 .. toctree::
    :hidden:
@@ -490,6 +491,9 @@ C++ Notes
    * - :doc:`cpp_observer_interactive`
      - Play With It: a real heap-use-after-free when an observer is destroyed without unsubscribing, and the weak_ptr fix
      - Observer pattern, weak_ptr, lock(), dangling pointer
+   * - :doc:`cpp_strategy_interactive`
+     - Play With It: swap pricing algorithms at runtime on the same cart, and see what adding a new one actually costs vs. an if/else chain
+     - Strategy pattern, open/closed principle, polymorphism
 
 Python Notes
 -----------------

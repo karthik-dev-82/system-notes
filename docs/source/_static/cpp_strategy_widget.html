@@ -1,0 +1,367 @@
+<div class="str-root" id="strWidget">
+  <style>
+    #strWidget {
+      --str-bg: #0f172a;
+      --str-panel: #16213e;
+      --str-border: #2a3655;
+      --str-text: #e2e8f0;
+      --str-muted: #94a3b8;
+      --str-accent: #38bdf8;
+      --str-good: #4ade80;
+      --str-bad: #f87171;
+      --str-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--str-bg);
+      color: var(--str-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #strWidget * { box-sizing: border-box; }
+    #strWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #strWidget h4 { margin: 0 0 10px; font-size: 0.85rem; color: var(--str-muted); text-transform: uppercase; letter-spacing: 0.04em; }
+    #strWidget .str-sub { color: var(--str-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #strWidget .str-stage { background: var(--str-panel); border: 1px solid var(--str-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 820px; }
+
+    #strWidget table.str-cart { width: 100%; border-collapse: collapse; margin-bottom: 12px; font-size: 0.84rem; }
+    #strWidget table.str-cart th { text-align: left; color: var(--str-muted); font-weight: 600; font-size: 0.72rem; text-transform: uppercase; padding: 4px 8px; border-bottom: 1px solid var(--str-border); }
+    #strWidget table.str-cart td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    #strWidget table.str-cart input[type="number"] { width: 56px; background: #0a1128; color: var(--str-text); border: 1px solid var(--str-border); border-radius: 6px; padding: 4px 6px; font-size: 0.82rem; }
+
+    #strWidget .str-toggle { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    #strWidget .str-strategy-btn { background: #0f1830; color: var(--str-text); border: 2px solid var(--str-border); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; text-align: left; }
+    #strWidget .str-strategy-btn .str-strategy-code { display: block; font-family: ui-monospace, monospace; font-size: 0.7rem; color: var(--str-muted); margin-top: 2px; }
+    #strWidget .str-strategy-btn.active { border-color: var(--str-accent); background: rgba(56,189,248,0.1); }
+
+    #strWidget .str-total-row { display: flex; align-items: baseline; gap: 10px; padding: 10px 14px; background: #0f1830; border: 1px solid var(--str-border); border-radius: 8px; }
+    #strWidget .str-total-label { color: var(--str-muted); font-size: 0.8rem; }
+    #strWidget .str-total-value { font-family: ui-monospace, monospace; font-size: 1.4rem; font-weight: 800; color: var(--str-good); }
+    #strWidget .str-total-saved { color: var(--str-warn); font-size: 0.8rem; }
+
+    #strWidget .str-compare-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; font-size: 0.76rem; font-family: ui-monospace, monospace; }
+    #strWidget .str-compare-chip { border: 1px solid var(--str-border); border-radius: 6px; padding: 4px 9px; color: var(--str-muted); }
+    #strWidget .str-compare-chip.best { border-color: var(--str-good); color: var(--str-good); }
+
+    #strWidget .str-panels { display: flex; gap: 14px; flex-wrap: wrap; }
+    #strWidget .str-code-panel { flex: 1; min-width: 340px; }
+    #strWidget .str-code { background: #0a1128; border: 1px solid var(--str-border); border-radius: 8px; padding: 10px 0; font-family: ui-monospace, monospace; font-size: 0.76rem; line-height: 1.6; }
+    #strWidget .str-code-line { padding: 1px 14px; color: var(--str-muted); white-space: pre; }
+    #strWidget .str-code-line.new { background: rgba(74,222,128,0.16); color: #fff; border-left: 3px solid var(--str-good); padding-left: 11px; }
+    #strWidget .str-code-verdict { margin-top: 8px; font-size: 0.78rem; font-weight: 700; }
+    #strWidget .str-code-verdict.bad { color: var(--str-bad); }
+    #strWidget .str-code-verdict.good { color: var(--str-good); }
+
+    #strWidget .str-btn { background: var(--str-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #strWidget .str-btn.secondary { background: transparent; color: var(--str-text); border: 1px solid var(--str-border); }
+    #strWidget .str-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    #strWidget details { margin-top: 14px; background: var(--str-panel); border: 1px solid var(--str-border); border-radius: 10px; padding: 12px 16px; }
+    #strWidget summary { cursor: pointer; color: var(--str-accent); font-weight: 700; }
+    #strWidget details ul { margin: 10px 0 0; padding-left: 20px; font-size: 0.85rem; color: var(--str-text); line-height: 1.6; }
+    #strWidget details li { margin-bottom: 8px; }
+    #strWidget code { background: rgba(255,255,255,0.08); padding: 1px 5px; border-radius: 4px; font-size: 0.85em; }
+  </style>
+
+  <h3>Strategy Pattern: Play With It</h3>
+  <div class="str-sub">Same cart, same checkout code, four interchangeable pricing algorithms. Swapping the strategy never touches the cart or the code that calls it -- only the object plugged into it changes.</div>
+
+  <div class="str-stage">
+    <h4>The Cart</h4>
+    <table class="str-cart" id="strCartTable"></table>
+    <div class="str-toggle" id="strStrategyToggle"></div>
+    <div class="str-total-row">
+      <span class="str-total-label">Total:</span>
+      <span class="str-total-value" id="strTotalVal">$0.00</span>
+      <span class="str-total-saved" id="strSavedVal"></span>
+    </div>
+    <div class="str-compare-row" id="strCompareRow"></div>
+  </div>
+
+  <div class="str-stage">
+    <h4>Why This Is a Pattern, Not Just an If/Else</h4>
+    <div class="str-sub" style="margin-bottom:10px;">Both panels below currently handle the same four strategies. Click the button to add a fifth -- watch which one has to edit code that was already shipped and tested.</div>
+    <div class="str-panels">
+      <div class="str-code-panel">
+        <div class="str-panel-title" style="font-size:0.72rem;color:var(--str-muted);margin-bottom:6px;">Branch-based checkout()</div>
+        <div class="str-code" id="strBranchCode"></div>
+        <div class="str-code-verdict" id="strBranchVerdict"></div>
+      </div>
+      <div class="str-code-panel">
+        <div class="str-panel-title" style="font-size:0.72rem;color:var(--str-muted);margin-bottom:6px;">Strategy-object checkout()</div>
+        <div class="str-code" id="strPatternCode"></div>
+        <div class="str-code-verdict" id="strPatternVerdict"></div>
+      </div>
+    </div>
+    <div style="margin-top:12px;">
+      <button class="str-btn" id="strAddStrategyBtn">Add a 5th strategy: "Buy 3, Get 2 Free"</button>
+      <button class="str-btn secondary" id="strResetOcpBtn">Reset</button>
+    </div>
+  </div>
+
+  <details>
+    <summary>Worth knowing, beyond what's interactive here</summary>
+    <ul>
+      <li><b>The cart's checkout code never mentions any specific discount.</b> It just calls <code>strategy.calc(cart)</code> -- whatever object is plugged in decides the math. That's the entire pattern: an interface (one method, same signature, different behavior per implementation) plus a context that only ever talks to the interface.</li>
+      <li><b>"Buy 2, get 1 free" isn't automatically the best deal -- it depends on the cart.</b> With three items at quantities 3, 1, and 5, it beats a flat 10% off here because two of the three lines have enough quantity to earn a free unit. Change the quantities and watch which strategy wins change with it.</li>
+      <li><b>The branch-based version isn't a strawman.</b> A single function with an if/else per case is a completely normal way this gets written before anyone reaches for Strategy -- it works fine right up until a new case needs adding, at which point it means re-opening and re-editing a function whose other branches are already shipped, tested, and (ideally) left alone.</li>
+      <li>See <a href="cpp_command_interactive.html">the Command pattern widget</a>, <a href="cpp_singleton_interactive.html">the Singleton widget</a>, and <a href="cpp_observer_interactive.html">the Observer widget</a> for the other modern-C++ pattern widgets in this series.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // --- Model: identical to the standalone Node-verified state machine ---
+
+    var STRATEGIES = {
+      none: {
+        label: 'No discount',
+        code: 'price * qty',
+        calc: function (cart) {
+          return cart.reduce(function (sum, i) { return sum + i.price * i.qty; }, 0);
+        },
+      },
+      percent10: {
+        label: '10% off everything',
+        code: 'subtotal * 0.9',
+        calc: function (cart) {
+          var subtotal = cart.reduce(function (sum, i) { return sum + i.price * i.qty; }, 0);
+          return subtotal * 0.9;
+        },
+      },
+      buy2get1: {
+        label: 'Buy 2, get 1 free (per item)',
+        code: 'price * (qty - floor(qty/3))',
+        calc: function (cart) {
+          return cart.reduce(function (sum, i) {
+            var free = Math.floor(i.qty / 3);
+            return sum + i.price * (i.qty - free);
+          }, 0);
+        },
+      },
+      flatOffThreshold: {
+        label: '$5 off orders over $50',
+        code: 'subtotal >= 50 ? subtotal - 5 : subtotal',
+        calc: function (cart) {
+          var subtotal = cart.reduce(function (sum, i) { return sum + i.price * i.qty; }, 0);
+          return subtotal >= 50 ? subtotal - 5 : subtotal;
+        },
+      },
+    };
+    var STRATEGY_ORDER = ['none', 'percent10', 'buy2get1', 'flatOffThreshold'];
+
+    function checkout(cart, strategyKey) {
+      return STRATEGIES[strategyKey].calc(cart);
+    }
+
+    // --- Widget state ---
+
+    var root = document.getElementById('strWidget');
+    var cart = [
+      { name: 'Widget', price: 12.00, qty: 3 },
+      { name: 'Gadget', price: 25.00, qty: 1 },
+      { name: 'Gizmo', price: 8.00, qty: 5 },
+    ];
+    var activeStrategy = 'none';
+    var ocpAdded = false;
+
+    var cartTableEl = root.querySelector('#strCartTable');
+    var toggleEl = root.querySelector('#strStrategyToggle');
+    var totalValEl = root.querySelector('#strTotalVal');
+    var savedValEl = root.querySelector('#strSavedVal');
+    var compareRowEl = root.querySelector('#strCompareRow');
+    var branchCodeEl = root.querySelector('#strBranchCode');
+    var patternCodeEl = root.querySelector('#strPatternCode');
+    var branchVerdictEl = root.querySelector('#strBranchVerdict');
+    var patternVerdictEl = root.querySelector('#strPatternVerdict');
+    var addStrategyBtn = root.querySelector('#strAddStrategyBtn');
+    var resetOcpBtn = root.querySelector('#strResetOcpBtn');
+
+    function fmt(n) { return '$' + n.toFixed(2); }
+
+    function renderCart() {
+      cartTableEl.innerHTML = '';
+      var thead = document.createElement('tr');
+      ['Item', 'Price', 'Qty', 'Line total'].forEach(function (h) {
+        var th = document.createElement('th');
+        th.textContent = h;
+        thead.appendChild(th);
+      });
+      cartTableEl.appendChild(thead);
+
+      cart.forEach(function (item, idx) {
+        var row = document.createElement('tr');
+
+        var nameTd = document.createElement('td');
+        nameTd.textContent = item.name;
+        row.appendChild(nameTd);
+
+        var priceTd = document.createElement('td');
+        priceTd.textContent = fmt(item.price);
+        row.appendChild(priceTd);
+
+        var qtyTd = document.createElement('td');
+        var qtyInput = document.createElement('input');
+        qtyInput.type = 'number';
+        qtyInput.min = '0';
+        qtyInput.max = '20';
+        qtyInput.value = String(item.qty);
+        qtyInput.addEventListener('input', function () {
+          var v = parseInt(qtyInput.value, 10);
+          item.qty = isNaN(v) ? 0 : Math.max(0, Math.min(20, v));
+          renderTotal();
+        });
+        qtyTd.appendChild(qtyInput);
+        row.appendChild(qtyTd);
+
+        var lineTd = document.createElement('td');
+        lineTd.id = 'strLine' + idx;
+        lineTd.textContent = fmt(item.price * item.qty);
+        row.appendChild(lineTd);
+
+        cartTableEl.appendChild(row);
+      });
+    }
+
+    function renderStrategyToggle() {
+      toggleEl.innerHTML = '';
+      STRATEGY_ORDER.forEach(function (key) {
+        var btn = document.createElement('button');
+        btn.className = 'str-strategy-btn' + (key === activeStrategy ? ' active' : '');
+        var label = document.createElement('span');
+        label.textContent = STRATEGIES[key].label;
+        btn.appendChild(label);
+        var code = document.createElement('span');
+        code.className = 'str-strategy-code';
+        code.textContent = STRATEGIES[key].code;
+        btn.appendChild(code);
+        btn.addEventListener('click', function () {
+          activeStrategy = key;
+          renderAll();
+        });
+        toggleEl.appendChild(btn);
+      });
+    }
+
+    function renderTotal() {
+      cart.forEach(function (item, idx) {
+        var lineTd = document.getElementById('strLine' + idx);
+        if (lineTd) lineTd.textContent = fmt(item.price * item.qty);
+      });
+
+      var totals = {};
+      STRATEGY_ORDER.forEach(function (key) { totals[key] = checkout(cart, key); });
+
+      var activeTotal = totals[activeStrategy];
+      totalValEl.textContent = fmt(activeTotal);
+      var noDiscount = totals.none;
+      var savedAmt = noDiscount - activeTotal;
+      savedValEl.textContent = savedAmt > 0.001 ? 'saved ' + fmt(savedAmt) + ' vs. no discount' : '';
+
+      var bestKey = STRATEGY_ORDER.reduce(function (best, key) {
+        return totals[key] < totals[best] ? key : best;
+      }, STRATEGY_ORDER[0]);
+
+      compareRowEl.innerHTML = '';
+      STRATEGY_ORDER.forEach(function (key) {
+        var chip = document.createElement('div');
+        chip.className = 'str-compare-chip' + (key === bestKey ? ' best' : '');
+        chip.textContent = STRATEGIES[key].label + ': ' + fmt(totals[key]) + (key === bestKey ? ' (best)' : '');
+        compareRowEl.appendChild(chip);
+      });
+    }
+
+    // --- OCP comparison panel ---
+
+    var BRANCH_LINES_BASE = [
+      'double checkout(Cart cart, string strategy) {',
+      '    double subtotal = sumOf(cart);',
+      '    if (strategy == "none") {',
+      '        return subtotal;',
+      '    } else if (strategy == "percent10") {',
+      '        return subtotal * 0.9;',
+      '    } else if (strategy == "buy2get1") {',
+      '        return buy2Get1Total(cart);',
+      '    } else if (strategy == "flatOffThreshold") {',
+      '        return subtotal >= 50 ? subtotal - 5 : subtotal;',
+      '    }',
+      '    return subtotal;',
+      '}',
+    ];
+    var BRANCH_NEW_LINES = [
+      '    } else if (strategy == "buy3get2") {',
+      '        return buy3Get2Total(cart);',
+    ];
+
+    var PATTERN_LINES_BASE = [
+      'double checkout(Cart cart, PricingStrategy& strategy) {',
+      '    return strategy.calc(cart);',
+      '}',
+      '',
+      '// existing strategies -- untouched, not shown again here',
+    ];
+    var PATTERN_NEW_LINES = [
+      '',
+      'struct Buy3Get2 : PricingStrategy {',
+      '    double calc(Cart cart) override {',
+      '        return buy3Get2Total(cart);',
+      '    }',
+      '};',
+    ];
+
+    function renderOcp() {
+      branchCodeEl.innerHTML = '';
+      var lines = BRANCH_LINES_BASE.slice();
+      if (ocpAdded) {
+        lines.splice(10, 0, BRANCH_NEW_LINES[0], BRANCH_NEW_LINES[1]);
+      }
+      lines.forEach(function (line, i) {
+        var div = document.createElement('div');
+        div.className = 'str-code-line' + (ocpAdded && (i === 10 || i === 11) ? ' new' : '');
+        div.textContent = line;
+        branchCodeEl.appendChild(div);
+      });
+      branchVerdictEl.className = 'str-code-verdict' + (ocpAdded ? ' bad' : '');
+      branchVerdictEl.textContent = ocpAdded
+        ? 'Every line of this already-shipped function is back in the diff, including the branches for the other 4 strategies.'
+        : 'Adding a strategy here means editing this function again.';
+
+      patternCodeEl.innerHTML = '';
+      var pLines = PATTERN_LINES_BASE.slice();
+      if (ocpAdded) pLines = pLines.concat(PATTERN_NEW_LINES);
+      pLines.forEach(function (line, i) {
+        var div = document.createElement('div');
+        var isNew = ocpAdded && i >= PATTERN_LINES_BASE.length;
+        div.className = 'str-code-line' + (isNew ? ' new' : '');
+        div.textContent = line;
+        patternCodeEl.appendChild(div);
+      });
+      patternVerdictEl.className = 'str-code-verdict' + (ocpAdded ? ' good' : '');
+      patternVerdictEl.textContent = ocpAdded
+        ? 'checkout() itself has zero new lines. The new strategy is a wholly separate, independently-testable block.'
+        : 'Adding a strategy here means writing a new, independent class -- this function never changes.';
+    }
+
+    addStrategyBtn.addEventListener('click', function () {
+      ocpAdded = true;
+      addStrategyBtn.disabled = true;
+      renderOcp();
+    });
+    resetOcpBtn.addEventListener('click', function () {
+      ocpAdded = false;
+      addStrategyBtn.disabled = false;
+      renderOcp();
+    });
+
+    function renderAll() {
+      renderCart();
+      renderStrategyToggle();
+      renderTotal();
+    }
+
+    renderAll();
+    renderOcp();
+  })();
+  </script>
+</div>
