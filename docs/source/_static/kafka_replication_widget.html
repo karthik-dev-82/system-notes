@@ -1,0 +1,411 @@
+<div class="kfkr-root" id="kfkrWidget">
+  <style>
+    #kfkrWidget {
+      --kfkr-bg: #0f172a;
+      --kfkr-panel: #16213e;
+      --kfkr-border: #2a3655;
+      --kfkr-text: #e2e8f0;
+      --kfkr-muted: #94a3b8;
+      --kfkr-good: #4ade80;
+      --kfkr-bad: #f87171;
+      --kfkr-warn: #fbbf24;
+      --kfkr-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--kfkr-bg);
+      color: var(--kfkr-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #kfkrWidget * { box-sizing: border-box; }
+    #kfkrWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #kfkrWidget .kfkr-sub { color: var(--kfkr-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .kfkr-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--kfkr-panel); border: 1px solid var(--kfkr-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .kfkr-controls label { font-size: 0.8rem; color: var(--kfkr-muted); display: flex; align-items: center; gap: 6px; }
+    .kfkr-btn { background: var(--kfkr-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .kfkr-btn.secondary { background: transparent; color: var(--kfkr-text); border: 1px solid var(--kfkr-border); }
+    .kfkr-btn.warn { background: var(--kfkr-warn); color: #2a1c00; }
+    .kfkr-btn.danger { background: var(--kfkr-bad); color: #2a0a0a; }
+    .kfkr-btn.small { padding: 4px 9px; font-size: 0.7rem; }
+    .kfkr-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .kfkr-stat-line { min-width: 950px; background: var(--kfkr-panel); border: 1px solid var(--kfkr-border); border-radius: 10px; padding: 10px 16px; margin-bottom: 12px; font-size: 0.82rem; display: flex; gap: 24px; flex-wrap: wrap; }
+    .kfkr-stat-line .k { color: var(--kfkr-muted); }
+    .kfkr-stat-line .v { font-weight: 700; color: #fff; font-family: ui-monospace, monospace; }
+
+    .kfkr-no-leader { display: none; min-width: 950px; background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.4); border-radius: 10px; padding: 10px 14px; font-size: 0.85rem; color: #fecaca; margin-bottom: 16px; align-items: center; gap: 12px; }
+    .kfkr-no-leader.show { display: flex; }
+
+    .kfkr-brokers { display: flex; gap: 12px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .kfkr-broker { flex: 1; min-width: 280px; background: var(--kfkr-panel); border: 2px solid var(--kfkr-border); border-radius: 10px; padding: 12px 14px; }
+    .kfkr-broker.leader { border-color: var(--kfkr-accent); }
+    .kfkr-broker.down { border-color: var(--kfkr-bad); opacity: 0.6; }
+    .kfkr-broker-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .kfkr-broker-name { font-weight: 700; color: #fff; font-size: 0.9rem; }
+    .kfkr-pill { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 999px; }
+    .kfkr-pill.leader { background: rgba(56,189,248,0.15); color: var(--kfkr-accent); }
+    .kfkr-pill.isr { background: rgba(74,222,128,0.15); color: var(--kfkr-good); }
+    .kfkr-pill.out-isr { background: rgba(251,191,36,0.15); color: var(--kfkr-warn); }
+    .kfkr-pill.down { background: rgba(248,113,113,0.15); color: var(--kfkr-bad); }
+    .kfkr-broker-actions { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+    .kfkr-broker-log { font-family: ui-monospace, monospace; font-size: 0.74rem; background: #0a1128; border-radius: 6px; padding: 6px 8px; min-height: 24px; color: var(--kfkr-text); word-break: break-word; }
+    .kfkr-broker-log .empty { color: var(--kfkr-muted); font-style: italic; }
+
+    .kfkr-produce-result { min-width: 950px; margin-bottom: 12px; font-size: 0.82rem; font-family: ui-monospace, monospace; min-height: 20px; }
+    .kfkr-produce-result.ok { color: var(--kfkr-good); }
+    .kfkr-produce-result.rejected { color: var(--kfkr-bad); font-weight: 700; }
+
+    .kfkr-log-box { background: var(--kfkr-panel); border: 1px solid var(--kfkr-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 12px; }
+    .kfkr-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--kfkr-muted); margin-bottom: 8px; }
+    .kfkr-log { height: 150px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .kfkr-log div { color: var(--kfkr-muted); }
+    .kfkr-log div.good { color: var(--kfkr-good); }
+    .kfkr-log div.bad { color: var(--kfkr-bad); }
+    .kfkr-log div.warn { color: var(--kfkr-warn); }
+
+    details.kfkr-notes { margin-top: 4px; background: var(--kfkr-panel); border: 1px solid var(--kfkr-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.kfkr-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.kfkr-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--kfkr-muted); }
+    details.kfkr-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--kfkr-accent); }
+  </style>
+
+  <h3>Kafka Replication: Play With It</h3>
+  <div class="kfkr-sub">One partition, replicated across 3 brokers. Kill the leader and watch a real election happen -- then flip <code>unclean.leader.election.enable</code> and watch the exact same failure produce a different, riskier outcome. This is the CAP theorem's AP/CP choice, as an actual Kafka config knob instead of an abstract policy toggle.</div>
+
+  <div class="kfkr-controls">
+    <label>Producer acks:
+      <select id="kfkrAcksSelect">
+        <option value="all">all (wait for ISR)</option>
+        <option value="1">1 (leader only)</option>
+      </select>
+    </label>
+    <button class="kfkr-btn" id="kfkrProduceBtn">Produce a message</button>
+    <label><input type="checkbox" id="kfkrUncleanCheckbox"> unclean.leader.election.enable</label>
+    <button class="kfkr-btn secondary" id="kfkrResetBtn">Reset</button>
+  </div>
+
+  <div class="kfkr-stat-line">
+    <span><span class="k">min.insync.replicas</span> <span class="v" id="kfkrMinIsrStat">--</span></span>
+    <span><span class="k">Current ISR</span> <span class="v" id="kfkrIsrStat">--</span></span>
+    <span><span class="k">Current leader</span> <span class="v" id="kfkrLeaderStat">--</span></span>
+  </div>
+
+  <div class="kfkr-no-leader" id="kfkrNoLeaderBanner">
+    <span>⚠ This partition has NO leader. Every produce request will be rejected until a new leader is elected.</span>
+    <button class="kfkr-btn small warn" id="kfkrElectBtn">Attempt Leader Election</button>
+  </div>
+
+  <div class="kfkr-brokers" id="kfkrBrokers"></div>
+
+  <div class="kfkr-produce-result" id="kfkrProduceResult"></div>
+
+  <div class="kfkr-log-box">
+    <div class="kfkr-panel-title">Event log</div>
+    <div class="kfkr-log" id="kfkrLog"></div>
+  </div>
+
+  <details class="kfkr-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>This is a real Kafka config, not a widget-only toggle.</b>
+        <code>unclean.leader.election.enable</code> defaulted to <code>true</code>
+        in early Kafka and was flipped to <code>false</code> in Kafka 0.11
+        (2017, KIP-106) specifically because the old default silently
+        favored availability over durability, catching operators off
+        guard. It ships <code>false</code> in every Kafka release since.</li>
+      <li><b>Killing the leader triggers an election automatically</b> --
+        exactly like this widget does it -- because Kafka's controller
+        continuously watches broker liveness and reacts the moment the
+        current leader stops being reachable. You never have to ask for an
+        election explicitly unless the partition is already leaderless and
+        you're retrying (the "Attempt Leader Election" button above only
+        appears in that situation).</li>
+      <li><b>A rejoining broker doesn't just "catch up" -- it can get
+        truncated.</b> Force an unclean election, then click "Restart" on
+        the old leader: notice it comes back holding messages the new
+        leader doesn't have. Click "Catch Up" and watch its log shrink
+        down to match the new leader's, not grow -- those extra messages
+        are discarded, not merged. This is real Kafka replication
+        protocol behavior (a follower truncates to the leader's log before
+        fetching forward), not a simplification.</li>
+      <li>This is the exact same tradeoff as the
+        <a href="cap_theorem_interactive.html">CAP theorem widget</a>,
+        wearing Kafka's real names: leaving <code>unclean.leader.election.enable</code>
+        off is the CP choice (refuse to serve rather than risk silently
+        losing acknowledged data); turning it on is the AP choice (restore
+        availability immediately, accept the data-loss risk).
+        <code>min.insync.replicas</code> paired with <code>acks=all</code>
+        is Kafka's other CP-leaning knob -- it rejects a write outright
+        rather than accept one that isn't durably replicated widely enough,
+        the same shape of refusal the CAP widget's CP mode makes for reads
+        and writes during a partition.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===KAFKA-REPL-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function makeReplicatedPartition(brokerIds) {
+      const log = {};
+      brokerIds.forEach(b => { log[b] = []; });
+      return {
+        brokerIds: [...brokerIds],
+        leaderId: brokerIds[0],
+        priorLeaderId: null,
+        log,
+        downBrokers: new Set(),
+        laggingBrokers: new Set(),
+        minInsyncReplicas: 2,
+        uncleanElectionEnabled: false,
+      };
+    }
+    function isrOf(state) {
+      if (!state.leaderId || state.downBrokers.has(state.leaderId)) return [];
+      const leaderLen = state.log[state.leaderId].length;
+      return state.brokerIds.filter(b => {
+        if (state.downBrokers.has(b)) return false;
+        if (b === state.leaderId) return true;
+        if (state.laggingBrokers.has(b)) return false;
+        return state.log[b].length === leaderLen;
+      });
+    }
+    function caughtUpFollowers(state, leaderId) {
+      if (!leaderId) return [];
+      const leaderLen = state.log[leaderId].length;
+      return state.brokerIds.filter(b => {
+        if (b === leaderId) return false;
+        if (state.downBrokers.has(b)) return false;
+        if (state.laggingBrokers.has(b)) return false;
+        return state.log[b].length === leaderLen;
+      });
+    }
+    function produce(state, value, acks) {
+      if (!state.leaderId || state.downBrokers.has(state.leaderId)) {
+        return { ok: false, reason: 'NO_LEADER' };
+      }
+      const isr = isrOf(state);
+      if (acks === 'all' && isr.length < state.minInsyncReplicas) {
+        return { ok: false, reason: 'NOT_ENOUGH_REPLICAS' };
+      }
+      state.log[state.leaderId].push(value);
+      state.brokerIds.forEach(b => {
+        if (b === state.leaderId) return;
+        if (state.downBrokers.has(b)) return;
+        if (state.laggingBrokers.has(b)) return;
+        state.log[b].push(value);
+      });
+      return { ok: true, acknowledgedBy: acks === 'all' ? isr.length : 1 };
+    }
+    function markDown(state, brokerId) { state.downBrokers.add(brokerId); }
+    function markUp(state, brokerId) { state.downBrokers.delete(brokerId); }
+    function markLagging(state, brokerId) { state.laggingBrokers.add(brokerId); }
+    function catchUp(state, brokerId) {
+      state.laggingBrokers.delete(brokerId);
+      if (state.leaderId && !state.downBrokers.has(state.leaderId)) {
+        state.log[brokerId] = [...state.log[state.leaderId]];
+      }
+    }
+    function electLeader(state) {
+      const oldLeaderId = state.leaderId !== null ? state.leaderId : state.priorLeaderId;
+      const candidates = caughtUpFollowers(state, oldLeaderId);
+      if (candidates.length > 0) {
+        const winner = candidates.slice().sort()[0];
+        state.leaderId = winner;
+        state.priorLeaderId = null;
+        return { ok: true, newLeaderId: winner, clean: true, dataLoss: false, lostMessages: [] };
+      }
+      if (!state.uncleanElectionEnabled) {
+        state.leaderId = null;
+        state.priorLeaderId = oldLeaderId;
+        return { ok: false, reason: 'NO_ISR_LEADER_AVAILABLE' };
+      }
+      const upBrokers = state.brokerIds.filter(b => b !== oldLeaderId && !state.downBrokers.has(b));
+      if (upBrokers.length === 0) {
+        state.leaderId = null;
+        state.priorLeaderId = oldLeaderId;
+        return { ok: false, reason: 'ALL_REPLICAS_DOWN' };
+      }
+      const winner = upBrokers.slice().sort((a, b) => state.log[b].length - state.log[a].length)[0];
+      const oldLeaderFinalLog = oldLeaderId ? state.log[oldLeaderId] : [];
+      const lostMessages = oldLeaderFinalLog.slice(state.log[winner].length);
+      state.leaderId = winner;
+      state.priorLeaderId = null;
+      return { ok: true, newLeaderId: winner, clean: false, dataLoss: lostMessages.length > 0, lostMessages };
+    }
+    // ===KAFKA-REPL-MODEL-END===
+
+    const BROKERS = ['B1', 'B2', 'B3'];
+
+    const root = document.getElementById('kfkrWidget');
+    const acksSelect = document.getElementById('kfkrAcksSelect');
+    const produceBtn = document.getElementById('kfkrProduceBtn');
+    const uncleanCheckbox = document.getElementById('kfkrUncleanCheckbox');
+    const resetBtn = document.getElementById('kfkrResetBtn');
+    const minIsrStat = document.getElementById('kfkrMinIsrStat');
+    const isrStat = document.getElementById('kfkrIsrStat');
+    const leaderStat = document.getElementById('kfkrLeaderStat');
+    const noLeaderBanner = document.getElementById('kfkrNoLeaderBanner');
+    const electBtn = document.getElementById('kfkrElectBtn');
+    const brokersEl = document.getElementById('kfkrBrokers');
+    const produceResultEl = document.getElementById('kfkrProduceResult');
+    const logEl = document.getElementById('kfkrLog');
+
+    let state, msgCounter;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function init() {
+      state = makeReplicatedPartition(BROKERS);
+      msgCounter = 0;
+      uncleanCheckbox.checked = false;
+      logEl.innerHTML = '';
+      produceResultEl.textContent = '';
+      produceResultEl.className = 'kfkr-produce-result';
+      log('Reset. B1 is leader, all 3 brokers in sync.', null);
+      render();
+    }
+
+    function render() {
+      const isr = isrOf(state);
+      minIsrStat.textContent = state.minInsyncReplicas;
+      isrStat.textContent = isr.length + ' / ' + BROKERS.length + ' (' + isr.join(', ') + ')';
+      leaderStat.textContent = state.leaderId || '(none)';
+      noLeaderBanner.classList.toggle('show', state.leaderId === null);
+
+      brokersEl.innerHTML = '';
+      BROKERS.forEach(id => {
+        const isLeader = id === state.leaderId;
+        const isDown = state.downBrokers.has(id);
+        const inIsr = isr.includes(id);
+        const isLagging = state.laggingBrokers.has(id);
+
+        const card = document.createElement('div');
+        card.className = 'kfkr-broker' + (isLeader ? ' leader' : '') + (isDown ? ' down' : '');
+
+        let pill;
+        if (isDown) pill = '<span class="kfkr-pill down">down</span>';
+        else if (isLeader) pill = '<span class="kfkr-pill leader">leader</span>';
+        else if (inIsr) pill = '<span class="kfkr-pill isr">in ISR</span>';
+        else pill = '<span class="kfkr-pill out-isr">out of ISR</span>';
+
+        let actions = '';
+        if (isDown) {
+          actions = '<button class="kfkr-btn small" data-action="up" data-broker="' + id + '">Restart</button>';
+        } else {
+          actions = '<button class="kfkr-btn small danger" data-action="down" data-broker="' + id + '">Kill</button>';
+          if (!isLeader) {
+            if (isLagging || !inIsr) {
+              actions += '<button class="kfkr-btn small" data-action="catchup" data-broker="' + id + '">Catch Up</button>';
+            } else {
+              actions += '<button class="kfkr-btn small secondary" data-action="lag" data-broker="' + id + '">Simulate Lag</button>';
+            }
+          }
+        }
+
+        const msgs = state.log[id];
+        const logHtml = msgs.length
+          ? msgs.map(m => '<span>' + m + '</span>').join(', ')
+          : '<span class="empty">(empty)</span>';
+
+        card.innerHTML =
+          '<div class="kfkr-broker-head"><span class="kfkr-broker-name">' + id + '</span>' + pill + '</div>' +
+          '<div class="kfkr-broker-actions">' + actions + '</div>' +
+          '<div class="kfkr-broker-log">' + logHtml + '</div>';
+        brokersEl.appendChild(card);
+      });
+    }
+
+    function doProduce() {
+      const acks = acksSelect.value;
+      const value = 'm' + (++msgCounter);
+      const result = produce(state, value, acks);
+      if (result.ok) {
+        produceResultEl.textContent = '✓ Produced "' + value + '" (acks=' + acks + ') -- acknowledged by ' + result.acknowledgedBy + ' replica(s).';
+        produceResultEl.className = 'kfkr-produce-result ok';
+        log('Produced "' + value + '" with acks=' + acks + ' -- OK, acknowledged by ' + result.acknowledgedBy + ' replica(s).', 'good');
+      } else {
+        msgCounter--; // no message was actually produced
+        produceResultEl.textContent = '✗ REJECTED: ' + result.reason;
+        produceResultEl.className = 'kfkr-produce-result rejected';
+        log('Produce REJECTED (acks=' + acks + '): ' + result.reason, 'bad');
+      }
+      render();
+    }
+
+    function doElect() {
+      const result = electLeader(state);
+      if (result.ok) {
+        if (result.clean) {
+          log('Election: ' + result.newLeaderId + ' became leader (clean -- chosen from the ISR, no data lost).', 'good');
+        } else {
+          const lost = result.lostMessages.length ? result.lostMessages.join(', ') : '(none, coincidentally)';
+          log('Election: ' + result.newLeaderId + ' became leader (UNCLEAN -- not in the ISR). Lost messages: ' + lost + '.', result.dataLoss ? 'bad' : 'warn');
+        }
+      } else {
+        log('Election FAILED (' + result.reason + '). Partition remains leaderless.', 'bad');
+      }
+      render();
+    }
+
+    function doKill(id) {
+      const wasLeader = id === state.leaderId;
+      markDown(state, id);
+      log(id + ' killed.', 'warn');
+      if (wasLeader) {
+        log(id + ' was the leader -- triggering automatic election...', 'warn');
+        doElect();
+        return;
+      }
+      render();
+    }
+
+    function doUp(id) {
+      markUp(state, id);
+      log(id + ' restarted. Holding its own log until it catches up (if behind).', null);
+      render();
+    }
+
+    function doLag(id) {
+      markLagging(state, id);
+      log(id + ' is now lagging -- it will stop receiving replicated writes until it catches up.', 'warn');
+      render();
+    }
+
+    function doCatchUp(id) {
+      catchUp(state, id);
+      log(id + ' caught up to the current leader\'s log exactly (extended or truncated as needed).', 'good');
+      render();
+    }
+
+    produceBtn.addEventListener('click', doProduce);
+    electBtn.addEventListener('click', doElect);
+    resetBtn.addEventListener('click', init);
+    uncleanCheckbox.addEventListener('change', () => {
+      state.uncleanElectionEnabled = uncleanCheckbox.checked;
+      log('unclean.leader.election.enable set to ' + state.uncleanElectionEnabled + '.', null);
+    });
+
+    brokersEl.addEventListener('click', ev => {
+      const btn = ev.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = btn.dataset.broker;
+      const action = btn.dataset.action;
+      if (action === 'down') doKill(id);
+      else if (action === 'up') doUp(id);
+      else if (action === 'lag') doLag(id);
+      else if (action === 'catchup') doCatchUp(id);
+    });
+
+    init();
+  })();
+  </script>
+</div>

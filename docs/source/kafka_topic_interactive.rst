@@ -71,6 +71,20 @@ Key Terms
    * - Broker
      - A Kafka server that stores partitions
      - The post office building itself
+   * - Leader
+     - The one replica of a partition that all reads and writes
+       actually go through
+     - The one mail slot clerks and customers actually use
+   * - Follower
+     - A replica that continuously copies the leader, ready to take
+       over if it fails
+     - A backup clerk shadowing the main one, ready to take the
+       counter
+   * - ISR (in-sync replicas)
+     - The subset of replicas caught up closely enough to the leader
+       to be trusted with taking over
+     - Backup clerks who've actually kept up with today's mail, not
+       ones who wandered off
 
 The One Idea Everything Else Builds On
 ---------------------------------------------
@@ -158,6 +172,56 @@ When to Use Kafka (and When Not To)
        (analytics, a dashboard, an alerting system) at once
      - Data that rarely changes -- a database already fits that better
 
+Replication and Leader Election
+--------------------------------------
+
+Everything above treats a partition as if it just lives on one broker
+forever. In production it's replicated across several, and that
+replication has its own state machine -- one broker is the **leader**
+for a given partition (every read and write for that partition goes
+through it), the rest are **followers** that continuously fetch from
+the leader to stay caught up. The set of replicas caught up closely
+enough to be trustworthy is the **ISR** (in-sync replicas). When the
+leader dies, one of two things happens, and which one is a config
+choice, not an accident:
+
+Play With It: Kill the Leader
+--------------------------------------
+
+.. raw:: html
+   :file: _static/kafka_replication_widget.html
+
+Kill the leader with **unclean.leader.election.enable** off (the
+default, and has been since Kafka 0.11) and, if no follower was fully
+caught up, the partition simply goes **unavailable** for writes rather
+than risk silently losing data -- notice the banner and the rejected
+produces. Turn the checkbox on, kill the leader again under the same
+lagging-follower setup, and this time a stale replica gets promoted
+anyway: the partition stays available, but whatever the old leader had
+that the new one doesn't is gone. Read that back and it's exactly the
+:doc:`CAP theorem <cap_theorem_interactive>` widget's AP-vs-CP choice,
+under its real Kafka name -- refuse and stay correct, or serve and risk
+correctness, decided per-partition by a config flag most people never
+look at until an outage forces the question. ``min.insync.replicas``
+paired with ``acks=all`` is Kafka's other half of that same choice,
+enforced on the write path instead of the failover path: it rejects a
+write outright the instant the ISR can't durably absorb it, rather
+than ever accepting one it can't back up.
+
+Reading the Log Divergence
+--------------------------------
+
+After forcing an unclean election, restart the deposed old leader and
+click **Catch Up** on it. Its log doesn't grow to merge with the new
+leader's -- it gets **truncated** down to match, even though the old
+leader objectively had more messages. That's real Kafka replication
+protocol behavior, not a simplification for this widget: a follower
+always truncates its own log to the current leader's before fetching
+forward, because the leader's log is authoritative by definition,
+regardless of which broker has "more" data sitting on disk. Whatever
+got discarded wasn't secretly kept anywhere -- it's exactly the
+messages the election result already told you were lost.
+
 A Minimal Real Producer and Consumer
 -------------------------------------------
 
@@ -204,3 +268,9 @@ See :doc:`hash_load_balancer_interactive` and
 several owners by hashing a key" idea applied to load balancing rather
 than a message log -- the underlying trade-off (same key, same owner,
 every time) is the same one driving Kafka's partitioning here.
+
+See :doc:`cap_theorem_interactive` for the abstract version of the
+availability-vs-consistency choice the replication widget above makes
+concrete -- same tradeoff, same "which side gets to keep serving"
+question, worked through on a real 2-node store instead of a Kafka
+partition.

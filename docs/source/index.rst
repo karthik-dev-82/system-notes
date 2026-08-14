@@ -432,8 +432,8 @@ Concurrency & Distributed Systems
      - Hash-based load balancing, sticky sessions, and consistent hashing
      - modulo hashing, session affinity, CDN routing, reshuffling problem
    * - :doc:`kafka_topic_interactive`
-     - Interactive Kafka topic -- send keyed readings, watch partition routing, poll with consumer groups, rebalance live
-     - partitions, consumer groups, offsets, rebalancing, replay
+     - Interactive Kafka topic -- send keyed readings, watch partition routing, poll with consumer groups, rebalance live -- plus kill the leader and watch real replication and clean vs. unclean election
+     - partitions, consumer groups, offsets, rebalancing, replay, ISR, leader election, unclean.leader.election.enable
    * - :doc:`priority_inversion_interactive`
      - Interactive priority inversion -- the bug that nearly stranded Mars Pathfinder, and the priority-inheritance fix, side by side
      - preemption, mutex, priority inheritance, real-time scheduling

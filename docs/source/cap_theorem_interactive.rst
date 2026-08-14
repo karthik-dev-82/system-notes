@@ -157,9 +157,8 @@ Where This Shows Up
   the set of nodes changes. That's a related but distinct problem from
   this page's question, which is what a node does when it can't reach
   the *other* node it needs to stay consistent with.
-* See :doc:`kafka_topic_interactive` for a related but simpler
-  ownership rule: each partition's log is owned by exactly one broker
-  at a time. That page doesn't cover Kafka's own leader-election/ISR
-  machinery for choosing that broker, but the underlying idea --
-  "exactly one owner at a time, decided by majority agreement" -- is
-  the same shape as the quorum widget above.
+* See :doc:`kafka_topic_interactive` for this exact AP-vs-CP choice
+  wearing real production names: Kafka's ``unclean.leader.election.enable``
+  flag is this page's CP/AP toggle, and ``min.insync.replicas`` is its
+  version of a quorum requirement, both enforced on a real replicated
+  log instead of an abstract 2-node store.
