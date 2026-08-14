@@ -1,0 +1,355 @@
+<div class="bf-root" id="bfWidget">
+  <style>
+    #bfWidget {
+      --bf-bg: #0f172a;
+      --bf-panel: #16213e;
+      --bf-border: #2a3655;
+      --bf-text: #e2e8f0;
+      --bf-muted: #94a3b8;
+      --bf-good: #4ade80;
+      --bf-bad: #f87171;
+      --bf-warn: #fbbf24;
+      --bf-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--bf-bg);
+      color: var(--bf-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #bfWidget * { box-sizing: border-box; }
+    #bfWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #bfWidget .bf-sub { color: var(--bf-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .bf-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--bf-panel); border: 1px solid var(--bf-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .bf-controls label { font-size: 0.8rem; color: var(--bf-muted); display: flex; align-items: center; gap: 8px; }
+    .bf-controls input[type="range"] { width: 110px; accent-color: var(--bf-accent); }
+    .bf-btn { background: var(--bf-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .bf-btn.secondary { background: transparent; color: var(--bf-text); border: 1px solid var(--bf-border); }
+
+    .bf-grid-box { background: var(--bf-panel); border: 1px solid var(--bf-border); border-radius: 10px; padding: 14px; min-width: 950px; margin-bottom: 16px; }
+    .bf-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--bf-muted); margin-bottom: 8px; }
+    .bf-grid { display: flex; flex-wrap: wrap; gap: 3px; }
+    .bf-bit { width: 16px; height: 16px; border-radius: 3px; background: #0a1128; border: 1px solid var(--bf-border); }
+    .bf-bit.set { background: var(--bf-accent); border-color: var(--bf-accent); }
+    .bf-bit.set.flash { animation: bfFlash 0.9s ease-out; }
+    @keyframes bfFlash { 0% { background: #fff; } 100% { background: var(--bf-accent); } }
+
+    .bf-row { display: flex; gap: 16px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .bf-box { flex: 1; min-width: 300px; background: var(--bf-panel); border: 1px solid var(--bf-border); border-radius: 10px; padding: 14px; }
+
+    .bf-action-row { display: flex; gap: 6px; margin-bottom: 8px; }
+    .bf-action-row input { flex: 1; min-width: 0; background: #0a1128; border: 1px solid var(--bf-border); border-radius: 6px; color: var(--bf-text); padding: 6px 8px; font-size: 0.82rem; }
+    .bf-result { font-size: 0.82rem; font-family: ui-monospace, monospace; min-height: 20px; margin-top: 4px; }
+    .bf-result.maybe-true { color: var(--bf-good); }
+    .bf-result.maybe-false { color: var(--bf-bad); font-weight: 700; }
+    .bf-result.no { color: var(--bf-muted); }
+
+    .bf-words { font-size: 0.75rem; color: var(--bf-muted); font-family: ui-monospace, monospace; max-height: 80px; overflow-y: auto; line-height: 1.6; }
+    .bf-words span { display: inline-block; background: rgba(56,189,248,0.12); color: #bae6fd; border-radius: 4px; padding: 1px 6px; margin: 2px; }
+
+    .bf-stat-line { display: flex; justify-content: space-between; font-size: 0.82rem; padding: 4px 0; border-bottom: 1px solid var(--bf-border); }
+    .bf-stat-line:last-child { border-bottom: none; }
+    .bf-stat-line .k { color: var(--bf-muted); }
+    .bf-stat-line .v { font-family: ui-monospace, monospace; font-weight: 700; color: #fff; }
+
+    details.bf-notes { margin-top: 4px; background: var(--bf-panel); border: 1px solid var(--bf-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.bf-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.bf-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--bf-muted); }
+    details.bf-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--bf-accent); }
+  </style>
+
+  <h3>Bloom Filter: Play With It</h3>
+  <div class="bf-sub">A real bit array and two real hash functions, combined into <code>k</code> independent-acting probes. Add words, test words, and watch it do the one thing a Bloom filter promises: it can lie and say "maybe" about something you never added, but it can never say "no" about something you did.</div>
+
+  <div class="bf-controls">
+    <label>Bit array size (m): <span id="bfMVal">64</span>
+      <input type="range" id="bfMSlider" min="16" max="160" step="8" value="64">
+    </label>
+    <label>Hash functions (k): <span id="bfKVal">3</span>
+      <input type="range" id="bfKSlider" min="1" max="8" step="1" value="3">
+    </label>
+    <button class="bf-btn secondary" id="bfResetBtn">Reset</button>
+  </div>
+
+  <div class="bf-grid-box">
+    <div class="bf-panel-title">Bit array (<span id="bfSetCount">0</span> / <span id="bfMVal2">64</span> bits set)</div>
+    <div class="bf-grid" id="bfGrid"></div>
+  </div>
+
+  <div class="bf-row">
+    <div class="bf-box">
+      <div class="bf-panel-title">Add a word</div>
+      <div class="bf-action-row">
+        <input type="text" id="bfAddInput" placeholder="word to insert...">
+        <button class="bf-btn" id="bfAddBtn">Add</button>
+      </div>
+      <div class="bf-panel-title" style="margin-top:10px;">Inserted so far</div>
+      <div class="bf-words" id="bfWords"></div>
+    </div>
+    <div class="bf-box">
+      <div class="bf-panel-title">Test a word</div>
+      <div class="bf-action-row">
+        <input type="text" id="bfTestInput" placeholder="word to test...">
+        <button class="bf-btn" id="bfTestBtn">Test</button>
+      </div>
+      <div class="bf-result" id="bfTestResult"></div>
+      <button class="bf-btn secondary" id="bfProbeBtn" style="margin-top:10px;">Run 2,000 Random Probes</button>
+    </div>
+    <div class="bf-box">
+      <div class="bf-panel-title">False-positive rate: measured vs. predicted</div>
+      <div class="bf-stat-line"><span class="k">Formula: p ≈ (1 - e^(-kn/m))^k</span><span class="v" id="bfFormulaVal">0%</span></div>
+      <div class="bf-stat-line"><span class="k">Probes run</span><span class="v" id="bfProbeCount">0</span></div>
+      <div class="bf-stat-line"><span class="k">False positives observed</span><span class="v" id="bfFPCount">0</span></div>
+      <div class="bf-stat-line"><span class="k">Measured rate</span><span class="v" id="bfMeasuredRate">--</span></div>
+    </div>
+  </div>
+
+  <details class="bf-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>No false negatives is a structural guarantee, not a probability.</b>
+        Once a word's <code>k</code> bits are set, they can only ever be set --
+        nothing in this data structure ever clears a bit. So a word you added
+        will test positive forever, no matter how many other words get added
+        after it. False positives, in contrast, are a real possibility any
+        time enough <i>other</i> insertions happen to set all of some other
+        word's <code>k</code> bits by coincidence.</li>
+      <li>Drag <b>m</b> down or <b>k</b> up (past the useful point) after adding
+        a few dozen words and watch the measured false-positive rate climb --
+        a smaller array or worse hash-count choice runs out of "room" to stay
+        selective. There's a real optimal <code>k</code> for a given
+        <code>m/n</code> ratio (<code>k = (m/n) ln 2</code>); too few wastes
+        the array's capacity to discriminate, too many sets bits faster than
+        it gains anything.</li>
+      <li>The two hash functions here (FNV-1a and djb2) are real, standard
+        string hashes -- the same FNV-1a used on this site's
+        <a href="consistent_hashing_interactive.html">consistent hashing</a> page. The
+        <code>k</code> "independent" hash functions are actually derived from
+        just these two, combined as <code>h_i(x) = h1(x) + i * h2(x)</code> --
+        a real, standard technique called Kirsch-Mitzenmacher double hashing,
+        not a shortcut specific to this demo. It's provably about as good as
+        <code>k</code> genuinely independent hash functions for this purpose.</li>
+      <li>Real systems use exactly this structure to avoid expensive lookups:
+        Chrome's Safe Browsing used one to avoid a network round-trip for
+        every URL that's <i>obviously</i> not malicious; Cassandra and
+        HBase use one per SSTable to skip disk reads for a key that's
+        <i>obviously</i> not there; Bitcoin light clients used one to filter
+        which blocks are worth downloading in full.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===BLOOM-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function fnv1aHash(str) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) {
+        h ^= str.charCodeAt(i);
+        h = Math.imul(h, 0x01000193);
+      }
+      return h >>> 0;
+    }
+    function djb2Hash(str) {
+      let h = 5381;
+      for (let i = 0; i < str.length; i++) {
+        h = ((h << 5) + h) + str.charCodeAt(i);
+      }
+      return h >>> 0;
+    }
+    function makeBloom(m, k) {
+      return { m, k, bits: new Uint8Array(m), inserted: 0 };
+    }
+    function hashPositions(str, m, k) {
+      const h1 = fnv1aHash(str);
+      const h2 = djb2Hash(str) || 1;
+      const positions = [];
+      for (let i = 0; i < k; i++) {
+        positions.push(((h1 + i * h2) >>> 0) % m);
+      }
+      return positions;
+    }
+    function add(filter, str) {
+      const positions = hashPositions(str, filter.m, filter.k);
+      positions.forEach(p => { filter.bits[p] = 1; });
+      filter.inserted += 1;
+      return positions;
+    }
+    function mightContain(filter, str) {
+      const positions = hashPositions(str, filter.m, filter.k);
+      return positions.every(p => filter.bits[p] === 1);
+    }
+    function estimatedFalsePositiveRate(m, k, n) {
+      return Math.pow(1 - Math.exp(-k * n / m), k);
+    }
+    // ===BLOOM-MODEL-END===
+
+    const root = document.getElementById('bfWidget');
+    const mSlider = document.getElementById('bfMSlider');
+    const kSlider = document.getElementById('bfKSlider');
+    const mVal = document.getElementById('bfMVal');
+    const mVal2 = document.getElementById('bfMVal2');
+    const kVal = document.getElementById('bfKVal');
+    const resetBtn = document.getElementById('bfResetBtn');
+    const grid = document.getElementById('bfGrid');
+    const setCountEl = document.getElementById('bfSetCount');
+    const addInput = document.getElementById('bfAddInput');
+    const addBtn = document.getElementById('bfAddBtn');
+    const wordsEl = document.getElementById('bfWords');
+    const testInput = document.getElementById('bfTestInput');
+    const testBtn = document.getElementById('bfTestBtn');
+    const testResult = document.getElementById('bfTestResult');
+    const probeBtn = document.getElementById('bfProbeBtn');
+    const formulaVal = document.getElementById('bfFormulaVal');
+    const probeCountEl = document.getElementById('bfProbeCount');
+    const fpCountEl = document.getElementById('bfFPCount');
+    const measuredRateEl = document.getElementById('bfMeasuredRate');
+
+    let m, k, filter, insertedWords, probesRun, falsePositivesObserved;
+
+    function init() {
+      m = parseInt(mSlider.value, 10);
+      k = parseInt(kSlider.value, 10);
+      filter = makeBloom(m, k);
+      insertedWords = new Set();
+      probesRun = 0;
+      falsePositivesObserved = 0;
+      testResult.textContent = '';
+      testResult.className = 'bf-result';
+      buildGrid();
+      renderWords();
+      renderStats();
+    }
+
+    function buildGrid() {
+      grid.innerHTML = '';
+      for (let i = 0; i < m; i++) {
+        const cell = document.createElement('div');
+        cell.className = 'bf-bit';
+        cell.id = 'bfBit-' + i;
+        grid.appendChild(cell);
+      }
+      mVal2.textContent = m;
+    }
+
+    function renderGridBits(highlightPositions) {
+      for (let i = 0; i < m; i++) {
+        const cell = document.getElementById('bfBit-' + i);
+        const isSet = filter.bits[i] === 1;
+        cell.className = 'bf-bit' + (isSet ? ' set' : '');
+      }
+      if (highlightPositions) {
+        highlightPositions.forEach(p => {
+          const cell = document.getElementById('bfBit-' + p);
+          cell.classList.add('flash');
+          setTimeout(() => cell.classList.remove('flash'), 900);
+        });
+      }
+      const setCount = filter.bits.reduce((a, b) => a + b, 0);
+      setCountEl.textContent = setCount;
+    }
+
+    function renderWords() {
+      wordsEl.innerHTML = '';
+      if (insertedWords.size === 0) {
+        const placeholder = document.createElement('span');
+        placeholder.style.cssText = 'background:none;color:var(--bf-muted);padding:0;';
+        placeholder.textContent = '(none yet)';
+        wordsEl.appendChild(placeholder);
+        return;
+      }
+      insertedWords.forEach(w => {
+        const tag = document.createElement('span');
+        tag.textContent = w; // textContent, not innerHTML -- user input must never be parsed as markup
+        wordsEl.appendChild(tag);
+      });
+    }
+
+    function renderStats() {
+      mVal.textContent = m;
+      kVal.textContent = k;
+      const predicted = estimatedFalsePositiveRate(m, k, insertedWords.size);
+      formulaVal.textContent = (predicted * 100).toFixed(2) + '% (n=' + insertedWords.size + ')';
+      probeCountEl.textContent = probesRun;
+      fpCountEl.textContent = falsePositivesObserved;
+      measuredRateEl.textContent = probesRun === 0 ? '--' : ((falsePositivesObserved / probesRun) * 100).toFixed(2) + '%';
+    }
+
+    function addWord() {
+      const word = addInput.value.trim();
+      if (!word) return;
+      const positions = add(filter, word);
+      insertedWords.add(word);
+      addInput.value = '';
+      renderGridBits(positions);
+      renderWords();
+      renderStats();
+    }
+
+    function classify(word) {
+      const positions = hashPositions(word, m, k);
+      const present = positions.every(p => filter.bits[p] === 1);
+      const groundTruth = insertedWords.has(word);
+      return { present, groundTruth, positions };
+    }
+
+    function testWord() {
+      const word = testInput.value.trim();
+      if (!word) return;
+      const { present, groundTruth, positions } = classify(word);
+      if (present && groundTruth) {
+        // A true positive isn't a "probe of absence" -- it can never be a
+        // false positive by construction, so it must NOT count toward the
+        // false-positive-rate statistics below, or repeatedly testing
+        // already-inserted words would silently dilute the measured rate.
+        testResult.textContent = '✓ "maybe in the set" -- and it genuinely is (true positive).';
+        testResult.className = 'bf-result maybe-true';
+      } else if (present && !groundTruth) {
+        testResult.textContent = '⚠ "maybe in the set" -- but it was NEVER added. FALSE POSITIVE.';
+        testResult.className = 'bf-result maybe-false';
+        falsePositivesObserved++;
+        probesRun++;
+      } else {
+        testResult.textContent = '✗ "definitely NOT in the set" -- correct, it was never added.';
+        testResult.className = 'bf-result no';
+        probesRun++;
+      }
+      renderGridBits(present ? positions : null);
+      renderStats();
+    }
+
+    function randomProbeWord(i) {
+      return 'probe-' + i + '-' + Math.random().toString(36).slice(2, 10);
+    }
+
+    function runManyProbes() {
+      const trials = 2000;
+      let localFP = 0, localRun = 0;
+      for (let i = 0; i < trials; i++) {
+        const word = randomProbeWord(probesRun + i);
+        if (insertedWords.has(word)) continue; // astronomically unlikely, but guard anyway
+        const { present } = classify(word);
+        localRun++;
+        if (present) localFP++;
+      }
+      probesRun += localRun;
+      falsePositivesObserved += localFP;
+      renderGridBits(null);
+      renderStats();
+    }
+
+    addBtn.addEventListener('click', addWord);
+    testBtn.addEventListener('click', testWord);
+    probeBtn.addEventListener('click', runManyProbes);
+    resetBtn.addEventListener('click', init);
+    mSlider.addEventListener('input', init);
+    kSlider.addEventListener('input', init);
+    addInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') addWord(); });
+    testInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') testWord(); });
+
+    init();
+  })();
+  </script>
+</div>

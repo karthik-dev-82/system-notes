@@ -121,6 +121,8 @@ worth writing down and coming back to.
    :caption: System Design
 
    cap_theorem_interactive
+   rate_limiting_interactive
+   bloom_filter_interactive
 
 .. toctree::
    :hidden:
@@ -450,6 +452,12 @@ System Design
    * - :doc:`cap_theorem_interactive`
      - Play With It: partition a 2-node store and choose Consistency or Availability, then see why quorum-based systems don't lose everyone
      - CAP theorem, partition tolerance, AP vs. CP, quorum, last-write-wins, strong vs. eventual consistency
+   * - :doc:`rate_limiting_interactive`
+     - Play With It: 5 rate-limiting algorithms fired at the same burst -- watch them disagree at the exact same moment
+     - token bucket, leaky bucket, fixed window, sliding window log, sliding window counter
+   * - :doc:`bloom_filter_interactive`
+     - Play With It: a real bit array and real hash functions -- add words, test words, measure false positives against the textbook formula
+     - bloom filter, false positive rate, double hashing, FNV-1a
 
 Robotics
 -----------------

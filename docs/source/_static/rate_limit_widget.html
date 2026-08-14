@@ -1,0 +1,355 @@
+<div class="rl-root" id="rlWidget">
+  <style>
+    #rlWidget {
+      --rl-bg: #0f172a;
+      --rl-panel: #16213e;
+      --rl-border: #2a3655;
+      --rl-text: #e2e8f0;
+      --rl-muted: #94a3b8;
+      --rl-good: #4ade80;
+      --rl-bad: #f87171;
+      --rl-warn: #fbbf24;
+      --rl-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rl-bg);
+      color: var(--rl-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #rlWidget * { box-sizing: border-box; }
+    #rlWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #rlWidget .rl-sub { color: var(--rl-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .rl-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--rl-panel); border: 1px solid var(--rl-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; min-width: 950px; }
+    .rl-controls label { font-size: 0.8rem; color: var(--rl-muted); display: flex; align-items: center; gap: 8px; }
+    .rl-controls input[type="range"] { width: 100px; accent-color: var(--rl-accent); }
+    .rl-btn { background: var(--rl-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; white-space: nowrap; }
+    .rl-btn.secondary { background: transparent; color: var(--rl-text); border: 1px solid var(--rl-border); }
+    .rl-btn.warn { background: var(--rl-warn); color: #2a1c00; }
+
+    .rl-preset-row { display: flex; flex-wrap: wrap; gap: 8px; min-width: 950px; margin-bottom: 16px; }
+
+    .rl-tip { min-width: 950px; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.3); border-radius: 10px; padding: 10px 14px; font-size: 0.8rem; color: #bae6fd; margin-bottom: 16px; line-height: 1.5; }
+    .rl-tip b { color: #fff; }
+
+    .rl-cards { display: flex; gap: 10px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .rl-card { flex: 1; min-width: 170px; background: var(--rl-panel); border: 1px solid var(--rl-border); border-radius: 10px; padding: 12px; }
+    .rl-card-title { font-size: 0.78rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+    .rl-card-pill { display: inline-block; font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 999px; margin-bottom: 8px; }
+    .rl-card-pill.last-allow { background: rgba(74,222,128,0.15); color: var(--rl-good); }
+    .rl-card-pill.last-deny { background: rgba(248,113,113,0.15); color: var(--rl-bad); }
+    .rl-card-pill.last-none { background: rgba(148,163,184,0.15); color: var(--rl-muted); }
+    .rl-bar-bg { height: 10px; background: #0a1128; border-radius: 4px; overflow: hidden; margin-bottom: 6px; }
+    .rl-bar-fill { height: 100%; border-radius: 4px; background: var(--rl-accent); transition: width 0.25s; }
+    .rl-card-detail { font-size: 0.72rem; color: var(--rl-muted); line-height: 1.5; font-family: ui-monospace, monospace; }
+
+    .rl-table-box { background: var(--rl-panel); border: 1px solid var(--rl-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 12px; }
+    .rl-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--rl-muted); margin-bottom: 8px; }
+    .rl-table-scroll { max-height: 260px; overflow-y: auto; }
+    table.rl-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    table.rl-table th, table.rl-table td { padding: 5px 8px; text-align: center; border-bottom: 1px solid var(--rl-border); }
+    table.rl-table th { color: var(--rl-muted); text-transform: uppercase; font-size: 0.65rem; letter-spacing: 0.04em; position: sticky; top: 0; background: var(--rl-panel); }
+    table.rl-table td:first-child, table.rl-table th:first-child { text-align: left; color: var(--rl-muted); }
+    table.rl-table td.ok { color: var(--rl-good); font-weight: 700; }
+    table.rl-table td.deny { color: var(--rl-bad); font-weight: 700; }
+    table.rl-table tfoot td { font-weight: 700; color: #fff; border-top: 2px solid var(--rl-border); border-bottom: none; }
+
+    details.rl-notes { margin-top: 4px; background: var(--rl-panel); border: 1px solid var(--rl-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.rl-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.rl-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--rl-muted); }
+    details.rl-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--rl-accent); }
+  </style>
+
+  <h3>Rate Limiting: 5 Algorithms, Same Burst</h3>
+  <div class="rl-sub">One configured budget -- N requests per window -- enforced five different ways. Fire the same request sequence at all five simultaneously and watch them disagree at the exact same moment.</div>
+
+  <div class="rl-tip"><b>Try this:</b> click <b>Boundary Burst</b> and watch Fixed Window let through roughly double the limit in a fraction of a second, while Sliding Log and Sliding Counter mostly catch it -- the classic reason fixed windows are considered unsafe at a shared edge.</div>
+
+  <div class="rl-controls">
+    <label>Limit: <span id="rlLimitVal">5</span>
+      <input type="range" id="rlLimitSlider" min="3" max="10" step="1" value="5">
+    </label>
+    <label>Window (ms): <span id="rlWindowVal">1000</span>
+      <input type="range" id="rlWindowSlider" min="500" max="2000" step="100" value="1000">
+    </label>
+    <button class="rl-btn" id="rlFireBtn">Fire 1 Request</button>
+    <button class="rl-btn secondary" id="rlAdvanceBtn">Advance Clock +500ms</button>
+    <button class="rl-btn secondary" id="rlResetBtn">Reset</button>
+    <span class="rl-card-detail" id="rlClock" style="margin-left:auto;">clock: 0ms</span>
+  </div>
+
+  <div class="rl-preset-row">
+    <button class="rl-btn warn" id="rlPresetBoundary">Boundary Burst</button>
+    <button class="rl-btn secondary" id="rlPresetSteady">Steady (within limit)</button>
+    <button class="rl-btn secondary" id="rlPresetSudden">Sudden Burst</button>
+    <button class="rl-btn secondary" id="rlPresetIdle">Idle, then Burst</button>
+  </div>
+
+  <div class="rl-cards" id="rlCards"></div>
+
+  <div class="rl-table-box">
+    <div class="rl-panel-title">Request-by-request comparison</div>
+    <div class="rl-table-scroll">
+      <table class="rl-table" id="rlTable">
+        <thead>
+          <tr><th>time (ms)</th><th>Token Bucket</th><th>Leaky Bucket</th><th>Fixed Window</th><th>Sliding Log</th><th>Sliding Counter</th></tr>
+        </thead>
+        <tbody id="rlTableBody"></tbody>
+        <tfoot><tr id="rlTotalsRow"><td>allowed / fired</td><td id="rlTotalToken"></td><td id="rlTotalLeaky"></td><td id="rlTotalFixed"></td><td id="rlTotalLog"></td><td id="rlTotalCounter"></td></tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <details class="rl-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Token bucket and leaky bucket, configured this way (capacity = limit,
+        refill/leak rate = limit/window), are mathematically dual</b> -- run
+        the same burst through both and they make identical allow/deny
+        decisions every time. The real production difference isn't the
+        admission decision at all: leaky bucket is usually implemented as an
+        actual queue that releases admitted requests at a constant output
+        rate (adding latency, but smoothing traffic downstream), while token
+        bucket just gates admission and lets accepted requests straight
+        through. This widget only models the admission decision, which is
+        why they read as identical here.</li>
+      <li><b>Fixed window's flaw is structural, not a tuning mistake:</b> it
+        resets its counter at fixed clock boundaries regardless of when
+        requests actually arrived, so up to <code>2 x limit</code> requests
+        can land in a window's worth of real time if they straddle a
+        boundary. Sliding log fixes this exactly, at the cost of storing
+        every timestamp in the window (unbounded-ish memory per client).
+        Sliding counter approximates the same fix in O(1) memory by
+        blending a weighted fraction of the previous window's count into
+        the current one.</li>
+      <li><b>Sliding counter's approximation has its own honest quirk</b>:
+        right at the very first instant of a new window, its formula still
+        counts the entire previous window's traffic as "fully present" (weight
+        1.0), even though a true sliding log would have already let the
+        oldest of those requests expire. Fire "Steady (within limit)" a few
+        times in a row and watch the counter occasionally read one stricter
+        than the log at the exact window boundary -- verified, not a
+        simplification.</li>
+      <li>All five are configured here to the same nominal budget so the
+        comparison is fair. In production, token bucket capacity is often
+        tuned independently of its refill rate specifically to allow bigger
+        bursts than the sustained rate -- a knob this widget intentionally
+        keeps locked to isolate the algorithmic difference.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===RATE-LIMIT-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function makeTokenBucket(capacity) { return { tokens: capacity, lastTime: 0 }; }
+    function tokenBucketCheck(state, t, capacity, ratePerMs) {
+      const elapsed = t - state.lastTime;
+      state.tokens = Math.min(capacity, state.tokens + elapsed * ratePerMs);
+      state.lastTime = t;
+      if (state.tokens >= 1) { state.tokens -= 1; return true; }
+      return false;
+    }
+    function makeLeakyBucket() { return { level: 0, lastTime: 0 }; }
+    function leakyBucketCheck(state, t, capacity, leakPerMs) {
+      const elapsed = t - state.lastTime;
+      state.level = Math.max(0, state.level - elapsed * leakPerMs);
+      state.lastTime = t;
+      if (capacity - state.level >= 1) { state.level += 1; return true; }
+      return false;
+    }
+    function makeFixedWindow() { return { windowIndex: -1, count: 0 }; }
+    function fixedWindowCheck(state, t, limit, windowMs) {
+      const idx = Math.floor(t / windowMs);
+      if (idx !== state.windowIndex) { state.windowIndex = idx; state.count = 0; }
+      if (state.count < limit) { state.count += 1; return true; }
+      return false;
+    }
+    function makeSlidingLog() { return { log: [] }; }
+    function slidingLogCheck(state, t, limit, windowMs) {
+      state.log = state.log.filter(ts => ts > t - windowMs);
+      if (state.log.length < limit) { state.log.push(t); return true; }
+      return false;
+    }
+    function makeSlidingCounter() { return { currentIndex: -1, currentCount: 0, prevCount: 0 }; }
+    function slidingCounterCheck(state, t, limit, windowMs) {
+      const idx = Math.floor(t / windowMs);
+      if (idx !== state.currentIndex) {
+        state.prevCount = (idx === state.currentIndex + 1) ? state.currentCount : 0;
+        state.currentIndex = idx;
+        state.currentCount = 0;
+      }
+      const elapsedIntoWindow = t - idx * windowMs;
+      const weight = 1 - elapsedIntoWindow / windowMs;
+      const estimate = state.prevCount * weight + state.currentCount;
+      if (estimate < limit) { state.currentCount += 1; return true; }
+      return false;
+    }
+    function peekTokenBucket(state, t, capacity, ratePerMs) {
+      return Math.min(capacity, state.tokens + Math.max(0, t - state.lastTime) * ratePerMs);
+    }
+    function peekLeakyBucket(state, t, capacity, leakPerMs) {
+      return Math.max(0, state.level - Math.max(0, t - state.lastTime) * leakPerMs);
+    }
+    function peekFixedWindow(state, t, windowMs) {
+      const idx = Math.floor(t / windowMs);
+      return idx === state.windowIndex ? state.count : 0;
+    }
+    function peekSlidingLog(state, t, windowMs) {
+      return state.log.filter(ts => ts > t - windowMs).length;
+    }
+    function peekSlidingCounter(state, t, windowMs) {
+      const idx = Math.floor(t / windowMs);
+      let prevCount = state.prevCount, currentCount = state.currentCount;
+      if (idx !== state.currentIndex) {
+        prevCount = (idx === state.currentIndex + 1) ? state.currentCount : 0;
+        currentCount = 0;
+      }
+      const elapsedIntoWindow = t - idx * windowMs;
+      const weight = 1 - elapsedIntoWindow / windowMs;
+      return prevCount * weight + currentCount;
+    }
+    // ===RATE-LIMIT-MODEL-END===
+
+    const ALGOS = [
+      { id: 'token', name: 'Token Bucket', make: makeTokenBucket, check: (s, t, limit, windowMs) => tokenBucketCheck(s, t, limit, limit / windowMs), room: (s, t, limit, windowMs) => peekTokenBucket(s, t, limit, limit / windowMs) },
+      { id: 'leaky', name: 'Leaky Bucket', make: () => makeLeakyBucket(), check: (s, t, limit, windowMs) => leakyBucketCheck(s, t, limit, limit / windowMs), room: (s, t, limit, windowMs) => limit - peekLeakyBucket(s, t, limit, limit / windowMs) },
+      { id: 'fixed', name: 'Fixed Window', make: () => makeFixedWindow(), check: (s, t, limit, windowMs) => fixedWindowCheck(s, t, limit, windowMs), room: (s, t, limit, windowMs) => limit - peekFixedWindow(s, t, windowMs) },
+      { id: 'log', name: 'Sliding Log', make: () => makeSlidingLog(), check: (s, t, limit, windowMs) => slidingLogCheck(s, t, limit, windowMs), room: (s, t, limit, windowMs) => limit - peekSlidingLog(s, t, windowMs) },
+      { id: 'counter', name: 'Sliding Counter', make: () => makeSlidingCounter(), check: (s, t, limit, windowMs) => slidingCounterCheck(s, t, limit, windowMs), room: (s, t, limit, windowMs) => limit - peekSlidingCounter(s, t, windowMs) },
+    ];
+
+    const root = document.getElementById('rlWidget');
+    const limitSlider = document.getElementById('rlLimitSlider');
+    const windowSlider = document.getElementById('rlWindowSlider');
+    const limitVal = document.getElementById('rlLimitVal');
+    const windowVal = document.getElementById('rlWindowVal');
+    const fireBtn = document.getElementById('rlFireBtn');
+    const advanceBtn = document.getElementById('rlAdvanceBtn');
+    const resetBtn = document.getElementById('rlResetBtn');
+    const clockEl = document.getElementById('rlClock');
+    const cardsEl = document.getElementById('rlCards');
+    const tableBody = document.getElementById('rlTableBody');
+
+    let limit, windowMs, clock, states, totals, lastResult;
+
+    function init() {
+      limit = parseInt(limitSlider.value, 10);
+      windowMs = parseInt(windowSlider.value, 10);
+      clock = 0;
+      states = {};
+      totals = {};
+      lastResult = {};
+      ALGOS.forEach(a => { states[a.id] = a.make(); totals[a.id] = { allowed: 0, fired: 0 }; lastResult[a.id] = null; });
+      tableBody.innerHTML = '';
+      buildCards();
+      render();
+    }
+
+    function buildCards() {
+      cardsEl.innerHTML = '';
+      ALGOS.forEach(a => {
+        const card = document.createElement('div');
+        card.className = 'rl-card';
+        card.id = 'rlCard-' + a.id;
+        card.innerHTML =
+          '<div class="rl-card-title">' + a.name + '</div>' +
+          '<div class="rl-card-pill last-none" id="rlPill-' + a.id + '">no requests yet</div>' +
+          '<div class="rl-bar-bg"><div class="rl-bar-fill" id="rlBar-' + a.id + '" style="width:0%"></div></div>' +
+          '<div class="rl-card-detail" id="rlDetail-' + a.id + '"></div>';
+        cardsEl.appendChild(card);
+      });
+    }
+
+    function render() {
+      limitVal.textContent = limit;
+      windowVal.textContent = windowMs;
+      clockEl.textContent = 'clock: ' + Math.round(clock) + 'ms';
+
+      ALGOS.forEach(a => {
+        const room = Math.max(0, Math.min(limit, a.room(states[a.id], clock, limit, windowMs)));
+        const pct = (room / limit) * 100;
+        document.getElementById('rlBar-' + a.id).style.width = pct + '%';
+        document.getElementById('rlBar-' + a.id).style.background = room >= 1 ? 'var(--rl-good)' : 'var(--rl-bad)';
+        document.getElementById('rlDetail-' + a.id).textContent = 'room: ' + room.toFixed(2) + ' / ' + limit;
+        const pill = document.getElementById('rlPill-' + a.id);
+        if (lastResult[a.id] === null) {
+          pill.textContent = 'no requests yet'; pill.className = 'rl-card-pill last-none';
+        } else if (lastResult[a.id]) {
+          pill.textContent = 'last request: allowed'; pill.className = 'rl-card-pill last-allow';
+        } else {
+          pill.textContent = 'last request: DENIED'; pill.className = 'rl-card-pill last-deny';
+        }
+      });
+
+      ALGOS.forEach(a => {
+        document.getElementById('rlTotal' + a.id[0].toUpperCase() + a.id.slice(1)).textContent =
+          totals[a.id].allowed + ' / ' + totals[a.id].fired;
+      });
+    }
+
+    function fireAt(t) {
+      clock = Math.max(clock, t);
+      const row = document.createElement('tr');
+      let html = '<td>' + Math.round(t) + '</td>';
+      ALGOS.forEach(a => {
+        const ok = a.check(states[a.id], t, limit, windowMs);
+        lastResult[a.id] = ok;
+        totals[a.id].fired += 1;
+        if (ok) totals[a.id].allowed += 1;
+        html += '<td class="' + (ok ? 'ok' : 'deny') + '">' + (ok ? '✓' : '✗') + '</td>';
+      });
+      row.innerHTML = html;
+      tableBody.appendChild(row);
+      tableBody.parentElement.parentElement.scrollTop = tableBody.parentElement.parentElement.scrollHeight;
+    }
+
+    function fireSequence(times) {
+      times.forEach(fireAt);
+      render();
+    }
+
+    function presetSteady() {
+      const interval = windowMs / limit;
+      const base = clock;
+      const times = Array.from({ length: limit }, (_, i) => base + i * interval);
+      fireSequence(times);
+    }
+
+    function presetSudden() {
+      const base = clock;
+      const times = Array.from({ length: limit + 3 }, (_, i) => base + i * 1);
+      fireSequence(times);
+    }
+
+    function presetBoundary() {
+      const nextBoundary = (Math.floor(clock / windowMs) + 1) * windowMs;
+      const times = [];
+      for (let i = 0; i < limit; i++) times.push(nextBoundary - (limit - i) * 2);
+      for (let i = 0; i < limit; i++) times.push(nextBoundary + i * 2 + 1);
+      fireSequence(times);
+    }
+
+    function presetIdle() {
+      clock += windowMs * 3;
+      const base = clock;
+      const times = Array.from({ length: limit + 3 }, (_, i) => base + i * 1);
+      fireSequence(times);
+    }
+
+    fireBtn.addEventListener('click', () => { fireSequence([clock]); clock += 1; render(); });
+    advanceBtn.addEventListener('click', () => { clock += 500; render(); });
+    resetBtn.addEventListener('click', init);
+    document.getElementById('rlPresetSteady').addEventListener('click', presetSteady);
+    document.getElementById('rlPresetSudden').addEventListener('click', presetSudden);
+    document.getElementById('rlPresetBoundary').addEventListener('click', presetBoundary);
+    document.getElementById('rlPresetIdle').addEventListener('click', presetIdle);
+    limitSlider.addEventListener('input', init);
+    windowSlider.addEventListener('input', init);
+
+    init();
+  })();
+  </script>
+</div>
