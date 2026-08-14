@@ -1,0 +1,293 @@
+<div class="shd-root" id="shdWidget">
+  <style>
+    #shdWidget {
+      --shd-bg: #0f172a;
+      --shd-panel: #16213e;
+      --shd-border: #2a3655;
+      --shd-text: #e2e8f0;
+      --shd-muted: #94a3b8;
+      --shd-good: #4ade80;
+      --shd-bad: #f87171;
+      --shd-warn: #fbbf24;
+      --shd-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--shd-bg);
+      color: var(--shd-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #shdWidget * { box-sizing: border-box; }
+    #shdWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #shdWidget .shd-sub { color: var(--shd-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .shd-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--shd-panel); border: 1px solid var(--shd-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .shd-controls input[type="number"] { width: 70px; background: #0a1128; color: var(--shd-text); border: 1px solid var(--shd-border); border-radius: 6px; padding: 6px 8px; font-size: 0.8rem; }
+    .shd-btn { background: var(--shd-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .shd-btn.secondary { background: transparent; color: var(--shd-text); border: 1px solid var(--shd-border); }
+    .shd-btn.warn { background: var(--shd-warn); color: #2a1c00; }
+    .shd-stat { font-size: 0.78rem; color: var(--shd-muted); font-family: ui-monospace, monospace; }
+
+    .shd-row { display: flex; gap: 14px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .shd-scheme { flex: 1; min-width: 440px; background: var(--shd-panel); border: 1px solid var(--shd-border); border-radius: 10px; padding: 12px 14px; }
+    .shd-scheme-title { font-weight: 700; color: #fff; font-size: 0.9rem; margin-bottom: 4px; }
+    .shd-scheme-sub { font-size: 0.72rem; color: var(--shd-muted); margin-bottom: 10px; }
+
+    .shd-shard-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; font-size: 0.76rem; font-family: ui-monospace, monospace; }
+    .shd-shard-label { width: 130px; flex-shrink: 0; color: var(--shd-muted); }
+    .shd-shard-bar-bg { flex: 1; height: 16px; background: #0a1128; border-radius: 4px; overflow: hidden; }
+    .shd-shard-bar-fill { height: 100%; border-radius: 4px; background: var(--shd-accent); transition: width 0.3s; }
+    .shd-shard-bar-fill.hot { background: var(--shd-bad); }
+    .shd-shard-count { width: 40px; text-align: right; }
+    .shd-shard-touched { outline: 2px solid var(--shd-good); }
+
+    .shd-log-box { background: var(--shd-panel); border: 1px solid var(--shd-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 12px; }
+    .shd-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--shd-muted); margin-bottom: 8px; }
+    .shd-log { height: 170px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .shd-log div { color: var(--shd-muted); }
+    .shd-log div.good { color: var(--shd-good); }
+    .shd-log div.bad { color: var(--shd-bad); }
+    .shd-log div.info { color: var(--shd-accent); }
+
+    details.shd-notes { margin-top: 4px; background: var(--shd-panel); border: 1px solid var(--shd-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.shd-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.shd-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--shd-muted); }
+    details.shd-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--shd-accent); }
+  </style>
+
+  <h3>Database Sharding: Play With It</h3>
+  <div class="shd-sub">The same stream of sequential primary keys (auto-increment IDs, 1, 2, 3, ...), written to two different sharding schemes at once. Watch where each key lands, then add a shard to each and see two completely different rebalancing operations.</div>
+
+  <div class="shd-controls">
+    <button class="shd-btn" id="shdInsertBtn">Insert Next 25 Keys</button>
+    <button class="shd-btn warn" id="shdAddShardBtn">Add a Shard (both schemes)</button>
+    <span class="shd-stat">Range query:</span>
+    <input type="number" id="shdQueryStart" value="10"> to <input type="number" id="shdQueryEnd" value="20">
+    <button class="shd-btn secondary" id="shdQueryBtn">Run Range Query</button>
+    <button class="shd-btn secondary" id="shdResetBtn">Reset</button>
+    <span class="shd-stat" id="shdNextKeyStat" style="margin-left:auto;"></span>
+  </div>
+
+  <div class="shd-row">
+    <div class="shd-scheme">
+      <div class="shd-scheme-title">Hash-based sharding</div>
+      <div class="shd-scheme-sub">shard = hash(key) % numShards</div>
+      <div id="shdHashShards"></div>
+    </div>
+    <div class="shd-scheme">
+      <div class="shd-scheme-title">Range-based sharding</div>
+      <div class="shd-scheme-sub">each shard owns a contiguous key range; the last shard's range is open-ended</div>
+      <div id="shdRangeShards"></div>
+    </div>
+  </div>
+
+  <div class="shd-log-box">
+    <div class="shd-panel-title">Event log</div>
+    <div class="shd-log" id="shdLog"></div>
+  </div>
+
+  <details class="shd-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Both schemes look balanced at first.</b> Click "Insert Next 25
+        Keys" four times and both sides look roughly even -- the range
+        shards were sized to exactly fit that first batch. Keep clicking
+        past that point and only the range-based side keeps dumping
+        everything on the last shard, because a real auto-increment primary
+        key never stops growing, and the last shard's range was always
+        open-ended. This is the real, documented "hot shard" anti-pattern
+        for range sharding on monotonically increasing keys -- not a
+        contrived edge case.</li>
+      <li><b>"Add a Shard" is two structurally different operations.</b> For
+        hash-based (naive modulo, no virtual nodes), adding a shard
+        recomputes <code>hash(key) % N</code> for every single key and
+        typically reshuffles the large majority of them -- the exact same
+        <code>(N-1)/N</code>-shaped cost demonstrated with real numbers on
+        :doc:`hash_load_balancer_interactive` and
+        :doc:`consistent_hashing_interactive`. For range-based, adding a
+        shard means splitting one range in two -- only the keys in the
+        <i>split</i> shard move; every other shard is completely
+        untouched, because splitting a range is a local operation with no
+        need to touch keys outside it.</li>
+      <li><b>Range queries are the other half of this trade.</b> Run a
+        query for keys 10-20 -- range-based touches exactly the one shard
+        whose range covers that window. Hash-based has to ask every
+        single shard, because keys 10 through 20 could have hashed
+        anywhere -- this is real scatter-gather, not a pessimistic
+        assumption, and it's the structural reason range sharding stays
+        attractive for time-series and other range-scanned data despite
+        its hot-shard risk.</li>
+      <li>Real systems mitigate the hot-shard problem several ways: adding
+        a random or hashed prefix to an otherwise-sequential key (trading
+        away some range-query locality on purpose), pre-splitting ranges
+        ahead of expected growth, or -- as this widget's "Add a Shard"
+        button demonstrates -- automatically splitting a shard once it
+        crosses a size threshold, which is exactly what systems like
+        HBase, Bigtable, and DynamoDB do under the name "auto-splitting."</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===SHARDING-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function djb2Hash(str) {
+      let h = 5381;
+      for (let i = 0; i < str.length; i++) h = (((h << 5) + h) + str.charCodeAt(i)) >>> 0;
+      return h;
+    }
+    function hashShardFor(key, numShards) {
+      return djb2Hash(String(key)) % numShards;
+    }
+    function makeRangeShards(numShards, minKey, maxKeyExclusiveOfLast) {
+      const width = (maxKeyExclusiveOfLast - minKey) / numShards;
+      const shards = [];
+      for (let i = 0; i < numShards; i++) {
+        const start = minKey + Math.round(i * width);
+        const end = (i === numShards - 1) ? Infinity : minKey + Math.round((i + 1) * width) - 1;
+        shards.push({ id: i, start, end });
+      }
+      return shards;
+    }
+    function rangeShardFor(key, shards) {
+      for (const s of shards) if (key >= s.start && key <= s.end) return s.id;
+      return -1;
+    }
+    function splitRangeShard(shards, shardIdToSplit, existingKeys) {
+      const target = shards.find(s => s.id === shardIdToSplit);
+      const finiteEnd = target.end === Infinity ? Math.max(...existingKeys.filter(k => k >= target.start), target.start) : target.end;
+      const mid = Math.floor((target.start + finiteEnd) / 2);
+      const newShardId = Math.max(...shards.map(s => s.id)) + 1;
+      const newShards = shards.map(s => s.id === shardIdToSplit ? { id: s.id, start: s.start, end: mid } : s);
+      newShards.push({ id: newShardId, start: mid + 1, end: target.end });
+      const movedKeys = existingKeys.filter(k => k >= mid + 1 && (target.end === Infinity ? true : k <= target.end));
+      return { newShards, movedKeys, newShardId };
+    }
+    function rangeQueryShardsTouched(shards, queryStart, queryEnd) {
+      return shards.filter(s => s.start <= queryEnd && s.end >= queryStart).map(s => s.id);
+    }
+    // ===SHARDING-MODEL-END===
+
+    const root = document.getElementById('shdWidget');
+    const insertBtn = document.getElementById('shdInsertBtn');
+    const addShardBtn = document.getElementById('shdAddShardBtn');
+    const queryStartInput = document.getElementById('shdQueryStart');
+    const queryEndInput = document.getElementById('shdQueryEnd');
+    const queryBtn = document.getElementById('shdQueryBtn');
+    const resetBtn = document.getElementById('shdResetBtn');
+    const nextKeyStat = document.getElementById('shdNextKeyStat');
+    const hashShardsEl = document.getElementById('shdHashShards');
+    const rangeShardsEl = document.getElementById('shdRangeShards');
+    const logEl = document.getElementById('shdLog');
+
+    const INITIAL_SHARDS = 4;
+    let nextKey, hashNumShards, rangeShards, insertedKeys;
+    let lastTouchedHash, lastTouchedRange;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function init() {
+      nextKey = 1;
+      hashNumShards = INITIAL_SHARDS;
+      rangeShards = makeRangeShards(INITIAL_SHARDS, 1, 101);
+      insertedKeys = [];
+      lastTouchedHash = new Set();
+      lastTouchedRange = new Set();
+      logEl.innerHTML = '';
+      log('Reset. 4 shards each way. Range shards cover [1,25], [26,50], [51,75], [76,∞).', null);
+      render();
+    }
+
+    function render() {
+      nextKeyStat.textContent = insertedKeys.length + ' keys inserted, next key = ' + nextKey;
+
+      const hashCounts = new Array(hashNumShards).fill(0);
+      insertedKeys.forEach(k => hashCounts[hashShardFor(k, hashNumShards)]++);
+      const hashMax = Math.max(1, ...hashCounts);
+      hashShardsEl.innerHTML = hashCounts.map((c, i) =>
+        '<div class="shd-shard-row' + (lastTouchedHash.has(i) ? ' shd-shard-touched' : '') + '">' +
+        '<span class="shd-shard-label">shard ' + i + '</span>' +
+        '<div class="shd-shard-bar-bg"><div class="shd-shard-bar-fill" style="width:' + (c / hashMax * 100) + '%"></div></div>' +
+        '<span class="shd-shard-count">' + c + '</span></div>'
+      ).join('');
+
+      const rangeCounts = rangeShards.map(s => insertedKeys.filter(k => k >= s.start && (s.end === Infinity || k <= s.end)).length);
+      const rangeMax = Math.max(1, ...rangeCounts);
+      rangeShardsEl.innerHTML = rangeShards.map((s, i) => {
+        const c = rangeCounts[i];
+        const isHot = s.end === Infinity && c > insertedKeys.length / hashNumShards * 1.5 && insertedKeys.length > 0;
+        const label = 'shard ' + s.id + ' [' + s.start + ',' + (s.end === Infinity ? '∞' : s.end) + ']';
+        return '<div class="shd-shard-row' + (lastTouchedRange.has(s.id) ? ' shd-shard-touched' : '') + '">' +
+          '<span class="shd-shard-label">' + label + '</span>' +
+          '<div class="shd-shard-bar-bg"><div class="shd-shard-bar-fill' + (isHot ? ' hot' : '') + '" style="width:' + (c / rangeMax * 100) + '%"></div></div>' +
+          '<span class="shd-shard-count">' + c + '</span></div>';
+      }).join('');
+    }
+
+    function doInsert() {
+      const batch = [];
+      for (let i = 0; i < 25; i++) { batch.push(nextKey); nextKey++; }
+      insertedKeys.push(...batch);
+      lastTouchedHash = new Set(batch.map(k => hashShardFor(k, hashNumShards)));
+      lastTouchedRange = new Set(batch.map(k => rangeShardFor(k, rangeShards)));
+      render();
+      log('Inserted keys ' + batch[0] + '-' + batch[batch.length - 1] + '. Hash touched shard(s) ' + [...lastTouchedHash].join(',') + '. Range touched shard(s) ' + [...lastTouchedRange].join(',') + '.',
+        lastTouchedRange.size === 1 && rangeShards.find(s => lastTouchedRange.has(s.id) && s.end === Infinity) ? 'bad' : 'info');
+    }
+
+    function doAddShard() {
+      // hash-based: recompute every key's shard under N+1 shards
+      const beforeAssignments = insertedKeys.map(k => hashShardFor(k, hashNumShards));
+      const newHashNumShards = hashNumShards + 1;
+      const afterAssignments = insertedKeys.map(k => hashShardFor(k, newHashNumShards));
+      const movedCount = beforeAssignments.filter((s, i) => s !== afterAssignments[i]).length;
+      const movedPct = insertedKeys.length ? (movedCount / insertedKeys.length * 100) : 0;
+      hashNumShards = newHashNumShards;
+
+      // range-based: split whichever shard currently holds the most keys
+      const rangeCounts = rangeShards.map(s => insertedKeys.filter(k => k >= s.start && (s.end === Infinity || k <= s.end)).length);
+      let busiestIdx = 0;
+      for (let i = 1; i < rangeCounts.length; i++) if (rangeCounts[i] > rangeCounts[busiestIdx]) busiestIdx = i;
+      const busiestId = rangeShards[busiestIdx].id;
+      const splitResult = splitRangeShard(rangeShards, busiestId, insertedKeys);
+      rangeShards = splitResult.newShards;
+
+      lastTouchedHash = new Set();
+      lastTouchedRange = new Set([busiestId, splitResult.newShardId]);
+      render();
+
+      log('Hash-based: now ' + hashNumShards + ' shards -- ' + movedCount + '/' + insertedKeys.length + ' keys (' + movedPct.toFixed(0) + '%) changed shard. Every key had to be re-checked.', 'bad');
+      log('Range-based: split shard ' + busiestId + ' -- ' + splitResult.movedKeys.length + ' key(s) moved to new shard ' + splitResult.newShardId + '. Every other shard: 0 keys touched.', 'good');
+    }
+
+    function doQuery() {
+      const qs = parseInt(queryStartInput.value, 10);
+      const qe = parseInt(queryEndInput.value, 10);
+      if (isNaN(qs) || isNaN(qe) || qs > qe) { log('Enter a valid range (start <= end).', 'bad'); return; }
+
+      const rangeTouched = rangeQueryShardsTouched(rangeShards, qs, qe);
+      const hashTouched = Array.from({ length: hashNumShards }, (_, i) => i); // must ask every shard
+
+      lastTouchedRange = new Set(rangeTouched);
+      lastTouchedHash = new Set(hashTouched);
+      render();
+
+      log('Range query [' + qs + ',' + qe + ']: range-based touched ' + rangeTouched.length + '/' + rangeShards.length + ' shard(s) (' + rangeTouched.join(',') + '). Hash-based had to touch all ' + hashTouched.length + '/' + hashTouched.length + ' shards (scatter-gather).', 'info');
+    }
+
+    insertBtn.addEventListener('click', doInsert);
+    addShardBtn.addEventListener('click', doAddShard);
+    queryBtn.addEventListener('click', doQuery);
+    resetBtn.addEventListener('click', init);
+
+    init();
+  })();
+  </script>
+</div>

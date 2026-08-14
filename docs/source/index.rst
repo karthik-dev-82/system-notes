@@ -124,6 +124,7 @@ worth writing down and coming back to.
    rate_limiting_interactive
    bloom_filter_interactive
    normalization_denormalization_interactive
+   database_sharding_interactive
 
 .. toctree::
    :hidden:
@@ -462,6 +463,9 @@ System Design
    * - :doc:`normalization_denormalization_interactive`
      - Play With It: the same data two ways, real PostgreSQL EXPLAIN costs, and a real reproduced update anomaly
      - normalization, denormalization, joins, update anomaly, EXPLAIN ANALYZE
+   * - :doc:`database_sharding_interactive`
+     - Play With It: hash-based vs. range-based sharding on the same sequential-key workload -- the real hot-shard problem and two different rebalancing operations
+     - sharding, hash sharding, range sharding, hot shard, rebalancing, scatter-gather
 
 Robotics
 -----------------
