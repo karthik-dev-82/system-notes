@@ -1,0 +1,296 @@
+<div class="rfr-root" id="rfrWidget">
+  <style>
+    #rfrWidget {
+      --rfr-bg: #0f172a;
+      --rfr-panel: #16213e;
+      --rfr-border: #2a3655;
+      --rfr-text: #e2e8f0;
+      --rfr-muted: #94a3b8;
+      --rfr-good: #4ade80;
+      --rfr-bad: #f87171;
+      --rfr-warn: #fbbf24;
+      --rfr-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rfr-bg);
+      color: var(--rfr-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #rfrWidget * { box-sizing: border-box; }
+    #rfrWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #rfrWidget .rfr-sub { color: var(--rfr-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .rfr-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--rfr-panel); border: 1px solid var(--rfr-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .rfr-controls input[type="text"] { background: #0a1128; color: var(--rfr-text); border: 1px solid var(--rfr-border); border-radius: 6px; padding: 6px 8px; font-size: 0.8rem; width: 140px; }
+    .rfr-btn { background: var(--rfr-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; white-space: nowrap; }
+    .rfr-btn.secondary { background: transparent; color: var(--rfr-text); border: 1px solid var(--rfr-border); }
+    .rfr-btn.warn { background: var(--rfr-warn); color: #2a1c00; }
+
+    .rfr-nodes { display: flex; gap: 12px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .rfr-node { flex: 1; min-width: 280px; background: var(--rfr-panel); border: 2px solid var(--rfr-border); border-radius: 10px; padding: 12px; }
+    .rfr-node.leader { border-color: var(--rfr-accent); }
+    .rfr-node-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .rfr-node-name { font-weight: 700; color: #fff; font-size: 0.85rem; }
+    .rfr-pill { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; padding: 2px 6px; border-radius: 999px; background: rgba(56,189,248,0.15); color: var(--rfr-accent); }
+    .rfr-log-entries { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 8px; min-height: 30px; }
+    .rfr-entry { font-family: ui-monospace, monospace; font-size: 0.68rem; background: #0a1128; border: 1px solid var(--rfr-border); border-radius: 5px; padding: 3px 6px; }
+    .rfr-entry.committed { border-color: var(--rfr-good); color: var(--rfr-good); }
+    .rfr-node-detail { font-size: 0.7rem; color: var(--rfr-muted); font-family: ui-monospace, monospace; }
+    .rfr-btn-row { margin-top: 8px; display: flex; gap: 6px; flex-wrap: wrap; }
+    .rfr-btn-row button { font-size: 0.68rem; padding: 4px 8px; background: #0a1128; border: 1px solid var(--rfr-border); color: var(--rfr-text); border-radius: 5px; cursor: pointer; }
+
+    .rfr-log-box { background: var(--rfr-panel); border: 1px solid var(--rfr-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 12px; }
+    .rfr-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--rfr-muted); margin-bottom: 8px; }
+    .rfr-log { height: 190px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .rfr-log div { color: var(--rfr-muted); }
+    .rfr-log div.good { color: var(--rfr-good); }
+    .rfr-log div.bad { color: var(--rfr-bad); }
+    .rfr-log div.warn { color: var(--rfr-warn); }
+
+    details.rfr-notes { margin-top: 4px; background: var(--rfr-panel); border: 1px solid var(--rfr-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.rfr-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.rfr-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--rfr-muted); }
+    details.rfr-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--rfr-accent); }
+  </style>
+
+  <h3>Raft Log Replication: Play With It</h3>
+  <div class="rfr-sub">A 3-node cluster with L already elected leader. Send a client command, replicate it to each follower by hand, and watch an entry become committed the instant a majority (leader + 1 follower, out of 3) actually has it.</div>
+
+  <div class="rfr-controls">
+    <input type="text" id="rfrCommandInput" value="SET x=1" placeholder="command...">
+    <button class="rfr-btn" id="rfrSendBtn">Client Sends Command</button>
+    <button class="rfr-btn secondary" id="rfrReplicateAllBtn">Replicate to All</button>
+    <button class="rfr-btn warn" id="rfrConflictBtn">Seed F1 with a Conflicting Entry</button>
+    <button class="rfr-btn secondary" id="rfrResetBtn">Reset</button>
+    <span class="rfr-panel-title" style="margin:0;">commitIndex: <span id="rfrCommitStat">0</span></span>
+  </div>
+
+  <div class="rfr-nodes" id="rfrNodes"></div>
+
+  <div class="rfr-log-box">
+    <div class="rfr-panel-title">Event log</div>
+    <div class="rfr-log" id="rfrLog"></div>
+  </div>
+
+  <details class="rfr-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Every entry carries the term it was created in</b>, shown as
+        the number after each command. This is what makes the
+        consistency check possible: AppendEntries includes the term of
+        the entry immediately before the new ones, and a follower only
+        accepts if its own log agrees on that (index, term) pair --
+        agreeing on the index alone isn't enough, the term has to match
+        too.</li>
+      <li><b>Click "Seed F1 with a Conflicting Entry," then replicate to
+        F1.</b> The first attempt fails the consistency check (logged as
+        a mismatch); the leader backs off one entry and retries; once it
+        finds a point both logs agree on, it truncates everything after
+        that point on F1 and overwrites it with its own authoritative
+        entries. This backtrack-then-overwrite is the real mechanism --
+        not a simplification -- and it's the same "leader's log wins"
+        principle already shown a different way in the
+        :doc:`Kafka replication widget <kafka_topic_interactive>` (which
+        truncates a rejoining replica's log wholesale rather than via
+        this index-by-index negotiation).</li>
+      <li><b>An entry only needs a majority, not everyone.</b> With 3
+        nodes, the leader plus ONE follower is already a majority --
+        watch commitIndex advance the moment you replicate to just F1,
+        without ever touching F2. F2 can stay arbitrarily far behind
+        without blocking progress, as long as enough <i>other</i> nodes
+        are caught up.</li>
+      <li>There's one safety rule this widget's model enforces but
+        doesn't have its own dedicated demo for: a leader can only commit
+        an entry directly if it's from the leader's <i>own current
+        term</i> -- an older entry that happens to reach a majority via a
+        newer leader's replication only becomes committed indirectly,
+        once a current-term entry after it also commits. This guards
+        against a rare but real scenario (Raft paper, Figure 8) where
+        committing an old-term entry too eagerly could let it be
+        overwritten by a future leader that never saw it.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===RAFT-REPLICATION-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function makeLogNode(id) { return { id, log: [] }; }
+    function makeReplCluster(nodeIds, leaderId, currentTerm) {
+      const nodes = {};
+      nodeIds.forEach(id => { nodes[id] = makeLogNode(id); });
+      const nextIndex = {}, matchIndex = {};
+      nodeIds.forEach(id => { nextIndex[id] = 1; matchIndex[id] = 0; });
+      return { nodes, leaderId, currentTerm, nextIndex, matchIndex, downNodes: new Set(), commitIndex: 0 };
+    }
+    function clientCommand(cluster, command) {
+      const leader = cluster.nodes[cluster.leaderId];
+      leader.log.push({ term: cluster.currentTerm, command });
+      cluster.matchIndex[cluster.leaderId] = leader.log.length;
+      return leader.log.length;
+    }
+    function appendEntriesToFollower(cluster, followerId) {
+      if (cluster.downNodes.has(followerId)) return { ok: false, reason: 'DOWN' };
+      const leader = cluster.nodes[cluster.leaderId];
+      const follower = cluster.nodes[followerId];
+      const nextIdx = cluster.nextIndex[followerId];
+      const prevLogIndex = nextIdx - 1;
+      const prevLogTerm = prevLogIndex > 0 ? leader.log[prevLogIndex - 1].term : 0;
+      const followerHasPrev = prevLogIndex === 0 ||
+        (follower.log.length >= prevLogIndex && follower.log[prevLogIndex - 1].term === prevLogTerm);
+      if (!followerHasPrev) {
+        cluster.nextIndex[followerId] = Math.max(1, cluster.nextIndex[followerId] - 1);
+        return { ok: false, reason: 'LOG_MISMATCH', retryAt: cluster.nextIndex[followerId] };
+      }
+      const conflictTruncated = follower.log.length > prevLogIndex;
+      follower.log = follower.log.slice(0, prevLogIndex);
+      const entriesToSend = leader.log.slice(nextIdx - 1);
+      follower.log.push(...entriesToSend);
+      cluster.nextIndex[followerId] = follower.log.length + 1;
+      cluster.matchIndex[followerId] = follower.log.length;
+      return { ok: true, matchIndex: cluster.matchIndex[followerId], conflictTruncated, entriesSent: entriesToSend.length };
+    }
+    function advanceCommitIndex(cluster) {
+      const leader = cluster.nodes[cluster.leaderId];
+      const total = Object.keys(cluster.nodes).length;
+      const majority = Math.floor(total / 2) + 1;
+      let newCommitIndex = cluster.commitIndex;
+      for (let n = leader.log.length; n > cluster.commitIndex; n--) {
+        if (leader.log[n - 1].term !== cluster.currentTerm) continue;
+        let count = 0;
+        Object.keys(cluster.nodes).forEach(id => { if (cluster.matchIndex[id] >= n) count++; });
+        if (count >= majority) { newCommitIndex = n; break; }
+      }
+      cluster.commitIndex = newCommitIndex;
+      return newCommitIndex;
+    }
+    // ===RAFT-REPLICATION-MODEL-END===
+
+    const NODE_IDS = ['L', 'F1', 'F2'];
+
+    const root = document.getElementById('rfrWidget');
+    const commandInput = document.getElementById('rfrCommandInput');
+    const sendBtn = document.getElementById('rfrSendBtn');
+    const replicateAllBtn = document.getElementById('rfrReplicateAllBtn');
+    const conflictBtn = document.getElementById('rfrConflictBtn');
+    const resetBtn = document.getElementById('rfrResetBtn');
+    const commitStat = document.getElementById('rfrCommitStat');
+    const nodesEl = document.getElementById('rfrNodes');
+    const logEl = document.getElementById('rfrLog');
+
+    let cluster;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function init() {
+      cluster = makeReplCluster(NODE_IDS, 'L', 1);
+      logEl.innerHTML = '';
+      log('Reset. L is leader (term 1). All logs empty.', null);
+      render();
+    }
+
+    function render() {
+      commitStat.textContent = cluster.commitIndex;
+      nodesEl.innerHTML = '';
+      NODE_IDS.forEach(id => {
+        const node = cluster.nodes[id];
+        const isLeader = id === cluster.leaderId;
+        const card = document.createElement('div');
+        card.className = 'rfr-node' + (isLeader ? ' leader' : '');
+
+        const entries = node.log.map((e, i) => {
+          const idx = i + 1;
+          const isCommitted = idx <= cluster.commitIndex;
+          // e.command comes from a free-text input -- escape before building HTML
+          return '<span class="rfr-entry' + (isCommitted ? ' committed' : '') + '">[' + idx + '] "' + escapeHtml(e.command) + '" t' + e.term + '</span>';
+        }).join('') || '<span class="rfr-node-detail">(empty)</span>';
+
+        let detail = 'log length: ' + node.log.length;
+        let actions = '';
+        if (!isLeader) {
+          detail += ' | nextIndex: ' + cluster.nextIndex[id] + ' | matchIndex: ' + cluster.matchIndex[id];
+          actions = '<div class="rfr-btn-row"><button data-action="replicate" data-id="' + id + '">Replicate to ' + id + '</button></div>';
+        }
+
+        card.innerHTML =
+          '<div class="rfr-node-head"><span class="rfr-node-name">' + id + '</span>' + (isLeader ? '<span class="rfr-pill">leader</span>' : '') + '</div>' +
+          '<div class="rfr-log-entries">' + entries + '</div>' +
+          '<div class="rfr-node-detail">' + detail + '</div>' + actions;
+        nodesEl.appendChild(card);
+      });
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function doSend() {
+      const command = commandInput.value.trim();
+      if (!command) return;
+      const idx = clientCommand(cluster, command);
+      render();
+      log('Client sent "' + command + '" -> appended at index ' + idx + ' (term ' + cluster.currentTerm + ', uncommitted).', null);
+    }
+
+    function doReplicate(followerId) {
+      const result = appendEntriesToFollower(cluster, followerId);
+      if (result.ok) {
+        advanceCommitIndex(cluster);
+        render();
+        log('Replicated to ' + followerId + ': ' + result.entriesSent + ' entr(y/ies) sent' + (result.conflictTruncated ? ' (conflicting suffix truncated first)' : '') + '. commitIndex now ' + cluster.commitIndex + '.',
+          result.conflictTruncated ? 'warn' : 'good');
+      } else if (result.reason === 'LOG_MISMATCH') {
+        render();
+        log('Replicate to ' + followerId + ': consistency check FAILED -- backing off to try index ' + result.retryAt + '. Click again to retry.', 'bad');
+      } else {
+        log('Replicate to ' + followerId + ': node is down.', 'bad');
+      }
+    }
+
+    function doReplicateAll() {
+      ['F1', 'F2'].forEach(id => {
+        let attempts = 0;
+        while (attempts < 10) {
+          const r = appendEntriesToFollower(cluster, id);
+          attempts++;
+          if (r.ok) break;
+        }
+      });
+      advanceCommitIndex(cluster);
+      render();
+      log('Replicated to all followers (retrying through any consistency-check failures automatically). commitIndex now ' + cluster.commitIndex + '.', 'good');
+    }
+
+    function doSeedConflict() {
+      cluster.nodes['F1'].log = [{ term: 1, command: 'stale-entry' }];
+      cluster.nextIndex['F1'] = cluster.nodes['L'].log.length + 1;
+      cluster.matchIndex['F1'] = 0;
+      render();
+      log('F1 seeded with a conflicting, un-replicated entry ("stale-entry", term 1) not present on the leader. Click "Replicate to F1" to watch the consistency check catch it.', 'warn');
+    }
+
+    sendBtn.addEventListener('click', doSend);
+    replicateAllBtn.addEventListener('click', doReplicateAll);
+    conflictBtn.addEventListener('click', doSeedConflict);
+    resetBtn.addEventListener('click', init);
+
+    nodesEl.addEventListener('click', ev => {
+      const btn = ev.target.closest('button[data-action="replicate"]');
+      if (!btn) return;
+      doReplicate(btn.dataset.id);
+    });
+
+    init();
+  })();
+  </script>
+</div>

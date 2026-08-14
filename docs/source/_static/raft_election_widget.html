@@ -1,0 +1,374 @@
+<div class="rfe-root" id="rfeWidget">
+  <style>
+    #rfeWidget {
+      --rfe-bg: #0f172a;
+      --rfe-panel: #16213e;
+      --rfe-border: #2a3655;
+      --rfe-text: #e2e8f0;
+      --rfe-muted: #94a3b8;
+      --rfe-good: #4ade80;
+      --rfe-bad: #f87171;
+      --rfe-warn: #fbbf24;
+      --rfe-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rfe-bg);
+      color: var(--rfe-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #rfeWidget * { box-sizing: border-box; }
+    #rfeWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #rfeWidget .rfe-sub { color: var(--rfe-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .rfe-controls { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; background: var(--rfe-panel); border: 1px solid var(--rfe-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .rfe-btn { background: var(--rfe-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 12px; font-weight: 700; font-size: 0.78rem; cursor: pointer; white-space: nowrap; }
+    .rfe-btn.secondary { background: transparent; color: var(--rfe-text); border: 1px solid var(--rfe-border); }
+    .rfe-btn.warn { background: var(--rfe-warn); color: #2a1c00; }
+    .rfe-btn.danger { background: var(--rfe-bad); color: #2a0505; }
+    .rfe-stat { font-size: 0.78rem; color: var(--rfe-muted); font-family: ui-monospace, monospace; }
+
+    .rfe-nodes { display: flex; gap: 10px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .rfe-node { flex: 1; min-width: 165px; background: var(--rfe-panel); border: 2px solid var(--rfe-border); border-radius: 10px; padding: 10px; }
+    .rfe-node.leader { border-color: var(--rfe-accent); }
+    .rfe-node.candidate { border-color: var(--rfe-warn); }
+    .rfe-node.down { border-color: var(--rfe-bad); opacity: 0.55; }
+    .rfe-node-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .rfe-node-name { font-weight: 700; color: #fff; font-size: 0.85rem; }
+    .rfe-pill { font-size: 0.62rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 6px; border-radius: 999px; }
+    .rfe-pill.follower { background: rgba(148,163,184,0.15); color: var(--rfe-muted); }
+    .rfe-pill.candidate { background: rgba(251,191,36,0.15); color: var(--rfe-warn); }
+    .rfe-pill.leader { background: rgba(56,189,248,0.15); color: var(--rfe-accent); }
+    .rfe-pill.down { background: rgba(248,113,113,0.15); color: var(--rfe-bad); }
+    .rfe-node-detail { font-size: 0.7rem; color: var(--rfe-muted); font-family: ui-monospace, monospace; line-height: 1.5; }
+    .rfe-timeout-bar-bg { height: 5px; background: #0a1128; border-radius: 3px; overflow: hidden; margin: 5px 0; }
+    .rfe-timeout-bar-fill { height: 100%; background: var(--rfe-warn); }
+    .rfe-node-actions { margin-top: 6px; }
+    .rfe-node-actions button { font-size: 0.66rem; padding: 3px 7px; background: #0a1128; border: 1px solid var(--rfe-border); color: var(--rfe-text); border-radius: 5px; cursor: pointer; }
+
+    .rfe-log-box { background: var(--rfe-panel); border: 1px solid var(--rfe-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 12px; }
+    .rfe-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--rfe-muted); margin-bottom: 8px; }
+    .rfe-log { height: 190px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .rfe-log div { color: var(--rfe-muted); }
+    .rfe-log div.good { color: var(--rfe-good); }
+    .rfe-log div.bad { color: var(--rfe-bad); }
+    .rfe-log div.warn { color: var(--rfe-warn); }
+
+    details.rfe-notes { margin-top: 4px; background: var(--rfe-panel); border: 1px solid var(--rfe-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.rfe-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.rfe-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--rfe-muted); }
+    details.rfe-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--rfe-accent); }
+  </style>
+
+  <h3>Raft Leader Election: Play With It</h3>
+  <div class="rfe-sub">5 nodes, discrete ticks instead of real time (message delivery is instant in this model -- the point is the state machine, not network timing). Each follower has its own randomized election timeout; the first one to time out starts a new term and asks for votes.</div>
+
+  <div class="rfe-controls">
+    <button class="rfe-btn" id="rfeTickBtn">Advance 1 Tick</button>
+    <button class="rfe-btn" id="rfeRunBtn">Run 15 Ticks</button>
+    <button class="rfe-btn warn" id="rfeKillLeaderBtn">Kill the Leader</button>
+    <button class="rfe-btn warn" id="rfeSplitBtn">Force a 3-Way Split Vote</button>
+    <button class="rfe-btn danger" id="rfeQuorumBtn">Kill 3 of 5 (lose quorum)</button>
+    <button class="rfe-btn secondary" id="rfeResetBtn">Reset</button>
+    <span class="rfe-stat" id="rfeTickStat" style="margin-left:auto;"></span>
+  </div>
+
+  <div class="rfe-nodes" id="rfeNodes"></div>
+
+  <div class="rfe-log-box">
+    <div class="rfe-panel-title">Event log</div>
+    <div class="rfe-log" id="rfeLog"></div>
+  </div>
+
+  <details class="rfe-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Randomized timeouts are the whole trick.</b> Every follower's
+        election timeout is picked independently (5-9 ticks here; real
+        Raft implementations typically use 150-300ms). That randomization
+        is what makes it statistically unlikely for two nodes to start an
+        election at the exact same moment -- not a guarantee, just very
+        good odds, which is why "Force a 3-Way Split Vote" exists as a
+        separate button: an unresolved split is real and possible, just
+        rare in practice.</li>
+      <li><b>A candidate's log has to be at least as up-to-date as a
+        voter's, or the voter refuses -- even in a higher term.</b> This
+        widget's cluster keeps empty logs (log replication is the
+        companion widget below), but the rule is real and load-bearing:
+        it's the entire mechanism behind Raft's Leader Completeness
+        guarantee -- a node that's missing committed data can never win an
+        election over one that has it, because winning requires a
+        majority, and at least one voter in any majority has the
+        committed entry and will refuse a less-caught-up candidate.</li>
+      <li><b>"Kill 3 of 5" demonstrates the same quorum math as
+        :doc:`the CAP theorem's quorum widget <cap_theorem_interactive>`</b>
+        -- with only 2 of 5 nodes reachable, no candidate can ever collect
+        the 3 votes a majority requires, so the cluster simply has no
+        leader until enough nodes come back. This isn't a bug or an
+        edge case Raft forgot to handle -- refusing to elect anyone
+        without a real majority is the entire safety guarantee working
+        as designed.</li>
+      <li>Kill the leader and watch a real former-leader come back with
+        "Revive" (via the node's own button) -- it always rejoins as a
+        follower, never resuming its old role. Real Raft never persists
+        "I am the leader" to disk; only the term, vote, and log survive a
+        restart, so a revived node has no way to still believe it's in
+        charge.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===RAFT-ELECTION-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function randomTimeout(rngFn) {
+      return 5 + Math.floor((rngFn ? rngFn() : Math.random()) * 5);
+    }
+    function makeNode(id) {
+      return {
+        id, state: 'follower', currentTerm: 0, votedFor: null,
+        log: [], ticksSinceHeard: 0, electionTimeout: randomTimeout(), leaderId: null,
+      };
+    }
+    function makeCluster(nodeIds) {
+      const nodes = {};
+      nodeIds.forEach(id => { nodes[id] = makeNode(id); });
+      return { nodes, downNodes: new Set(), leaderId: null, currentTick: 0, termLeaders: {} };
+    }
+    function lastLogTerm(node) { return node.log.length ? node.log[node.log.length - 1].term : 0; }
+    function lastLogIndex(node) { return node.log.length; }
+    function isLogUpToDate(candidateLastTerm, candidateLastIndex, voter) {
+      const voterLastTerm = lastLogTerm(voter);
+      const voterLastIndex = lastLogIndex(voter);
+      if (candidateLastTerm !== voterLastTerm) return candidateLastTerm > voterLastTerm;
+      return candidateLastIndex >= voterLastIndex;
+    }
+    function requestVote(voter, candidateTerm, candidateId, candidateLastLogTerm, candidateLastLogIndex) {
+      if (candidateTerm > voter.currentTerm) {
+        voter.currentTerm = candidateTerm;
+        voter.state = 'follower';
+        voter.votedFor = null;
+        voter.leaderId = null;
+      }
+      if (candidateTerm < voter.currentTerm) return false;
+      const alreadyVoted = voter.votedFor && voter.votedFor.term === candidateTerm;
+      if (alreadyVoted) return voter.votedFor.id === candidateId;
+      if (!isLogUpToDate(candidateLastLogTerm, candidateLastLogIndex, voter)) return false;
+      voter.votedFor = { term: candidateTerm, id: candidateId };
+      voter.ticksSinceHeard = 0;
+      return true;
+    }
+    function becomeLeader(cluster, nodeId) {
+      const node = cluster.nodes[nodeId];
+      node.state = 'leader';
+      node.leaderId = nodeId;
+      cluster.leaderId = nodeId;
+      cluster.termLeaders[node.currentTerm] = cluster.termLeaders[node.currentTerm] || new Set();
+      cluster.termLeaders[node.currentTerm].add(nodeId);
+      sendHeartbeats(cluster, nodeId);
+    }
+    function startElection(cluster, nodeId) {
+      const node = cluster.nodes[nodeId];
+      node.state = 'candidate';
+      node.currentTerm += 1;
+      node.votedFor = { term: node.currentTerm, id: nodeId };
+      node.ticksSinceHeard = 0;
+      node.electionTimeout = randomTimeout();
+      node.leaderId = null;
+      let votes = new Set([nodeId]);
+      Object.values(cluster.nodes).forEach(voter => {
+        if (voter.id === nodeId) return;
+        if (cluster.downNodes.has(voter.id)) return;
+        const granted = requestVote(voter, node.currentTerm, nodeId, lastLogTerm(node), lastLogIndex(node));
+        if (granted) votes.add(voter.id);
+      });
+      const total = Object.keys(cluster.nodes).length;
+      const majority = Math.floor(total / 2) + 1;
+      if (votes.size >= majority) becomeLeader(cluster, nodeId);
+      return { votes: votes.size, majority, won: votes.size >= majority };
+    }
+    function sendHeartbeats(cluster, leaderId) {
+      const leader = cluster.nodes[leaderId];
+      const heardFrom = new Set([leaderId]);
+      Object.values(cluster.nodes).forEach(n => {
+        if (n.id === leaderId) return;
+        if (cluster.downNodes.has(n.id)) return;
+        if (leader.currentTerm < n.currentTerm) return;
+        if (leader.currentTerm > n.currentTerm) { n.currentTerm = leader.currentTerm; n.votedFor = null; }
+        n.state = 'follower';
+        n.leaderId = leaderId;
+        n.ticksSinceHeard = 0;
+        heardFrom.add(n.id);
+      });
+      return heardFrom;
+    }
+    function markDown(cluster, nodeId) { cluster.downNodes.add(nodeId); }
+    function markUp(cluster, nodeId) {
+      cluster.downNodes.delete(nodeId);
+      const node = cluster.nodes[nodeId];
+      node.state = 'follower';
+      node.ticksSinceHeard = 0;
+    }
+    function tick(cluster) {
+      cluster.currentTick += 1;
+      let heardFrom = new Set();
+      if (cluster.leaderId !== null && !cluster.downNodes.has(cluster.leaderId)) {
+        heardFrom = sendHeartbeats(cluster, cluster.leaderId);
+      }
+      const toStartElection = [];
+      Object.values(cluster.nodes).sort((a, b) => a.id.localeCompare(b.id)).forEach(n => {
+        if (cluster.downNodes.has(n.id)) return;
+        if (n.state === 'leader') return;
+        if (heardFrom.has(n.id)) return;
+        n.ticksSinceHeard += 1;
+        if (n.ticksSinceHeard >= n.electionTimeout) toStartElection.push(n.id);
+      });
+      toStartElection.forEach(id => startElection(cluster, id));
+    }
+    function forceSplitVote(cluster, candidateIds) {
+      const newTerm = Math.max(...Object.values(cluster.nodes).map(n => n.currentTerm)) + 1;
+      candidateIds.forEach(id => {
+        const n = cluster.nodes[id];
+        n.state = 'candidate';
+        n.currentTerm = newTerm;
+        n.votedFor = { term: newTerm, id };
+        n.ticksSinceHeard = 0;
+        n.electionTimeout = randomTimeout();
+        n.leaderId = null;
+      });
+      const others = Object.keys(cluster.nodes).filter(id => !candidateIds.includes(id) && !cluster.downNodes.has(id));
+      others.forEach((voterId, i) => {
+        const candId = candidateIds[i % candidateIds.length];
+        const cand = cluster.nodes[candId];
+        requestVote(cluster.nodes[voterId], newTerm, candId, lastLogTerm(cand), lastLogIndex(cand));
+      });
+      const total = Object.keys(cluster.nodes).length;
+      const majority = Math.floor(total / 2) + 1;
+      const tallies = {};
+      candidateIds.forEach(id => {
+        tallies[id] = Object.values(cluster.nodes).filter(n => n.votedFor && n.votedFor.term === newTerm && n.votedFor.id === id).length;
+      });
+      const anyoneWon = Object.values(tallies).some(v => v >= majority);
+      return { tallies, majority, anyoneWon, term: newTerm };
+    }
+    // ===RAFT-ELECTION-MODEL-END===
+
+    const NODE_IDS = ['N1', 'N2', 'N3', 'N4', 'N5'];
+
+    const root = document.getElementById('rfeWidget');
+    const tickBtn = document.getElementById('rfeTickBtn');
+    const runBtn = document.getElementById('rfeRunBtn');
+    const killLeaderBtn = document.getElementById('rfeKillLeaderBtn');
+    const splitBtn = document.getElementById('rfeSplitBtn');
+    const quorumBtn = document.getElementById('rfeQuorumBtn');
+    const resetBtn = document.getElementById('rfeResetBtn');
+    const tickStat = document.getElementById('rfeTickStat');
+    const nodesEl = document.getElementById('rfeNodes');
+    const logEl = document.getElementById('rfeLog');
+
+    let cluster;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function init() {
+      cluster = makeCluster(NODE_IDS);
+      logEl.innerHTML = '';
+      log('Reset. All 5 nodes start as followers with independent random timeouts.', null);
+      render();
+    }
+
+    function render() {
+      tickStat.textContent = 'tick: ' + cluster.currentTick + (cluster.leaderId ? ' | leader: ' + cluster.leaderId + ' (term ' + cluster.nodes[cluster.leaderId].currentTerm + ')' : ' | no leader');
+
+      nodesEl.innerHTML = '';
+      NODE_IDS.forEach(id => {
+        const n = cluster.nodes[id];
+        const isDown = cluster.downNodes.has(id);
+        const card = document.createElement('div');
+        card.className = 'rfe-node' + (isDown ? ' down' : ' ' + n.state);
+
+        const pillClass = isDown ? 'down' : n.state;
+        const pillText = isDown ? 'down' : n.state;
+        const pct = Math.min(100, (n.ticksSinceHeard / n.electionTimeout) * 100);
+
+        let actions = isDown
+          ? '<button data-action="up" data-id="' + id + '">Revive</button>'
+          : '<button data-action="down" data-id="' + id + '">Kill</button>';
+
+        card.innerHTML =
+          '<div class="rfe-node-head"><span class="rfe-node-name">' + id + '</span><span class="rfe-pill ' + pillClass + '">' + pillText + '</span></div>' +
+          '<div class="rfe-node-detail">term ' + n.currentTerm + '<br>voted: ' + (n.votedFor ? n.votedFor.id + ' (t' + n.votedFor.term + ')' : '--') + '</div>' +
+          (isDown || n.state === 'leader' ? '' : '<div class="rfe-timeout-bar-bg"><div class="rfe-timeout-bar-fill" style="width:' + pct + '%"></div></div><div class="rfe-node-detail">' + n.ticksSinceHeard + '/' + n.electionTimeout + ' ticks since heard</div>') +
+          '<div class="rfe-node-actions">' + actions + '</div>';
+        nodesEl.appendChild(card);
+      });
+    }
+
+    function doTick() {
+      const beforeLeader = cluster.leaderId;
+      tick(cluster);
+      render();
+      if (cluster.leaderId !== beforeLeader && cluster.leaderId !== null) {
+        log('Tick ' + cluster.currentTick + ': ' + cluster.leaderId + ' became leader for term ' + cluster.nodes[cluster.leaderId].currentTerm + '.', 'good');
+      }
+    }
+
+    function doRun() {
+      for (let i = 0; i < 15; i++) doTick();
+    }
+
+    function doKillLeader() {
+      if (!cluster.leaderId || cluster.downNodes.has(cluster.leaderId)) { log('No live leader to kill.', null); return; }
+      const id = cluster.leaderId;
+      markDown(cluster, id);
+      log(id + ' (the leader) killed. Waiting for a follower’s timeout to fire...', 'warn');
+      render();
+    }
+
+    function doSplit() {
+      const eligible = NODE_IDS.filter(id => !cluster.downNodes.has(id));
+      if (eligible.length < 5) { log('Split-vote demo needs all 5 nodes up.', null); return; }
+      const candidates = eligible.slice(0, 3);
+      const result = forceSplitVote(cluster, candidates);
+      render();
+      log('Forced simultaneous candidacy: ' + candidates.join(', ') + ' (term ' + result.term + '). Tallies: ' + JSON.stringify(result.tallies) + ' -- need ' + result.majority + ' to win.',
+        result.anyoneWon ? 'good' : 'warn');
+      if (!result.anyoneWon) log('No majority reached -- genuine split vote. Keep ticking; each candidate retries with a fresh random timeout and a new term.', 'warn');
+    }
+
+    function doQuorumKill() {
+      const up = NODE_IDS.filter(id => !cluster.downNodes.has(id));
+      const toKill = up.slice(0, 3);
+      toKill.forEach(id => markDown(cluster, id));
+      render();
+      const remaining = NODE_IDS.length - cluster.downNodes.size;
+      log('Killed ' + toKill.length + ' node(s) (' + (toKill.join(', ') || 'none left to kill') + '). Only ' + remaining + ' remain -- no majority (needs 3) is possible. No leader can ever be elected until enough come back.', 'bad');
+    }
+
+    tickBtn.addEventListener('click', doTick);
+    runBtn.addEventListener('click', doRun);
+    killLeaderBtn.addEventListener('click', doKillLeader);
+    splitBtn.addEventListener('click', doSplit);
+    quorumBtn.addEventListener('click', doQuorumKill);
+    resetBtn.addEventListener('click', init);
+
+    nodesEl.addEventListener('click', ev => {
+      const btn = ev.target.closest('button[data-action]');
+      if (!btn) return;
+      const id = btn.dataset.id;
+      if (btn.dataset.action === 'down') { markDown(cluster, id); log(id + ' killed.', 'warn'); }
+      else { markUp(cluster, id); log(id + ' revived -- rejoins as a follower.', 'good'); }
+      render();
+    });
+
+    init();
+  })();
+  </script>
+</div>

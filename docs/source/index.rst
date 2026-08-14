@@ -126,6 +126,7 @@ worth writing down and coming back to.
    normalization_denormalization_interactive
    database_sharding_interactive
    cache_strategies_interactive
+   raft_consensus_interactive
 
 .. toctree::
    :hidden:
@@ -470,6 +471,9 @@ System Design
    * - :doc:`cache_strategies_interactive`
      - Play With It: cache-aside/read-through/write-through/write-back (crash the cache and see what's actually lost), plus LRU/FIFO/LFU/TTL run side by side on one access sequence
      - cache-aside, read-through, write-through, write-back, LRU, FIFO, LFU, TTL
+   * - :doc:`raft_consensus_interactive`
+     - Play With It: real Raft leader election (randomized timeouts, forced split votes, quorum loss) and log replication (AppendEntries, consistency check, majority commit)
+     - Raft, leader election, terms, log replication, AppendEntries, quorum, consensus
 
 Robotics
 -----------------
