@@ -1,0 +1,339 @@
+<div class="cst-root" id="cstWidget">
+  <style>
+    #cstWidget {
+      --cst-bg: #0f172a;
+      --cst-panel: #16213e;
+      --cst-border: #2a3655;
+      --cst-text: #e2e8f0;
+      --cst-muted: #94a3b8;
+      --cst-good: #4ade80;
+      --cst-bad: #f87171;
+      --cst-warn: #fbbf24;
+      --cst-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cst-bg);
+      color: var(--cst-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cstWidget * { box-sizing: border-box; }
+    #cstWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cstWidget .cst-sub { color: var(--cst-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .cst-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--cst-panel); border: 1px solid var(--cst-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 12px; min-width: 950px; }
+    .cst-strategy-row { display: flex; gap: 6px; flex-wrap: wrap; min-width: 950px; margin-bottom: 16px; }
+    .cst-btn { background: transparent; color: var(--cst-text); border: 1px solid var(--cst-border); border-radius: 7px; padding: 7px 13px; font-weight: 600; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .cst-btn.active { background: var(--cst-accent); color: #041322; border-color: var(--cst-accent); }
+    .cst-btn.warn { background: var(--cst-warn); color: #2a1c00; border: none; }
+    .cst-btn.danger { background: var(--cst-bad); color: #2a0505; border: none; }
+    .cst-btn.secondary { background: transparent; }
+    .cst-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .cst-controls input[type="text"] { width: 80px; background: #0a1128; color: var(--cst-text); border: 1px solid var(--cst-border); border-radius: 6px; padding: 6px 8px; font-size: 0.8rem; }
+
+    .cst-row { display: flex; gap: 14px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cst-arch { flex: 1.2; min-width: 400px; background: var(--cst-panel); border: 1px solid var(--cst-border); border-radius: 10px; padding: 14px; }
+    .cst-boxes { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .cst-box { flex: 1; text-align: center; background: #0a1128; border: 1px solid var(--cst-border); border-radius: 8px; padding: 10px; margin: 0 4px; }
+    .cst-box-title { font-weight: 700; color: #fff; font-size: 0.8rem; }
+    .cst-box-state { font-size: 0.68rem; color: var(--cst-muted); margin-top: 4px; font-family: ui-monospace, monospace; max-height: 90px; overflow-y: auto; }
+    .cst-box.dirty { border-color: var(--cst-warn); }
+    .cst-trace { font-family: ui-monospace, monospace; font-size: 0.76rem; line-height: 1.7; }
+    .cst-trace .arrow { color: var(--cst-accent); }
+    .cst-trace .sync { color: var(--cst-warn); }
+
+    .cst-side { flex: 1; min-width: 300px; display: flex; flex-direction: column; gap: 14px; }
+    .cst-box2 { background: var(--cst-panel); border: 1px solid var(--cst-border); border-radius: 10px; padding: 12px 14px; }
+    .cst-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cst-muted); margin-bottom: 8px; }
+    .cst-log { height: 190px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .cst-log div { color: var(--cst-muted); }
+    .cst-log div.good { color: var(--cst-good); }
+    .cst-log div.bad { color: var(--cst-bad); }
+    .cst-log div.warn { color: var(--cst-warn); }
+
+    details.cst-notes { margin-top: 4px; background: var(--cst-panel); border: 1px solid var(--cst-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.cst-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cst-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cst-muted); }
+    details.cst-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cst-accent); }
+  </style>
+
+  <h3>Cache Strategies: Play With It</h3>
+  <div class="cst-sub">Four different answers to "who talks to whom, and when is a write actually safe." Pick a strategy, read and write a key, and watch the message trace between App, Cache, and DB -- then try crashing the cache mid-flight to see which strategies actually survive it.</div>
+
+  <div class="cst-strategy-row" id="cstStrategyRow">
+    <button class="cst-btn active" data-strategy="cache-aside">Cache-Aside</button>
+    <button class="cst-btn" data-strategy="read-through">Read-Through</button>
+    <button class="cst-btn" data-strategy="write-through">Write-Through</button>
+    <button class="cst-btn" data-strategy="write-back">Write-Back</button>
+  </div>
+
+  <div class="cst-controls">
+    <span class="cst-panel-title" style="margin:0;">Key:</span>
+    <input type="text" id="cstKeyInput" value="user:42">
+    <span class="cst-panel-title" style="margin:0;">Value:</span>
+    <input type="text" id="cstValueInput" value="Alice">
+    <button class="cst-btn" id="cstReadBtn">Read</button>
+    <button class="cst-btn" id="cstWriteBtn">Write</button>
+    <button class="cst-btn warn" id="cstFlushBtn" style="display:none;">Flush Dirty Writes</button>
+    <button class="cst-btn danger" id="cstCrashBtn" style="display:none;">Simulate Cache Crash</button>
+    <button class="cst-btn secondary" id="cstResetBtn">Reset</button>
+  </div>
+
+  <div class="cst-row">
+    <div class="cst-arch">
+      <div class="cst-panel-title">Architecture</div>
+      <div class="cst-boxes">
+        <div class="cst-box"><div class="cst-box-title">App</div></div>
+        <div class="cst-box" id="cstCacheBox"><div class="cst-box-title">Cache</div><div class="cst-box-state" id="cstCacheState"></div></div>
+        <div class="cst-box"><div class="cst-box-title">DB</div><div class="cst-box-state" id="cstDbState"></div></div>
+      </div>
+      <div class="cst-panel-title">Last operation trace</div>
+      <div class="cst-trace" id="cstTrace"></div>
+    </div>
+    <div class="cst-side">
+      <div class="cst-box2">
+        <div class="cst-panel-title">Durability</div>
+        <div id="cstDurability" style="font-size:0.82rem;"></div>
+      </div>
+      <div class="cst-box2">
+        <div class="cst-panel-title">Event log</div>
+        <div class="cst-log" id="cstLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="cst-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Cache-aside puts the app in charge of both systems.</b> The
+        cache doesn't know the DB exists -- on a miss, the APP fetches from
+        the DB and populates the cache itself. On a write, the simplest
+        and most common correct approach is to invalidate (delete) the
+        cache entry rather than update it in place, letting the next read
+        repopulate it fresh -- updating both DB and cache from the app
+        risks the two falling out of sync if the write is retried or
+        reordered.</li>
+      <li><b>Read-through and write-through make the cache itself smart.</b>
+        The app only ever talks to the cache; on a miss, the cache loads
+        from the DB on the app's behalf. Write-through commits synchronously
+        to the DB before acknowledging the app's write, so it's exactly as
+        durable as writing to the DB directly -- just routed through the
+        cache first.</li>
+      <li><b>Write-back trades durability for write latency.</b> The app's
+        write is acknowledged the instant it hits the cache, before the DB
+        has seen it at all. Click "Simulate Cache Crash" without flushing
+        first, and watch the write vanish -- it was never actually
+        durable, just fast. This is a real, deliberate trade real systems
+        make (write-heavy caches, metrics pipelines) when losing a small
+        window of recent writes is acceptable in exchange for not blocking
+        every write on a synchronous DB round-trip.</li>
+      <li>Try switching strategy mid-session without resetting -- notice
+        the DB and cache contents persist across the switch, because the
+        strategy is a policy for how future operations behave, not a
+        property of the data itself.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===CACHE-STRATEGY-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function makeSystem() {
+      return { db: new Map(), cache: new Map(), dirty: new Set() };
+    }
+    function read(system, strategy, key) {
+      const steps = [];
+      if (strategy === 'cache-aside') {
+        steps.push({ from: 'app', to: 'cache', msg: 'GET ' + key });
+        if (system.cache.has(key)) {
+          steps.push({ from: 'cache', to: 'app', msg: 'HIT: ' + system.cache.get(key) });
+          return { value: system.cache.get(key), hit: true, steps };
+        }
+        steps.push({ from: 'cache', to: 'app', msg: 'MISS' });
+        steps.push({ from: 'app', to: 'db', msg: 'GET ' + key });
+        const val = system.db.get(key);
+        steps.push({ from: 'db', to: 'app', msg: val === undefined ? 'NOT FOUND' : String(val) });
+        if (val !== undefined) {
+          system.cache.set(key, val);
+          steps.push({ from: 'app', to: 'cache', msg: 'SET ' + key + ' = ' + val + ' (populate)' });
+        }
+        return { value: val, hit: false, steps };
+      }
+      steps.push({ from: 'app', to: 'cache', msg: 'GET ' + key });
+      if (system.cache.has(key)) {
+        steps.push({ from: 'cache', to: 'app', msg: 'HIT: ' + system.cache.get(key) });
+        return { value: system.cache.get(key), hit: true, steps };
+      }
+      steps.push({ from: 'cache', to: 'db', msg: 'GET ' + key + ' (cache-internal load)' });
+      const val = system.db.get(key);
+      steps.push({ from: 'db', to: 'cache', msg: val === undefined ? 'NOT FOUND' : String(val) });
+      if (val !== undefined) system.cache.set(key, val);
+      steps.push({ from: 'cache', to: 'app', msg: val === undefined ? 'NOT FOUND' : String(val) });
+      return { value: val, hit: false, steps };
+    }
+    function write(system, strategy, key, value) {
+      const steps = [];
+      if (strategy === 'cache-aside') {
+        steps.push({ from: 'app', to: 'db', msg: 'SET ' + key + ' = ' + value });
+        system.db.set(key, value);
+        steps.push({ from: 'app', to: 'cache', msg: 'DELETE ' + key + ' (invalidate)' });
+        system.cache.delete(key);
+        return { steps, durable: true };
+      }
+      if (strategy === 'read-through' || strategy === 'write-through') {
+        steps.push({ from: 'app', to: 'cache', msg: 'SET ' + key + ' = ' + value });
+        steps.push({ from: 'cache', to: 'db', msg: 'SET ' + key + ' = ' + value + ' (synchronous)' });
+        system.db.set(key, value);
+        system.cache.set(key, value);
+        steps.push({ from: 'db', to: 'cache', msg: 'OK' });
+        steps.push({ from: 'cache', to: 'app', msg: 'OK (durable)' });
+        return { steps, durable: true };
+      }
+      if (strategy === 'write-back') {
+        steps.push({ from: 'app', to: 'cache', msg: 'SET ' + key + ' = ' + value });
+        system.cache.set(key, value);
+        system.dirty.add(key);
+        steps.push({ from: 'cache', to: 'app', msg: 'OK (acknowledged, DB not yet updated)' });
+        return { steps, durable: false };
+      }
+      throw new Error('unknown strategy ' + strategy);
+    }
+    function flushWriteBack(system) {
+      const flushed = [...system.dirty];
+      flushed.forEach(key => system.db.set(key, system.cache.get(key)));
+      system.dirty.clear();
+      return flushed;
+    }
+    function simulateCacheCrash(system) {
+      const lostKeys = [...system.dirty];
+      system.cache.clear();
+      system.dirty.clear();
+      return { lostKeys };
+    }
+    // ===CACHE-STRATEGY-MODEL-END===
+
+    const root = document.getElementById('cstWidget');
+    const strategyBtns = root.querySelectorAll('[data-strategy]');
+    const keyInput = document.getElementById('cstKeyInput');
+    const valueInput = document.getElementById('cstValueInput');
+    const readBtn = document.getElementById('cstReadBtn');
+    const writeBtn = document.getElementById('cstWriteBtn');
+    const flushBtn = document.getElementById('cstFlushBtn');
+    const crashBtn = document.getElementById('cstCrashBtn');
+    const resetBtn = document.getElementById('cstResetBtn');
+    const cacheBox = document.getElementById('cstCacheBox');
+    const cacheStateEl = document.getElementById('cstCacheState');
+    const dbStateEl = document.getElementById('cstDbState');
+    const traceEl = document.getElementById('cstTrace');
+    const durabilityEl = document.getElementById('cstDurability');
+    const logEl = document.getElementById('cstLog');
+
+    let system, strategy;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function init() {
+      system = makeSystem();
+      strategy = 'cache-aside';
+      strategyBtns.forEach(b => b.classList.toggle('active', b.dataset.strategy === strategy));
+      logEl.innerHTML = '';
+      traceEl.innerHTML = '<span style="color:var(--cst-muted);">Run a Read or Write to see the trace.</span>';
+      log('Reset. Empty cache and DB.', null);
+      render();
+    }
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function mapEntries(map) {
+      if (map.size === 0) return '<span style="color:var(--cst-muted);font-style:italic;">(empty)</span>';
+      // key/value come from free-text inputs -- escape before building HTML
+      return [...map.entries()].map(([k, v]) => escapeHtml(k) + ' = ' + escapeHtml(v)).join('<br>');
+    }
+
+    function render() {
+      cacheStateEl.innerHTML = mapEntries(system.cache);
+      dbStateEl.innerHTML = mapEntries(system.db);
+      cacheBox.classList.toggle('dirty', system.dirty.size > 0);
+
+      const isWriteBack = strategy === 'write-back';
+      flushBtn.style.display = isWriteBack ? '' : 'none';
+      crashBtn.style.display = isWriteBack ? '' : 'none';
+      flushBtn.disabled = system.dirty.size === 0;
+
+      durabilityEl.innerHTML = isWriteBack
+        ? (system.dirty.size > 0
+          ? '<span style="color:var(--cst-warn);">⚠ ' + system.dirty.size + ' key(s) acknowledged but NOT yet in the DB.</span>'
+          : '<span style="color:var(--cst-good);">✓ Cache and DB agree -- nothing dirty.</span>')
+        : '<span style="color:var(--cst-good);">✓ Every acknowledged write is already durable in the DB under this strategy.</span>';
+    }
+
+    function renderTrace(steps) {
+      // s.from/s.to are always internal literals ('app'/'cache'/'db'), but
+      // s.msg embeds the user-typed key/value -- escape the whole thing.
+      traceEl.innerHTML = steps.map(s =>
+        '<div><span class="arrow">' + s.from + ' -> ' + s.to + '</span>: ' + escapeHtml(s.msg) + '</div>'
+      ).join('');
+    }
+
+    function doRead() {
+      const key = keyInput.value.trim();
+      if (!key) return;
+      const result = read(system, strategy, key);
+      renderTrace(result.steps);
+      render();
+      log('READ ' + key + ': ' + (result.hit ? 'cache HIT' : 'cache MISS, loaded') + ' -> ' + (result.value === undefined ? 'NOT FOUND' : result.value), result.hit ? 'good' : 'warn');
+    }
+
+    function doWrite() {
+      const key = keyInput.value.trim();
+      const value = valueInput.value.trim();
+      if (!key || !value) return;
+      const result = write(system, strategy, key, value);
+      renderTrace(result.steps);
+      render();
+      log('WRITE ' + key + ' = ' + value + ': ' + (result.durable ? 'durable immediately' : 'acknowledged, DB update PENDING'), result.durable ? 'good' : 'warn');
+    }
+
+    function doFlush() {
+      const flushed = flushWriteBack(system);
+      render();
+      log('Flushed ' + flushed.length + ' dirty key(s) to the DB: ' + (flushed.join(', ') || '(none)'), 'good');
+    }
+
+    function doCrash() {
+      const result = simulateCacheCrash(system);
+      render();
+      if (result.lostKeys.length > 0) {
+        log('💥 Cache crashed. LOST forever (never made it to the DB): ' + result.lostKeys.join(', '), 'bad');
+      } else {
+        log('💥 Cache crashed. Nothing was lost -- there was nothing unflushed.', 'good');
+      }
+    }
+
+    strategyBtns.forEach(b => b.addEventListener('click', () => {
+      strategy = b.dataset.strategy;
+      strategyBtns.forEach(btn => btn.classList.toggle('active', btn === b));
+      log('Strategy set to ' + strategy + '. Existing DB/cache contents unchanged.', null);
+      render();
+    }));
+    readBtn.addEventListener('click', doRead);
+    writeBtn.addEventListener('click', doWrite);
+    flushBtn.addEventListener('click', doFlush);
+    crashBtn.addEventListener('click', doCrash);
+    resetBtn.addEventListener('click', init);
+
+    init();
+  })();
+  </script>
+</div>

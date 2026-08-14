@@ -125,6 +125,7 @@ worth writing down and coming back to.
    bloom_filter_interactive
    normalization_denormalization_interactive
    database_sharding_interactive
+   cache_strategies_interactive
 
 .. toctree::
    :hidden:
@@ -466,6 +467,9 @@ System Design
    * - :doc:`database_sharding_interactive`
      - Play With It: hash-based vs. range-based sharding on the same sequential-key workload -- the real hot-shard problem and two different rebalancing operations
      - sharding, hash sharding, range sharding, hot shard, rebalancing, scatter-gather
+   * - :doc:`cache_strategies_interactive`
+     - Play With It: cache-aside/read-through/write-through/write-back (crash the cache and see what's actually lost), plus LRU/FIFO/LFU/TTL run side by side on one access sequence
+     - cache-aside, read-through, write-through, write-back, LRU, FIFO, LFU, TTL
 
 Robotics
 -----------------
