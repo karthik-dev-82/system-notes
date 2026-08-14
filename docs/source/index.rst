@@ -118,6 +118,13 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: System Design
+
+   cap_theorem_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: Robotics
 
    lidar_slam
@@ -428,6 +435,21 @@ Concurrency & Distributed Systems
    * - :doc:`priority_inversion_interactive`
      - Interactive priority inversion -- the bug that nearly stranded Mars Pathfinder, and the priority-inheritance fix, side by side
      - preemption, mutex, priority inheritance, real-time scheduling
+
+System Design
+-----------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`cap_theorem_interactive`
+     - Play With It: partition a 2-node store and choose Consistency or Availability, then see why quorum-based systems don't lose everyone
+     - CAP theorem, partition tolerance, AP vs. CP, quorum, last-write-wins, strong vs. eventual consistency
 
 Robotics
 -----------------

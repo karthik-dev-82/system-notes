@@ -1,0 +1,436 @@
+<div class="cppart-root" id="cpPartWidget">
+  <style>
+    #cpPartWidget {
+      --cp-bg: #0f172a;
+      --cp-panel: #16213e;
+      --cp-border: #2a3655;
+      --cp-text: #e2e8f0;
+      --cp-muted: #94a3b8;
+      --cp-good: #4ade80;
+      --cp-bad: #f87171;
+      --cp-warn: #fbbf24;
+      --cp-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cp-bg);
+      color: var(--cp-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cpPartWidget * { box-sizing: border-box; }
+    #cpPartWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #cpPartWidget .cp-sub { color: var(--cp-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 900px; }
+
+    .cp-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      align-items: center;
+      background: var(--cp-panel);
+      border: 1px solid var(--cp-border);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      min-width: 900px;
+    }
+    .cp-controls .cp-group { display: flex; align-items: center; gap: 6px; }
+    .cp-controls .cp-group-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cp-muted); margin-right: 4px; }
+    .cp-btn { background: var(--cp-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.82rem; cursor: pointer; white-space: nowrap; }
+    .cp-btn.secondary { background: transparent; color: var(--cp-text); border: 1px solid var(--cp-border); }
+    .cp-btn.toggle { background: transparent; color: var(--cp-muted); border: 1px solid var(--cp-border); }
+    .cp-btn.toggle.active { background: var(--cp-accent); color: #041322; border-color: var(--cp-accent); }
+    .cp-btn.danger { background: var(--cp-bad); color: #2a0a0a; }
+    .cp-btn.warn { background: var(--cp-warn); color: #2a1c00; }
+    .cp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .cp-tip { min-width: 900px; background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.3); border-radius: 10px; padding: 10px 14px; font-size: 0.8rem; color: #bae6fd; margin-bottom: 16px; line-height: 1.5; }
+    .cp-tip b { color: #fff; }
+
+    .cp-diverge-banner { display: none; min-width: 900px; background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.4); border-radius: 10px; padding: 10px 14px; font-size: 0.82rem; color: #fecaca; margin-bottom: 16px; }
+    .cp-diverge-banner.show { display: block; }
+
+    .cp-main { display: flex; align-items: stretch; gap: 0; min-width: 900px; margin-bottom: 16px; }
+    .cp-node-card { flex: 1; background: var(--cp-panel); border: 1px solid var(--cp-border); border-radius: 10px; padding: 14px 16px; min-width: 300px; }
+    .cp-node-card.diverged { border-color: var(--cp-bad); }
+    .cp-node-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .cp-node-name { font-weight: 700; color: #fff; font-size: 0.95rem; }
+    .cp-pill { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; padding: 3px 8px; border-radius: 999px; }
+    .cp-pill.up { background: rgba(74,222,128,0.15); color: var(--cp-good); }
+    .cp-pill.down { background: rgba(248,113,113,0.15); color: var(--cp-bad); }
+
+    .cp-value-box { background: #0a1128; border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; }
+    .cp-value { font-family: ui-monospace, monospace; font-size: 1.1rem; color: #fff; word-break: break-all; }
+    .cp-value.empty { color: var(--cp-muted); font-style: italic; }
+    .cp-meta { font-size: 0.72rem; color: var(--cp-muted); margin-top: 4px; font-family: ui-monospace, monospace; }
+
+    .cp-action-row { display: flex; gap: 6px; margin-bottom: 6px; }
+    .cp-action-row input { flex: 1; min-width: 0; background: #0a1128; border: 1px solid var(--cp-border); border-radius: 6px; color: var(--cp-text); padding: 6px 8px; font-size: 0.82rem; }
+    .cp-response { min-height: 18px; font-size: 0.76rem; font-family: ui-monospace, monospace; margin-top: 4px; }
+    .cp-response.ok { color: var(--cp-good); }
+    .cp-response.rejected { color: var(--cp-bad); }
+
+    .cp-link-col { width: 90px; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; padding: 0 6px; }
+    .cp-link-line { width: 100%; height: 4px; background: var(--cp-good); border-radius: 2px; position: relative; }
+    .cp-link-line.broken { background: repeating-linear-gradient(90deg, var(--cp-bad), var(--cp-bad) 6px, transparent 6px, transparent 12px); }
+    .cp-link-label { font-size: 0.68rem; text-align: center; color: var(--cp-muted); }
+    .cp-link-label.up { color: var(--cp-good); }
+    .cp-link-label.down { color: var(--cp-bad); font-weight: 700; }
+
+    .cp-box { background: var(--cp-panel); border: 1px solid var(--cp-border); border-radius: 10px; padding: 12px 14px; min-width: 900px; }
+    .cp-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cp-muted); margin-bottom: 8px; }
+    .cp-log { height: 160px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .cp-log div { color: var(--cp-muted); }
+    .cp-log div.write { color: var(--cp-accent); }
+    .cp-log div.reject { color: var(--cp-bad); }
+    .cp-log div.info { color: var(--cp-warn); }
+    .cp-log div.reconcile { color: var(--cp-good); }
+
+    details.cp-notes { margin-top: 14px; background: var(--cp-panel); border: 1px solid var(--cp-border); border-radius: 10px; padding: 12px 16px; min-width: 900px; font-size: 0.85rem; line-height: 1.6; }
+    details.cp-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.cp-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--cp-muted); }
+    details.cp-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--cp-accent); }
+  </style>
+
+  <h3>CAP Theorem: Partition a 2-Node Store</h3>
+  <div class="cp-sub">Two replicas hold the same key. A network link connects them. Break the link, then pick a policy for what each side does about reads and writes while it can't reach the other -- that choice <i>is</i> the CAP tradeoff, made concrete instead of abstract.</div>
+
+  <div class="cp-tip"><b>Try this:</b> write a value to Node A (watch it replicate to B) &rarr; break the network &rarr; switch to <b>CP</b> and try writing/reading either node (both refuse) &rarr; switch to <b>AP</b> and write <i>different</i> values to A and B (both succeed -- now they disagree) &rarr; heal the network &rarr; notice they're <i>still</i> disagreeing until you click <b>Reconcile</b>.</div>
+
+  <div class="cp-controls">
+    <div class="cp-group">
+      <span class="cp-group-label">Policy</span>
+      <button class="cp-btn toggle" id="cpModeAP">AP (Available)</button>
+      <button class="cp-btn toggle" id="cpModeCP">CP (Consistent)</button>
+    </div>
+    <div class="cp-group">
+      <button class="cp-btn warn" id="cpPartitionBtn">Break the Network</button>
+    </div>
+    <div class="cp-group">
+      <button class="cp-btn" id="cpReconcileBtn" disabled>Reconcile</button>
+    </div>
+    <div class="cp-group">
+      <button class="cp-btn secondary" id="cpResetBtn">Reset</button>
+    </div>
+  </div>
+
+  <div class="cp-diverge-banner" id="cpDivergeBanner"></div>
+
+  <div class="cp-main">
+    <div class="cp-node-card" id="cpCardA" data-node="nodeA">
+      <div class="cp-node-head">
+        <span class="cp-node-name">Node A</span>
+        <span class="cp-pill" id="cpStatusA">available</span>
+      </div>
+      <div class="cp-value-box">
+        <div class="cp-value" id="cpValueA">(empty)</div>
+        <div class="cp-meta" id="cpMetaA">version 0 &middot; clock 0</div>
+      </div>
+      <div class="cp-action-row">
+        <input type="text" id="cpInputA" placeholder="new value for A...">
+        <button class="cp-btn" data-write="nodeA">Write</button>
+        <button class="cp-btn secondary" data-read="nodeA">Read</button>
+      </div>
+      <div class="cp-response" id="cpResponseA"></div>
+    </div>
+
+    <div class="cp-link-col">
+      <div class="cp-link-line" id="cpLinkLine"></div>
+      <div class="cp-link-label up" id="cpLinkLabel">connected</div>
+    </div>
+
+    <div class="cp-node-card" id="cpCardB" data-node="nodeB">
+      <div class="cp-node-head">
+        <span class="cp-node-name">Node B</span>
+        <span class="cp-pill" id="cpStatusB">available</span>
+      </div>
+      <div class="cp-value-box">
+        <div class="cp-value" id="cpValueB">(empty)</div>
+        <div class="cp-meta" id="cpMetaB">version 0 &middot; clock 0</div>
+      </div>
+      <div class="cp-action-row">
+        <input type="text" id="cpInputB" placeholder="new value for B...">
+        <button class="cp-btn" data-write="nodeB">Write</button>
+        <button class="cp-btn secondary" data-read="nodeB">Read</button>
+      </div>
+      <div class="cp-response" id="cpResponseB"></div>
+    </div>
+  </div>
+
+  <div class="cp-box">
+    <div class="cp-panel-title">Event log</div>
+    <div class="cp-log" id="cpLog"></div>
+  </div>
+
+  <details class="cp-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li>CAP is not a static "pick 2 of 3" menu. A distributed system that
+        replicates data <i>always</i> gets Consistency and Availability when
+        there's no partition -- the tradeoff only exists <i>during</i> an
+        actual partition. That's why nothing interesting happens in this
+        widget until you click "Break the Network."</li>
+      <li>In CP mode with only two nodes, breaking the link makes <b>both</b>
+        sides unavailable, not just one. Neither side can prove it's the
+        "real" one without hearing from the other, so a strict consistent
+        system has no safe choice but to refuse everyone. Real CP systems
+        (etcd, Raft/Paxos-based stores, ZooKeeper) fix this by running an odd
+        number of replicas so a <i>majority</i> side can keep serving --
+        see the companion quorum widget below.</li>
+      <li>Flipping the policy toggle to CP does not retroactively fix data
+        that already diverged under AP -- it only governs what happens to
+        <i>future</i> requests. If A and B already disagree, they keep
+        disagreeing until you explicitly heal the network and click
+        Reconcile. This is not a simplification for the demo -- it's exactly
+        how a real switch from an "AP mode" to a "CP mode" config would
+        behave, since the label doesn't move any bytes.</li>
+      <li>Reconciliation here uses last-write-wins by timestamp ("clock"),
+        the same strategy real systems like Cassandra use by default. Notice
+        what it does: the <i>losing</i> write is silently discarded, with no
+        merge. That's a genuine, documented weakness of naive LWW under
+        concurrent writes -- if the two clocks were wall-clock timestamps
+        from two different machines with any clock skew, "later" isn't even
+        guaranteed to mean "actually happened later." Systems that need to
+        avoid silently losing writes use vector clocks or CRDTs instead, which
+        can detect a genuine conflict rather than guessing a winner.</li>
+      <li>This is the same idea as <a href="databases_postgresql_mongodb_redis.html">strong vs. eventual consistency</a>:
+        CP behavior here is a strong-consistency read/write (refuse rather
+        than risk stale data); AP behavior here is eventual consistency (serve
+        immediately, converge later).</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===CAP-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function makeSystem() {
+      return {
+        linkUp: true,
+        mode: 'AP',
+        nodeA: { value: '', version: 0, updatedAt: 0 },
+        nodeB: { value: '', version: 0, updatedAt: 0 },
+      };
+    }
+
+    function otherOf(nodeId) { return nodeId === 'nodeA' ? 'nodeB' : 'nodeA'; }
+
+    function write(system, nodeId, value, now) {
+      if (!system.linkUp && system.mode === 'CP') {
+        return { ok: false, reason: 'unavailable-no-quorum' };
+      }
+      const node = system[nodeId];
+      node.value = value;
+      node.version += 1;
+      node.updatedAt = now;
+
+      if (system.linkUp) {
+        const other = system[otherOf(nodeId)];
+        other.value = value;
+        other.version = node.version;
+        other.updatedAt = now;
+      }
+      return { ok: true, value, version: node.version };
+    }
+
+    function read(system, nodeId) {
+      if (!system.linkUp && system.mode === 'CP') {
+        return { ok: false, reason: 'unavailable-no-quorum' };
+      }
+      const node = system[nodeId];
+      return { ok: true, value: node.value, version: node.version, updatedAt: node.updatedAt };
+    }
+
+    function reconcile(system) {
+      if (system.nodeA.value === system.nodeB.value) return { conflict: false };
+      const winnerId = system.nodeA.updatedAt >= system.nodeB.updatedAt ? 'nodeA' : 'nodeB';
+      const loserId = otherOf(winnerId);
+      const winner = system[winnerId];
+      const loser = system[loserId];
+      const lostValue = loser.value;
+      const lostVersion = loser.version;
+      const resolvedVersion = Math.max(system.nodeA.version, system.nodeB.version) + 1;
+      loser.value = winner.value;
+      loser.version = resolvedVersion;
+      loser.updatedAt = winner.updatedAt;
+      winner.version = resolvedVersion;
+      return {
+        conflict: true, winnerId, loserId, lostValue, lostVersion,
+        resolvedValue: winner.value, resolvedVersion,
+      };
+    }
+    // ===CAP-MODEL-END===
+
+    let sys = makeSystem();
+    let clock = 0;
+
+    const modeAPBtn = document.getElementById('cpModeAP');
+    const modeCPBtn = document.getElementById('cpModeCP');
+    const partitionBtn = document.getElementById('cpPartitionBtn');
+    const reconcileBtn = document.getElementById('cpReconcileBtn');
+    const resetBtn = document.getElementById('cpResetBtn');
+    const linkLine = document.getElementById('cpLinkLine');
+    const linkLabel = document.getElementById('cpLinkLabel');
+    const divergeBanner = document.getElementById('cpDivergeBanner');
+    const logEl = document.getElementById('cpLog');
+
+    const els = {
+      nodeA: {
+        card: document.getElementById('cpCardA'),
+        status: document.getElementById('cpStatusA'),
+        value: document.getElementById('cpValueA'),
+        meta: document.getElementById('cpMetaA'),
+        input: document.getElementById('cpInputA'),
+        response: document.getElementById('cpResponseA'),
+        label: 'Node A',
+      },
+      nodeB: {
+        card: document.getElementById('cpCardB'),
+        status: document.getElementById('cpStatusB'),
+        value: document.getElementById('cpValueB'),
+        meta: document.getElementById('cpMetaB'),
+        input: document.getElementById('cpInputB'),
+        response: document.getElementById('cpResponseB'),
+        label: 'Node B',
+      },
+    };
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function nodeIsAvailable(nodeId) {
+      return !(!sys.linkUp && sys.mode === 'CP');
+    }
+
+    function render() {
+      modeAPBtn.classList.toggle('active', sys.mode === 'AP');
+      modeCPBtn.classList.toggle('active', sys.mode === 'CP');
+      partitionBtn.textContent = sys.linkUp ? 'Break the Network' : 'Heal the Network';
+      partitionBtn.className = 'cp-btn ' + (sys.linkUp ? 'warn' : 'danger');
+
+      linkLine.classList.toggle('broken', !sys.linkUp);
+      linkLabel.textContent = sys.linkUp ? 'connected' : 'PARTITIONED';
+      linkLabel.className = 'cp-link-label ' + (sys.linkUp ? 'up' : 'down');
+
+      const diverged = sys.nodeA.value !== sys.nodeB.value;
+      ['nodeA', 'nodeB'].forEach(id => {
+        const node = sys[id];
+        const e = els[id];
+        const available = nodeIsAvailable(id);
+        e.card.classList.toggle('diverged', diverged);
+        e.status.textContent = available ? 'available' : 'unavailable';
+        e.status.className = 'cp-pill ' + (available ? 'up' : 'down');
+        e.value.textContent = node.value === '' ? '(empty)' : node.value;
+        e.value.classList.toggle('empty', node.value === '');
+        e.meta.textContent = 'version ' + node.version + ' · clock ' + node.updatedAt;
+      });
+
+      if (diverged) {
+        divergeBanner.classList.add('show');
+        divergeBanner.textContent = '⚠ Node A and Node B currently disagree: "' +
+          (sys.nodeA.value || '(empty)') + '" vs "' + (sys.nodeB.value || '(empty)') +
+          '". ' + (sys.linkUp ? 'Click Reconcile to resolve it.' : 'Heal the network, then Reconcile.');
+      } else {
+        divergeBanner.classList.remove('show');
+      }
+
+      reconcileBtn.disabled = !(diverged && sys.linkUp);
+    }
+
+    function doWrite(nodeId) {
+      const e = els[nodeId];
+      const value = e.input.value.trim();
+      if (!value) return;
+      clock += 1 + Math.floor(Math.random() * 4);
+      const result = write(sys, nodeId, value, clock);
+      if (result.ok) {
+        e.response.textContent = '→ write ok (v' + result.version + ')';
+        e.response.className = 'cp-response ok';
+        log(e.label + ': wrote "' + value + '" (clock ' + clock + ')' +
+          (sys.linkUp ? ' -- replicated to ' + (nodeId === 'nodeA' ? 'Node B' : 'Node A') + '.' : ' -- partitioned, only applied locally.'),
+          'write');
+      } else {
+        e.response.textContent = '→ ⛔ rejected: unavailable (CP, no quorum while partitioned)';
+        e.response.className = 'cp-response rejected';
+        log(e.label + ': write REJECTED -- CP mode, partitioned, cannot guarantee consistency.', 'reject');
+      }
+      e.input.value = '';
+      render();
+    }
+
+    function doRead(nodeId) {
+      const e = els[nodeId];
+      const result = read(sys, nodeId);
+      if (result.ok) {
+        e.response.textContent = '→ read: "' + (result.value || '(empty)') + '" (v' + result.version + ')';
+        e.response.className = 'cp-response ok';
+        log(e.label + ': read returned "' + (result.value || '(empty)') + '" (v' + result.version + ').', 'info');
+      } else {
+        e.response.textContent = '→ ⛔ rejected: unavailable (CP, no quorum while partitioned)';
+        e.response.className = 'cp-response rejected';
+        log(e.label + ': read REJECTED -- CP mode, partitioned, cannot guarantee freshness.', 'reject');
+      }
+      render();
+    }
+
+    function setMode(mode) {
+      if (sys.mode === mode) return;
+      sys.mode = mode;
+      log('Policy set to ' + mode + '.', 'info');
+      render();
+    }
+
+    function togglePartition() {
+      sys.linkUp = !sys.linkUp;
+      log(sys.linkUp ? '🔌 Network healed -- Node A and Node B can reach each other again (existing disagreements are NOT auto-fixed).'
+                      : '💥 Network partitioned -- Node A and Node B can no longer reach each other.',
+          'info');
+      render();
+    }
+
+    function doReconcile() {
+      const result = reconcile(sys);
+      if (result.conflict) {
+        log('🔀 Reconciled: ' + els[result.winnerId].label + ' wins (clock ' +
+          sys[result.winnerId].updatedAt + ', "' + result.resolvedValue + '"). ' +
+          els[result.loserId].label + '\'s write ("' + result.lostValue + '", v' + result.lostVersion + ') is LOST.',
+          'reconcile');
+      }
+      render();
+    }
+
+    function reset() {
+      sys = makeSystem();
+      clock = 0;
+      logEl.innerHTML = '';
+      els.nodeA.response.textContent = '';
+      els.nodeB.response.textContent = '';
+      log('Reset. Both nodes hold the same (empty) value, link is up, policy is AP.', 'info');
+      render();
+    }
+
+    modeAPBtn.addEventListener('click', () => setMode('AP'));
+    modeCPBtn.addEventListener('click', () => setMode('CP'));
+    partitionBtn.addEventListener('click', togglePartition);
+    reconcileBtn.addEventListener('click', doReconcile);
+    resetBtn.addEventListener('click', reset);
+
+    const root = document.getElementById('cpPartWidget');
+    root.querySelectorAll('[data-write]').forEach(btn => {
+      btn.addEventListener('click', () => doWrite(btn.getAttribute('data-write')));
+    });
+    root.querySelectorAll('[data-read]').forEach(btn => {
+      btn.addEventListener('click', () => doRead(btn.getAttribute('data-read')));
+    });
+    els.nodeA.input.addEventListener('keydown', ev => { if (ev.key === 'Enter') doWrite('nodeA'); });
+    els.nodeB.input.addEventListener('keydown', ev => { if (ev.key === 'Enter') doWrite('nodeB'); });
+
+    reset();
+  })();
+  </script>
+</div>
