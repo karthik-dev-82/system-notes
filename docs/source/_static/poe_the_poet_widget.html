@@ -1,0 +1,318 @@
+<div class="poe-root" id="poeWidget">
+  <style>
+    #poeWidget {
+      --poe-bg: #0f172a;
+      --poe-panel: #16213e;
+      --poe-border: #2a3655;
+      --poe-text: #e2e8f0;
+      --poe-muted: #94a3b8;
+      --poe-good: #4ade80;
+      --poe-bad: #f87171;
+      --poe-warn: #fbbf24;
+      --poe-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--poe-bg);
+      color: var(--poe-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #poeWidget * { box-sizing: border-box; }
+    #poeWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #poeWidget .poe-sub { color: var(--poe-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .poe-row { display: flex; gap: 14px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .poe-config-col { flex: 1; min-width: 320px; }
+    .poe-run-col { flex: 1.4; min-width: 420px; }
+
+    .poe-box { background: var(--poe-panel); border: 1px solid var(--poe-border); border-radius: 10px; padding: 12px 14px; margin-bottom: 12px; }
+    .poe-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--poe-muted); margin-bottom: 8px; }
+
+    .poe-toml { font-family: ui-monospace, monospace; font-size: 0.74rem; line-height: 1.7; white-space: pre; color: var(--poe-text); }
+    .poe-toml .k { color: var(--poe-accent); }
+    .poe-toml .s { color: var(--poe-warn); }
+    .poe-toml .c { color: var(--poe-muted); font-style: italic; }
+    .poe-toml .hidden-marker { color: var(--poe-bad); }
+
+    .poe-controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 10px; }
+    .poe-prompt { font-family: ui-monospace, monospace; color: var(--poe-good); font-weight: 700; }
+    .poe-controls input[type="text"] { flex: 1; min-width: 180px; background: #0a1128; color: var(--poe-text); border: 1px solid var(--poe-border); border-radius: 6px; padding: 7px 10px; font-size: 0.82rem; font-family: ui-monospace, monospace; }
+    .poe-btn { background: var(--poe-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .poe-btn.secondary { background: transparent; color: var(--poe-text); border: 1px solid var(--poe-border); }
+    .poe-quick-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+    .poe-quick-row button { font-size: 0.72rem; padding: 4px 9px; background: #0a1128; border: 1px solid var(--poe-border); color: var(--poe-accent); border-radius: 5px; cursor: pointer; font-family: ui-monospace, monospace; }
+    .poe-fail-row { display: flex; gap: 12px; font-size: 0.76rem; color: var(--poe-muted); margin-bottom: 10px; }
+    .poe-fail-row label { display: flex; align-items: center; gap: 4px; }
+
+    .poe-result { font-weight: 700; padding: 6px 10px; border-radius: 6px; font-size: 0.82rem; margin-bottom: 8px; display: inline-block; }
+    .poe-result.ok { background: rgba(74,222,128,0.15); color: var(--poe-good); }
+    .poe-result.bad { background: rgba(248,113,113,0.15); color: var(--poe-bad); }
+
+    .poe-trace { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.8; max-height: 220px; overflow-y: auto; }
+    .poe-trace div { padding: 2px 0; }
+    .poe-trace .ok-mark { color: var(--poe-good); }
+    .poe-trace .bad-mark { color: var(--poe-bad); }
+    .poe-trace .type-tag { color: var(--poe-muted); font-size: 0.68rem; }
+
+    details.poe-notes { margin-top: 4px; background: var(--poe-panel); border: 1px solid var(--poe-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.poe-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.poe-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--poe-muted); }
+    details.poe-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--poe-accent); }
+  </style>
+
+  <h3>Poe the Poet: Play With It</h3>
+  <div class="poe-sub">A real task-resolution simulator for <a href="https://poethepoet.natn.io/" target="_blank" rel="noopener">Poe the Poet</a>, a Python task runner. Type a <code>poe</code> command against the config on the left and watch exactly what it resolves to and executes -- task type dispatch, argument passthrough, sequence fail-fast, and hidden-task rules, all real, documented behavior.</div>
+
+  <div class="poe-row">
+    <div class="poe-config-col">
+      <div class="poe-box">
+        <div class="poe-panel-title">pyproject.toml</div>
+        <div class="poe-toml" id="poeConfigView"></div>
+      </div>
+      <div class="poe-box">
+        <div class="poe-panel-title">Simulate a failure</div>
+        <div class="poe-fail-row">
+          <label><input type="checkbox" id="poeFailTest"> make <code>test</code> fail</label>
+          <label><input type="checkbox" id="poeFailClean"> make <code>clean</code> fail</label>
+        </div>
+      </div>
+    </div>
+    <div class="poe-run-col">
+      <div class="poe-box">
+        <div class="poe-controls">
+          <span class="poe-prompt">$</span>
+          <input type="text" id="poeCommandInput" value="poe test -v">
+          <button class="poe-btn" id="poeRunBtn">Run</button>
+        </div>
+        <div class="poe-quick-row">
+          <button data-cmd="poe">poe</button>
+          <button data-cmd="poe test">poe test</button>
+          <button data-cmd="poe test -v">poe test -v</button>
+          <button data-cmd="poe release">poe release</button>
+          <button data-cmd="poe checkup">poe checkup</button>
+          <button data-cmd="poe both">poe both</button>
+          <button data-cmd="poe t -x">poe t -x</button>
+          <button data-cmd="poe _build">poe _build</button>
+        </div>
+        <div id="poeResultLine"></div>
+        <div class="poe-panel-title">Trace</div>
+        <div class="poe-trace" id="poeTrace"></div>
+      </div>
+    </div>
+  </div>
+
+  <details class="poe-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>A bare string task is shorthand, not a separate type.</b>
+        <code>test = "pytest"</code> means exactly the same thing as
+        <code>test.cmd = "pytest"</code> -- <code>cmd</code> is just the
+        default when no type is specified. <code>cmd</code> runs as a
+        direct subprocess (no shell, no pipes/<code>&amp;&amp;</code>);
+        reach for <code>shell</code> specifically when you need those.</li>
+      <li><b>An array is shorthand for a sequence.</b>
+        <code>release = ["test", "_build"]</code> means the same thing as
+        writing it out as an explicit <code>sequence</code> task. By
+        default, one failure stops the rest of the sequence -- try
+        checking "make test fail" and running <code>poe release</code>
+        to see <code>_build</code> never even attempt to run. Then try
+        <code>poe checkup</code> (which sets
+        <code>ignore_fail = "return_non_zero"</code>) with the same
+        failure toggled -- both steps run, but the overall result still
+        reports failure.</li>
+      <li><b>Task names starting with <code>_</code> are hidden</b> from
+        <code>poe</code>'s no-argument listing and can't be invoked
+        directly by name -- try <code>poe _build</code> and watch it get
+        refused, even though the exact same task runs fine as a step
+        inside <code>release</code>'s sequence. This is real, documented
+        behavior, not a simulation quirk -- it's how projects hide
+        internal implementation-detail tasks from the tasks a
+        contributor is meant to run directly.</li>
+      <li>Extra arguments typed after the task name are appended verbatim
+        to the underlying command -- <code>poe test -v</code> really does
+        become <code>pytest -v</code>. This widget only demonstrates that
+        passthrough on a directly-invoked leaf task
+        (<code>cmd</code>/<code>shell</code>), which is the clearly
+        documented case.</li>
+      <li>Two environment variables are always available inside any task:
+        <code>$POE_ROOT</code> (the directory containing the task file)
+        and <code>$POE_PWD</code> (the directory you actually ran
+        <code>poe</code> from) -- useful because a task's own working
+        directory can change during execution, but you often still need
+        to know where the invocation actually started.</li>
+      <li>Not modeled here, but real: <code>switch</code> tasks pick a
+        branch based on a "control" task's output (commonly
+        <code>control.expr = "sys.platform"</code>, to run different
+        commands on different operating systems) -- worth knowing exists,
+        even without its own interactive demo on this page.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===POE-MODEL-START=== (verified separately with Node assert() tests against the official poethepoet docs; kept byte-identical here)
+    function normalizeTask(taskDef) {
+      if (typeof taskDef === 'string') return { type: 'cmd', cmd: taskDef };
+      if (Array.isArray(taskDef)) return { type: 'sequence', sequence: taskDef };
+      return taskDef;
+    }
+    function isHidden(taskName) { return taskName.startsWith('_'); }
+    function listTasks(config) {
+      return Object.keys(config)
+        .filter(name => !isHidden(name))
+        .map(name => ({ name, help: normalizeTask(config[name]).help || null }));
+    }
+    function runTask(config, taskName, args, failSet, trace) {
+      trace = trace || [];
+      if (!(taskName in config)) {
+        trace.push({ task: taskName, type: 'error', message: 'no such task' });
+        return { ok: false, trace };
+      }
+      const taskDef = normalizeTask(config[taskName]);
+      if (taskDef.type === 'cmd' || taskDef.type === 'shell') {
+        const base = taskDef.type === 'cmd' ? taskDef.cmd : taskDef.shell;
+        const finalCmd = base + (args.length ? ' ' + args.join(' ') : '');
+        const ok = !failSet.has(taskName);
+        trace.push({ task: taskName, type: taskDef.type, command: finalCmd, ok });
+        return { ok, trace };
+      }
+      if (taskDef.type === 'script') {
+        const ok = !failSet.has(taskName);
+        trace.push({ task: taskName, type: 'script', command: taskDef.script, ok });
+        return { ok, trace };
+      }
+      if (taskDef.type === 'expr') {
+        const ok = !failSet.has(taskName);
+        trace.push({ task: taskName, type: 'expr', command: taskDef.expr, ok });
+        return { ok, trace };
+      }
+      if (taskDef.type === 'ref') {
+        return runTask(config, taskDef.ref, args, failSet, trace);
+      }
+      if (taskDef.type === 'sequence') {
+        let overallOk = true;
+        for (const sub of taskDef.sequence) {
+          const r = runTask(config, sub, [], failSet, trace);
+          if (!r.ok) {
+            if (taskDef.ignore_fail === 'return_zero') continue;
+            if (taskDef.ignore_fail === 'return_non_zero') { overallOk = false; continue; }
+            overallOk = false;
+            break;
+          }
+        }
+        return { ok: taskDef.ignore_fail === 'return_zero' ? true : overallOk, trace };
+      }
+      if (taskDef.type === 'parallel') {
+        let overallOk = true;
+        taskDef.parallel.forEach(sub => {
+          const r = runTask(config, sub, [], failSet, trace);
+          if (!r.ok) overallOk = false;
+        });
+        return { ok: overallOk, trace };
+      }
+      throw new Error('unknown task type ' + taskDef.type);
+    }
+    // ===POE-MODEL-END===
+
+    const CONFIG = {
+      test: 'pytest',
+      clean: { type: 'shell', shell: 'rm -rf dist && rm -rf build' },
+      serve: { type: 'script', script: 'my_app.service:run(debug=True)', help: 'run the dev server' },
+      greet: { type: 'expr', expr: '"hello " + "world"' },
+      _build: { type: 'cmd', cmd: 'python -m build' },
+      release: ['test', '_build'],
+      checkup: { type: 'sequence', sequence: ['test', 'clean'], ignore_fail: 'return_non_zero' },
+      both: { type: 'parallel', parallel: ['test', 'clean'] },
+      t: { type: 'ref', ref: 'test' },
+    };
+
+    const root = document.getElementById('poeWidget');
+    const configView = document.getElementById('poeConfigView');
+    const commandInput = document.getElementById('poeCommandInput');
+    const runBtn = document.getElementById('poeRunBtn');
+    const resultLine = document.getElementById('poeResultLine');
+    const traceEl = document.getElementById('poeTrace');
+    const failTestCb = document.getElementById('poeFailTest');
+    const failCleanCb = document.getElementById('poeFailClean');
+
+    function escapeHtml(str) {
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function renderConfig() {
+      const lines = ['<span class="c"># [tool.poe.tasks]</span>'];
+      Object.entries(CONFIG).forEach(([name, def]) => {
+        const hiddenNote = isHidden(name) ? ' <span class="hidden-marker">(hidden)</span>' : '';
+        if (typeof def === 'string') {
+          lines.push('<span class="k">' + name + '</span> = <span class="s">"' + escapeHtml(def) + '"</span>' + hiddenNote);
+        } else if (Array.isArray(def)) {
+          lines.push('<span class="k">' + name + '</span> = [' + def.map(d => '<span class="s">"' + escapeHtml(d) + '"</span>').join(', ') + '] <span class="c"># sequence shorthand</span>' + hiddenNote);
+        } else {
+          const rest = Object.entries(def).filter(([k]) => k !== 'type').map(([k, v]) => k + ' = "' + escapeHtml(String(v)) + '"').join(', ');
+          lines.push('<span class="k">' + name + '</span>.<span class="c">' + def.type + '</span> {' + rest + '}' + hiddenNote);
+        }
+      });
+      configView.innerHTML = lines.join('\n');
+    }
+
+    function currentFailSet() {
+      const s = new Set();
+      if (failTestCb.checked) s.add('test');
+      if (failCleanCb.checked) s.add('clean');
+      return s;
+    }
+
+    function run() {
+      const input = commandInput.value.trim();
+      resultLine.innerHTML = '';
+      traceEl.innerHTML = '';
+
+      if (!input.startsWith('poe')) {
+        resultLine.innerHTML = '<span class="poe-result bad">Commands here start with "poe".</span>';
+        return;
+      }
+      const parts = input.replace(/^poe\s*/, '').split(/\s+/).filter(Boolean);
+
+      if (parts.length === 0) {
+        const tasks = listTasks(CONFIG);
+        traceEl.innerHTML = tasks.map(t => '<div>' + t.name + (t.help ? '  <span class="type-tag">-- ' + escapeHtml(t.help) + '</span>' : '') + '</div>').join('');
+        resultLine.innerHTML = '<span class="poe-result ok">Listed ' + tasks.length + ' task(s). Hidden (_-prefixed) tasks are never shown here.</span>';
+        return;
+      }
+
+      const taskName = parts[0];
+      const args = parts.slice(1);
+
+      if (isHidden(taskName)) {
+        resultLine.innerHTML = '<span class="poe-result bad">✗ REFUSED -- "' + escapeHtml(taskName) + '" starts with _, hidden tasks can’t be run directly.</span>';
+        return;
+      }
+      if (!(taskName in CONFIG)) {
+        resultLine.innerHTML = '<span class="poe-result bad">✗ No such task: "' + escapeHtml(taskName) + '"</span>';
+        return;
+      }
+
+      const result = runTask(CONFIG, taskName, args, currentFailSet(), []);
+      resultLine.innerHTML = '<span class="poe-result ' + (result.ok ? 'ok' : 'bad') + '">' + (result.ok ? '✓ succeeded' : '✗ failed') + '</span>';
+      traceEl.innerHTML = result.trace.map(step => {
+        if (step.type === 'error') return '<div class="bad-mark">✗ ' + escapeHtml(step.message) + '</div>';
+        const mark = step.ok ? '<span class="ok-mark">✓</span>' : '<span class="bad-mark">✗</span>';
+        return '<div>' + mark + ' <b>' + escapeHtml(step.task) + '</b> <span class="type-tag">[' + step.type + ']</span> -&gt; ' + escapeHtml(step.command) + '</div>';
+      }).join('');
+    }
+
+    renderConfig();
+    runBtn.addEventListener('click', run);
+    commandInput.addEventListener('keydown', ev => { if (ev.key === 'Enter') run(); });
+    root.querySelectorAll('[data-cmd]').forEach(btn => {
+      btn.addEventListener('click', () => { commandInput.value = btn.dataset.cmd; run(); });
+    });
+
+    run();
+  })();
+  </script>
+</div>

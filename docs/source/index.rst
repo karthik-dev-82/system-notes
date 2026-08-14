@@ -13,6 +13,7 @@ worth writing down and coming back to.
    bashrc_reference
    system_monitoring_commands
    developer_commands
+   poe_the_poet_interactive
    linux_devices
    usb_binding_interactive
    tty_sessions_interactive
@@ -192,6 +193,9 @@ Shell & System Basics
    * - :doc:`developer_commands`
      - Daily engineering workflows & tooling
      - ``docker``, ``git``, ``rsync``, ``aria2c``, ``find``, ``grep``
+   * - :doc:`poe_the_poet_interactive`
+     - Play With It: a real Poe the Poet task-resolution simulator -- task types, arg passthrough, sequence fail-fast, hidden tasks
+     - poe, pyproject.toml, cmd/shell/script/expr, sequence, parallel, switch
    * - :doc:`linux_devices`
      - Block/char/network/terminal/pseudo devices, and USB layering
      - ``/dev``, ``lsblk``, ``ttyACM``/``ttyUSB``, ``udevadm``, PTYs
