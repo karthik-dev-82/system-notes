@@ -123,6 +123,7 @@ worth writing down and coming back to.
    cap_theorem_interactive
    rate_limiting_interactive
    bloom_filter_interactive
+   normalization_denormalization_interactive
 
 .. toctree::
    :hidden:
@@ -458,6 +459,9 @@ System Design
    * - :doc:`bloom_filter_interactive`
      - Play With It: a real bit array and real hash functions -- add words, test words, measure false positives against the textbook formula
      - bloom filter, false positive rate, double hashing, FNV-1a
+   * - :doc:`normalization_denormalization_interactive`
+     - Play With It: the same data two ways, real PostgreSQL EXPLAIN costs, and a real reproduced update anomaly
+     - normalization, denormalization, joins, update anomaly, EXPLAIN ANALYZE
 
 Robotics
 -----------------

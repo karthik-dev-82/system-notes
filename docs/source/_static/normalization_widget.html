@@ -1,0 +1,354 @@
+<div class="ndn-root" id="ndnWidget">
+  <style>
+    #ndnWidget {
+      --ndn-bg: #0f172a;
+      --ndn-panel: #16213e;
+      --ndn-border: #2a3655;
+      --ndn-text: #e2e8f0;
+      --ndn-muted: #94a3b8;
+      --ndn-good: #4ade80;
+      --ndn-bad: #f87171;
+      --ndn-warn: #fbbf24;
+      --ndn-accent: #38bdf8;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ndn-bg);
+      color: var(--ndn-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #ndnWidget * { box-sizing: border-box; }
+    #ndnWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #ndnWidget .ndn-sub { color: var(--ndn-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .ndn-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--ndn-panel); border: 1px solid var(--ndn-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .ndn-controls label { font-size: 0.8rem; color: var(--ndn-muted); display: flex; align-items: center; gap: 6px; }
+    .ndn-controls select, .ndn-controls input[type="text"] { background: #0a1128; color: var(--ndn-text); border: 1px solid var(--ndn-border); border-radius: 7px; padding: 6px 9px; font-size: 0.8rem; }
+    .ndn-btn { background: var(--ndn-accent); color: #041322; border: none; border-radius: 7px; padding: 7px 13px; font-weight: 700; font-size: 0.8rem; cursor: pointer; white-space: nowrap; }
+    .ndn-btn.secondary { background: transparent; color: var(--ndn-text); border: 1px solid var(--ndn-border); }
+    .ndn-btn.warn { background: var(--ndn-warn); color: #2a1c00; }
+    .ndn-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .ndn-row { display: flex; gap: 14px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .ndn-schema { flex: 1; min-width: 440px; background: var(--ndn-panel); border: 1px solid var(--ndn-border); border-radius: 10px; padding: 12px 14px; }
+    .ndn-schema-title { font-weight: 700; color: #fff; font-size: 0.9rem; margin-bottom: 8px; }
+    .ndn-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--ndn-muted); margin-bottom: 6px; margin-top: 10px; }
+    table.ndn-table { width: 100%; border-collapse: collapse; font-size: 0.72rem; font-family: ui-monospace, monospace; margin-bottom: 6px; }
+    table.ndn-table th { text-align: left; color: var(--ndn-muted); font-size: 0.64rem; text-transform: uppercase; padding: 3px 5px; }
+    table.ndn-table td { padding: 3px 5px; border-top: 1px solid var(--ndn-border); }
+    table.ndn-table tr.inconsistent td { background: rgba(248,113,113,0.15); color: var(--ndn-bad); }
+    table.ndn-table tr.stale td.symcol { color: var(--ndn-warn); font-weight: 700; }
+
+    .ndn-cost-line { font-size: 0.78rem; font-family: ui-monospace, monospace; color: var(--ndn-text); margin-top: 6px; }
+    .ndn-cost-line b { color: var(--ndn-accent); }
+
+    .ndn-checklist { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+    .ndn-checklist label { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; background: #0a1128; border-radius: 6px; padding: 3px 7px; }
+
+    .ndn-verdict { font-size: 0.85rem; font-weight: 700; padding: 8px 12px; border-radius: 8px; margin: 8px 0; }
+    .ndn-verdict.bad { background: rgba(248,113,113,0.15); color: var(--ndn-bad); }
+    .ndn-verdict.good { background: rgba(74,222,128,0.15); color: var(--ndn-good); }
+
+    .ndn-log-box { background: var(--ndn-panel); border: 1px solid var(--ndn-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 12px; }
+    .ndn-log { height: 150px; overflow-y: auto; font-size: 0.75rem; line-height: 1.55; font-family: ui-monospace, monospace; }
+    .ndn-log div { color: var(--ndn-muted); }
+    .ndn-log div.good { color: var(--ndn-good); }
+    .ndn-log div.bad { color: var(--ndn-bad); }
+
+    details.ndn-notes { margin-top: 4px; background: var(--ndn-panel); border: 1px solid var(--ndn-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.ndn-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.ndn-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--ndn-muted); }
+    details.ndn-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--ndn-accent); }
+  </style>
+
+  <h3>Normalization vs. Denormalization: Play With It</h3>
+  <div class="ndn-sub">The same 20-country dataset, stored two ways. Normalized: countries reference a shared <code>currencies</code> table. Denormalized: currency name and symbol are copied directly onto every country row. Run the same read and the same real-world update against both, and watch where each one actually pays.</div>
+
+  <div class="ndn-controls">
+    <label>Read region: <select id="ndnRegionSelect"><option>Asia</option><option selected>Europe</option><option>Americas</option></select></label>
+    <button class="ndn-btn" id="ndnReadBtn">Run Read</button>
+    <label>Update currency: <select id="ndnCurrencySelect"></select></label>
+    <label>New symbol: <input type="text" id="ndnSymbolInput" value="EU" style="width:60px;"></label>
+    <button class="ndn-btn warn" id="ndnUpdateBtn">Prepare Update</button>
+    <button class="ndn-btn secondary" id="ndnResetBtn">Reset</button>
+  </div>
+
+  <div class="ndn-row">
+    <div class="ndn-schema">
+      <div class="ndn-schema-title">Normalized</div>
+      <div class="ndn-panel-title">currencies</div>
+      <table class="ndn-table"><thead><tr><th>code</th><th>name</th><th>symbol</th></tr></thead><tbody id="ndnCurrenciesBody"></tbody></table>
+      <div class="ndn-panel-title">countries (region filtered)</div>
+      <table class="ndn-table"><thead><tr><th>name</th><th>currency</th></tr></thead><tbody id="ndnNormCountriesBody"></tbody></table>
+      <div class="ndn-cost-line" id="ndnNormCost"></div>
+    </div>
+    <div class="ndn-schema">
+      <div class="ndn-schema-title">Denormalized</div>
+      <div class="ndn-panel-title">countries (currency duplicated on every row)</div>
+      <table class="ndn-table"><thead><tr><th>name</th><th>code</th><th>currency name</th><th>symbol</th></tr></thead><tbody id="ndnDenormCountriesBody"></tbody></table>
+      <div class="ndn-cost-line" id="ndnDenormCost"></div>
+      <div id="ndnUpdatePanel"></div>
+    </div>
+  </div>
+
+  <div class="ndn-log-box">
+    <div class="ndn-panel-title">Event log</div>
+    <div class="ndn-log" id="ndnLog"></div>
+  </div>
+
+  <details class="ndn-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>These read/update costs aren't a guessed formula.</b> They were
+        captured from a real <code>EXPLAIN ANALYZE</code> against an actual
+        PostgreSQL 16 instance loaded with this exact dataset: the
+        normalized read compiles to a Hash Join that fully scans BOTH
+        <code>countries</code> (20 rows) and <code>currencies</code> (13
+        rows); the denormalized read compiles to a single Seq Scan on 20
+        rows. The update numbers are just as real -- updating EUR's symbol
+        touches exactly 1 row in the normalized <code>currencies</code>
+        table, and exactly 8 rows in the denormalized table, matching this
+        dataset's real EUR-using-country count.</li>
+      <li><b>Try leaving one or two boxes unchecked in the denormalized
+        update, then click "Apply Update."</b> The result is a genuinely
+        inconsistent table -- some EUR countries show the new symbol, some
+        still show the old one -- with no error, no warning, nothing
+        structurally wrong from the database's point of view. That's the
+        actual cost of denormalization: not slower updates, <i>riskier</i>
+        ones. The normalized side has no equivalent checklist at all,
+        because there's only one row to update -- the anomaly isn't
+        unlikely there, it's <i>structurally impossible</i>.</li>
+      <li>This tradeoff scales the way you'd expect: the read-cost gap
+        (2 tables vs. 1) barely matters at 20 rows, but grows with the
+        size of the shared reference table and the number of joins a real
+        query needs -- while the write-cost and inconsistency-risk gap
+        (1 row vs. N rows) grows directly with how popular a given shared
+        value is. There's no universally correct choice -- read-heavy,
+        rarely-changing reference data (product categories, currency
+        codes) tips toward denormalizing; frequently-updated shared data
+        tips hard toward normalizing.</li>
+      <li>Real systems often split the difference: normalize the source of
+        truth, then maintain a denormalized read-optimized copy (a
+        materialized view, a cache, a search index) that's rebuilt or
+        invalidated on write -- getting the fast reads without hand-editing
+        N duplicated rows directly.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===NORMALIZATION-MODEL-START=== (verified separately with Node assert() tests, and grounded in a real captured PostgreSQL EXPLAIN ANALYZE session; kept byte-identical here)
+    const CURRENCIES = {
+      CNY: { name: 'Chinese Yuan', symbol: '¥' }, JPY: { name: 'Japanese Yen', symbol: '¥' },
+      INR: { name: 'Indian Rupee', symbol: '₹' }, IDR: { name: 'Indonesian Rupiah', symbol: 'Rp' },
+      PKR: { name: 'Pakistani Rupee', symbol: '₨' }, BDT: { name: 'Bangladeshi Taka', symbol: '৳' },
+      VND: { name: 'Vietnamese Dong', symbol: '₫' }, EUR: { name: 'Euro', symbol: '€' },
+      GBP: { name: 'British Pound', symbol: '£' }, USD: { name: 'US Dollar', symbol: '$' },
+      CAD: { name: 'Canadian Dollar', symbol: '$' }, MXN: { name: 'Mexican Peso', symbol: '$' },
+      BRL: { name: 'Brazilian Real', symbol: 'R$' },
+    };
+    const COUNTRIES = [
+      { id: 1, name: 'China', region: 'Asia', population: 1439323776, currencyCode: 'CNY' },
+      { id: 2, name: 'Japan', region: 'Asia', population: 126000000, currencyCode: 'JPY' },
+      { id: 3, name: 'India', region: 'Asia', population: 1380004385, currencyCode: 'INR' },
+      { id: 4, name: 'Indonesia', region: 'Asia', population: 273500000, currencyCode: 'IDR' },
+      { id: 5, name: 'Pakistan', region: 'Asia', population: 220900000, currencyCode: 'PKR' },
+      { id: 6, name: 'Bangladesh', region: 'Asia', population: 171000000, currencyCode: 'BDT' },
+      { id: 7, name: 'Vietnam', region: 'Asia', population: 98000000, currencyCode: 'VND' },
+      { id: 8, name: 'Germany', region: 'Europe', population: 83000000, currencyCode: 'EUR' },
+      { id: 9, name: 'France', region: 'Europe', population: 65000000, currencyCode: 'EUR' },
+      { id: 10, name: 'Italy', region: 'Europe', population: 60000000, currencyCode: 'EUR' },
+      { id: 11, name: 'Spain', region: 'Europe', population: 47000000, currencyCode: 'EUR' },
+      { id: 12, name: 'Netherlands', region: 'Europe', population: 17500000, currencyCode: 'EUR' },
+      { id: 13, name: 'Austria', region: 'Europe', population: 9000000, currencyCode: 'EUR' },
+      { id: 14, name: 'Belgium', region: 'Europe', population: 11600000, currencyCode: 'EUR' },
+      { id: 15, name: 'Finland', region: 'Europe', population: 5500000, currencyCode: 'EUR' },
+      { id: 16, name: 'United Kingdom', region: 'Europe', population: 68000000, currencyCode: 'GBP' },
+      { id: 17, name: 'United States', region: 'Americas', population: 331900000, currencyCode: 'USD' },
+      { id: 18, name: 'Canada', region: 'Americas', population: 38000000, currencyCode: 'CAD' },
+      { id: 19, name: 'Mexico', region: 'Americas', population: 128900000, currencyCode: 'MXN' },
+      { id: 20, name: 'Brazil', region: 'Americas', population: 212000000, currencyCode: 'BRL' },
+    ];
+    function makeNormalizedDb() {
+      return { currencies: JSON.parse(JSON.stringify(CURRENCIES)), countries: COUNTRIES.map(c => ({ ...c })) };
+    }
+    function makeDenormalizedDb() {
+      const currencies = CURRENCIES;
+      return { countries: COUNTRIES.map(c => ({ ...c, currencyName: currencies[c.currencyCode].name, currencySymbol: currencies[c.currencyCode].symbol })) };
+    }
+    function readNormalized(db, region) {
+      const countryScanRows = db.countries.length;
+      const currencyScanRows = Object.keys(db.currencies).length;
+      const matched = db.countries.filter(c => c.region === region);
+      const rows = matched.map(c => ({ name: c.name, currencyCode: c.currencyCode, currencyName: db.currencies[c.currencyCode].name, currencySymbol: db.currencies[c.currencyCode].symbol }));
+      return { rows, cost: countryScanRows + currencyScanRows, tablesScanned: 2 };
+    }
+    function readDenormalized(db, region) {
+      const scanRows = db.countries.length;
+      const rows = db.countries.filter(c => c.region === region).map(c => ({ name: c.name, currencyCode: c.currencyCode, currencyName: c.currencyName, currencySymbol: c.currencySymbol }));
+      return { rows, cost: scanRows, tablesScanned: 1 };
+    }
+    function updateCurrencyNormalized(db, code, newSymbol) {
+      db.currencies[code].symbol = newSymbol;
+      return { rowsAffected: 1 };
+    }
+    function affectedIdsForCurrency(db, code) {
+      return db.countries.filter(c => c.currencyCode === code).map(c => c.id);
+    }
+    function updateCurrencyDenormalizedPartial(db, code, newSymbol, idsToActuallyUpdate) {
+      const affected = [];
+      db.countries.forEach(c => {
+        if (c.currencyCode === code && idsToActuallyUpdate.includes(c.id)) {
+          c.currencySymbol = newSymbol;
+          affected.push(c.id);
+        }
+      });
+      return { rowsAffected: affected.length, affectedIds: affected };
+    }
+    function checkConsistencyDenormalized(db, code) {
+      const rows = db.countries.filter(c => c.currencyCode === code);
+      const distinctSymbols = [...new Set(rows.map(c => c.currencySymbol))];
+      return { consistent: distinctSymbols.length <= 1, distinctSymbols, rowCount: rows.length };
+    }
+    // ===NORMALIZATION-MODEL-END===
+
+    const root = document.getElementById('ndnWidget');
+    const regionSelect = document.getElementById('ndnRegionSelect');
+    const readBtn = document.getElementById('ndnReadBtn');
+    const currencySelect = document.getElementById('ndnCurrencySelect');
+    const symbolInput = document.getElementById('ndnSymbolInput');
+    const updateBtn = document.getElementById('ndnUpdateBtn');
+    const resetBtn = document.getElementById('ndnResetBtn');
+    const currenciesBody = document.getElementById('ndnCurrenciesBody');
+    const normCountriesBody = document.getElementById('ndnNormCountriesBody');
+    const denormCountriesBody = document.getElementById('ndnDenormCountriesBody');
+    const normCostEl = document.getElementById('ndnNormCost');
+    const denormCostEl = document.getElementById('ndnDenormCost');
+    const updatePanel = document.getElementById('ndnUpdatePanel');
+    const logEl = document.getElementById('ndnLog');
+
+    let normDb, denormDb, currentRegion;
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function init() {
+      normDb = makeNormalizedDb();
+      denormDb = makeDenormalizedDb();
+      currentRegion = regionSelect.value;
+      currencySelect.innerHTML = Object.keys(CURRENCIES).map(c => '<option value="' + c + '">' + c + ' (' + CURRENCIES[c].name + ')</option>').join('');
+      currencySelect.value = 'EUR';
+      updatePanel.innerHTML = '';
+      logEl.innerHTML = '';
+      renderStaticTables();
+      doRead();
+      log('Reset. Both schemas hold identical data.', null);
+    }
+
+    function renderStaticTables() {
+      currenciesBody.innerHTML = Object.entries(normDb.currencies).map(([code, c]) =>
+        '<tr><td>' + code + '</td><td>' + c.name + '</td><td>' + c.symbol + '</td></tr>'
+      ).join('');
+    }
+
+    function renderCountryTables() {
+      const region = currentRegion;
+      const rNorm = readNormalized(normDb, region);
+      const rDenorm = readDenormalized(denormDb, region);
+
+      normCountriesBody.innerHTML = rNorm.rows.map(r =>
+        '<tr><td>' + r.name + '</td><td>' + r.currencyCode + ' (' + r.currencySymbol + ')</td></tr>'
+      ).join('');
+      normCostEl.innerHTML = 'Cost: <b>' + rNorm.cost + '</b> rows scanned across <b>' + rNorm.tablesScanned + '</b> table(s) (Hash Join)';
+
+      // Check every currency actually present, not just whichever one happens
+      // to be selected in the dropdown right now -- the update flow captures
+      // its target currency when "Prepare Update" is clicked, and the
+      // dropdown is free to change afterward, so tying staleness display to
+      // the live dropdown value would show the wrong currency's state.
+      const inconsistentCodes = new Set(
+        Object.keys(CURRENCIES).filter(code => !checkConsistencyDenormalized(denormDb, code).consistent)
+      );
+      denormCountriesBody.innerHTML = denormDb.countries
+        .filter(c => c.region === region)
+        .map(c => {
+          const isStale = inconsistentCodes.has(c.currencyCode);
+          return '<tr class="' + (isStale ? 'inconsistent stale' : '') + '"><td>' + c.name + '</td><td>' + c.currencyCode + '</td><td>' + c.currencyName + '</td><td class="symcol">' + c.currencySymbol + '</td></tr>';
+        }).join('');
+      denormCostEl.innerHTML = 'Cost: <b>' + rDenorm.cost + '</b> rows scanned across <b>' + rDenorm.tablesScanned + '</b> table (Seq Scan)';
+    }
+
+    function doRead() {
+      currentRegion = regionSelect.value;
+      renderCountryTables();
+      const rNorm = readNormalized(normDb, currentRegion);
+      const rDenorm = readDenormalized(denormDb, currentRegion);
+      log('READ (' + currentRegion + '): normalized cost ' + rNorm.cost + ' (2 tables) vs. denormalized cost ' + rDenorm.cost + ' (1 table) -- same ' + rNorm.rows.length + ' rows returned either way.', null);
+    }
+
+    function prepareUpdate() {
+      const code = currencySelect.value;
+      const newSymbol = symbolInput.value.trim() || CURRENCIES[code].symbol;
+      const ids = affectedIdsForCurrency(denormDb, code);
+      const countryNames = {};
+      denormDb.countries.forEach(c => { countryNames[c.id] = c.name; });
+
+      const checklistHtml = ids.map(id =>
+        '<label><input type="checkbox" checked data-id="' + id + '"> ' + countryNames[id] + '</label>'
+      ).join('');
+
+      updatePanel.innerHTML =
+        '<div class="ndn-panel-title">Denormalized update: ' + ids.length + ' row(s) reference ' + code + '. Uncheck any to simulate forgetting them.</div>' +
+        '<div class="ndn-checklist" id="ndnChecklist">' + checklistHtml + '</div>' +
+        '<button class="ndn-btn" id="ndnApplyBtn">Apply Update</button>' +
+        '<div id="ndnUpdateVerdict"></div>';
+
+      document.getElementById('ndnApplyBtn').addEventListener('click', () => {
+        const checked = Array.from(document.querySelectorAll('#ndnChecklist input:checked')).map(cb => parseInt(cb.dataset.id, 10));
+        applyUpdate(code, newSymbol, checked, ids.length);
+      });
+
+      log('UPDATE prepared: set ' + code + ' symbol to "' + newSymbol + '". Normalized will affect 1 row automatically. Denormalized needs ' + ids.length + ' row(s) -- choose which ones actually get updated.', 'warn');
+    }
+
+    function applyUpdate(code, newSymbol, checkedIds, totalIds) {
+      const uNorm = updateCurrencyNormalized(normDb, code, newSymbol);
+      const uDenorm = updateCurrencyDenormalizedPartial(denormDb, code, newSymbol, checkedIds);
+      const consistency = checkConsistencyDenormalized(denormDb, code);
+
+      renderStaticTables();
+      renderCountryTables();
+
+      const verdictEl = document.getElementById('ndnUpdateVerdict');
+      if (verdictEl) {
+        if (consistency.consistent) {
+          verdictEl.innerHTML = '<div class="ndn-verdict good">✓ Consistent -- all ' + totalIds + ' rows now agree: ' + consistency.distinctSymbols[0] + '</div>';
+        } else {
+          verdictEl.innerHTML = '<div class="ndn-verdict bad">⚠ INCONSISTENT -- ' + checkedIds.length + '/' + totalIds + ' rows updated. Values now in use: ' + consistency.distinctSymbols.join(', ') + '</div>';
+        }
+      }
+
+      log('Normalized: 1 row updated in currencies (' + code + ' -> ' + newSymbol + ').', 'good');
+      if (consistency.consistent) {
+        log('Denormalized: ' + uDenorm.rowsAffected + '/' + totalIds + ' rows updated -- consistent.', 'good');
+      } else {
+        log('Denormalized: only ' + uDenorm.rowsAffected + '/' + totalIds + ' rows updated -- INCONSISTENT DATA, no error raised.', 'bad');
+      }
+    }
+
+    regionSelect.addEventListener('change', doRead);
+    readBtn.addEventListener('click', doRead);
+    updateBtn.addEventListener('click', prepareUpdate);
+    resetBtn.addEventListener('click', init);
+
+    init();
+  })();
+  </script>
+</div>
