@@ -399,8 +399,8 @@ Databases
      - Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data
      - hashes, sorted sets, leaderboards, set intersection, TTL/expiry
    * - :doc:`db_acid_transaction_interactive`
-     - Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row
-     - transactions, atomicity, rollback, foreign keys, referential integrity
+     - Interactive ACID atomicity and isolation -- rollback vs. an orphaned row, plus dirty/non-repeatable/phantom reads and write skew, built and prevented live
+     - transactions, atomicity, rollback, isolation levels, MVCC, write skew, serializable
    * - :doc:`db_composite_index_interactive`
      - Play With It: composite indexes and the leftmost prefix rule, live
      - composite index, leftmost prefix, covering index, query planner

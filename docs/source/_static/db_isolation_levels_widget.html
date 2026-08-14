@@ -1,0 +1,407 @@
+<div class="dbi-root" id="dbiWidget">
+  <style>
+    #dbiWidget {
+      --dbi-bg: #0f172a;
+      --dbi-panel: #16213e;
+      --dbi-border: #2a3655;
+      --dbi-text: #e2e8f0;
+      --dbi-muted: #94a3b8;
+      --dbi-good: #4ade80;
+      --dbi-bad: #f87171;
+      --dbi-warn: #fbbf24;
+      --dbi-accent: #38bdf8;
+      --dbi-t1: #38bdf8;
+      --dbi-t2: #c084fc;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--dbi-bg);
+      color: var(--dbi-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #dbiWidget * { box-sizing: border-box; }
+    #dbiWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #dbiWidget .dbi-sub { color: var(--dbi-muted); font-size: 0.85rem; margin-bottom: 16px; max-width: 950px; }
+
+    .dbi-controls { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; min-width: 950px; }
+    .dbi-group { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+    .dbi-group-label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dbi-muted); margin-right: 4px; }
+    .dbi-btn { background: transparent; color: var(--dbi-text); border: 1px solid var(--dbi-border); border-radius: 7px; padding: 7px 12px; font-weight: 600; font-size: 0.78rem; cursor: pointer; white-space: nowrap; }
+    .dbi-btn.active { background: var(--dbi-accent); color: #041322; border-color: var(--dbi-accent); }
+    .dbi-btn.run { background: var(--dbi-good); color: #052e12; border: none; font-weight: 700; }
+    .dbi-btn.secondary { background: transparent; }
+
+    .dbi-grid-box { background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 14px; min-width: 950px; margin-bottom: 16px; }
+    .dbi-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--dbi-muted); margin-bottom: 8px; }
+    table.dbi-results { width: 100%; border-collapse: collapse; font-size: 0.8rem; }
+    table.dbi-results th, table.dbi-results td { padding: 6px 10px; text-align: center; border: 1px solid var(--dbi-border); }
+    table.dbi-results th { color: var(--dbi-muted); font-size: 0.7rem; text-transform: uppercase; }
+    table.dbi-results td:first-child, table.dbi-results th:first-child { text-align: left; color: var(--dbi-text); font-weight: 600; }
+    .dbi-cell { font-family: ui-monospace, monospace; font-weight: 700; cursor: default; }
+    .dbi-cell.untested { color: var(--dbi-muted); font-weight: 400; font-style: italic; }
+    .dbi-cell.allowed { background: rgba(248,113,113,0.15); color: var(--dbi-bad); }
+    .dbi-cell.prevented { background: rgba(74,222,128,0.15); color: var(--dbi-good); }
+    .dbi-cell.current-run { outline: 2px solid #fff; outline-offset: -2px; }
+
+    .dbi-row { display: flex; gap: 14px; min-width: 950px; margin-bottom: 16px; flex-wrap: wrap; }
+    .dbi-box { flex: 1; min-width: 320px; background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 14px; }
+
+    .dbi-verdict { font-size: 0.85rem; font-weight: 700; padding: 8px 12px; border-radius: 8px; margin-bottom: 10px; }
+    .dbi-verdict.allowed { background: rgba(248,113,113,0.15); color: var(--dbi-bad); }
+    .dbi-verdict.prevented { background: rgba(74,222,128,0.15); color: var(--dbi-good); }
+
+    .dbi-steps { font-family: ui-monospace, monospace; font-size: 0.78rem; line-height: 1.8; max-height: 220px; overflow-y: auto; }
+    .dbi-step-actor { display: inline-block; width: 26px; font-weight: 700; }
+    .dbi-step-actor.T1 { color: var(--dbi-t1); }
+    .dbi-step-actor.T2 { color: var(--dbi-t2); }
+
+    .dbi-log { height: 220px; overflow-y: auto; font-size: 0.75rem; line-height: 1.6; font-family: ui-monospace, monospace; }
+    .dbi-log div { color: var(--dbi-muted); }
+    .dbi-log div.good { color: var(--dbi-good); }
+    .dbi-log div.bad { color: var(--dbi-bad); }
+
+    details.dbi-notes { margin-top: 4px; background: var(--dbi-panel); border: 1px solid var(--dbi-border); border-radius: 10px; padding: 12px 16px; min-width: 950px; font-size: 0.85rem; line-height: 1.6; }
+    details.dbi-notes summary { cursor: pointer; font-weight: 700; color: #fff; }
+    details.dbi-notes ul { margin: 10px 0 0; padding-left: 20px; color: var(--dbi-muted); }
+    details.dbi-notes code { background: #0a1128; padding: 1px 5px; border-radius: 4px; color: var(--dbi-accent); }
+  </style>
+
+  <h3>Transaction Isolation Levels: Play With It</h3>
+  <div class="dbi-sub">Two transactions, T1 and T2, run concurrently against the same rows. Pick an isolation level and an anomaly, run it, and watch whether the anomaly actually happens -- then fill in the rest of the grid yourself. This is real MVCC snapshot-visibility logic (the mechanism Postgres actually uses), not a lookup table pretending to be a demo.</div>
+
+  <div class="dbi-controls">
+    <div class="dbi-group">
+      <span class="dbi-group-label">Isolation level</span>
+      <button class="dbi-btn active" data-level="READ_COMMITTED">Read Committed</button>
+      <button class="dbi-btn" data-level="REPEATABLE_READ">Repeatable Read</button>
+      <button class="dbi-btn" data-level="SERIALIZABLE">Serializable</button>
+    </div>
+    <div class="dbi-group">
+      <span class="dbi-group-label">Anomaly</span>
+      <button class="dbi-btn active" data-scenario="dirty">Dirty Read</button>
+      <button class="dbi-btn" data-scenario="nonrepeatable">Non-Repeatable Read</button>
+      <button class="dbi-btn" data-scenario="phantom">Phantom Read</button>
+      <button class="dbi-btn" data-scenario="writeskew">Write Skew</button>
+    </div>
+    <button class="dbi-btn run" id="dbiRunBtn">Run</button>
+    <button class="dbi-btn secondary" id="dbiResetBtn">Reset</button>
+  </div>
+
+  <div class="dbi-grid-box">
+    <div class="dbi-panel-title">Your results grid -- fill it in by running every combination</div>
+    <table class="dbi-results" id="dbiResultsTable">
+      <thead><tr><th>Anomaly</th><th>Read Committed</th><th>Repeatable Read</th><th>Serializable</th></tr></thead>
+      <tbody>
+        <tr data-scenario="dirty"><td>Dirty Read</td><td class="dbi-cell untested" data-level="READ_COMMITTED">--</td><td class="dbi-cell untested" data-level="REPEATABLE_READ">--</td><td class="dbi-cell untested" data-level="SERIALIZABLE">--</td></tr>
+        <tr data-scenario="nonrepeatable"><td>Non-Repeatable Read</td><td class="dbi-cell untested" data-level="READ_COMMITTED">--</td><td class="dbi-cell untested" data-level="REPEATABLE_READ">--</td><td class="dbi-cell untested" data-level="SERIALIZABLE">--</td></tr>
+        <tr data-scenario="phantom"><td>Phantom Read</td><td class="dbi-cell untested" data-level="READ_COMMITTED">--</td><td class="dbi-cell untested" data-level="REPEATABLE_READ">--</td><td class="dbi-cell untested" data-level="SERIALIZABLE">--</td></tr>
+        <tr data-scenario="writeskew"><td>Write Skew</td><td class="dbi-cell untested" data-level="READ_COMMITTED">--</td><td class="dbi-cell untested" data-level="REPEATABLE_READ">--</td><td class="dbi-cell untested" data-level="SERIALIZABLE">--</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="dbi-row">
+    <div class="dbi-box">
+      <div class="dbi-panel-title">This run</div>
+      <div id="dbiVerdict"></div>
+      <div class="dbi-steps" id="dbiSteps"></div>
+    </div>
+    <div class="dbi-box">
+      <div class="dbi-panel-title">Run history</div>
+      <div class="dbi-log" id="dbiLog"></div>
+    </div>
+  </div>
+
+  <details class="dbi-notes">
+    <summary>Worth knowing, beyond what's animated here</summary>
+    <ul>
+      <li><b>Dirty reads never happen here, at any level -- and that's not a
+        simplification.</b> PostgreSQL's docs state plainly that Read
+        Uncommitted "behaves like Read Committed" in Postgres, because its
+        MVCC design makes seeing another transaction's uncommitted data
+        structurally impossible -- there's nothing looser than Read
+        Committed to actually implement. (Source: PostgreSQL docs,
+        <code>transaction-iso.html</code>, Table 13.1.)</li>
+      <li><b>Postgres's Repeatable Read is stricter than the SQL standard
+        requires.</b> The standard only requires Repeatable Read to stop
+        dirty reads and non-repeatable reads -- phantom reads are still
+        technically allowed at that level. Postgres implements Repeatable
+        Read as true snapshot isolation (one snapshot for the whole
+        transaction), which happens to close off phantom reads too. Try
+        the Phantom Read scenario at Repeatable Read to see this for
+        yourself.</li>
+      <li><b>Write skew is the one anomaly Repeatable Read does NOT close,
+        even in Postgres.</b> Snapshot isolation (what Repeatable Read
+        actually is) prevents two transactions from seeing each other's
+        writes, but it does nothing to stop two transactions from each
+        making a decision based on a snapshot that's about to become
+        stale. Only Serializable -- which additionally tracks read-write
+        dependencies between concurrently active transactions and aborts
+        one side of a dangerous cycle -- closes this gap. This widget's
+        Serializable check is a scoped, exact version of that detection for
+        two concurrent transactions; real Postgres's SSI generalizes it to
+        chains of three or more.</li>
+      <li>Every level here is checked against the exact same underlying
+        MVCC visibility rule (a row version is visible only if its creator
+        committed before your snapshot, and wasn't itself superseded before
+        your snapshot) -- the only thing that changes between levels is
+        <i>when</i> that snapshot gets taken: fresh per statement for Read
+        Committed, once at <code>BEGIN</code> for the other two.</li>
+    </ul>
+  </details>
+
+  <script>
+  (function () {
+    // ===ISOLATION-MODEL-START=== (verified separately with Node assert() tests; kept byte-identical here)
+    function makeDb() {
+      return { rows: {}, nextXid: 1, commitLog: [], txnHistory: {} };
+    }
+    function beginTxn(db, isolationLevel) {
+      const xid = db.nextXid++;
+      return {
+        xid, isolationLevel, active: true, aborted: false,
+        snapshotCommitted: isolationLevel === 'READ_COMMITTED' ? null : new Set(db.commitLog),
+        readSet: new Set(), writeSet: new Set(),
+      };
+    }
+    function currentSnapshot(db, txn) {
+      return txn.isolationLevel === 'READ_COMMITTED' ? new Set(db.commitLog) : txn.snapshotCommitted;
+    }
+    function isVisible(version, txn, snapshot) {
+      if (version.createdBy === txn.xid) return version.deletedBy === null || version.deletedBy === txn.xid ? true : !snapshot.has(version.deletedBy);
+      if (!snapshot.has(version.createdBy)) return false;
+      if (version.deletedBy === null) return true;
+      if (version.deletedBy === txn.xid) return false;
+      return !snapshot.has(version.deletedBy);
+    }
+    function readRow(db, txn, rowId) {
+      txn.readSet.add(rowId);
+      const snapshot = currentSnapshot(db, txn);
+      const versions = db.rows[rowId] || [];
+      for (let i = versions.length - 1; i >= 0; i--) if (isVisible(versions[i], txn, snapshot)) return versions[i].value;
+      return undefined;
+    }
+    function readCountWhere(db, txn, predicate) {
+      txn.readSet.add('__TABLE_SCAN__');
+      const snapshot = currentSnapshot(db, txn);
+      let count = 0;
+      for (const rowId in db.rows) {
+        txn.readSet.add(rowId);
+        const versions = db.rows[rowId];
+        for (let i = versions.length - 1; i >= 0; i--) {
+          if (isVisible(versions[i], txn, snapshot)) { if (predicate(versions[i].value)) count++; break; }
+        }
+      }
+      return count;
+    }
+    function writeRow(db, txn, rowId, newValue) {
+      txn.writeSet.add(rowId);
+      const versions = db.rows[rowId] || (db.rows[rowId] = []);
+      for (let i = versions.length - 1; i >= 0; i--) if (versions[i].deletedBy === null) { versions[i].deletedBy = txn.xid; break; }
+      versions.push({ value: newValue, createdBy: txn.xid, deletedBy: null });
+    }
+    function insertRow(db, txn, rowId, value) {
+      txn.writeSet.add(rowId); txn.writeSet.add('__TABLE_SCAN__');
+      db.rows[rowId] = [{ value, createdBy: txn.xid, deletedBy: null }];
+    }
+    function commitTxn(db, txn) {
+      if (txn.isolationLevel === 'SERIALIZABLE') {
+        for (const otherXid of db.commitLog) {
+          const other = db.txnHistory[otherXid];
+          if (!other) continue;
+          if (txn.snapshotCommitted.has(otherXid)) continue;
+          const otherWroteWhatWeRead = [...txn.readSet].some(r => other.writeSet.has(r));
+          const weWriteWhatOtherRead = [...txn.writeSet].some(r => other.readSet.has(r));
+          if (otherWroteWhatWeRead && weWriteWhatOtherRead) {
+            txn.active = false; txn.aborted = true;
+            return { ok: false, reason: 'SERIALIZATION_FAILURE', conflictWith: otherXid };
+          }
+        }
+      }
+      db.commitLog.push(txn.xid); txn.active = false; db.txnHistory[txn.xid] = txn;
+      return { ok: true };
+    }
+    function rollbackTxn(db, txn) { txn.active = false; txn.aborted = true; }
+
+    function runDirtyReadScenario(level) {
+      const db = makeDb();
+      const seed = beginTxn(db, 'READ_COMMITTED');
+      insertRow(db, seed, 'balance', 100);
+      commitTxn(db, seed);
+      const steps = [];
+      const t1 = beginTxn(db, level);
+      const t2 = beginTxn(db, level);
+      steps.push({ actor: 'T1', text: 'BEGIN' });
+      steps.push({ actor: 'T2', text: 'BEGIN' });
+      writeRow(db, t1, 'balance', 50);
+      steps.push({ actor: 'T1', text: 'UPDATE balance = 50 -- (not committed yet)' });
+      const t2Read = readRow(db, t2, 'balance');
+      steps.push({ actor: 'T2', text: 'SELECT balance -> ' + t2Read });
+      rollbackTxn(db, t1);
+      steps.push({ actor: 'T1', text: 'ROLLBACK' });
+      const anomaly = t2Read === 50;
+      return { steps, anomaly, summary: anomaly ? 'DIRTY READ: T2 saw T1\'s uncommitted 50, which then got rolled back -- T2 read a value that never really existed.' : 'No dirty read: T2 saw 100 (the last committed value) the whole time, never T1\'s uncommitted 50.' };
+    }
+    function runNonRepeatableReadScenario(level) {
+      const db = makeDb();
+      const seed = beginTxn(db, 'READ_COMMITTED');
+      insertRow(db, seed, 'balance', 100);
+      commitTxn(db, seed);
+      const steps = [];
+      const t1 = beginTxn(db, level);
+      const t2 = beginTxn(db, level);
+      steps.push({ actor: 'T1', text: 'BEGIN' });
+      steps.push({ actor: 'T2', text: 'BEGIN' });
+      const read1 = readRow(db, t2, 'balance');
+      steps.push({ actor: 'T2', text: 'SELECT balance (1st read) -> ' + read1 });
+      writeRow(db, t1, 'balance', 200);
+      const c1 = commitTxn(db, t1);
+      steps.push({ actor: 'T1', text: 'UPDATE balance = 200; COMMIT' + (c1.ok ? '' : ' -- REJECTED') });
+      const read2 = readRow(db, t2, 'balance');
+      steps.push({ actor: 'T2', text: 'SELECT balance (2nd read, same txn) -> ' + read2 });
+      const anomaly = read1 !== read2;
+      return { steps, anomaly, summary: anomaly ? 'NON-REPEATABLE READ: T2 read ' + read1 + ', then ' + read2 + ', for the SAME row, inside one transaction.' : 'No non-repeatable read: T2 read ' + read1 + ' both times, even though T1 committed a change in between.' };
+    }
+    function runPhantomReadScenario(level) {
+      const db = makeDb();
+      const seed = beginTxn(db, 'READ_COMMITTED');
+      insertRow(db, seed, 'doc1', { onCall: true });
+      insertRow(db, seed, 'doc2', { onCall: true });
+      commitTxn(db, seed);
+      const steps = [];
+      const t1 = beginTxn(db, level);
+      const t2 = beginTxn(db, level);
+      steps.push({ actor: 'T1', text: 'BEGIN' });
+      steps.push({ actor: 'T2', text: 'BEGIN' });
+      const count1 = readCountWhere(db, t2, v => v.onCall);
+      steps.push({ actor: 'T2', text: 'SELECT count(*) WHERE on_call (1st) -> ' + count1 });
+      insertRow(db, t1, 'doc3', { onCall: true });
+      const c1 = commitTxn(db, t1);
+      steps.push({ actor: 'T1', text: 'INSERT doc3 (on_call); COMMIT' + (c1.ok ? '' : ' -- REJECTED') });
+      const count2 = readCountWhere(db, t2, v => v.onCall);
+      steps.push({ actor: 'T2', text: 'SELECT count(*) WHERE on_call (2nd, same txn) -> ' + count2 });
+      const anomaly = count1 !== count2;
+      return { steps, anomaly, summary: anomaly ? 'PHANTOM READ: T2\'s count changed from ' + count1 + ' to ' + count2 + ' -- a row appeared that matched the SAME query, inside one transaction.' : 'No phantom read: T2\'s count stayed ' + count1 + ' both times, even though T1 committed a new matching row in between.' };
+    }
+    function runWriteSkewScenario(level) {
+      const db = makeDb();
+      const seed = beginTxn(db, 'READ_COMMITTED');
+      insertRow(db, seed, 'alice', { onCall: true });
+      insertRow(db, seed, 'bob', { onCall: true });
+      commitTxn(db, seed);
+      const steps = [];
+      const t1 = beginTxn(db, level);
+      const t2 = beginTxn(db, level);
+      steps.push({ actor: 'T1', text: 'BEGIN' });
+      steps.push({ actor: 'T2', text: 'BEGIN' });
+      const t1Count = readCountWhere(db, t1, v => v.onCall);
+      steps.push({ actor: 'T1', text: 'SELECT count(*) WHERE on_call -> ' + t1Count + ' (safe for me to go off call)' });
+      const t2Count = readCountWhere(db, t2, v => v.onCall);
+      steps.push({ actor: 'T2', text: 'SELECT count(*) WHERE on_call -> ' + t2Count + ' (safe for me to go off call)' });
+      writeRow(db, t1, 'alice', { onCall: false });
+      const c1 = commitTxn(db, t1);
+      steps.push({ actor: 'T1', text: 'UPDATE alice SET on_call = false; COMMIT' + (c1.ok ? '' : ' -- REJECTED (serialization_failure)') });
+      writeRow(db, t2, 'bob', { onCall: false });
+      const c2 = commitTxn(db, t2);
+      steps.push({ actor: 'T2', text: 'UPDATE bob SET on_call = false; COMMIT' + (c2.ok ? '' : ' -- REJECTED (serialization_failure)') });
+      const bothCommitted = c1.ok && c2.ok;
+      const finalReader = beginTxn(db, 'READ_COMMITTED');
+      const finalOnCallCount = readCountWhere(db, finalReader, v => v.onCall);
+      const anomaly = bothCommitted && finalOnCallCount === 0;
+      return { steps, anomaly, finalOnCallCount, summary: anomaly ? 'WRITE SKEW: both commits succeeded, and now ZERO doctors are on call -- an invariant neither transaction individually violated, but their combination did.' : (bothCommitted ? 'Both committed, but the invariant happens to still hold (' + finalOnCallCount + ' on call).' : 'One commit was REJECTED (serialization failure) -- the invariant survives because the conflicting transaction never landed.') };
+    }
+    // ===ISOLATION-MODEL-END===
+
+    const SCENARIOS = {
+      dirty: { label: 'Dirty Read', run: runDirtyReadScenario },
+      nonrepeatable: { label: 'Non-Repeatable Read', run: runNonRepeatableReadScenario },
+      phantom: { label: 'Phantom Read', run: runPhantomReadScenario },
+      writeskew: { label: 'Write Skew', run: runWriteSkewScenario },
+    };
+    const LEVEL_LABEL = { READ_COMMITTED: 'Read Committed', REPEATABLE_READ: 'Repeatable Read', SERIALIZABLE: 'Serializable' };
+
+    const root = document.getElementById('dbiWidget');
+    const levelBtns = root.querySelectorAll('[data-level]');
+    const scenarioBtns = root.querySelectorAll('[data-scenario]');
+    const runBtn = document.getElementById('dbiRunBtn');
+    const resetBtn = document.getElementById('dbiResetBtn');
+    const verdictEl = document.getElementById('dbiVerdict');
+    const stepsEl = document.getElementById('dbiSteps');
+    const logEl = document.getElementById('dbiLog');
+    const resultsTable = document.getElementById('dbiResultsTable');
+
+    let level = 'READ_COMMITTED';
+    let scenario = 'dirty';
+
+    function log(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function clearResultsGrid() {
+      resultsTable.querySelectorAll('.dbi-cell').forEach(td => {
+        td.textContent = '--';
+        td.className = 'dbi-cell untested';
+      });
+    }
+
+    function highlightCurrentCell() {
+      resultsTable.querySelectorAll('.dbi-cell').forEach(td => td.classList.remove('current-run'));
+      const row = resultsTable.querySelector('tr[data-scenario="' + scenario + '"]');
+      const cell = row.querySelector('[data-level="' + level + '"]');
+      cell.classList.add('current-run');
+    }
+
+    function setLevel(l) {
+      level = l;
+      levelBtns.forEach(b => b.classList.toggle('active', b.dataset.level === l));
+      highlightCurrentCell();
+    }
+    function setScenario(s) {
+      scenario = s;
+      scenarioBtns.forEach(b => b.classList.toggle('active', b.dataset.scenario === s));
+      highlightCurrentCell();
+    }
+
+    function doRun() {
+      const result = SCENARIOS[scenario].run(level);
+
+      verdictEl.innerHTML = '<div class="dbi-verdict ' + (result.anomaly ? 'allowed' : 'prevented') + '">' +
+        (result.anomaly ? '⚠ ANOMALY OCCURRED' : '✓ ANOMALY PREVENTED') + '</div>' +
+        '<div style="font-size:0.82rem;color:var(--dbi-muted);margin-bottom:8px;">' + result.summary + '</div>';
+
+      stepsEl.innerHTML = result.steps.map(s =>
+        '<div><span class="dbi-step-actor ' + s.actor + '">' + s.actor + '</span>' + s.text + '</div>'
+      ).join('');
+
+      const row = resultsTable.querySelector('tr[data-scenario="' + scenario + '"]');
+      const cell = row.querySelector('[data-level="' + level + '"]');
+      cell.textContent = result.anomaly ? 'ALLOWED' : 'PREVENTED';
+      cell.className = 'dbi-cell current-run ' + (result.anomaly ? 'allowed' : 'prevented');
+
+      log(SCENARIOS[scenario].label + ' @ ' + LEVEL_LABEL[level] + ': ' + (result.anomaly ? 'ALLOWED' : 'prevented'), result.anomaly ? 'bad' : 'good');
+    }
+
+    levelBtns.forEach(b => b.addEventListener('click', () => setLevel(b.dataset.level)));
+    scenarioBtns.forEach(b => b.addEventListener('click', () => setScenario(b.dataset.scenario)));
+    runBtn.addEventListener('click', doRun);
+    resetBtn.addEventListener('click', () => {
+      clearResultsGrid();
+      logEl.innerHTML = '';
+      verdictEl.innerHTML = '';
+      stepsEl.innerHTML = '';
+      setLevel('READ_COMMITTED');
+      setScenario('dirty');
+      log('Reset. Pick a level and an anomaly, then Run.', null);
+    });
+
+    highlightCurrentCell();
+    log('Pick a level and an anomaly, then Run. Try every combination to build the full grid.', null);
+  })();
+  </script>
+</div>

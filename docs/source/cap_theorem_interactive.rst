@@ -162,3 +162,8 @@ Where This Shows Up
   flag is this page's CP/AP toggle, and ``min.insync.replicas`` is its
   version of a quorum requirement, both enforced on a real replicated
   log instead of an abstract 2-node store.
+* See :doc:`db_acid_transaction_interactive` for the same "serve now
+  vs. guarantee correctness" tension shrunk down to a single machine --
+  isolation levels are what one transaction can see of another
+  in-flight transaction's work, the same shape of question this page
+  asks about one node and another.
