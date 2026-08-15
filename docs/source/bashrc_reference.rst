@@ -281,8 +281,8 @@ buffer allowing cancellation (``Ctrl-C``).
 * ``docker-prune``: Runs ``_docker_cli_wipe`` (Clears containers, images,
   volumes, buildx cache without restarting daemon).
 * ``docker-prune --deep``: **Nuclear option.** Stops Docker daemon, directly
-  deletes ``/var/lib/docker/*`` and ``/var/lib/containerd/*`` on disk,
-  restarts daemon, and attempts ``runner host buildkit fix`` if available.
+  deletes ``/var/lib/docker/*`` and ``/var/lib/containerd/*`` on disk, and
+  restarts daemon.
 
 ``fn_submodule_update``
 ^^^^^^^^^^^^^^^^^^^^^^^^^

@@ -411,9 +411,6 @@ docker-prune ()
         sudo rm -rf /var/lib/containerd/*
         sudo systemctl start docker
         sleep 2
-        # Internal builder-recreation command, not standard docker/OS
-        # tooling - guarded so it's a no-op on machines that don't have it.
-        command -v runner &> /dev/null && runner host buildkit fix
     fi
 
     _docker_cli_wipe
