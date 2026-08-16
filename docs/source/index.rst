@@ -31,6 +31,7 @@ worth writing down and coming back to.
    kernel_networking_docker_internals
    dns_resolution_interactive
    rest_api_interactive
+   rest_vs_rpc_interactive
 
 .. toctree::
    :hidden:
@@ -241,6 +242,9 @@ Networking
    * - :doc:`rest_api_interactive`
      - Tutorial + Play With It: a real in-browser REST API -- resources, HTTP methods, status codes, and genuine idempotency behavior
      - GET/POST/PUT/PATCH/DELETE, safe vs. idempotent, status codes, statelessness
+   * - :doc:`rest_vs_rpc_interactive`
+     - Interactive REST vs. RPC -- identical flaky-network retry storm hits three handlers side by side, one of them double-charges
+     - idempotency, retry safety, idempotency keys, gRPC/JSON-RPC vs. resource verbs
 
 Containers & Filesystems
 ------------------------------

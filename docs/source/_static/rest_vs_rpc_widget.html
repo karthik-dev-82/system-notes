@@ -1,0 +1,378 @@
+<div class="rvr-root" id="restVsRpcWidget">
+  <style>
+    #restVsRpcWidget {
+      --rvr-bg: #0f172a;
+      --rvr-panel: #16213e;
+      --rvr-border: #2a3655;
+      --rvr-text: #e2e8f0;
+      --rvr-muted: #94a3b8;
+      --rvr-accent: #38bdf8;
+      --rvr-good: #4ade80;
+      --rvr-bad: #f87171;
+      --rvr-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rvr-bg);
+      color: var(--rvr-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #restVsRpcWidget * { box-sizing: border-box; }
+    #restVsRpcWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #restVsRpcWidget .rvr-sub { color: var(--rvr-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #restVsRpcWidget .rvr-stage { background: var(--rvr-panel); border: 1px solid var(--rvr-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 900px; }
+
+    #restVsRpcWidget .rvr-controls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    #restVsRpcWidget .rvr-btn { background: var(--rvr-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    #restVsRpcWidget .rvr-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    #restVsRpcWidget .rvr-btn.secondary { background: transparent; color: var(--rvr-text); border: 1px solid var(--rvr-border); }
+    #restVsRpcWidget .rvr-btn.tiny { padding: 5px 10px; font-size: 0.74rem; }
+    #restVsRpcWidget .rvr-scenario-group { display: flex; gap: 6px; }
+    #restVsRpcWidget .rvr-scenario-btn { background: #0a1128; color: var(--rvr-muted); border: 1px solid var(--rvr-border); border-radius: 7px; padding: 7px 14px; font-size: 0.82rem; font-weight: 700; cursor: pointer; }
+    #restVsRpcWidget .rvr-scenario-btn.active { background: rgba(56,189,248,0.16); color: var(--rvr-accent); border-color: var(--rvr-accent); }
+    #restVsRpcWidget label.rvr-check { display: flex; align-items: center; gap: 6px; font-size: 0.82rem; color: var(--rvr-muted); cursor: pointer; user-select: none; }
+    #restVsRpcWidget .rvr-speed { display: flex; align-items: center; gap: 8px; font-size: 0.78rem; color: var(--rvr-muted); margin-left: auto; }
+    #restVsRpcWidget input[type="range"] { width: 100px; }
+
+    #restVsRpcWidget .rvr-scenario-note { font-size: 0.82rem; color: var(--rvr-muted); background: #0a1128; border: 1px solid var(--rvr-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; }
+    #restVsRpcWidget .rvr-scenario-note b { color: var(--rvr-text); }
+
+    #restVsRpcWidget .rvr-cols { display: flex; gap: 12px; }
+    #restVsRpcWidget .rvr-col { flex: 1; min-width: 270px; background: #0a1128; border: 1px solid var(--rvr-border); border-radius: 10px; padding: 12px; }
+    #restVsRpcWidget .rvr-col-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 8px; }
+    #restVsRpcWidget .rvr-col-title { font-weight: 800; font-size: 0.88rem; color: #fff; }
+    #restVsRpcWidget .rvr-verb-badge { font-family: ui-monospace, monospace; font-size: 0.7rem; padding: 2px 7px; border-radius: 5px; background: rgba(148,163,184,0.16); color: var(--rvr-muted); font-weight: 700; }
+
+    #restVsRpcWidget .rvr-state-box { border: 1px solid var(--rvr-border); border-radius: 8px; padding: 10px; margin-bottom: 10px; text-align: center; transition: background 0.25s, border-color 0.25s; }
+    #restVsRpcWidget .rvr-state-box.flash { background: rgba(56,189,248,0.14); border-color: var(--rvr-accent); }
+    #restVsRpcWidget .rvr-state-status { font-size: 0.78rem; color: var(--rvr-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    #restVsRpcWidget .rvr-state-value { font-size: 1.6rem; font-weight: 800; color: var(--rvr-text); margin-top: 2px; }
+    #restVsRpcWidget .rvr-verdict { font-size: 0.74rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; text-align: center; margin-bottom: 10px; }
+    #restVsRpcWidget .rvr-verdict.safe { background: rgba(74,222,128,0.16); color: var(--rvr-good); }
+    #restVsRpcWidget .rvr-verdict.bad { background: rgba(248,113,113,0.16); color: var(--rvr-bad); }
+    #restVsRpcWidget .rvr-verdict.neutral { background: rgba(148,163,184,0.14); color: var(--rvr-muted); }
+
+    #restVsRpcWidget .rvr-log { height: 190px; overflow-y: auto; font-size: 0.72rem; font-family: ui-monospace, monospace; background: #050a1a; border: 1px solid var(--rvr-border); border-radius: 8px; padding: 8px 10px; }
+    #restVsRpcWidget .rvr-log-line { padding: 3px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; justify-content: space-between; gap: 6px; }
+    #restVsRpcWidget .rvr-log-line .rvr-attempt-n { color: var(--rvr-muted); flex-shrink: 0; }
+    #restVsRpcWidget .rvr-log-line .rvr-outcome.success { color: var(--rvr-good); }
+    #restVsRpcWidget .rvr-log-line .rvr-outcome.timeout { color: var(--rvr-warn); }
+    #restVsRpcWidget .rvr-log-empty { color: var(--rvr-muted); font-style: italic; }
+
+    #restVsRpcWidget .rvr-key-note { font-size: 0.68rem; color: var(--rvr-muted); margin-top: 6px; }
+  </style>
+
+  <h3>REST vs. RPC: Play With It</h3>
+  <p class="rvr-sub">
+    Same two business operations, sent three different ways, under an
+    identical flaky network. Watch which ones survive a blind client
+    retry -- and which one silently double-charges a customer.
+  </p>
+
+  <div class="rvr-stage">
+    <div class="rvr-controls-row">
+      <div class="rvr-scenario-group">
+        <button class="rvr-scenario-btn active" data-scenario="cancel">Cancel Order</button>
+        <button class="rvr-scenario-btn" data-scenario="payment">Retry Payment</button>
+      </div>
+      <label class="rvr-check">
+        <input type="checkbox" id="rvrLossToggle" checked>
+        simulate this response getting lost
+      </label>
+      <button class="rvr-btn" id="rvrSendBtn">Send Request</button>
+      <button class="rvr-btn secondary" id="rvrStormBtn">Run Flaky Retry Storm</button>
+      <button class="rvr-btn secondary tiny" id="rvrResetBtn">Reset</button>
+      <div class="rvr-speed">
+        <span>Storm pace</span>
+        <input type="range" id="rvrSpeed" min="150" max="1200" step="50" value="500">
+      </div>
+    </div>
+
+    <div class="rvr-scenario-note" id="rvrScenarioNote"></div>
+
+    <div class="rvr-cols">
+      <div class="rvr-col">
+        <div class="rvr-col-head">
+          <span class="rvr-col-title">REST</span>
+          <span class="rvr-verb-badge" id="rvrVerbRest"></span>
+        </div>
+        <div class="rvr-verdict neutral" id="rvrVerdictRest">--</div>
+        <div class="rvr-state-box" id="rvrStateBoxRest">
+          <div class="rvr-state-status" id="rvrStateLabelRest"></div>
+          <div class="rvr-state-value" id="rvrStateValueRest">--</div>
+        </div>
+        <div class="rvr-log" id="rvrLogRest"><div class="rvr-log-empty">No requests sent yet.</div></div>
+      </div>
+
+      <div class="rvr-col">
+        <div class="rvr-col-head">
+          <span class="rvr-col-title">RPC (naive)</span>
+          <span class="rvr-verb-badge" id="rvrVerbRpcNaive"></span>
+        </div>
+        <div class="rvr-verdict neutral" id="rvrVerdictRpcNaive">--</div>
+        <div class="rvr-state-box" id="rvrStateBoxRpcNaive">
+          <div class="rvr-state-status" id="rvrStateLabelRpcNaive"></div>
+          <div class="rvr-state-value" id="rvrStateValueRpcNaive">--</div>
+        </div>
+        <div class="rvr-log" id="rvrLogRpcNaive"><div class="rvr-log-empty">No requests sent yet.</div></div>
+      </div>
+
+      <div class="rvr-col">
+        <div class="rvr-col-head">
+          <span class="rvr-col-title">RPC + idempotency key</span>
+          <span class="rvr-verb-badge" id="rvrVerbRpcKey"></span>
+        </div>
+        <div class="rvr-verdict neutral" id="rvrVerdictRpcKey">--</div>
+        <div class="rvr-state-box" id="rvrStateBoxRpcKey">
+          <div class="rvr-state-status" id="rvrStateLabelRpcKey"></div>
+          <div class="rvr-state-value" id="rvrStateValueRpcKey">--</div>
+        </div>
+        <div class="rvr-log" id="rvrLogRpcKey"><div class="rvr-log-empty">No requests sent yet.</div></div>
+        <div class="rvr-key-note">Client generates <code>idempotency-key</code> once per logical attempt and resends the <em>same</em> key on every retry of it.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var root = document.getElementById('restVsRpcWidget');
+
+    // ---- Core state-machine functions (identical to the verified Node
+    // model in rest_vs_rpc_model.js -- fuzz-tested there, not re-derived
+    // here) --------------------------------------------------------------
+
+    function freshServer() {
+      return {
+        order: { status: 'active' },
+        payment: { status: 'pending', amount: 50, chargeCount: 0 },
+        seenKeys: {},
+      };
+    }
+
+    function restCancelOrder(server) {
+      server.order.status = 'cancelled';
+      return { verb: 'DELETE /orders/1', code: 204 };
+    }
+
+    function restRetryPayment(server) {
+      if (server.payment.status !== 'charged') {
+        server.payment.chargeCount++;
+        server.payment.status = 'charged';
+      }
+      return { verb: 'PUT /payments/1', code: 200 };
+    }
+
+    function rpcCancelOrder(server) {
+      server.order.status = 'cancelled';
+      return { verb: 'POST /cancelOrder', code: 200 };
+    }
+
+    function rpcRetryPaymentNaive(server) {
+      server.payment.chargeCount++;
+      server.payment.status = 'charged';
+      return { verb: 'POST /retryPayment', code: 200 };
+    }
+
+    function rpcRetryPaymentWithKey(server, key) {
+      if (server.seenKeys[key]) {
+        return { verb: 'POST /retryPayment', code: 200, dedup: true };
+      }
+      server.seenKeys[key] = true;
+      server.payment.chargeCount++;
+      server.payment.status = 'charged';
+      return { verb: 'POST /retryPayment', code: 200, dedup: false };
+    }
+
+    // ---- Widget state -----------------------------------------------------
+
+    var SCENARIOS = {
+      cancel: {
+        label: 'Cancel Order',
+        note: '<b>Cancel Order</b> is a pure status assignment -- "make this order\'s status = cancelled". That\'s naturally idempotent no matter how it\'s exposed, so all three columns stay safe here. This scenario is the control case: it shows idempotency-under-retry is a property of the <em>operation</em>, not automatically a property of REST.',
+        rest: { verb: 'DELETE /orders/1', handler: restCancelOrder, field: 'status', label: 'order status' },
+        rpcNaive: { verb: 'POST /cancelOrder', handler: rpcCancelOrder, field: 'status', label: 'order status' },
+        rpcKey: { verb: 'POST /cancelOrder', handler: rpcCancelOrder, field: 'status', label: 'order status', ignoreKey: true },
+        target: 'order',
+      },
+      payment: {
+        label: 'Retry Payment',
+        note: '<b>Retry Payment</b> means "charge the customer" -- a counting, side-effecting action, not a fixed-value assignment. REST\'s <code>PUT</code> handler is written to check "already charged?" before acting, so it converges. The naive RPC handler just charges, every single call -- watch it diverge the moment a response gets marked lost and the client retries.',
+        rest: { verb: 'PUT /payments/1', handler: restRetryPayment, field: 'chargeCount', label: 'charge count' },
+        rpcNaive: { verb: 'POST /retryPayment', handler: rpcRetryPaymentNaive, field: 'chargeCount', label: 'charge count' },
+        rpcKey: { verb: 'POST /retryPayment', handler: rpcRetryPaymentWithKey, field: 'chargeCount', label: 'charge count' },
+        target: 'payment',
+      },
+    };
+
+    var state = {
+      scenario: 'cancel',
+      attemptKey: 0, // increments once per logical "Send" click, used as the idempotency key
+      servers: { rest: freshServer(), rpcNaive: freshServer(), rpcKey: freshServer() },
+      logs: { rest: [], rpcNaive: [], rpcKey: [] },
+      stormRunning: false,
+    };
+
+    function currentScenario() { return SCENARIOS[state.scenario]; }
+
+    // ---- One client attempt, applied identically to all three columns ----
+    // `lost` = whether the response is (simulated as) lost this attempt.
+    // The server always actually processes the request; only whether the
+    // CLIENT perceives success or a timeout differs -- exactly the case
+    // that motivates idempotency in the first place.
+    function sendAttempt(lost) {
+      var sc = currentScenario();
+      var key = 'attempt-' + state.attemptKey;
+
+      var rRest = sc.rest.handler(state.servers.rest);
+      var rNaive = sc.rpcNaive.handler(state.servers.rpcNaive);
+      var rKey = sc.rpcKey.ignoreKey
+        ? sc.rpcKey.handler(state.servers.rpcKey)
+        : sc.rpcKey.handler(state.servers.rpcKey, key);
+
+      state.logs.rest.push({ verb: rRest.verb, lost: lost });
+      state.logs.rpcNaive.push({ verb: rNaive.verb, lost: lost });
+      state.logs.rpcKey.push({ verb: rKey.verb, lost: lost });
+
+      // A logical attempt only advances to a NEW key once the client has
+      // stopped retrying (seen success) -- while retrying the same lost
+      // request, it must reuse the same idempotency key.
+      if (!lost) state.attemptKey++;
+
+      render(true);
+    }
+
+    // ---- Rendering ----------------------------------------------------
+
+    function fieldValue(server, sc, which) {
+      var target = server[sc.target];
+      var field = sc[which].field;
+      return target[field];
+    }
+
+    function renderColumn(which, boxId, labelId, valueId, verdictId, logId, verbId) {
+      var sc = currentScenario();
+      var server = state.servers[which];
+      var cfg = sc[which];
+      var value = fieldValue(server, sc, which);
+
+      document.getElementById(verbId).textContent = cfg.verb;
+      document.getElementById(labelId).textContent = cfg.label;
+      document.getElementById(valueId).textContent = value;
+
+      var verdictEl = document.getElementById(verdictId);
+      if (state.logs[which].length === 0) {
+        verdictEl.className = 'rvr-verdict neutral';
+        verdictEl.textContent = 'No requests yet';
+      } else if (sc.target === 'order') {
+        verdictEl.className = 'rvr-verdict safe';
+        verdictEl.textContent = 'Converged: ' + value;
+      } else {
+        var safe = value <= 1;
+        verdictEl.className = 'rvr-verdict ' + (safe ? 'safe' : 'bad');
+        verdictEl.textContent = safe ? 'Safe: charged once' : 'DIVERGED: charged ' + value + 'x';
+      }
+
+      var logEl = document.getElementById(logId);
+      var entries = state.logs[which];
+      if (entries.length === 0) {
+        logEl.innerHTML = '<div class="rvr-log-empty">No requests sent yet.</div>';
+      } else {
+        var html = '';
+        for (var i = 0; i < entries.length; i++) {
+          var e = entries[i];
+          var outcomeClass = e.lost ? 'timeout' : 'success';
+          var outcomeText = e.lost ? 'client saw: timeout (retrying)' : 'client saw: success';
+          html += '<div class="rvr-log-line"><span class="rvr-attempt-n">#' + (i + 1) + ' ' + escapeHtml(e.verb) + '</span><span class="rvr-outcome ' + outcomeClass + '">' + outcomeText + '</span></div>';
+        }
+        logEl.innerHTML = html;
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+    }
+
+    function render(flash) {
+      var sc = currentScenario();
+      document.getElementById('rvrScenarioNote').innerHTML = sc.note;
+
+      renderColumn('rest', 'rvrStateBoxRest', 'rvrStateLabelRest', 'rvrStateValueRest', 'rvrVerdictRest', 'rvrLogRest', 'rvrVerbRest');
+      renderColumn('rpcNaive', 'rvrStateBoxRpcNaive', 'rvrStateLabelRpcNaive', 'rvrStateValueRpcNaive', 'rvrVerdictRpcNaive', 'rvrLogRpcNaive', 'rvrVerbRpcNaive');
+      renderColumn('rpcKey', 'rvrStateBoxRpcKey', 'rvrStateLabelRpcKey', 'rvrStateValueRpcKey', 'rvrVerdictRpcKey', 'rvrLogRpcKey', 'rvrVerbRpcKey');
+
+      if (flash) {
+        ['rvrStateBoxRest', 'rvrStateBoxRpcNaive', 'rvrStateBoxRpcKey'].forEach(function (id) {
+          var el = document.getElementById(id);
+          el.classList.add('flash');
+          setTimeout(function () { el.classList.remove('flash'); }, 350);
+        });
+      }
+
+      var storming = state.stormRunning;
+      document.getElementById('rvrSendBtn').disabled = storming;
+      document.getElementById('rvrStormBtn').disabled = storming;
+      document.getElementById('rvrStormBtn').textContent = storming ? 'Running storm...' : 'Run Flaky Retry Storm';
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function resetScenario() {
+      state.servers = { rest: freshServer(), rpcNaive: freshServer(), rpcKey: freshServer() };
+      state.logs = { rest: [], rpcNaive: [], rpcKey: [] };
+      state.attemptKey = 0;
+      render(false);
+    }
+
+    // ---- Wiring ---------------------------------------------------------
+
+    var scenarioBtns = root.querySelectorAll('.rvr-scenario-btn');
+    scenarioBtns.forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        if (state.stormRunning) return;
+        scenarioBtns.forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        state.scenario = btn.getAttribute('data-scenario');
+        resetScenario();
+      });
+    });
+
+    document.getElementById('rvrSendBtn').addEventListener('click', function () {
+      var lost = document.getElementById('rvrLossToggle').checked;
+      sendAttempt(lost);
+    });
+
+    document.getElementById('rvrResetBtn').addEventListener('click', function () {
+      if (state.stormRunning) return;
+      resetScenario();
+    });
+
+    document.getElementById('rvrStormBtn').addEventListener('click', function () {
+      if (state.stormRunning) return;
+      resetScenario();
+      state.stormRunning = true;
+      // A dramatic, guaranteed-to-diverge-if-unsafe pattern: several lost
+      // responses in a row, then one that finally arrives.
+      var pattern = [true, true, true, false];
+      var i = 0;
+      var speed = parseInt(document.getElementById('rvrSpeed').value, 10);
+      function step() {
+        if (i >= pattern.length) {
+          state.stormRunning = false;
+          render(false);
+          return;
+        }
+        sendAttempt(pattern[i]);
+        i++;
+        setTimeout(step, speed);
+      }
+      render(false);
+      setTimeout(step, speed);
+    });
+
+    resetScenario();
+  })();
+  </script>
+</div>
