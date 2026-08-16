@@ -32,6 +32,7 @@ worth writing down and coming back to.
    dns_resolution_interactive
    rest_api_interactive
    rest_vs_rpc_interactive
+   long_poll_vs_ws_interactive
 
 .. toctree::
    :hidden:
@@ -245,6 +246,9 @@ Networking
    * - :doc:`rest_vs_rpc_interactive`
      - Interactive REST vs. RPC -- identical flaky-network retry storm hits three handlers side by side, one of them double-charges
      - idempotency, retry safety, idempotency keys, gRPC/JSON-RPC vs. resource verbs
+   * - :doc:`long_poll_vs_ws_interactive`
+     - Interactive long polling vs. WebSockets -- same event schedule, live request-count and delivery-latency comparison
+     - server push, request overhead, reconnect-gap latency, persistent connections
 
 Containers & Filesystems
 ------------------------------

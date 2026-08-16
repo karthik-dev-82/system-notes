@@ -116,4 +116,7 @@ See Also
 See :doc:`rest_api_interactive` for the full REST method/status-code
 reference this page builds on. See :doc:`rate_limiting_interactive`
 for another case where a client-visible contract (rate-limit headers,
-here retry-safety) has to be designed in rather than assumed.
+here retry-safety) has to be designed in rather than assumed. See
+:doc:`long_poll_vs_ws_interactive` for another transport-mechanics
+comparison, this time about delivery latency and connection overhead
+rather than retry safety.

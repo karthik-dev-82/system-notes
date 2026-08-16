@@ -1,0 +1,435 @@
+<div class="lpw-root" id="longPollVsWsWidget">
+  <style>
+    #longPollVsWsWidget {
+      --lpw-bg: #0f172a;
+      --lpw-panel: #16213e;
+      --lpw-border: #2a3655;
+      --lpw-text: #e2e8f0;
+      --lpw-muted: #94a3b8;
+      --lpw-accent: #38bdf8;
+      --lpw-good: #4ade80;
+      --lpw-bad: #f87171;
+      --lpw-warn: #fbbf24;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--lpw-bg);
+      color: var(--lpw-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #longPollVsWsWidget * { box-sizing: border-box; }
+    #longPollVsWsWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #longPollVsWsWidget .lpw-sub { color: var(--lpw-muted); font-size: 0.85rem; margin-bottom: 16px; }
+    #longPollVsWsWidget .lpw-stage { background: var(--lpw-panel); border: 1px solid var(--lpw-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 900px; }
+
+    #longPollVsWsWidget .lpw-controls-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 12px; }
+    #longPollVsWsWidget .lpw-btn { background: var(--lpw-accent); color: #041322; border: none; border-radius: 7px; padding: 8px 14px; font-weight: 700; font-size: 0.82rem; cursor: pointer; }
+    #longPollVsWsWidget .lpw-btn.secondary { background: transparent; color: var(--lpw-text); border: 1px solid var(--lpw-border); }
+    #longPollVsWsWidget .lpw-slider-group { display: flex; align-items: center; gap: 6px; font-size: 0.76rem; color: var(--lpw-muted); }
+    #longPollVsWsWidget .lpw-slider-group input[type="range"] { width: 90px; }
+    #longPollVsWsWidget .lpw-slider-group .lpw-slider-val { color: var(--lpw-text); font-weight: 700; min-width: 16px; display: inline-block; text-align: right; }
+    #longPollVsWsWidget .lpw-speed { display: flex; align-items: center; gap: 8px; font-size: 0.76rem; color: var(--lpw-muted); margin-left: auto; }
+
+    #longPollVsWsWidget .lpw-stats-row { display: flex; gap: 12px; margin-bottom: 14px; flex-wrap: wrap; }
+    #longPollVsWsWidget .lpw-stat-box { background: #0a1128; border: 1px solid var(--lpw-border); border-radius: 8px; padding: 8px 14px; text-align: center; min-width: 130px; }
+    #longPollVsWsWidget .lpw-stat-label { font-size: 0.68rem; color: var(--lpw-muted); text-transform: uppercase; letter-spacing: 0.03em; }
+    #longPollVsWsWidget .lpw-stat-value { font-size: 1.3rem; font-weight: 800; margin-top: 2px; }
+    #longPollVsWsWidget .lpw-stat-value.accent { color: var(--lpw-accent); }
+
+    #longPollVsWsWidget .lpw-track-label { font-size: 0.78rem; font-weight: 700; color: var(--lpw-text); margin-bottom: 4px; display: flex; justify-content: space-between; align-items: center; }
+    #longPollVsWsWidget .lpw-track-label .lpw-track-legend { font-weight: 400; color: var(--lpw-muted); font-size: 0.7rem; }
+    #longPollVsWsWidget .lpw-track { position: relative; display: flex; height: 34px; border-radius: 6px; overflow: hidden; margin-bottom: 4px; background: #050a1a; border: 1px solid var(--lpw-border); }
+    #longPollVsWsWidget .lpw-cell { flex: 0 0 auto; width: 14px; height: 100%; border-right: 1px solid rgba(255,255,255,0.03); position: relative; }
+    #longPollVsWsWidget .lpw-cell.lpw-open { background: rgba(56,189,248,0.35); }
+    #longPollVsWsWidget .lpw-cell.lpw-idle { background: transparent; }
+    #longPollVsWsWidget .lpw-cell.lpw-connected { background: rgba(74,222,128,0.28); }
+    #longPollVsWsWidget .lpw-marker { position: absolute; top: -13px; left: 50%; transform: translateX(-50%); font-size: 11px; line-height: 1; }
+    #longPollVsWsWidget .lpw-marker.lpw-event { color: var(--lpw-warn); top: -13px; }
+    #longPollVsWsWidget .lpw-marker.lpw-delivery { color: var(--lpw-good); top: 20px; }
+    #longPollVsWsWidget .lpw-marker.lpw-gap-delivery { color: var(--lpw-bad); top: 20px; }
+    #longPollVsWsWidget .lpw-playhead { position: absolute; top: -16px; bottom: -6px; width: 2px; background: #fff; z-index: 3; pointer-events: none; transition: left 0.08s linear; }
+    #longPollVsWsWidget .lpw-tracks-wrap { position: relative; margin-bottom: 18px; }
+
+    #longPollVsWsWidget .lpw-moment { font-size: 0.8rem; background: #0a1128; border: 1px solid var(--lpw-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 14px; display: flex; gap: 24px; flex-wrap: wrap; }
+    #longPollVsWsWidget .lpw-moment b { color: var(--lpw-accent); }
+
+    #longPollVsWsWidget .lpw-latency-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; font-family: ui-monospace, monospace; }
+    #longPollVsWsWidget .lpw-latency-table th, #longPollVsWsWidget .lpw-latency-table td { padding: 5px 10px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    #longPollVsWsWidget .lpw-latency-table th { color: var(--lpw-muted); font-weight: 700; text-align: right; font-family: -apple-system, sans-serif; font-size: 0.7rem; text-transform: uppercase; }
+    #longPollVsWsWidget .lpw-latency-table td:first-child, #longPollVsWsWidget .lpw-latency-table th:first-child { text-align: left; }
+    #longPollVsWsWidget .lpw-latency-table td.lpw-gap-cell { color: var(--lpw-bad); font-weight: 700; }
+    #longPollVsWsWidget .lpw-empty-note { color: var(--lpw-muted); font-style: italic; font-size: 0.8rem; }
+  </style>
+
+  <h3>Long Polling vs. WebSockets: Play With It</h3>
+  <p class="lpw-sub">
+    Same event schedule, delivered two ways. Watch how many HTTP
+    requests each approach burns, and the one real latency gap long
+    polling has that a persistent WebSocket connection can't.
+  </p>
+
+  <div class="lpw-stage">
+    <div class="lpw-controls-row">
+      <button class="lpw-btn" id="lpwRandomizeBtn">Randomize Events</button>
+      <button class="lpw-btn secondary" id="lpwGapDemoBtn">Load Reconnect-Gap Example</button>
+      <button class="lpw-btn secondary" id="lpwClearBtn">Clear Events</button>
+      <div class="lpw-slider-group">
+        <span>Poll timeout</span>
+        <input type="range" id="lpwTimeout" min="1" max="10" value="4">
+        <span class="lpw-slider-val" id="lpwTimeoutVal">4</span>
+      </div>
+      <div class="lpw-slider-group">
+        <span>Reconnect delay</span>
+        <input type="range" id="lpwReconnect" min="0" max="5" value="1">
+        <span class="lpw-slider-val" id="lpwReconnectVal">1</span>
+      </div>
+      <div class="lpw-speed">
+        <span>Playhead speed</span>
+        <input type="range" id="lpwSpeed" min="60" max="500" step="20" value="180">
+        <button class="lpw-btn secondary" id="lpwPlayBtn">Play</button>
+      </div>
+    </div>
+
+    <div class="lpw-stats-row">
+      <div class="lpw-stat-box">
+        <div class="lpw-stat-label">Long polling requests</div>
+        <div class="lpw-stat-value" id="lpwStatLpRequests">--</div>
+      </div>
+      <div class="lpw-stat-box">
+        <div class="lpw-stat-label">WebSocket requests</div>
+        <div class="lpw-stat-value accent" id="lpwStatWsRequests">--</div>
+      </div>
+      <div class="lpw-stat-box">
+        <div class="lpw-stat-label">Events in this run</div>
+        <div class="lpw-stat-value" id="lpwStatEvents">--</div>
+      </div>
+      <div class="lpw-stat-box">
+        <div class="lpw-stat-label">Worst LP delivery gap</div>
+        <div class="lpw-stat-value" id="lpwStatWorstGap">--</div>
+      </div>
+    </div>
+
+    <div class="lpw-tracks-wrap" id="lpwTracksWrap">
+      <div class="lpw-track-label">
+        <span>Long Polling</span>
+        <span class="lpw-track-legend">blue = request open &middot; gap = idle/reconnecting &middot; &#9670; = event &middot; &#10003; = delivered</span>
+      </div>
+      <div class="lpw-track" id="lpwTrackLp"></div>
+
+      <div class="lpw-track-label" style="margin-top: 10px;">
+        <span>WebSocket</span>
+        <span class="lpw-track-legend">green = connected the whole time &middot; &#9670; = event &middot; &#10003; = delivered (same tick)</span>
+      </div>
+      <div class="lpw-track" id="lpwTrackWs"></div>
+    </div>
+
+    <div class="lpw-moment" id="lpwMoment"></div>
+
+    <table class="lpw-latency-table" id="lpwLatencyTable"></table>
+  </div>
+
+  <script>
+  (function () {
+    var root = document.getElementById('longPollVsWsWidget');
+
+    // ---- Core simulation functions (identical to the verified Node model
+    // in long_poll_vs_ws_model.js -- fuzz-tested there, not re-derived
+    // here) ------------------------------------------------------------
+
+    function simulateLongPolling(events, timeoutTicks, reconnectDelay, totalTicks) {
+      var eventsByTick = {};
+      for (var i = 0; i < events.length; i++) {
+        var t = events[i];
+        if (!eventsByTick[t]) eventsByTick[t] = [];
+        eventsByTick[t].push(t);
+      }
+
+      var requestCount = 0;
+      var openedAt = null;
+      var nextOpenAt = 0;
+      var deliveries = [];
+      var pendingQueue = [];
+      var openIntervals = [];
+
+      function closePoll(tick) {
+        openIntervals.push({ start: openedAt, end: tick });
+        openedAt = null;
+        nextOpenAt = tick + reconnectDelay;
+      }
+
+      for (var tick = 0; tick <= totalTicks; tick++) {
+        if (openedAt === null && tick >= nextOpenAt) {
+          requestCount++;
+          openedAt = tick;
+          while (pendingQueue.length > 0) {
+            var qEventTick = pendingQueue.shift();
+            deliveries.push({ eventTick: qEventTick, deliveredAt: tick });
+          }
+        }
+
+        var todaysEvents = eventsByTick[tick] || [];
+        for (var j = 0; j < todaysEvents.length; j++) {
+          var eventTick = todaysEvents[j];
+          if (openedAt !== null) {
+            deliveries.push({ eventTick: eventTick, deliveredAt: tick });
+            closePoll(tick);
+          } else {
+            pendingQueue.push(eventTick);
+          }
+        }
+
+        if (openedAt !== null && tick - openedAt >= timeoutTicks) {
+          closePoll(tick);
+        }
+      }
+
+      return { requestCount: requestCount, deliveries: deliveries, openIntervals: openIntervals };
+    }
+
+    function simulateWebSocket(events, totalTicks) {
+      var deliveries = [];
+      for (var i = 0; i < events.length; i++) {
+        if (events[i] <= totalTicks) deliveries.push({ eventTick: events[i], deliveredAt: events[i] });
+      }
+      return { requestCount: 1, deliveries: deliveries };
+    }
+
+    // ---- Widget state ---------------------------------------------------
+
+    var TOTAL_TICKS = 46;
+    var state = {
+      events: [12, 27, 34],
+      timeoutTicks: 4,
+      reconnectDelay: 1,
+      playhead: 0,
+      playing: false,
+      playTimer: null,
+    };
+
+    function recompute() {
+      var lp = simulateLongPolling(state.events, state.timeoutTicks, state.reconnectDelay, TOTAL_TICKS);
+      var ws = simulateWebSocket(state.events, TOTAL_TICKS);
+      return { lp: lp, ws: ws };
+    }
+
+    function tickIsOpen(intervals, tick) {
+      for (var i = 0; i < intervals.length; i++) {
+        if (tick >= intervals[i].start && tick <= intervals[i].end) return true;
+      }
+      return false;
+    }
+
+    function deliveryAtTick(deliveries, tick) {
+      for (var i = 0; i < deliveries.length; i++) {
+        if (deliveries[i].deliveredAt === tick) return deliveries[i];
+      }
+      return null;
+    }
+
+    function eventAtTick(events, tick) {
+      return events.indexOf(tick) !== -1;
+    }
+
+    function renderTrack(trackEl, cellClassForTick, events, deliveries) {
+      var html = '';
+      for (var tick = 0; tick <= TOTAL_TICKS; tick++) {
+        var cls = cellClassForTick(tick);
+        var markers = '';
+        if (eventAtTick(events, tick)) {
+          markers += '<span class="lpw-marker lpw-event">&#9670;</span>';
+        }
+        var d = deliveryAtTick(deliveries, tick);
+        if (d) {
+          var isGap = d.deliveredAt > d.eventTick;
+          markers += '<span class="lpw-marker ' + (isGap ? 'lpw-gap-delivery' : 'lpw-delivery') + '">&#10003;</span>';
+        }
+        html += '<div class="lpw-cell ' + cls + '">' + markers + '</div>';
+      }
+      trackEl.innerHTML = html;
+    }
+
+    function render() {
+      var result = recompute();
+      var lp = result.lp;
+      var ws = result.ws;
+
+      document.getElementById('lpwStatLpRequests').textContent = lp.requestCount;
+      document.getElementById('lpwStatWsRequests').textContent = ws.requestCount;
+      document.getElementById('lpwStatEvents').textContent = state.events.length;
+
+      var worstGap = 0;
+      for (var i = 0; i < lp.deliveries.length; i++) {
+        var gap = lp.deliveries[i].deliveredAt - lp.deliveries[i].eventTick;
+        if (gap > worstGap) worstGap = gap;
+      }
+      document.getElementById('lpwStatWorstGap').textContent = worstGap + ' tick' + (worstGap === 1 ? '' : 's');
+
+      renderTrack(
+        document.getElementById('lpwTrackLp'),
+        function (tick) { return tickIsOpen(lp.openIntervals, tick) ? 'lpw-open' : 'lpw-idle'; },
+        state.events,
+        lp.deliveries
+      );
+      renderTrack(
+        document.getElementById('lpwTrackWs'),
+        function () { return 'lpw-connected'; },
+        state.events,
+        ws.deliveries
+      );
+
+      renderMoment(lp, ws);
+      renderLatencyTable(lp, ws);
+      renderPlayhead();
+
+      document.getElementById('lpwPlayBtn').textContent = state.playing ? 'Pause' : 'Play';
+    }
+
+    function renderMoment(lp, ws) {
+      var tick = state.playhead;
+      var lpOpen = tickIsOpen(lp.openIntervals, tick);
+      var lpEvent = eventAtTick(state.events, tick);
+      var lpDelivery = deliveryAtTick(lp.deliveries, tick);
+      var wsDelivery = deliveryAtTick(ws.deliveries, tick);
+
+      var lpText = 'Long polling @ tick <b>' + tick + '</b>: request is currently <b>' + (lpOpen ? 'OPEN' : 'idle (between polls)') + '</b>.';
+      if (lpDelivery) lpText += ' Delivering event from tick ' + lpDelivery.eventTick + ' right now' + (lpDelivery.deliveredAt > lpDelivery.eventTick ? ' (' + (lpDelivery.deliveredAt - lpDelivery.eventTick) + '-tick gap latency).' : ' (zero added latency).');
+      else if (lpEvent) lpText += ' An event just occurred here.';
+
+      var wsText = 'WebSocket @ tick <b>' + tick + '</b>: connection has been open since tick 0.';
+      if (wsDelivery) wsText += ' Delivering the same event instantly (zero latency, always).';
+
+      document.getElementById('lpwMoment').innerHTML = '<div>' + lpText + '</div><div>' + wsText + '</div>';
+    }
+
+    function renderLatencyTable(lp, ws) {
+      var el = document.getElementById('lpwLatencyTable');
+      var existingNote = el.parentNode.querySelector('.lpw-empty-note');
+      if (existingNote) existingNote.remove();
+
+      if (state.events.length === 0) {
+        el.innerHTML = '';
+        var note = document.createElement('div');
+        note.className = 'lpw-empty-note';
+        note.textContent = 'No events yet -- click "Randomize Events" or "Load Reconnect-Gap Example".';
+        el.parentNode.appendChild(note);
+        return;
+      }
+
+      var sortedEvents = state.events.slice().sort(function (a, b) { return a - b; });
+      var rows = '<tr><th>Event tick</th><th>Long-poll delivered</th><th>LP latency</th><th>WS latency</th></tr>';
+      for (var i = 0; i < sortedEvents.length; i++) {
+        var et = sortedEvents[i];
+        var lpMatch = null;
+        for (var j = 0; j < lp.deliveries.length; j++) {
+          if (lp.deliveries[j].eventTick === et) { lpMatch = lp.deliveries[j]; break; }
+        }
+        var lpLatency = lpMatch ? lpMatch.deliveredAt - lpMatch.eventTick : '?';
+        var isGap = lpMatch && lpMatch.deliveredAt > lpMatch.eventTick;
+        rows += '<tr><td>' + et + '</td><td>' + (lpMatch ? lpMatch.deliveredAt : '?') + '</td><td class="' + (isGap ? 'lpw-gap-cell' : '') + '">' + lpLatency + '</td><td>0</td></tr>';
+      }
+      el.innerHTML = rows;
+    }
+
+    function renderPlayhead() {
+      var wrap = document.getElementById('lpwTracksWrap');
+      var existing = wrap.querySelector('.lpw-playhead');
+      if (existing) existing.remove();
+      var head = document.createElement('div');
+      head.className = 'lpw-playhead';
+      // Cell width is 14px (see .lpw-cell); top/bottom span comes from the
+      // CSS class default (top:-16px, bottom:-6px relative to the
+      // position:relative wrap), so only horizontal placement is set here.
+      head.style.left = (state.playhead * 14 + 7) + 'px';
+      wrap.appendChild(head);
+    }
+
+    // ---- Event schedule builders -----------------------------------------
+
+    function randomEvents() {
+      var count = 3 + Math.floor(Math.random() * 4);
+      var set = {};
+      while (Object.keys(set).length < count) {
+        set[2 + Math.floor(Math.random() * (TOTAL_TICKS - 4))] = true;
+      }
+      return Object.keys(set).map(Number);
+    }
+
+    function gapDemoEvents() {
+      // Find a tick that currently falls in an idle/reconnect gap under the
+      // active timeout/reconnect settings, so the example reliably shows
+      // added latency no matter how the sliders are set.
+      var probe = simulateLongPolling([], state.timeoutTicks, state.reconnectDelay, TOTAL_TICKS);
+      for (var tick = 5; tick < TOTAL_TICKS - 5; tick++) {
+        if (!tickIsOpen(probe.openIntervals, tick)) {
+          return [tick];
+        }
+      }
+      return [10];
+    }
+
+    // ---- Wiring -----------------------------------------------------------
+
+    function stopPlaying() {
+      state.playing = false;
+      if (state.playTimer) { clearInterval(state.playTimer); state.playTimer = null; }
+    }
+
+    document.getElementById('lpwRandomizeBtn').addEventListener('click', function () {
+      stopPlaying();
+      state.events = randomEvents();
+      state.playhead = 0;
+      render();
+    });
+
+    document.getElementById('lpwGapDemoBtn').addEventListener('click', function () {
+      stopPlaying();
+      state.events = gapDemoEvents();
+      state.playhead = 0;
+      render();
+    });
+
+    document.getElementById('lpwClearBtn').addEventListener('click', function () {
+      stopPlaying();
+      state.events = [];
+      state.playhead = 0;
+      render();
+    });
+
+    document.getElementById('lpwTimeout').addEventListener('input', function (e) {
+      state.timeoutTicks = parseInt(e.target.value, 10);
+      document.getElementById('lpwTimeoutVal').textContent = state.timeoutTicks;
+      render();
+    });
+
+    document.getElementById('lpwReconnect').addEventListener('input', function (e) {
+      state.reconnectDelay = parseInt(e.target.value, 10);
+      document.getElementById('lpwReconnectVal').textContent = state.reconnectDelay;
+      render();
+    });
+
+    document.getElementById('lpwPlayBtn').addEventListener('click', function () {
+      if (state.playing) {
+        stopPlaying();
+        render();
+        return;
+      }
+      state.playing = true;
+      if (state.playhead >= TOTAL_TICKS) state.playhead = 0;
+      var speed = parseInt(document.getElementById('lpwSpeed').value, 10);
+      state.playTimer = setInterval(function () {
+        state.playhead++;
+        if (state.playhead > TOTAL_TICKS) {
+          stopPlaying();
+          state.playhead = TOTAL_TICKS;
+        }
+        render();
+      }, speed);
+      render();
+    });
+
+    render();
+  })();
+  </script>
+</div>
