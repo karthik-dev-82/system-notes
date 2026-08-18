@@ -1,0 +1,557 @@
+<div class="cmt-root" id="cudaMoatWidget">
+  <style>
+    #cudaMoatWidget {
+      --cmt-bg: #0d141c;
+      --cmt-surface: #131c27;
+      --cmt-surface-2: #1a2532;
+      --cmt-ink: #e7ecf2;
+      --cmt-muted: #93a2b6;
+      --cmt-rule: #29374a;
+      --cmt-accent-silicon: #63c96a;
+      --cmt-accent-silicon-soft: #63c96a22;
+      --cmt-accent-software: #a596ec;
+      --cmt-accent-software-soft: #a596ec22;
+      --cmt-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 30px rgba(0,0,0,0.35);
+      --cmt-font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --cmt-font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --cmt-font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+
+      background: var(--cmt-bg);
+      color: var(--cmt-ink);
+      font-family: var(--cmt-font-body);
+      line-height: 1.6;
+      font-size: 16px;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cudaMoatWidget * { box-sizing: border-box; }
+
+    #cudaMoatWidget a { color: var(--cmt-accent-silicon); }
+    #cudaMoatWidget a:focus-visible,
+    #cudaMoatWidget button:focus-visible,
+    #cudaMoatWidget summary:focus-visible {
+      outline: 2px solid var(--cmt-accent-software);
+      outline-offset: 2px;
+    }
+
+    #cudaMoatWidget .page { max-width: 800px; margin: 0 auto; padding: 0; }
+    #cudaMoatWidget .wide { max-width: 960px; margin-left: auto; margin-right: auto; }
+
+    #cudaMoatWidget header.masthead { margin-bottom: 40px; }
+    #cudaMoatWidget .eyebrow {
+      font-family: var(--cmt-font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--cmt-muted);
+      margin: 0 0 14px;
+    }
+    #cudaMoatWidget h1 {
+      font-family: var(--cmt-font-display);
+      font-weight: 600;
+      font-size: clamp(1.9rem, 5vw, 2.5rem);
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px;
+      color: #fff;
+    }
+    #cudaMoatWidget .dek { font-size: 1.05rem; color: var(--cmt-muted); max-width: 62ch; margin: 0; }
+
+    #cudaMoatWidget .verdict {
+      margin-top: 28px;
+      padding: 18px 20px;
+      background: var(--cmt-surface);
+      border: 1px solid var(--cmt-rule);
+      border-left: 3px solid var(--cmt-ink);
+      border-radius: 4px;
+      box-shadow: var(--cmt-shadow);
+    }
+    #cudaMoatWidget .verdict p { margin: 0 0 10px; }
+    #cudaMoatWidget .verdict p:last-child { margin-bottom: 0; }
+    #cudaMoatWidget .verdict strong { font-weight: 700; }
+
+    #cudaMoatWidget nav.toc {
+      margin: 40px 0 48px;
+      padding: 18px 22px;
+      background: var(--cmt-surface);
+      border: 1px solid var(--cmt-rule);
+      border-radius: 6px;
+    }
+    #cudaMoatWidget nav.toc .eyebrow { margin-bottom: 10px; }
+    #cudaMoatWidget nav.toc ol {
+      margin: 0; padding: 0; list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 6px 20px;
+    }
+    #cudaMoatWidget nav.toc li { font-size: 0.94rem; }
+    #cudaMoatWidget nav.toc a { color: var(--cmt-ink); text-decoration: none; border-bottom: 1px solid transparent; }
+    #cudaMoatWidget nav.toc a:hover { border-bottom-color: var(--cmt-muted); }
+    #cudaMoatWidget nav.toc .num { font-family: var(--cmt-font-mono); color: var(--cmt-muted); margin-right: 8px; font-size: 0.85em; }
+
+    #cudaMoatWidget section { margin: 56px 0; }
+    #cudaMoatWidget section:first-of-type { margin-top: 0; }
+
+    #cudaMoatWidget .section-head {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 6px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--cmt-rule);
+    }
+    #cudaMoatWidget .section-head .tag { font-family: var(--cmt-font-mono); font-size: 0.78rem; color: var(--cmt-muted); }
+    #cudaMoatWidget h2 {
+      font-family: var(--cmt-font-display);
+      font-size: 1.5rem; font-weight: 600; margin: 0;
+    }
+    #cudaMoatWidget h3 { font-family: var(--cmt-font-display); font-size: 1.14rem; font-weight: 600; margin: 28px 0 10px; }
+    #cudaMoatWidget p { margin: 0 0 16px; }
+    #cudaMoatWidget .lede { font-size: 1.02rem; color: var(--cmt-ink); margin-top: 18px; }
+
+    #cudaMoatWidget .silicon h2, #cudaMoatWidget .silicon h3 { color: var(--cmt-accent-silicon); }
+    #cudaMoatWidget .software h2, #cudaMoatWidget .software h3 { color: var(--cmt-accent-software); }
+
+    #cudaMoatWidget .pill {
+      display: inline-block; font-family: var(--cmt-font-mono); font-size: 0.72rem;
+      letter-spacing: 0.03em; padding: 2px 9px; border-radius: 20px; border: 1px solid currentColor;
+    }
+    #cudaMoatWidget .pill.silicon { color: var(--cmt-accent-silicon); background: var(--cmt-accent-silicon-soft); border-color: var(--cmt-accent-silicon); }
+    #cudaMoatWidget .pill.software { color: var(--cmt-accent-software); background: var(--cmt-accent-software-soft); border-color: var(--cmt-accent-software); }
+
+    #cudaMoatWidget figure {
+      margin: 24px 0; padding: 18px;
+      background: var(--cmt-surface); border: 1px solid var(--cmt-rule); border-radius: 8px;
+      box-shadow: var(--cmt-shadow);
+    }
+    #cudaMoatWidget figure svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+    #cudaMoatWidget figcaption {
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--cmt-rule);
+      font-size: 0.85rem; color: var(--cmt-muted);
+    }
+    #cudaMoatWidget figcaption b { color: var(--cmt-ink); font-weight: 600; }
+
+    #cudaMoatWidget svg text { fill: currentColor; font-family: var(--cmt-font-body); }
+    #cudaMoatWidget svg .mono { font-family: var(--cmt-font-mono); }
+    #cudaMoatWidget svg .lbl { font-size: 12.5px; }
+    #cudaMoatWidget svg .lbl-sm { font-size: 11px; }
+    #cudaMoatWidget svg .lbl-title { font-size: 13.5px; font-weight: 700; }
+    #cudaMoatWidget svg .muted-txt { fill: var(--cmt-muted); }
+    #cudaMoatWidget svg .box { fill: var(--cmt-surface-2); stroke: var(--cmt-rule); stroke-width: 1.4; }
+    #cudaMoatWidget svg .box-strong { fill: var(--cmt-surface-2); stroke: var(--cmt-ink); stroke-width: 1.6; }
+    #cudaMoatWidget svg .box-silicon { stroke: var(--cmt-accent-silicon); }
+    #cudaMoatWidget svg .box-software { stroke: var(--cmt-accent-software); }
+    #cudaMoatWidget svg .wire { stroke: var(--cmt-muted); stroke-width: 1.4; fill: none; }
+    #cudaMoatWidget svg .wire-silicon { stroke: var(--cmt-accent-silicon); }
+    #cudaMoatWidget svg .wire-software { stroke: var(--cmt-accent-software); }
+    #cudaMoatWidget svg .wire-dash { stroke-dasharray: 4 3; }
+    #cudaMoatWidget svg .core-cpu { fill: var(--cmt-surface-2); stroke: var(--cmt-ink); stroke-width: 1.3; }
+    #cudaMoatWidget svg .core-gpu-fire { fill: var(--cmt-accent-silicon); }
+
+    #cudaMoatWidget table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    #cudaMoatWidget th, #cudaMoatWidget td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--cmt-rule); vertical-align: top; }
+    #cudaMoatWidget thead th {
+      font-family: var(--cmt-font-mono); font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--cmt-muted); border-bottom: 1px solid var(--cmt-ink);
+    }
+    #cudaMoatWidget tbody tr:last-child td { border-bottom: none; }
+    #cudaMoatWidget td code, #cudaMoatWidget p code, #cudaMoatWidget li code {
+      font-family: var(--cmt-font-mono); font-size: 0.9em; background: var(--cmt-surface-2);
+      padding: 1px 5px; border-radius: 3px;
+    }
+    #cudaMoatWidget .table-wrap { overflow-x: auto; border: 1px solid var(--cmt-rule); border-radius: 8px; background: var(--cmt-surface); padding: 4px; }
+    #cudaMoatWidget .table-wrap table { min-width: 640px; }
+
+    #cudaMoatWidget .callout {
+      margin: 20px 0; padding: 16px 18px; border-radius: 6px;
+      background: var(--cmt-surface); border: 1px solid var(--cmt-rule); border-left: 3px solid var(--cmt-muted);
+      font-size: 0.93rem;
+    }
+    #cudaMoatWidget .callout.silicon { border-left-color: var(--cmt-accent-silicon); }
+    #cudaMoatWidget .callout.software { border-left-color: var(--cmt-accent-software); }
+    #cudaMoatWidget .callout p:last-child { margin-bottom: 0; }
+
+    #cudaMoatWidget ul.tight, #cudaMoatWidget ol.tight { margin: 0 0 16px; padding-left: 22px; }
+    #cudaMoatWidget ul.tight li, #cudaMoatWidget ol.tight li { margin-bottom: 6px; }
+
+    #cudaMoatWidget footer.sources {
+      margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--cmt-rule);
+      font-size: 0.82rem; color: var(--cmt-muted);
+    }
+    #cudaMoatWidget footer.sources h2 {
+      font-size: 0.98rem; color: var(--cmt-ink); font-family: var(--cmt-font-body); font-weight: 700; margin-bottom: 10px;
+    }
+    #cudaMoatWidget footer.sources ul { margin: 0; padding-left: 20px; }
+    #cudaMoatWidget footer.sources li { margin-bottom: 5px; }
+    #cudaMoatWidget footer.sources a { color: var(--cmt-muted); text-decoration: underline; }
+    #cudaMoatWidget footer.sources a:hover { color: var(--cmt-ink); }
+  </style>
+
+  <div class="page">
+
+    <header class="masthead">
+      <p class="eyebrow">GPU computing &amp; the AI buildout &middot; verified against current NVIDIA, AMD &amp; industry documentation</p>
+      <h1>The CUDA Moat</h1>
+      <p class="dek">Why one company's chips became the bottleneck for an entire industry &mdash; the hardware reason, the software reason, and how thousands of them get wired together into one machine.</p>
+
+      <div class="verdict">
+        <p><strong>Short answer: it's two separate stories people usually blend into one.</strong> Story one is genuinely about physics: neural networks are, underneath, almost entirely one repeated operation (multiplying and adding numbers, over and over), and GPUs are chips built from thousands of simple cores doing exactly that operation at once instead of a few complex cores doing it one at a time. That part is real, and it isn't NVIDIA-specific &mdash; any sufficiently parallel chip benefits.</p>
+        <p>Story two is about software, and it <em>is</em> NVIDIA-specific: <b>CUDA</b> is NVIDIA's own programming platform, and after fifteen years of libraries, tooling, and a few million trained developers being built on top of it, it's now the reason renting an NVIDIA GPU is the boring, safe choice even when competing silicon is technically comparable or cheaper. This page covers both halves, plus the interconnects that let a rack of these chips act like one giant computer.</p>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="Table of contents">
+      <p class="eyebrow">On this page</p>
+      <ol>
+        <li><span class="num">01</span><a href="#one-idea">The one operation underneath it all</a></li>
+        <li><span class="num">02</span><a href="#inside-a-gpu">Inside one GPU</a></li>
+        <li><span class="num">03</span><a href="#the-moat">CUDA: the moat isn't the chip</a></li>
+        <li><span class="num">04</span><a href="#wiring-together">Wiring thousands of them together</a></li>
+        <li><span class="num">05</span><a href="#reference">Quick reference</a></li>
+      </ol>
+    </nav>
+
+    <section id="one-idea" class="silicon">
+      <div class="section-head">
+        <span class="tag mono">&sect;1</span>
+        <h2>The one operation underneath it all <span class="pill silicon">why GPUs, at all</span></h2>
+      </div>
+      <p class="lede">Strip away the hype and a neural network training or answering a prompt is, at the hardware level, mostly one thing happening billions of times: <b>multiply two numbers, add the result to a running total</b> &mdash; a multiply-accumulate. Almost the entire cost of running a transformer model is matrix multiplication, which is just that same operation done in a very regular, very repeatable pattern across huge grids of numbers.</p>
+      <p>A CPU is built to be good at a few different, unpredictable things in a row &mdash; branching logic, cache-dependent lookups, one thread of a complex program. It has a handful of powerful cores (8&ndash;64 is typical) and spends a lot of its transistor budget on guessing what instruction comes next. A GPU throws almost all of that away and instead builds thousands of small, identical cores that all execute the <i>same</i> instruction on <i>different</i> data at the same time &mdash; a design called SIMT, single instruction, multiple threads. For one unpredictable task, that's a bad trade. For multiplying every element of two enormous, regular matrices, it's exactly the right shape.</p>
+
+      <figure>
+        <svg viewBox="0 0 900 300" role="img" aria-label="Diagram comparing a CPU multiplying eight number pairs sequentially in a loop, one pair per cycle, against a GPU multiplying all eight pairs in the same instant using separate cores.">
+          <defs>
+            <marker id="cmtArrH1" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <text x="200" y="26" text-anchor="middle" class="lbl-title">CPU: a few cores, one at a time</text>
+          <rect class="box box-strong" x="40" y="46" width="140" height="66" rx="6"></rect>
+          <text x="110" y="74" text-anchor="middle" class="lbl">1 core</text>
+          <text x="110" y="92" text-anchor="middle" class="lbl-sm muted-txt">complex, general</text>
+
+          <g class="mono">
+            <rect x="220" y="56" width="46" height="26" class="core-cpu"></rect><text x="243" y="73" text-anchor="middle" class="lbl-sm">a&#8321;b&#8321;</text>
+            <rect x="220" y="90" width="46" height="26" class="core-cpu"></rect><text x="243" y="107" text-anchor="middle" class="lbl-sm">a&#8322;b&#8322;</text>
+          </g>
+          <text x="330" y="80" text-anchor="middle" class="lbl-sm muted-txt">&hellip; 6 more, one after another &hellip;</text>
+
+          <line x1="180" y1="79" x2="218" y2="70" class="wire" marker-end="url(#cmtArrH1)"></line>
+          <line x1="266" y1="70" x2="218" y2="104" class="wire wire-dash"></line>
+          <line x1="266" y1="104" x2="600" y2="79" class="wire wire-dash"></line>
+
+          <rect class="box" x="600" y="56" width="180" height="56" rx="6"></rect>
+          <text x="690" y="80" text-anchor="middle" class="lbl">result, one pair</text>
+          <text x="690" y="96" text-anchor="middle" class="lbl-sm muted-txt">at a time, in sequence</text>
+          <line x1="330" y1="90" x2="598" y2="84" class="wire" marker-end="url(#cmtArrH1)"></line>
+
+          <line x1="40" y1="140" x2="860" y2="140" class="wire wire-dash"></line>
+
+          <text x="200" y="170" text-anchor="middle" class="lbl-title">GPU: thousands of cores, all at once</text>
+          <rect class="box box-strong box-silicon" x="40" y="188" width="820" height="96" rx="8"></rect>
+          <text x="60" y="208" class="lbl-sm muted-txt">one instruction, issued once, run by every core below simultaneously</text>
+
+          <g>
+            <rect x="60" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="100" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="140" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="180" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="220" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="260" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="300" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="340" y="220" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="60" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="100" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="140" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="180" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="220" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="260" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="300" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <rect x="340" y="248" width="34" height="20" class="core-gpu-fire"></rect>
+            <text x="400" y="240" class="lbl-sm muted-txt">&hellip; thousands more, same instant &hellip;</text>
+          </g>
+
+          <rect class="box" x="620" y="222" width="220" height="46" rx="6"></rect>
+          <text x="730" y="244" text-anchor="middle" class="lbl">all 8+ results, same cycle</text>
+          <text x="730" y="259" text-anchor="middle" class="lbl-sm muted-txt">not one after another</text>
+          <line x1="400" y1="240" x2="618" y2="244" class="wire wire-silicon" marker-end="url(#cmtArrH1)"></line>
+        </svg>
+        <figcaption><b>Same math, two different shapes of machine.</b> A CPU core is fast per-operation but does one operation at a time; a modern NVIDIA GPU has thousands of simpler cores that all execute the same instruction together. Matrix multiplication &mdash; the operation neural networks are mostly built from &mdash; is exactly the repetitive, uniform workload that shape is good at.</figcaption>
+      </figure>
+
+      <p>This half of the story has nothing to do with NVIDIA specifically. AMD's GPUs, Apple's GPU cores, Google's TPUs, and countless AI accelerator startups all exploit the same idea: throw parallelism at a workload that's regular enough to parallelize. The part that <i>is</i> NVIDIA-specific starts in the next two sections.</p>
+    </section>
+
+    <section id="inside-a-gpu" class="silicon">
+      <div class="section-head">
+        <span class="tag mono">&sect;2</span>
+        <h2>Inside one GPU <span class="pill silicon">the silicon</span></h2>
+      </div>
+      <p class="lede">NVIDIA's GPUs organize those thousands of cores into repeated blocks called <b>Streaming Multiprocessors (SMs)</b>. Each SM is a self-contained unit: a cluster of general-purpose <b>CUDA cores</b>, a smaller number of specialized <b>Tensor Cores</b> built specifically to multiply small matrix chunks in one operation instead of many individual multiplies, a warp scheduler that decides which group of threads runs next, and a slice of fast on-chip shared memory. A current data-center GPU repeats this block well over a hundred times &mdash; NVIDIA's H100 has 132 SMs; Blackwell Ultra has 160.</p>
+
+      <figure>
+        <svg viewBox="0 0 900 340" role="img" aria-label="Diagram of one Streaming Multiprocessor block containing CUDA cores, Tensor cores, a warp scheduler, and shared memory, repeated many times across the die, with HBM memory stacks connected directly beside the die through a silicon interposer.">
+          <defs>
+            <marker id="cmtArrH2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="box box-strong box-silicon" x="40" y="30" width="380" height="220" rx="10"></rect>
+          <text x="60" y="54" class="lbl-title">one Streaming Multiprocessor (SM)</text>
+          <text x="60" y="70" class="lbl-sm muted-txt">repeated 130&ndash;160+ times on one GPU die</text>
+
+          <rect class="box" x="60" y="86" width="160" height="70" rx="5"></rect>
+          <text x="140" y="108" text-anchor="middle" class="lbl-sm">CUDA cores</text>
+          <text x="140" y="124" text-anchor="middle" class="lbl-sm muted-txt">general-purpose</text>
+          <text x="140" y="140" text-anchor="middle" class="lbl-sm muted-txt">multiply-add</text>
+
+          <rect class="box box-silicon" x="240" y="86" width="160" height="70" rx="5"></rect>
+          <text x="320" y="108" text-anchor="middle" class="lbl-sm">Tensor cores</text>
+          <text x="320" y="124" text-anchor="middle" class="lbl-sm muted-txt">whole small matrix</text>
+          <text x="320" y="140" text-anchor="middle" class="lbl-sm muted-txt">in one operation</text>
+
+          <rect class="box" x="60" y="172" width="160" height="56" rx="5"></rect>
+          <text x="140" y="196" text-anchor="middle" class="lbl-sm">Warp scheduler</text>
+          <text x="140" y="212" text-anchor="middle" class="lbl-sm muted-txt">picks next thread group</text>
+
+          <rect class="box" x="240" y="172" width="160" height="56" rx="5"></rect>
+          <text x="320" y="196" text-anchor="middle" class="lbl-sm">Shared memory / L1</text>
+          <text x="320" y="212" text-anchor="middle" class="lbl-sm muted-txt">on-chip, per-SM</text>
+
+          <text x="60" y="330" class="lbl-sm muted-txt">&#8592; the whole die is this block, copied ~150&times;, plus shared L2 and memory controllers</text>
+
+          <rect class="box box-strong" x="500" y="70" width="70" height="180" rx="4"></rect>
+          <rect class="box box-strong" x="580" y="70" width="70" height="180" rx="4"></rect>
+          <rect class="box box-strong" x="660" y="70" width="70" height="180" rx="4"></rect>
+          <text x="605" y="60" text-anchor="middle" class="lbl-sm muted-txt">HBM stack</text>
+          <text x="605" y="270" text-anchor="middle" class="lbl-sm muted-txt">8&ndash;12 DRAM dies,</text>
+          <text x="605" y="284" text-anchor="middle" class="lbl-sm muted-txt">stacked vertically</text>
+
+          <rect class="box box-silicon" x="460" y="255" width="310" height="18" rx="3"></rect>
+          <text x="615" y="268" text-anchor="middle" class="lbl-sm mono">silicon interposer</text>
+
+          <line x1="420" y1="140" x2="458" y2="200" class="wire wire-silicon" marker-end="url(#cmtArrH2)"></line>
+          <text x="380" y="180" class="lbl-sm muted-txt mono">&gt;1 TB/s</text>
+          <text x="380" y="193" class="lbl-sm muted-txt mono">per stack</text>
+        </svg>
+        <figcaption><b>Memory sits closer to the cores than in almost any other kind of chip.</b> Instead of a memory controller reaching out to separate RAM sticks, current data-center GPUs sit on the same silicon interposer as several stacks of High Bandwidth Memory (HBM) &mdash; 8 to 12 DRAM dies stacked vertically per stack, wired through thousands of connections too dense for an ordinary circuit board. A current-generation GPU's combined HBM bandwidth (multiple terabytes per second) dwarfs a CPU's DDR5 channels, because feeding thousands of cores at once takes that much bandwidth.</figcaption>
+      </figure>
+
+      <p>This is the same idea explored in <i>Beyond the Bridges</i> for CPUs &mdash; putting memory as physically close to the compute as possible &mdash; just taken further. A CPU's DDR5 is a few centimeters away on the motherboard; a GPU's HBM is millimeters away on the same package.</p>
+    </section>
+
+    <section id="the-moat" class="software">
+      <div class="section-head">
+        <span class="tag mono">&sect;3</span>
+        <h2>CUDA: the moat isn't the chip <span class="pill software">the actual craze</span></h2>
+      </div>
+      <p class="lede">Here's the part that actually explains why one company, not "GPUs" generically, ended up capturing the value: the hardware described above is necessary but not sufficient. Somebody has to translate "multiply these two matrices" into instructions those thousands of cores can actually execute efficiently &mdash; and that's a genuinely hard compiler and library problem, not a hardware one.</p>
+      <p><b>CUDA</b> is NVIDIA's own answer to that problem: a programming language extension, compiler, and runtime that only targets NVIDIA GPUs. On top of it sit libraries &mdash; <code>cuDNN</code> for neural network layers, <code>cuBLAS</code> for matrix math, <code>NCCL</code> for coordinating many GPUs &mdash; that NVIDIA has spent roughly fifteen years hand-tuning. PyTorch and TensorFlow, the frameworks almost everyone actually writes code against, are themselves built on top of those libraries. <b>OpenCL</b> is an open, vendor-neutral alternative to CUDA that runs on any vendor's hardware &mdash; and it largely lost anyway, because NVIDIA's tooling, documentation, and library performance stayed consistently ahead. AMD's <b>ROCm</b> is the current, more serious competitor, and reported benchmarks still put CUDA roughly 10&ndash;30% ahead on most compute-heavy ML workloads, though AMD's newest chips win specific workloads (very large models that need more memory than an NVIDIA GPU has) on hardware capacity alone.</p>
+
+      <figure>
+        <svg viewBox="0 0 900 300" role="img" aria-label="Diagram comparing two software stacks: on the left, an application on a generic vendor-neutral GPU API with a thin driver layer reaching any GPU; on the right, an application on PyTorch built on top of fifteen years of NVIDIA-tuned cuDNN, cuBLAS, and NCCL libraries, reaching only NVIDIA GPUs through CUDA.">
+          <defs>
+            <marker id="cmtArrH3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <text x="210" y="24" text-anchor="middle" class="lbl-title">Vendor-neutral stack</text>
+          <text x="210" y="40" text-anchor="middle" class="lbl-sm muted-txt">OpenCL, or ROCm on AMD</text>
+
+          <rect class="box" x="80" y="54" width="260" height="40" rx="5"></rect>
+          <text x="210" y="78" text-anchor="middle" class="lbl-sm">Application / model code</text>
+          <line x1="210" y1="94" x2="210" y2="112" class="wire wire-dash" marker-end="url(#cmtArrH3)"></line>
+
+          <rect class="box" x="80" y="112" width="260" height="40" rx="5" stroke-dasharray="4 3"></rect>
+          <text x="210" y="136" text-anchor="middle" class="lbl-sm muted-txt">generic compute API</text>
+          <line x1="210" y1="152" x2="210" y2="170" class="wire wire-dash" marker-end="url(#cmtArrH3)"></line>
+
+          <rect class="box" x="80" y="170" width="260" height="40" rx="5" stroke-dasharray="4 3"></rect>
+          <text x="210" y="194" text-anchor="middle" class="lbl-sm muted-txt">vendor driver, thinner tuning</text>
+          <line x1="210" y1="210" x2="210" y2="228" class="wire wire-dash" marker-end="url(#cmtArrH3)"></line>
+
+          <rect class="box" x="80" y="228" width="260" height="40" rx="5"></rect>
+          <text x="210" y="252" text-anchor="middle" class="lbl-sm">any vendor's silicon</text>
+
+          <line x1="450" y1="30" x2="450" y2="280" class="wire wire-dash"></line>
+
+          <text x="690" y="24" text-anchor="middle" class="lbl-title">NVIDIA / CUDA stack</text>
+          <text x="690" y="40" text-anchor="middle" class="lbl-sm muted-txt">what most production ML runs on</text>
+
+          <rect class="box" x="560" y="54" width="260" height="40" rx="5"></rect>
+          <text x="690" y="78" text-anchor="middle" class="lbl-sm">PyTorch / TensorFlow</text>
+          <line x1="690" y1="94" x2="690" y2="112" class="wire wire-software" marker-end="url(#cmtArrH3)"></line>
+
+          <rect class="box box-software" x="560" y="112" width="260" height="46" rx="5"></rect>
+          <text x="690" y="132" text-anchor="middle" class="lbl-sm">cuDNN &middot; cuBLAS &middot; NCCL</text>
+          <text x="690" y="147" text-anchor="middle" class="lbl-sm muted-txt">~15 years of tuning</text>
+          <line x1="690" y1="158" x2="690" y2="176" class="wire wire-software" marker-end="url(#cmtArrH3)"></line>
+
+          <rect class="box box-software" x="560" y="176" width="260" height="40" rx="5"></rect>
+          <text x="690" y="200" text-anchor="middle" class="lbl-sm">CUDA runtime &amp; compiler</text>
+          <line x1="690" y1="216" x2="690" y2="234" class="wire wire-software" marker-end="url(#cmtArrH3)"></line>
+
+          <rect class="box box-strong" x="560" y="234" width="260" height="40" rx="5"></rect>
+          <text x="690" y="258" text-anchor="middle" class="lbl-sm">NVIDIA silicon only</text>
+        </svg>
+        <figcaption><b>The bottom layer isn't the differentiator; the middle two are.</b> Both stacks can technically reach the same style of hardware. The dashed boxes on the left aren't thinner because the hardware is worse &mdash; they're thinner because far less engineering time has gone into them, which shows up directly as lower achieved performance and rougher edges for anyone actually shipping a model.</figcaption>
+      </figure>
+
+      <div class="callout software">
+        <p>This is why "just build a competing GPU" undersells the problem NVIDIA's competitors face. The silicon is the easier half. Matching a fifteen-year library head start, a reported ~4 million active CUDA developers as of 2026, and a decade of university courses and documentation built around one specific toolchain is a software and ecosystem problem, on top of a hardware one.</p>
+      </div>
+    </section>
+
+    <section id="wiring-together" class="silicon">
+      <div class="section-head">
+        <span class="tag mono">&sect;4</span>
+        <h2>Wiring thousands of them together <span class="pill silicon">the interconnect</span></h2>
+      </div>
+      <p class="lede">One GPU, however fast, isn't enough to train a large model in a reasonable time &mdash; real training and large-scale inference runs across dozens, hundreds, or thousands of GPUs at once, which only works if they can talk to each other far faster than a normal expansion slot allows. This is the same "what connects to what, and how fast" question the rest of this series asks about CPUs, scaled up by several orders of magnitude.</p>
+
+      <figure class="wide">
+        <svg viewBox="0 0 980 300" role="img" aria-label="Diagram showing scale: a single GPU connected by NVLink at 1.8 terabytes per second, eight GPUs in one server connected all-to-all through an NVSwitch chip, and 72 GPUs across a full rack connected all-to-all through NVLink Switch at 130 terabytes per second, with slower networking connecting racks to each other.">
+          <defs>
+            <marker id="cmtArrH4" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="box box-strong box-silicon" x="30" y="90" width="90" height="90" rx="6"></rect>
+          <text x="75" y="130" text-anchor="middle" class="lbl-sm">1 GPU</text>
+          <text x="75" y="146" text-anchor="middle" class="lbl-sm muted-txt">PCIe: 128 GB/s</text>
+
+          <line x1="122" y1="135" x2="168" y2="135" class="wire wire-silicon" marker-end="url(#cmtArrH4)"></line>
+          <text x="145" y="120" text-anchor="middle" class="lbl-sm mono">NVLink</text>
+          <text x="145" y="180" text-anchor="middle" class="lbl-sm mono">1.8 TB/s</text>
+
+          <rect class="box box-strong box-silicon" x="176" y="60" width="220" height="150" rx="8"></rect>
+          <text x="286" y="82" text-anchor="middle" class="lbl-title">1 server, 8 GPUs</text>
+          <rect class="box" x="196" y="96" width="44" height="34" rx="4"></rect>
+          <rect class="box" x="248" y="96" width="44" height="34" rx="4"></rect>
+          <rect class="box" x="300" y="96" width="44" height="34" rx="4"></rect>
+          <rect class="box" x="196" y="136" width="44" height="34" rx="4"></rect>
+          <rect class="box box-software" x="248" y="136" width="44" height="34" rx="4"></rect>
+          <text x="270" y="158" text-anchor="middle" class="lbl-sm" font-size="9">SW</text>
+          <rect class="box" x="300" y="136" width="44" height="34" rx="4"></rect>
+          <text x="286" y="192" text-anchor="middle" class="lbl-sm muted-txt">NVSwitch: all-to-all, no degradation</text>
+
+          <line x1="398" y1="135" x2="440" y2="135" class="wire wire-silicon" marker-end="url(#cmtArrH4)"></line>
+
+          <rect class="box box-strong box-silicon" x="448" y="40" width="290" height="200" rx="8"></rect>
+          <text x="593" y="62" text-anchor="middle" class="lbl-title">1 rack, 72 GPUs</text>
+          <text x="593" y="78" text-anchor="middle" class="lbl-sm muted-txt">e.g. GB200 NVL72</text>
+          <g>
+            <rect x="470" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="500" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="530" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="560" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="590" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="620" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="650" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="680" y="94" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="470" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="500" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="530" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="560" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="590" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="620" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="650" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <rect x="680" y="118" width="26" height="18" class="core-gpu-fire"></rect>
+            <text x="593" y="150" text-anchor="middle" class="lbl-sm muted-txt">&hellip; 72 GPUs total, acting as one accelerator &hellip;</text>
+          </g>
+          <text x="593" y="220" text-anchor="middle" class="lbl-sm mono">NVLink Switch: 130 TB/s all-to-all</text>
+
+          <line x1="738" y1="135" x2="782" y2="135" class="wire wire-dash" marker-end="url(#cmtArrH4)"></line>
+          <text x="760" y="120" text-anchor="middle" class="lbl-sm muted-txt mono">Ethernet /</text>
+          <text x="760" y="255" text-anchor="middle" class="lbl-sm muted-txt mono">InfiniBand</text>
+
+          <rect class="box box-strong" x="790" y="90" width="150" height="90" rx="6"></rect>
+          <text x="865" y="128" text-anchor="middle" class="lbl-sm">other racks</text>
+          <text x="865" y="146" text-anchor="middle" class="lbl-sm muted-txt">ordinary datacenter</text>
+          <text x="865" y="160" text-anchor="middle" class="lbl-sm muted-txt">networking, far slower</text>
+        </svg>
+        <figcaption><b>Bandwidth falls off a cliff at the rack boundary, by design.</b> NVLink replaces PCIe entirely for GPU-to-GPU traffic within a server (1.8&nbsp;TB/s vs. PCIe Gen5's 128&nbsp;GB/s per GPU). NVSwitch chips extend that to full all-to-all communication within a server or, at rack scale, across all 72 GPUs in an NVL72 rack &mdash; 130&nbsp;TB/s aggregate, all 72 GPUs addressable as one accelerator. Once you leave the rack, you're back to ordinary (much slower) datacenter networking, which is why "how many GPUs fit in one NVLink domain" is a real architectural limit, not just a cost question.</figcaption>
+      </figure>
+
+      <p>There's one more version of this worth knowing: NVIDIA's <b>Grace Hopper</b> superchip fuses an ARM-based Grace CPU directly to a Hopper GPU with <b>NVLink-C2C</b> &mdash; 900&nbsp;GB/s, cache-coherent, no PCIe slot involved at all &mdash; about 7&times; the bandwidth of a GPU sitting in a normal PCIe slot talking to its host CPU. It's a direct descendant of the same idea covered in <i>Beyond the Bridges</i>: the fastest link is the one that never has to leave the package.</p>
+    </section>
+
+    <section id="reference">
+      <div class="section-head">
+        <span class="tag mono">&sect;5</span>
+        <h2>Quick reference</h2>
+      </div>
+      <p class="lede">The three things people actually mean when they say "GPU," "CUDA," and "NVIDIA" &mdash; kept straight.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>CPU</th>
+              <th>GPU (any vendor)</th>
+              <th>NVIDIA GPU + CUDA</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Core shape</td>
+              <td>Few (8&ndash;64), complex, sequential</td>
+              <td>Thousands, simple, same instruction at once</td>
+              <td>Same, plus dedicated Tensor Cores for matrix math</td>
+            </tr>
+            <tr>
+              <td>Memory</td>
+              <td>DDR5 on the motherboard, a few cm away</td>
+              <td>HBM stacked on the same package, mm away</td>
+              <td>Same HBM approach; current chips: multiple TB/s combined</td>
+            </tr>
+            <tr>
+              <td>Good at</td>
+              <td>Branching, unpredictable, general-purpose work</td>
+              <td>Regular, parallel, numerically heavy work</td>
+              <td>Same, with a library layer already tuned for it</td>
+            </tr>
+            <tr>
+              <td>Chip-to-chip link</td>
+              <td>UPI / Infinity Fabric between sockets</td>
+              <td>Vendor-specific (varies)</td>
+              <td>NVLink (1.8&nbsp;TB/s) + NVSwitch for all-to-all</td>
+            </tr>
+            <tr>
+              <td>Software layer</td>
+              <td>Any compiler, any OS, decades of tooling</td>
+              <td>OpenCL / ROCm &mdash; open, but thinner tuning</td>
+              <td>CUDA + cuDNN/cuBLAS/NCCL &mdash; ~15 years tuned, ~4M developers</td>
+            </tr>
+            <tr>
+              <td>The actual moat</td>
+              <td>&mdash;</td>
+              <td>The hardware idea is not exclusive to anyone</td>
+              <td><span class="pill software">the software stack, not the silicon</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="sources">
+      <h2>Verified against, not recalled from memory</h2>
+      <ul>
+        <li><a href="https://newsletter.semianalysis.com/p/nvidia-tensor-core-evolution-from-volta-to-blackwell" target="_blank" rel="noopener">SemiAnalysis &mdash; NVIDIA Tensor Core evolution, Volta to Blackwell (SM/core counts)</a></li>
+        <li><a href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/" target="_blank" rel="noopener">NVIDIA Technical Blog &mdash; Inside Blackwell Ultra (SM count, Tensor Core count, HBM3e bandwidth)</a></li>
+        <li><a href="https://www.softwareseni.com/cuda-lock-in-unpacked-the-software-moat-the-real-switching-costs-and-how-they-are-changing/" target="_blank" rel="noopener">SoftwareSeni &mdash; CUDA lock-in, switching costs, developer ecosystem size</a></li>
+        <li><a href="https://weightythoughts.com/p/cuda-is-still-a-giant-moat-for-nvidia" target="_blank" rel="noopener">Weighty Thoughts &mdash; CUDA vs. ROCm performance gap, AMD's memory-capacity wins</a></li>
+        <li><a href="https://www.nvidia.com/en-us/data-center/nvlink/" target="_blank" rel="noopener">NVIDIA &mdash; NVLink &amp; NVLink Switch product page (bandwidth figures)</a></li>
+        <li><a href="https://www.wevolver.com/article/what-is-hbm-high-bandwidth-memory-deep-dive-into-architecture-packaging-and-applications" target="_blank" rel="noopener">Wevolver &mdash; HBM architecture, stacking, and CoWoS interposer packaging</a></li>
+        <li><a href="https://developer.nvidia.com/blog/nvidia-grace-hopper-superchip-architecture-in-depth/" target="_blank" rel="noopener">NVIDIA Technical Blog &mdash; Grace Hopper Superchip, NVLink-C2C bandwidth</a></li>
+      </ul>
+    </footer>
+
+  </div>
+</div>

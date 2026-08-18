@@ -1,0 +1,559 @@
+<div class="btb-root" id="beyondTheBridgesWidget">
+  <style>
+    #beyondTheBridgesWidget {
+      --btb-bg: #0d141c;
+      --btb-surface: #131c27;
+      --btb-surface-2: #1a2532;
+      --btb-ink: #e7ecf2;
+      --btb-muted: #93a2b6;
+      --btb-rule: #29374a;
+      --btb-accent-x86: #e08a4d;
+      --btb-accent-x86-soft: #e08a4d22;
+      --btb-accent-arm: #46d3c8;
+      --btb-accent-arm-soft: #46d3c822;
+      --btb-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 30px rgba(0,0,0,0.35);
+      --btb-font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+      --btb-font-body: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --btb-font-mono: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+
+      background: var(--btb-bg);
+      color: var(--btb-ink);
+      font-family: var(--btb-font-body);
+      line-height: 1.6;
+      font-size: 16px;
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #beyondTheBridgesWidget * { box-sizing: border-box; }
+
+    #beyondTheBridgesWidget a { color: var(--btb-accent-x86); }
+    #beyondTheBridgesWidget a:focus-visible,
+    #beyondTheBridgesWidget button:focus-visible,
+    #beyondTheBridgesWidget summary:focus-visible {
+      outline: 2px solid var(--btb-accent-arm);
+      outline-offset: 2px;
+    }
+
+    #beyondTheBridgesWidget .page { max-width: 800px; margin: 0 auto; padding: 0; }
+    #beyondTheBridgesWidget .wide { max-width: 960px; margin-left: auto; margin-right: auto; }
+
+    #beyondTheBridgesWidget header.masthead { margin-bottom: 40px; }
+    #beyondTheBridgesWidget .eyebrow {
+      font-family: var(--btb-font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.11em;
+      text-transform: uppercase;
+      color: var(--btb-muted);
+      margin: 0 0 14px;
+    }
+    #beyondTheBridgesWidget h1 {
+      font-family: var(--btb-font-display);
+      font-weight: 600;
+      font-size: clamp(1.9rem, 5vw, 2.5rem);
+      line-height: 1.12;
+      letter-spacing: -0.01em;
+      margin: 0 0 16px;
+      color: #fff;
+    }
+    #beyondTheBridgesWidget .dek { font-size: 1.05rem; color: var(--btb-muted); max-width: 62ch; margin: 0; }
+
+    #beyondTheBridgesWidget .verdict {
+      margin-top: 28px;
+      padding: 18px 20px;
+      background: var(--btb-surface);
+      border: 1px solid var(--btb-rule);
+      border-left: 3px solid var(--btb-ink);
+      border-radius: 4px;
+      box-shadow: var(--btb-shadow);
+    }
+    #beyondTheBridgesWidget .verdict p { margin: 0 0 10px; }
+    #beyondTheBridgesWidget .verdict p:last-child { margin-bottom: 0; }
+    #beyondTheBridgesWidget .verdict strong { font-weight: 700; }
+
+    #beyondTheBridgesWidget nav.toc {
+      margin: 40px 0 48px;
+      padding: 18px 22px;
+      background: var(--btb-surface);
+      border: 1px solid var(--btb-rule);
+      border-radius: 6px;
+    }
+    #beyondTheBridgesWidget nav.toc .eyebrow { margin-bottom: 10px; }
+    #beyondTheBridgesWidget nav.toc ol {
+      margin: 0; padding: 0; list-style: none;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 6px 20px;
+    }
+    #beyondTheBridgesWidget nav.toc li { font-size: 0.94rem; }
+    #beyondTheBridgesWidget nav.toc a { color: var(--btb-ink); text-decoration: none; border-bottom: 1px solid transparent; }
+    #beyondTheBridgesWidget nav.toc a:hover { border-bottom-color: var(--btb-muted); }
+    #beyondTheBridgesWidget nav.toc .num { font-family: var(--btb-font-mono); color: var(--btb-muted); margin-right: 8px; font-size: 0.85em; }
+
+    #beyondTheBridgesWidget section { margin: 56px 0; }
+    #beyondTheBridgesWidget section:first-of-type { margin-top: 0; }
+
+    #beyondTheBridgesWidget .section-head {
+      display: flex; align-items: baseline; gap: 12px;
+      margin-bottom: 6px; padding-bottom: 14px;
+      border-bottom: 1px solid var(--btb-rule);
+    }
+    #beyondTheBridgesWidget .section-head .tag { font-family: var(--btb-font-mono); font-size: 0.78rem; color: var(--btb-muted); }
+    #beyondTheBridgesWidget h2 {
+      font-family: var(--btb-font-display);
+      font-size: 1.5rem; font-weight: 600; margin: 0;
+    }
+    #beyondTheBridgesWidget h3 { font-family: var(--btb-font-display); font-size: 1.14rem; font-weight: 600; margin: 28px 0 10px; }
+    #beyondTheBridgesWidget p { margin: 0 0 16px; }
+    #beyondTheBridgesWidget .lede { font-size: 1.02rem; color: var(--btb-ink); margin-top: 18px; }
+
+    #beyondTheBridgesWidget .x86 h2, #beyondTheBridgesWidget .x86 h3 { color: var(--btb-accent-x86); }
+    #beyondTheBridgesWidget .arm h2, #beyondTheBridgesWidget .arm h3 { color: var(--btb-accent-arm); }
+
+    #beyondTheBridgesWidget .pill {
+      display: inline-block; font-family: var(--btb-font-mono); font-size: 0.72rem;
+      letter-spacing: 0.03em; padding: 2px 9px; border-radius: 20px; border: 1px solid currentColor;
+    }
+    #beyondTheBridgesWidget .pill.obsolete { color: var(--btb-muted); }
+    #beyondTheBridgesWidget .pill.x86 { color: var(--btb-accent-x86); background: var(--btb-accent-x86-soft); border-color: var(--btb-accent-x86); }
+    #beyondTheBridgesWidget .pill.arm { color: var(--btb-accent-arm); background: var(--btb-accent-arm-soft); border-color: var(--btb-accent-arm); }
+
+    #beyondTheBridgesWidget figure {
+      margin: 24px 0; padding: 18px;
+      background: var(--btb-surface); border: 1px solid var(--btb-rule); border-radius: 8px;
+      box-shadow: var(--btb-shadow);
+    }
+    #beyondTheBridgesWidget figure svg { display: block; max-width: 100%; height: auto; margin: 0 auto; }
+    #beyondTheBridgesWidget figcaption {
+      margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--btb-rule);
+      font-size: 0.85rem; color: var(--btb-muted);
+    }
+    #beyondTheBridgesWidget figcaption b { color: var(--btb-ink); font-weight: 600; }
+
+    #beyondTheBridgesWidget svg text { fill: currentColor; font-family: var(--btb-font-body); }
+    #beyondTheBridgesWidget svg .mono { font-family: var(--btb-font-mono); }
+    #beyondTheBridgesWidget svg .lbl { font-size: 12.5px; }
+    #beyondTheBridgesWidget svg .lbl-sm { font-size: 11px; }
+    #beyondTheBridgesWidget svg .lbl-title { font-size: 13.5px; font-weight: 700; }
+    #beyondTheBridgesWidget svg .muted-txt { fill: var(--btb-muted); }
+    #beyondTheBridgesWidget svg .box { fill: var(--btb-surface-2); stroke: var(--btb-rule); stroke-width: 1.4; }
+    #beyondTheBridgesWidget svg .box-cpu { fill: var(--btb-surface-2); stroke: var(--btb-ink); stroke-width: 1.6; }
+    #beyondTheBridgesWidget svg .box-x86 { stroke: var(--btb-accent-x86); }
+    #beyondTheBridgesWidget svg .box-arm { stroke: var(--btb-accent-arm); }
+    #beyondTheBridgesWidget svg .wire { stroke: var(--btb-muted); stroke-width: 1.4; fill: none; }
+    #beyondTheBridgesWidget svg .wire-x86 { stroke: var(--btb-accent-x86); }
+    #beyondTheBridgesWidget svg .wire-arm { stroke: var(--btb-accent-arm); }
+    #beyondTheBridgesWidget svg .wire-dash { stroke-dasharray: 4 3; }
+
+    #beyondTheBridgesWidget table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    #beyondTheBridgesWidget th, #beyondTheBridgesWidget td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--btb-rule); vertical-align: top; }
+    #beyondTheBridgesWidget thead th {
+      font-family: var(--btb-font-mono); font-size: 0.7rem; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--btb-muted); border-bottom: 1px solid var(--btb-ink);
+    }
+    #beyondTheBridgesWidget tbody tr:last-child td { border-bottom: none; }
+    #beyondTheBridgesWidget td code, #beyondTheBridgesWidget p code, #beyondTheBridgesWidget li code {
+      font-family: var(--btb-font-mono); font-size: 0.9em; background: var(--btb-surface-2);
+      padding: 1px 5px; border-radius: 3px;
+    }
+    #beyondTheBridgesWidget .table-wrap { overflow-x: auto; border: 1px solid var(--btb-rule); border-radius: 8px; background: var(--btb-surface); padding: 4px; }
+    #beyondTheBridgesWidget .table-wrap table { min-width: 640px; }
+
+    #beyondTheBridgesWidget .callout {
+      margin: 20px 0; padding: 16px 18px; border-radius: 6px;
+      background: var(--btb-surface); border: 1px solid var(--btb-rule); border-left: 3px solid var(--btb-muted);
+      font-size: 0.93rem;
+    }
+    #beyondTheBridgesWidget .callout.x86 { border-left-color: var(--btb-accent-x86); }
+    #beyondTheBridgesWidget .callout.arm { border-left-color: var(--btb-accent-arm); }
+    #beyondTheBridgesWidget .callout p:last-child { margin-bottom: 0; }
+
+    #beyondTheBridgesWidget ul.tight, #beyondTheBridgesWidget ol.tight { margin: 0 0 16px; padding-left: 22px; }
+    #beyondTheBridgesWidget ul.tight li, #beyondTheBridgesWidget ol.tight li { margin-bottom: 6px; }
+
+    #beyondTheBridgesWidget footer.sources {
+      margin-top: 60px; padding-top: 22px; border-top: 1px solid var(--btb-rule);
+      font-size: 0.82rem; color: var(--btb-muted);
+    }
+    #beyondTheBridgesWidget footer.sources h2 {
+      font-size: 0.98rem; color: var(--btb-ink); font-family: var(--btb-font-body); font-weight: 700; margin-bottom: 10px;
+    }
+    #beyondTheBridgesWidget footer.sources ul { margin: 0; padding-left: 20px; }
+    #beyondTheBridgesWidget footer.sources li { margin-bottom: 5px; }
+    #beyondTheBridgesWidget footer.sources a { color: var(--btb-muted); text-decoration: underline; }
+    #beyondTheBridgesWidget footer.sources a:hover { color: var(--btb-ink); }
+  </style>
+
+  <div class="page">
+
+    <header class="masthead">
+      <p class="eyebrow">Processor &amp; platform architecture &middot; verified against current Intel, AMD &amp; ARM documentation</p>
+      <h1>Beyond the Bridges</h1>
+      <p class="dek">Where memory and I/O actually connect in a modern chip &mdash; and why "northbridge" and "southbridge," the terms most explainers still use, describe almost nothing built in the last decade.</p>
+
+      <div class="verdict">
+        <p><strong>Short answer to "are these terms still valid": mostly no.</strong> Northbridge/southbridge described a real, physical two-chip layout that was standard on Intel motherboards through roughly 2008. Intel folded the northbridge's job (memory controller, PCIe) into the CPU package starting with Nehalem, and renamed the southbridge's descendant the <b>Platform Controller Hub (PCH)</b>. AMD did the same with its own chiplet layout. The words <em>chipset</em> and <em>PCH</em> are still current; <em>northbridge</em> and <em>southbridge</em> are historical, and neither term was ever really used to describe ARM chips, which took a different physical route to the same problem from the start.</p>
+        <p>The rest of this page walks through the old model briefly for grounding, then the two current answers &mdash; x86 (Intel/AMD) and ARM &mdash; side by side, with a floor plan for each.</p>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="Table of contents">
+      <p class="eyebrow">On this page</p>
+      <ol>
+        <li><span class="num">01</span><a href="#three-doors">The three doors out of a CPU</a></li>
+        <li><span class="num">02</span><a href="#old-model">The 2008 model: north &amp; south bridge</a></li>
+        <li><span class="num">03</span><a href="#modern-x86">Modern x86: Intel &amp; AMD today</a></li>
+        <li><span class="num">04</span><a href="#arm">ARM: no bridges at all</a></li>
+        <li><span class="num">05</span><a href="#reference">Quick-reference table</a></li>
+      </ol>
+    </nav>
+
+    <section id="three-doors">
+      <div class="section-head">
+        <span class="tag mono">&sect;1</span>
+        <h2>The one thing that never changed</h2>
+      </div>
+      <p class="lede">Before getting into what moved where, it's worth naming the one idea that's been true since long before 2008 and is still true today: <b>a CPU core only has three ways to talk to the outside world</b> &mdash; a physical memory address space, a (mostly vestigial, on x86) separate I/O address space, and interrupt lines. Everything else &mdash; RAM, a graphics card, an NVMe drive, a USB controller &mdash; is reached by putting a request on one of those, and something downstream decides what actually answers it.</p>
+      <p>What's changed repeatedly is <i>where the "something downstream" physically lives</i> &mdash; which chip, on which side of which package boundary, decides that a given address means "RAM" versus "the drive controller." That's the part this page is actually about.</p>
+    </section>
+
+    <section id="old-model">
+      <div class="section-head">
+        <span class="tag mono">&sect;2</span>
+        <h2>The 2008 model, for grounding <span class="pill obsolete">historical</span></h2>
+      </div>
+      <p class="lede">This is the layout classic explainers (including the one you're probably reading right now) describe, and it was accurate for real Intel Core 2&ndash;era motherboards. Two separate chips sat between the CPU and everything else:</p>
+
+      <figure>
+        <svg viewBox="0 0 900 360" role="img" aria-label="Diagram: CPU connects over the front-side bus to the northbridge, which connects to RAM and the PCIe graphics card, and down to the southbridge, which connects to SATA drives, USB, PCI slots, and BIOS flash.">
+          <defs>
+            <marker id="btbArrH" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="box box-cpu" x="40" y="150" width="120" height="70" rx="6"></rect>
+          <text x="100" y="180" text-anchor="middle" class="lbl-title">CPU</text>
+          <text x="100" y="197" text-anchor="middle" class="lbl-sm muted-txt">Core 2 Duo/Quad</text>
+
+          <rect class="box" x="260" y="140" width="150" height="90" rx="6"></rect>
+          <text x="335" y="175" text-anchor="middle" class="lbl-title">Northbridge</text>
+          <text x="335" y="192" text-anchor="middle" class="lbl-sm muted-txt">memory + PCIe</text>
+          <text x="335" y="207" text-anchor="middle" class="lbl-sm muted-txt">controller</text>
+
+          <rect class="box" x="260" y="20" width="150" height="55" rx="6"></rect>
+          <text x="335" y="43" text-anchor="middle" class="lbl">RAM (DDR2/3)</text>
+          <text x="335" y="59" text-anchor="middle" class="lbl-sm muted-txt">system memory</text>
+
+          <rect class="box" x="500" y="20" width="160" height="55" rx="6"></rect>
+          <text x="580" y="43" text-anchor="middle" class="lbl">Graphics card</text>
+          <text x="580" y="59" text-anchor="middle" class="lbl-sm muted-txt">PCIe x16</text>
+
+          <rect class="box" x="260" y="270" width="150" height="70" rx="6"></rect>
+          <text x="335" y="300" text-anchor="middle" class="lbl-title">Southbridge</text>
+          <text x="335" y="317" text-anchor="middle" class="lbl-sm muted-txt">everything slower</text>
+
+          <rect class="box" x="480" y="245" width="130" height="42" rx="5"></rect>
+          <text x="545" y="270" text-anchor="middle" class="lbl-sm">SATA drives</text>
+          <rect class="box" x="480" y="295" width="130" height="42" rx="5"></rect>
+          <text x="545" y="320" text-anchor="middle" class="lbl-sm">USB</text>
+          <rect class="box" x="650" y="245" width="130" height="42" rx="5"></rect>
+          <text x="715" y="270" text-anchor="middle" class="lbl-sm">PCI slots</text>
+          <rect class="box" x="650" y="295" width="130" height="42" rx="5"></rect>
+          <text x="715" y="320" text-anchor="middle" class="lbl-sm">BIOS flash</text>
+
+          <line x1="160" y1="185" x2="252" y2="185" class="wire" marker-end="url(#btbArrH)"></line>
+          <text x="206" y="175" text-anchor="middle" class="lbl-sm muted-txt mono">FSB</text>
+
+          <line x1="335" y1="140" x2="335" y2="77" class="wire" marker-end="url(#btbArrH)"></line>
+          <line x1="410" y1="160" x2="580" y2="90" class="wire" marker-end="url(#btbArrH)"></line>
+          <text x="470" y="115" text-anchor="middle" class="lbl-sm muted-txt mono">PCIe x16</text>
+
+          <line x1="335" y1="230" x2="335" y2="268" class="wire" marker-end="url(#btbArrH)"></line>
+          <text x="345" y="253" class="lbl-sm muted-txt mono">chipset link</text>
+
+          <line x1="410" y1="290" x2="478" y2="266" class="wire" marker-end="url(#btbArrH)"></line>
+          <line x1="410" y1="305" x2="478" y2="316" class="wire" marker-end="url(#btbArrH)"></line>
+          <line x1="410" y1="285" x2="648" y2="266" class="wire" marker-end="url(#btbArrH)"></line>
+          <line x1="410" y1="310" x2="648" y2="316" class="wire" marker-end="url(#btbArrH)"></line>
+        </svg>
+        <figcaption><b>Two chips did all the routing.</b> The CPU could only reach the world through the northbridge, over the front-side bus (~10&nbsp;GB/s, shared by everything). The northbridge owned memory and the fast graphics slot; everything else hung off a second chip, the southbridge, reached over a slower link. This is the exact shape drawn in Gustavo&nbsp;Duarte's 2008&ndash;2009 "Motherboards, Chipsets, and the Memory Map" series &mdash; still a good read for the concepts, obsolete for the floor plan.</figcaption>
+      </figure>
+
+      <p>Two things about this layout stopped being true within about a year of when it was written: the front-side bus, and the northbridge as a separate chip. Both went away with Intel's Nehalem generation (2008&ndash;2009), which is also where <code>southbridge</code> was formally renamed to <code>PCH</code> in Intel's own documentation. Everything below reflects the current shape.</p>
+    </section>
+
+    <section id="modern-x86" class="x86">
+      <div class="section-head">
+        <span class="tag mono">&sect;3</span>
+        <h2>Modern x86 <span class="pill x86">Intel &amp; AMD, current</span></h2>
+      </div>
+      <p class="lede">The northbridge's job didn't disappear &mdash; it moved <i>inside the CPU package</i>. Every current Intel and AMD desktop or laptop chip has its memory controller and PCIe root complex on the same package as the cores, not on a separate chip reached over a shared bus. What's left of the southbridge is a single companion chip, reached over a narrow, dedicated, point-to-point link instead of a shared bus.</p>
+
+      <figure>
+        <svg viewBox="0 0 900 420" role="img" aria-label="Diagram: A modern CPU package containing cores, an integrated memory controller connected directly to RAM, and a PCIe root complex connected directly to the graphics card and NVMe drive. A narrow link runs down to a separate PCH or chipset, which handles SATA, USB, audio, and slow PCIe devices.">
+          <defs>
+            <marker id="btbArrH2" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <rect class="box box-cpu box-x86" x="80" y="40" width="440" height="190" rx="10"></rect>
+          <text x="100" y="66" class="lbl-title">CPU package</text>
+          <text x="100" y="82" class="lbl-sm muted-txt">Intel: SoC tile &middot; AMD: I/O die (IOD)</text>
+
+          <rect class="box" x="100" y="98" width="140" height="46" rx="5"></rect>
+          <text x="170" y="126" text-anchor="middle" class="lbl-sm">Cores</text>
+
+          <rect class="box" x="100" y="156" width="140" height="56" rx="5"></rect>
+          <text x="170" y="180" text-anchor="middle" class="lbl-sm">Memory</text>
+          <text x="170" y="195" text-anchor="middle" class="lbl-sm">controller</text>
+
+          <rect class="box" x="270" y="156" width="150" height="56" rx="5"></rect>
+          <text x="345" y="180" text-anchor="middle" class="lbl-sm">PCIe root</text>
+          <text x="345" y="195" text-anchor="middle" class="lbl-sm">complex</text>
+
+          <line x1="240" y1="121" x2="272" y2="180" class="wire wire-x86" stroke-width="1.2"></line>
+          <line x1="240" y1="184" x2="270" y2="184" class="wire wire-x86" stroke-width="1.2"></line>
+
+          <rect class="box" x="620" y="40" width="160" height="56" rx="6"></rect>
+          <text x="700" y="64" text-anchor="middle" class="lbl">DDR5 RAM</text>
+          <text x="700" y="80" text-anchor="middle" class="lbl-sm muted-txt">on-package link</text>
+
+          <rect class="box" x="620" y="120" width="160" height="52" rx="6"></rect>
+          <text x="700" y="142" text-anchor="middle" class="lbl">GPU</text>
+          <text x="700" y="158" text-anchor="middle" class="lbl-sm muted-txt">direct PCIe x16</text>
+
+          <rect class="box" x="620" y="192" width="160" height="52" rx="6"></rect>
+          <text x="700" y="214" text-anchor="middle" class="lbl">NVMe SSD</text>
+          <text x="700" y="228" text-anchor="middle" class="lbl-sm muted-txt">direct PCIe x4</text>
+
+          <line x1="240" y1="184" x2="618" y2="66" class="wire wire-x86" marker-end="url(#btbArrH2)"></line>
+          <line x1="420" y1="175" x2="618" y2="146" class="wire wire-x86" marker-end="url(#btbArrH2)"></line>
+          <line x1="420" y1="195" x2="618" y2="218" class="wire wire-x86" marker-end="url(#btbArrH2)"></line>
+
+          <rect class="box" x="240" y="330" width="220" height="70" rx="8"></rect>
+          <text x="350" y="358" text-anchor="middle" class="lbl-title">PCH / chipset</text>
+          <text x="350" y="375" text-anchor="middle" class="lbl-sm muted-txt">southbridge's descendant</text>
+
+          <line x1="300" y1="230" x2="300" y2="328" class="wire" marker-end="url(#btbArrH2)"></line>
+          <text x="310" y="285" class="lbl-sm muted-txt mono">DMI (Intel)</text>
+          <text x="310" y="300" class="lbl-sm muted-txt mono">/ PCIe (AMD)</text>
+
+          <rect class="box" x="530" y="300" width="120" height="40" rx="5"></rect>
+          <text x="590" y="324" text-anchor="middle" class="lbl-sm">SATA</text>
+          <rect class="box" x="530" y="350" width="120" height="40" rx="5"></rect>
+          <text x="590" y="374" text-anchor="middle" class="lbl-sm">USB / audio</text>
+          <rect class="box" x="670" y="300" width="120" height="40" rx="5"></rect>
+          <text x="730" y="324" text-anchor="middle" class="lbl-sm">Slow PCIe</text>
+          <rect class="box" x="670" y="350" width="120" height="40" rx="5"></rect>
+          <text x="730" y="374" text-anchor="middle" class="lbl-sm">BIOS flash</text>
+
+          <line x1="460" y1="345" x2="528" y2="320" class="wire" marker-end="url(#btbArrH2)"></line>
+          <line x1="460" y1="365" x2="528" y2="370" class="wire" marker-end="url(#btbArrH2)"></line>
+          <line x1="460" y1="355" x2="668" y2="320" class="wire" marker-end="url(#btbArrH2)"></line>
+          <line x1="460" y1="375" x2="668" y2="370" class="wire" marker-end="url(#btbArrH2)"></line>
+        </svg>
+        <figcaption><b>The northbridge is inside the CPU now; the southbridge shrank to one chip.</b> Memory and the fast PCIe lanes (GPU, primary NVMe) never leave the CPU package. Only the slow stuff &mdash; SATA, USB, audio, extra PCIe &mdash; still crosses to a separate chip, and that chip is reached by a dedicated narrow link rather than a shared bus.</figcaption>
+      </figure>
+
+      <h3>Intel: SoC tile + PCH</h3>
+      <p>Since Meteor Lake and continuing through Arrow Lake and Panther Lake, Intel builds its client CPUs from separate <i>tiles</i> on one package: a compute tile (cores), a graphics tile, an SoC tile, and an I/O tile. The <b>SoC tile carries the DDR5 memory controller and the PCIe root complex</b> &mdash; the northbridge's exact job, just built as one tile among several rather than a standalone chip. The <b>PCH</b> is still a physically separate chip on the motherboard, reached over <b>DMI</b> (itself a PCIe-based point-to-point link, not a shared bus), and current desktop platforms still carry a chipset model name in the old tradition &mdash; <code>Z890</code> for the current Arrow Lake-S desktop generation.</p>
+
+      <h3>AMD: CCD + IOD</h3>
+      <p>AMD's Ryzen chips are built from chiplets: one or more <b>Core Complex Dies (CCDs)</b>, which hold only cores and cache, plus a separate <b>I/O Die (IOD)</b> that holds the memory controller and PCIe root complex &mdash; again, the northbridge's job, on its own die but still inside the CPU package. Each CCD talks to the IOD over <b>Infinity Fabric</b>. The motherboard chipset (<code>X870</code>, <code>B850</code>, and similar current AM5 chipsets) plays the same role Intel's PCH does, connected over PCIe rather than DMI, and AMD's own materials still call it "the chipset" &mdash; not southbridge, but not entirely divorced from the concept either.</p>
+
+      <div class="callout x86">
+        <p>The practical upshot for anyone reasoning about performance: <b>a GPU or your primary NVMe drive is one hop from the CPU cores</b> in a way a USB device or a SATA drive isn't. That asymmetry is exactly the northbridge/southbridge split, preserved &mdash; it's just that one side of the split now lives inside the CPU's own package instead of on a second chip.</p>
+      </div>
+    </section>
+
+    <section id="arm" class="arm">
+      <div class="section-head">
+        <span class="tag mono">&sect;4</span>
+        <h2>ARM <span class="pill arm">no bridges, ever</span></h2>
+      </div>
+      <p class="lede">Northbridge/southbridge was never really an ARM concept, for a structural reason: ARM Holdings doesn't build chips, it licenses an instruction set and, optionally, core and interconnect designs, to companies (Apple, Qualcomm, Samsung, Amazon, Ampere, and dozens more) who each build their own complete chip. There was never a standard "ARM motherboard" for a chipset industry to grow up around the way there was for Intel-compatible PCs. Instead, essentially everything ships as one <b>system-on-chip (SoC)</b> &mdash; and what's actually on that chip varies enormously by who built it and what it's for.</p>
+
+      <p>The two ends of that range look different enough to be worth drawing separately.</p>
+
+      <figure class="wide">
+        <svg viewBox="0 0 980 460" role="img" aria-label="Diagram comparing a mobile ARM SoC, where CPU cores, GPU, memory controller, and I/O controllers all sit on one die connected by an on-chip fabric with RAM directly on the package, against a server ARM SoC, where many core tiles surround a coherent mesh interconnect with memory controllers and a PCIe root complex at the mesh edges.">
+          <defs>
+            <marker id="btbArrH3" markerWidth="9" markerHeight="9" refX="7" refY="4" orient="auto">
+              <polygon points="0,0 8,4 0,8" fill="currentColor"></polygon>
+            </marker>
+          </defs>
+
+          <text x="230" y="24" text-anchor="middle" class="lbl-title">Mobile / laptop SoC</text>
+          <text x="230" y="40" text-anchor="middle" class="lbl-sm muted-txt">e.g. Apple M-series, Snapdragon</text>
+
+          <rect class="box box-cpu box-arm" x="40" y="56" width="380" height="240" rx="10"></rect>
+          <text x="60" y="80" class="lbl-sm muted-txt">one die / package</text>
+
+          <rect class="box" x="60" y="96" width="110" height="42" rx="5"></rect>
+          <text x="115" y="122" text-anchor="middle" class="lbl-sm">CPU cores</text>
+          <rect class="box" x="60" y="146" width="110" height="42" rx="5"></rect>
+          <text x="115" y="172" text-anchor="middle" class="lbl-sm">GPU</text>
+          <rect class="box" x="60" y="196" width="110" height="42" rx="5"></rect>
+          <text x="115" y="222" text-anchor="middle" class="lbl-sm">NPU / ISP</text>
+
+          <circle cx="245" cy="176" r="46" class="box box-arm"></circle>
+          <text x="245" y="172" text-anchor="middle" class="lbl-sm">on-chip</text>
+          <text x="245" y="187" text-anchor="middle" class="lbl-sm">fabric</text>
+
+          <line x1="170" y1="117" x2="203" y2="155" class="wire wire-arm" stroke-width="1.2"></line>
+          <line x1="170" y1="167" x2="199" y2="172" class="wire wire-arm" stroke-width="1.2"></line>
+          <line x1="170" y1="217" x2="203" y2="197" class="wire wire-arm" stroke-width="1.2"></line>
+
+          <rect class="box" x="320" y="96" width="80" height="42" rx="5"></rect>
+          <text x="360" y="122" text-anchor="middle" class="lbl-sm">Storage</text>
+          <rect class="box" x="320" y="146" width="80" height="42" rx="5"></rect>
+          <text x="360" y="172" text-anchor="middle" class="lbl-sm">USB-C</text>
+          <rect class="box" x="320" y="196" width="80" height="42" rx="5"></rect>
+          <text x="360" y="222" text-anchor="middle" class="lbl-sm">Modem</text>
+
+          <line x1="287" y1="160" x2="318" y2="117" class="wire wire-arm" stroke-width="1.2"></line>
+          <line x1="291" y1="176" x2="318" y2="167" class="wire wire-arm" stroke-width="1.2"></line>
+          <line x1="287" y1="192" x2="318" y2="217" class="wire wire-arm" stroke-width="1.2"></line>
+
+          <rect class="box" x="60" y="252" width="340" height="34" rx="5"></rect>
+          <text x="230" y="273" text-anchor="middle" class="lbl-sm">Memory controller</text>
+          <line x1="245" y1="222" x2="245" y2="250" class="wire wire-arm" stroke-width="1.2"></line>
+
+          <rect class="box" x="130" y="326" width="200" height="46" rx="6"></rect>
+          <text x="230" y="354" text-anchor="middle" class="lbl">LPDDR RAM</text>
+          <line x1="230" y1="296" x2="230" y2="324" class="wire wire-arm" marker-end="url(#btbArrH3)"></line>
+          <text x="240" y="312" class="lbl-sm muted-txt">same package</text>
+
+          <text x="230" y="410" text-anchor="middle" class="lbl-sm muted-txt">no separate chipset chip on the board</text>
+
+          <text x="730" y="24" text-anchor="middle" class="lbl-title">Server SoC</text>
+          <text x="730" y="40" text-anchor="middle" class="lbl-sm muted-txt">e.g. AWS Graviton, Ampere &mdash; ARM Neoverse-based</text>
+
+          <rect class="box box-cpu box-arm" x="510" y="56" width="440" height="290" rx="10"></rect>
+
+          <rect class="box" x="530" y="76" width="70" height="34" rx="4"></rect><text x="565" y="97" text-anchor="middle" class="lbl-sm">core</text>
+          <rect class="box" x="610" y="76" width="70" height="34" rx="4"></rect><text x="645" y="97" text-anchor="middle" class="lbl-sm">core</text>
+          <rect class="box" x="690" y="76" width="70" height="34" rx="4"></rect><text x="725" y="97" text-anchor="middle" class="lbl-sm">core</text>
+          <rect class="box" x="530" y="230" width="70" height="34" rx="4"></rect><text x="565" y="251" text-anchor="middle" class="lbl-sm">core</text>
+          <rect class="box" x="610" y="230" width="70" height="34" rx="4"></rect><text x="645" y="251" text-anchor="middle" class="lbl-sm">core</text>
+          <rect class="box" x="690" y="230" width="70" height="34" rx="4"></rect><text x="725" y="251" text-anchor="middle" class="lbl-sm">core</text>
+          <text x="645" y="175" text-anchor="middle" class="lbl-sm muted-txt">&hellip; up to 96+ cores</text>
+
+          <rect class="box box-arm" x="580" y="145" width="130" height="46" rx="6"></rect>
+          <text x="645" y="164" text-anchor="middle" class="lbl-sm">Coherent</text>
+          <text x="645" y="179" text-anchor="middle" class="lbl-sm">mesh (CMN)</text>
+
+          <line x1="565" y1="110" x2="610" y2="145" class="wire wire-arm" stroke-width="1.1"></line>
+          <line x1="725" y1="110" x2="690" y2="145" class="wire wire-arm" stroke-width="1.1"></line>
+          <line x1="565" y1="230" x2="610" y2="191" class="wire wire-arm" stroke-width="1.1"></line>
+          <line x1="725" y1="230" x2="690" y2="191" class="wire wire-arm" stroke-width="1.1"></line>
+
+          <rect class="box" x="800" y="80" width="120" height="42" rx="5"></rect>
+          <text x="860" y="106" text-anchor="middle" class="lbl-sm">DDR5 ch. A&ndash;H</text>
+          <rect class="box" x="800" y="270" width="120" height="42" rx="5"></rect>
+          <text x="860" y="296" text-anchor="middle" class="lbl-sm">PCIe root</text>
+
+          <line x1="710" y1="160" x2="798" y2="101" class="wire wire-arm" marker-end="url(#btbArrH3)"></line>
+          <line x1="710" y1="180" x2="798" y2="290" class="wire wire-arm" marker-end="url(#btbArrH3)"></line>
+
+          <rect class="box" x="800" y="330" width="120" height="40" rx="5"></rect>
+          <text x="860" y="354" text-anchor="middle" class="lbl-sm">NVMe / NIC</text>
+          <line x1="860" y1="312" x2="860" y2="328" class="wire wire-arm" marker-end="url(#btbArrH3)"></line>
+        </svg>
+        <figcaption><b>Same ISA, two completely different floor plans.</b> A phone or laptop SoC puts everything &mdash; cores, GPU, memory controller, storage and radio controllers &mdash; on one die with RAM stacked directly on the package, which is what makes "unified memory" (CPU and GPU sharing one pool, no copy between them) natural. A server chip built on ARM's Neoverse platform looks structurally more like a modern x86 CPU package: dozens of cores around a coherent mesh, with memory controllers and a PCIe root complex at the mesh's edges for conventional DDR5 and expansion cards.</figcaption>
+      </figure>
+
+      <h3>Mobile &amp; laptop: unified memory, one die, no chipset</h3>
+      <p>Apple's M-series is the clearest public example: CPU cores, GPU cores, and the Neural Engine all sit on one die and share one pool of LPDDR memory over a single wide, high-bandwidth path &mdash; Apple's own <i>unified memory architecture</i>. There's no discrete GPU with its own VRAM to copy data into, and no separate chipset chip on the logic board handling storage or USB &mdash; those controllers are on the SoC die too. Qualcomm's Snapdragon and other mobile ARM SoCs follow the same basic shape: one die, on-chip fabric, memory attached directly to the package.</p>
+
+      <h3>Server: a coherent mesh, not a bus</h3>
+      <p>ARM's Neoverse platform &mdash; the basis for AWS Graviton, Ampere's Altra/AmpereOne, and others &mdash; scales to dozens or low hundreds of cores, which a single shared bus can't do without becoming the bottleneck. Instead, ARM's <b>CMN (Coherent Mesh Network)</b> interconnect arranges cores, cache, memory controllers, and I/O as nodes on a 2D mesh, using the <b>AMBA CHI</b> protocol to keep every core's view of memory consistent. Memory controllers and the PCIe root complex sit at the mesh's edges, functionally in the same place the northbridge used to be &mdash; just reached by mesh routing instead of a shared bus, and built by the chip vendor into the same die as the cores rather than existing as a separate part at all.</p>
+
+      <div class="callout arm">
+        <p>There's no ARM equivalent of "PCH" or "chipset" to look up, because the concept doesn't map cleanly &mdash; not because ARM chips are simpler. A high-end Neoverse server SoC is arguably more complex to route than a modern x86 CPU package; it just never had a second physical chip to hand the job to.</p>
+      </div>
+    </section>
+
+    <section id="reference">
+      <div class="section-head">
+        <span class="tag mono">&sect;5</span>
+        <h2>Quick reference</h2>
+      </div>
+      <p class="lede">The same six questions, answered for each era/platform. Use this as the thing to reload when the details above fade.</p>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Question</th>
+              <th>2008 x86</th>
+              <th>Modern x86</th>
+              <th>ARM mobile/laptop</th>
+              <th>ARM server</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Memory controller lives&hellip;</td>
+              <td>Northbridge chip</td>
+              <td>Inside CPU package (SoC tile / IOD)</td>
+              <td>On the SoC die</td>
+              <td>On the SoC die, at the mesh edge</td>
+            </tr>
+            <tr>
+              <td>CPU&ndash;memory link</td>
+              <td>Front-side bus (shared, ~10&nbsp;GB/s)</td>
+              <td>Short on-package interconnect</td>
+              <td>On-die fabric</td>
+              <td>Coherent mesh (CMN)</td>
+            </tr>
+            <tr>
+              <td>GPU / fast storage</td>
+              <td>Via northbridge's PCIe root complex</td>
+              <td>Direct CPU PCIe lanes, no hop</td>
+              <td>Integrated on the same die</td>
+              <td>Direct PCIe root complex on-die</td>
+            </tr>
+            <tr>
+              <td>USB / SATA / audio</td>
+              <td>Southbridge</td>
+              <td>PCH (Intel, via DMI) / chipset (AMD, via PCIe)</td>
+              <td>Integrated on the same die</td>
+              <td>Often integrated; varies by vendor</td>
+            </tr>
+            <tr>
+              <td>Scaling to many cores</td>
+              <td>n/a &mdash; 1&ndash;4 cores</td>
+              <td>Infinity Fabric (AMD) / ring or mesh (Intel), plus UPI across sockets</td>
+              <td>n/a &mdash; single cluster</td>
+              <td>CMN mesh, extended across dies via CXL/CCIX</td>
+            </tr>
+            <tr>
+              <td>What people call it today</td>
+              <td><span class="pill obsolete">"northbridge / southbridge"</span> &mdash; historical only</td>
+              <td>"the chipset" / "the PCH"; memory+PCIe just called part of "the CPU"</td>
+              <td>"the SoC" &mdash; bridge terms never applied</td>
+              <td>"the SoC" &mdash; bridge terms never applied</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <footer class="sources">
+      <h2>Verified against, not recalled from memory</h2>
+      <ul>
+        <li><a href="https://www.techpowerup.com/review/intel-core-ultra-arrow-lake-preview/3.html" target="_blank" rel="noopener">TechPowerUp &mdash; Intel Core Ultra Arrow Lake architecture preview (SoC tile, memory controller placement)</a></li>
+        <li><a href="https://www.back2gaming.com/guides/intel-arrow-lake-and-the-z890-platform-technical-overview/" target="_blank" rel="noopener">Back2Gaming &mdash; Arrow Lake and the Z890 platform (PCH retained, DMI link)</a></li>
+        <li><a href="https://chipsandcheese.com/p/amds-ryzen-9950x-zen-5-on-desktop" target="_blank" rel="noopener">Chips and Cheese &mdash; AMD Ryzen 9950X, Zen 5 chiplet layout (CCD/IOD, Infinity Fabric)</a></li>
+        <li><a href="https://en.wikipedia.org/wiki/Apple_M4" target="_blank" rel="noopener">Wikipedia &mdash; Apple M4 (unified memory bandwidth figures)</a></li>
+        <li><a href="https://www.arm.com/products/silicon-ip-system/corelink-interconnect/cmn-700" target="_blank" rel="noopener">Arm &mdash; Neoverse CMN-700 coherent mesh network product page</a></li>
+      </ul>
+    </footer>
+
+  </div>
+</div>

@@ -59,6 +59,14 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: Processor Architecture
+
+   processor_architecture
+   cuda_gpu_architecture
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: Security & Cryptography
 
    ssh_secure_shell_interactive
@@ -303,6 +311,24 @@ Memory & Processes
    * - :doc:`latency_numbers_interactive`
      - Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop
      - CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT
+
+Processor Architecture
+----------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`processor_architecture`
+     - Beyond the Bridges -- where memory and I/O connect in modern Intel, AMD, and ARM chips, and why northbridge/southbridge is now historical
+     - SoC tile, PCH, DMI, CCD/IOD, Infinity Fabric, unified memory, CMN mesh
+   * - :doc:`cuda_gpu_architecture`
+     - The CUDA Moat -- why GPUs suit neural-net math, and why CUDA specifically (not GPUs generically) is NVIDIA's real moat
+     - SM, CUDA/Tensor cores, HBM, CUDA vs. ROCm/OpenCL, NVLink, NVSwitch
 
 Security & Cryptography
 ------------------------------
