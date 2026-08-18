@@ -1,6 +1,156 @@
 Complete Guide to Linux Devices
 ===================================
 
+.. raw:: html
+
+   <style>
+     div.document {
+       background: #0d141c;
+       color: #e7ecf2;
+       font-family: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+       line-height: 1.65;
+       border-radius: 12px;
+       padding: 32px 40px 40px;
+       margin: 12px 0 28px;
+       box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 30px rgba(0,0,0,0.35);
+     }
+     div.document h1 {
+       font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+       font-weight: 600;
+       font-size: 2.1rem;
+       color: #ffffff;
+       border-bottom: 1px solid #29374a;
+       padding-bottom: 16px;
+       margin: 0 0 28px;
+     }
+     div.document h2 {
+       font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+       font-weight: 600;
+       font-size: 1.5rem;
+       color: #63c96a;
+       margin: 44px 0 16px;
+       padding-bottom: 10px;
+       border-bottom: 1px solid #29374a;
+     }
+     div.document h3 {
+       font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+       font-weight: 600;
+       font-size: 1.15rem;
+       color: #a596ec;
+       margin: 26px 0 10px;
+     }
+     div.document .headerlink {
+       color: #93a2b6;
+       opacity: 0.55;
+       text-decoration: none;
+       margin-left: 8px;
+       font-weight: 400;
+     }
+     div.document .headerlink:hover { opacity: 1; color: #63c96a; }
+     div.document p { margin: 0 0 15px; color: #e7ecf2; }
+     div.document strong { color: #ffffff; font-weight: 700; }
+     div.document a { color: #63c96a; }
+     div.document a:hover { color: #a596ec; }
+     div.document ul, div.document ol { margin: 0 0 16px; padding-left: 24px; }
+     div.document li { margin-bottom: 6px; color: #e7ecf2; }
+     div.document hr { border-color: #29374a; }
+
+     div.document code.docutils.literal {
+       font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+       font-size: 0.88em;
+       background: #1a2532;
+       color: #e7ecf2;
+       padding: 1px 6px;
+       border-radius: 4px;
+       border: 1px solid #29374a;
+     }
+
+     div.document div.highlight {
+       background: #0a1119;
+       border: 1px solid #29374a;
+       border-radius: 8px;
+       padding: 14px 16px;
+       margin: 0 0 20px;
+       overflow-x: auto;
+     }
+     div.document div.highlight pre {
+       background: transparent;
+       color: #e7ecf2;
+       font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+       font-size: 0.86rem;
+       margin: 0;
+       line-height: 1.55;
+     }
+     /* The default pygments token colors are tuned for a light page and go
+        near-invisible on a dark one (e.g. navy-on-black prompts) -- only
+        override the specific tokens that would otherwise disappear. */
+     div.document .highlight .gp, div.document .highlight .gh { color: #63c96a; }
+     div.document .highlight .nv, div.document .highlight .ss,
+     div.document .highlight .vc, div.document .highlight .vg,
+     div.document .highlight .vi, div.document .highlight .vm { color: #a596ec; }
+     div.document .highlight .o, div.document .highlight .go { color: #93a2b6; }
+     div.document .highlight .w { color: #3a4a60; }
+
+     div.document table.docutils {
+       width: 100%;
+       border-collapse: collapse;
+       background: #131c27;
+       border: 1px solid #29374a;
+       border-radius: 8px;
+       margin: 0 0 22px;
+       font-size: 0.92rem;
+       overflow: hidden;
+     }
+     div.document table.docutils th.head {
+       font-family: ui-monospace, "SF Mono", "Cascadia Code", "Roboto Mono", Menlo, monospace;
+       font-size: 0.72rem;
+       letter-spacing: 0.05em;
+       text-transform: uppercase;
+       color: #93a2b6;
+       background: #1a2532;
+       text-align: left;
+       padding: 10px 14px;
+       border-bottom: 1px solid #29374a;
+     }
+     div.document table.docutils td {
+       padding: 9px 14px;
+       border-bottom: 1px solid #29374a;
+       vertical-align: top;
+       color: #e7ecf2;
+     }
+     div.document table.docutils tr.row-even,
+     div.document table.docutils tr.row-odd { background: transparent; }
+     div.document table.docutils tr:last-child td { border-bottom: none; }
+
+     div.document div.admonition {
+       background: #131c27;
+       border: 1px solid #29374a;
+       border-left: 3px solid #a596ec;
+       border-radius: 6px;
+       padding: 14px 18px;
+       margin: 0 0 20px;
+     }
+     div.document p.admonition-title {
+       font-weight: 700;
+       font-size: 0.78rem;
+       text-transform: uppercase;
+       letter-spacing: 0.04em;
+       color: #a596ec;
+       margin: 0 0 8px;
+     }
+     div.document div.admonition p:last-child { margin-bottom: 0; }
+
+     div.document p.plantuml { text-align: center; margin: 26px 0; }
+     div.document p.plantuml img {
+       max-width: 100%;
+       height: auto;
+       background: #ffffff;
+       border-radius: 10px;
+       padding: 18px;
+       box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 30px rgba(0,0,0,0.35);
+     }
+   </style>
+
 The Big Picture
 --------------------
 
