@@ -1,0 +1,23 @@
+image: python:3.12
+
+stages:
+  - build
+
+pages:
+  stage: build
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      changes:
+        - docs/**/*
+        - .gitlab-ci.yml
+  before_script:
+    - apt-get update
+    - apt-get install -y --no-install-recommends default-jre-headless graphviz curl
+    - curl -sL --fail -o /tmp/plantuml.jar https://github.com/plantuml/plantuml/releases/latest/download/plantuml.jar
+    - export PLANTUML_JAR=/tmp/plantuml.jar
+    - pip install -r docs/requirements.txt
+  script:
+    - sphinx-build -n -W docs/source public
+  artifacts:
+    paths:
+      - public
