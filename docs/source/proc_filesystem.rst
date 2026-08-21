@@ -48,7 +48,6 @@ The /proc Filesystem
        color: #5c675d;
        opacity: 0.5;
        text-decoration: none;
-       font-family: -apple-system, sans-serif;
        font-size: 0.7em;
        margin-left: 8px;
      }
