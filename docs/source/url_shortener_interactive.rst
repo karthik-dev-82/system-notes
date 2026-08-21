@@ -333,12 +333,12 @@ Putting It All Together
 
    !theme plain
    skinparam backgroundColor white
-   actor Client
-   participant "API Server" as API
-   participant "Rate Limiter" as RL
-   participant "ID / Hash\nGenerator" as GEN
-   database "Sharded Store\n(by short_code)" as DB
-   participant Cache
+   participant Client #LightGray
+   participant "API Server" as API #LightBlue
+   participant "Rate Limiter" as RL #LightSalmon
+   participant "ID / Hash\nGenerator" as GEN #LightYellow
+   participant "Sharded Store\n(by short_code)" as DB #LightGreen
+   participant Cache #Plum
 
    Client -> API: POST /shorten {long_url}
    API -> RL: check quota
@@ -355,10 +355,10 @@ Putting It All Together
 
    !theme plain
    skinparam backgroundColor white
-   actor Client
-   participant "API Server" as API
-   participant Cache
-   database "Sharded Store\n(by short_code)" as DB
+   participant Client #LightGray
+   participant "API Server" as API #LightBlue
+   participant Cache #Plum
+   participant "Sharded Store\n(by short_code)" as DB #LightGreen
 
    Client -> API: GET /{short_code}
    API -> Cache: get(short_code)
