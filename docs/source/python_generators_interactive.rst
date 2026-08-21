@@ -207,4 +207,7 @@ suspend/resume idea, driven by an event loop instead of a plain
 ``for`` loop or manual ``next()`` calls. That page explicitly notes
 the ``yield``-inside-``async-def`` case (an async generator) without
 explaining plain generators in depth -- this page is that missing
-piece.
+piece. :doc:`py_itertools_interactive` covers the standard library's
+pre-built generator combinators -- the same suspend/produce idea,
+packaged as ready-made functions instead of hand-written ``yield``
+statements.

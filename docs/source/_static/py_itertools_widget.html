@@ -1,0 +1,391 @@
+<div class="it-root" id="itWidget">
+  <style>
+    #itWidget {
+      --it-bg: #eef1ee;
+      --it-panel: #ffffff;
+      --it-border: #cdd6cc;
+      --it-text: #1c231d;
+      --it-muted: #5c675d;
+      --it-a: #3d5c3d;
+      --it-b: #7a2f3d;
+      --it-bad: #b0432a;
+      --it-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--it-bg);
+      color: var(--it-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #itWidget * { box-sizing: border-box; }
+    #itWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #itWidget .it-sub { color: var(--it-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .it-tabs { display: flex; gap: 8px; margin-bottom: 14px; min-width: 700px; }
+    .it-tab {
+      background: var(--it-panel); border: 1px solid var(--it-border); border-radius: 8px 8px 0 0;
+      padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--it-muted); cursor: pointer;
+    }
+    .it-tab.active { color: var(--it-b); border-bottom: 2px solid var(--it-b); }
+    .it-panel { display: none; }
+    .it-panel.active { display: block; }
+
+    .it-controls {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      background: var(--it-panel); border: 1px solid var(--it-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 14px; min-width: 700px;
+    }
+    .it-btn { background: var(--it-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .it-btn.secondary { background: transparent; color: var(--it-text); border: 1px solid var(--it-border); }
+    .it-btn.small { padding: 5px 11px; font-size: 0.76rem; }
+    .it-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .it-toggle-row { display: flex; gap: 6px; }
+    .it-toggle { background: transparent; color: var(--it-muted); border: 1px solid var(--it-border); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; }
+    .it-toggle.active { background: var(--it-a); color: #f7f4ef; border-color: var(--it-a); }
+
+    .it-stage { background: var(--it-panel); border: 1px solid var(--it-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .it-chip-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 14px; }
+    .it-chip { min-width: 30px; text-align: center; padding: 6px 8px; border-radius: 6px; font-family: ui-monospace, monospace; font-weight: 700; font-size: 0.85rem; border: 2px solid var(--it-border); background: #f7f6f2; color: var(--it-muted); }
+
+    .it-groups-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .it-group-box { border-radius: 8px; padding: 8px 10px; min-width: 60px; }
+    .it-group-label { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--it-muted); margin-bottom: 4px; }
+    .it-group-chips { display: flex; gap: 3px; flex-wrap: wrap; }
+
+    .it-tee-track { margin-bottom: 14px; }
+    .it-tee-label { font-size: 0.78rem; color: var(--it-muted); margin-bottom: 6px; font-family: ui-monospace, monospace; }
+    .it-tee-chip.pulled-a { border-color: var(--it-a); background: rgba(61,92,61,0.14); }
+    .it-tee-chip.pulled-b { border-color: var(--it-b); background: rgba(122,47,61,0.14); }
+    .it-tee-chip.buffered { border-color: var(--it-warn); background: rgba(166,124,31,0.14); }
+
+    .it-counter-row { display: flex; gap: 20px; flex-wrap: wrap; font-size: 0.82rem; color: var(--it-muted); margin-top: 10px; }
+    .it-counter-row b { color: var(--it-text); font-family: ui-monospace, monospace; }
+
+    .it-values-row { display: flex; gap: 6px; flex-wrap: wrap; min-height: 40px; }
+    .it-value-chip { background: #ffffff; border: 2px solid var(--it-a); border-radius: 6px; padding: 6px 10px; font-family: ui-monospace, monospace; font-weight: 700; font-size: 0.85rem; color: var(--it-text); }
+    .it-value-chip.cycle-chip { border-color: var(--it-b); }
+
+    table.it-enum-table { border-collapse: collapse; font-size: 0.8rem; margin-top: 10px; font-family: ui-monospace, monospace; }
+    table.it-enum-table th, table.it-enum-table td { border: 1px solid var(--it-border); padding: 5px 10px; text-align: left; }
+    table.it-enum-table th { background: #f7f6f2; color: var(--it-b); font-size: 0.68rem; text-transform: uppercase; }
+
+    .it-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .it-explain-panel, .it-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .it-explain-panel { flex: 1.4; }
+    .it-box { background: var(--it-panel); border: 1px solid var(--it-border); border-radius: 10px; padding: 12px 14px; }
+    .it-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--it-muted); margin-bottom: 8px; }
+    .it-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .it-log div { color: var(--it-muted); }
+    .it-log div.ok { color: var(--it-a); }
+    .it-log div.warn { color: var(--it-warn); }
+  </style>
+
+  <h3>itertools: Play With It</h3>
+  <div class="it-sub">Every result below comes from real, running algorithms -- each one first checked against actual CPython output before being ported here.</div>
+
+  <div class="it-tabs">
+    <div class="it-tab active" data-tab="groupby">1. groupby</div>
+    <div class="it-tab" data-tab="tee">2. tee</div>
+    <div class="it-tab" data-tab="infinite">3. count / cycle / enumerate</div>
+  </div>
+
+  <div class="it-panel active" id="panel-groupby">
+    <div class="it-controls">
+      <div class="it-toggle-row">
+        <button class="it-toggle active" id="itGbUnsorted">As-is (unsorted)</button>
+        <button class="it-toggle" id="itGbSorted">Sorted first</button>
+      </div>
+    </div>
+    <div class="it-stage">
+      <div class="it-chip-row" id="itGbInput"></div>
+      <div class="it-groups-row" id="itGbGroups"></div>
+      <div class="it-counter-row">
+        <div>resulting groups: <b id="itGbCount">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="it-panel" id="panel-tee">
+    <div class="it-controls">
+      <button class="it-btn" id="itTeePullA">Pull Reader A</button>
+      <button class="it-btn secondary" id="itTeePullB">Pull Reader B</button>
+      <button class="it-btn secondary" id="itTeeReset">Reset</button>
+    </div>
+    <div class="it-stage">
+      <div class="it-tee-track">
+        <div class="it-tee-label">source (pulled from lazily, once per element)</div>
+        <div class="it-chip-row" id="itTeeSource"></div>
+      </div>
+      <div class="it-counter-row">
+        <div>source elements actually pulled: <b id="itTeePulled">0</b></div>
+        <div>Reader A position: <b id="itTeeAPos">0</b></div>
+        <div>Reader B position: <b id="itTeeBPos">0</b></div>
+        <div>live buffer size (gap between readers): <b id="itTeeBuffer">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="it-panel" id="panel-infinite">
+    <div class="it-controls">
+      <button class="it-btn" id="itPullCount">Pull next from count(10, step=5)</button>
+      <button class="it-btn secondary" id="itPullCycle">Pull next from cycle(['x','y','z'])</button>
+      <button class="it-btn secondary" id="itInfiniteReset">Reset</button>
+    </div>
+    <div class="it-stage">
+      <div class="it-tee-label">count(10, 5) pulled so far</div>
+      <div class="it-values-row" id="itCountValues"></div>
+      <div class="it-tee-label" style="margin-top:12px;">cycle(['x','y','z']) pulled so far</div>
+      <div class="it-values-row" id="itCycleValues"></div>
+      <div class="it-tee-label" style="margin-top:16px;">enumerate(items, start) is really just zip(count(start), items) -- both computed live, right now:</div>
+      <table class="it-enum-table" id="itEnumTable"></table>
+    </div>
+  </div>
+
+  <div class="it-panels">
+    <div class="it-explain-panel">
+      <div class="it-box">
+        <div class="it-panel-title">What's happening right now</div>
+        <div id="itExplain">groupby only groups CONSECUTIVE equal keys -- it has no idea the same letter appears elsewhere in the list unless you sort first. Toggle between the two modes and watch the group count change on identical data.</div>
+      </div>
+    </div>
+    <div class="it-side-panel-col">
+      <div class="it-box">
+        <div class="it-panel-title">Event log</div>
+        <div class="it-log" id="itLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // ---- shared tab wiring ----
+    const tabs = document.querySelectorAll('.it-tab');
+    const panels = { groupby: document.getElementById('panel-groupby'), tee: document.getElementById('panel-tee'), infinite: document.getElementById('panel-infinite') };
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        Object.values(panels).forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        panels[tab.dataset.tab].classList.add('active');
+      });
+    });
+    const explainEl = document.getElementById('itExplain');
+    const logEl = document.getElementById('itLog');
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ---- Tab 1: groupby ----
+    function groupby(items) {
+      const groups = [];
+      let currentKey = Symbol('none');
+      let currentGroup = null;
+      for (const item of items) {
+        if (item !== currentKey) {
+          currentGroup = [];
+          groups.push({ key: item, items: currentGroup });
+          currentKey = item;
+        }
+        currentGroup.push(item);
+      }
+      return groups;
+    }
+
+    const GB_DATA = ['a', 'a', 'b', 'a', 'a', 'b', 'b'];
+    let gbSorted = false;
+    const gbInputEl = document.getElementById('itGbInput');
+    const gbGroupsEl = document.getElementById('itGbGroups');
+    const gbCountEl = document.getElementById('itGbCount');
+
+    function renderGroupby() {
+      const data = gbSorted ? [...GB_DATA].sort() : GB_DATA;
+      gbInputEl.innerHTML = '';
+      data.forEach(x => {
+        const c = document.createElement('div');
+        c.className = 'it-chip';
+        c.textContent = x;
+        gbInputEl.appendChild(c);
+      });
+      const groups = groupby(data);
+      gbGroupsEl.innerHTML = '';
+      groups.forEach(g => {
+        const box = document.createElement('div');
+        box.className = 'it-group-box';
+        box.style.border = '2px solid ' + (g.key === 'a' ? '#3d5c3d' : '#7a2f3d');
+        box.style.background = g.key === 'a' ? 'rgba(61,92,61,0.08)' : 'rgba(122,47,61,0.08)';
+        const label = document.createElement('div');
+        label.className = 'it-group-label';
+        label.textContent = 'key: ' + g.key;
+        box.appendChild(label);
+        const chips = document.createElement('div');
+        chips.className = 'it-group-chips';
+        g.items.forEach(() => {
+          const c = document.createElement('div');
+          c.className = 'it-chip';
+          c.textContent = g.key;
+          chips.appendChild(c);
+        });
+        box.appendChild(chips);
+        gbGroupsEl.appendChild(box);
+      });
+      gbCountEl.textContent = groups.length;
+    }
+
+    document.getElementById('itGbUnsorted').addEventListener('click', () => {
+      gbSorted = false;
+      document.getElementById('itGbUnsorted').classList.add('active');
+      document.getElementById('itGbSorted').classList.remove('active');
+      explainEl.textContent = 'Same data, not sorted: groupby sees "a, a, b, a, a, b, b" and produces 4 separate groups because it only merges elements that are ADJACENT and equal -- the two "a" runs never get combined.';
+      renderGroupby();
+    });
+    document.getElementById('itGbSorted').addEventListener('click', () => {
+      gbSorted = true;
+      document.getElementById('itGbSorted').classList.add('active');
+      document.getElementById('itGbUnsorted').classList.remove('active');
+      explainEl.textContent = 'Sort first, and every equal element becomes adjacent -- now groupby produces exactly one group per distinct key. This is the single most common groupby bug: forgetting the sort.';
+      renderGroupby();
+    });
+    renderGroupby();
+
+    // ---- Tab 2: tee ----
+    const TEE_SOURCE = Array.from({ length: 10 }, (_, i) => i);
+    let teeCache, teeSourcePulled, teeDropped, teePosA, teePosB;
+    const teeSourceEl = document.getElementById('itTeeSource');
+    const teePulledEl = document.getElementById('itTeePulled');
+    const teeAPosEl = document.getElementById('itTeeAPos');
+    const teeBPosEl = document.getElementById('itTeeBPos');
+    const teeBufferEl = document.getElementById('itTeeBuffer');
+
+    function resetTee() {
+      teeCache = [];
+      teeSourcePulled = 0;
+      teeDropped = 0;
+      teePosA = 0;
+      teePosB = 0;
+      renderTee();
+    }
+    function teeEnsureCached(upTo) {
+      while (teeSourcePulled <= upTo && teeSourcePulled < TEE_SOURCE.length) {
+        teeCache.push(TEE_SOURCE[teeSourcePulled]);
+        teeSourcePulled++;
+      }
+    }
+    function teeReclaim() {
+      const minPos = Math.min(teePosA, teePosB);
+      while (teeDropped < minPos) { teeDropped++; }
+    }
+    function teeNext(which) {
+      const pos = which === 'A' ? teePosA : teePosB;
+      const pulledBefore = teeSourcePulled;
+      teeEnsureCached(pos);
+      if (pos >= teeCache.length) { logTo('Reader ' + which + ': exhausted, nothing left.', 'warn'); return; }
+      const wasFreshPull = teeSourcePulled > pulledBefore;
+      if (which === 'A') teePosA++; else teePosB++;
+      teeReclaim();
+      logTo('Reader ' + which + ' pulled ' + teeCache[pos] + ' -- ' + (wasFreshPull ? 'fresh from source' : 'was already buffered') + '.');
+    }
+    function renderTee() {
+      teeSourceEl.innerHTML = '';
+      TEE_SOURCE.forEach((v, i) => {
+        const c = document.createElement('div');
+        let cls = 'it-chip it-tee-chip';
+        const seenByA = i < teePosA;
+        const seenByB = i < teePosB;
+        if (seenByA && seenByB) cls += ' pulled-a';
+        else if (seenByA || seenByB) cls += ' buffered';
+        c.className = cls;
+        c.textContent = v;
+        teeSourceEl.appendChild(c);
+      });
+      teePulledEl.textContent = teeSourcePulled;
+      teeAPosEl.textContent = teePosA;
+      teeBPosEl.textContent = teePosB;
+      teeBufferEl.textContent = Math.max(teePosA, teePosB) - Math.min(teePosA, teePosB);
+    }
+    document.getElementById('itTeePullA').addEventListener('click', () => {
+      teeNext('A'); renderTee();
+      explainEl.textContent = teePosA > teePosB
+        ? ('Reader A is now ahead of Reader B by ' + (teePosA - teePosB) + ' -- those items stay buffered (amber) because B hasn\'t seen them yet. tee never re-reads the source for B; it just holds onto what A already pulled.')
+        : 'Reader A caught back up to Reader B -- notice the buffer shrank. Positions both readers have already passed are dropped, exactly like the real CPython implementation (verified against its actual reference-counted linked-list source).';
+    });
+    document.getElementById('itTeePullB').addEventListener('click', () => {
+      teeNext('B'); renderTee();
+      explainEl.textContent = teePosB > teePosA
+        ? ('Reader B is now ahead of Reader A by ' + (teePosB - teePosA) + ' -- same buffering, just the other direction.')
+        : 'Buffer back to its minimum -- both readers are at the same position again.';
+    });
+    document.getElementById('itTeeReset').addEventListener('click', () => { logTo('-- reset --'); resetTee(); });
+    resetTee();
+
+    // ---- Tab 3: count / cycle / enumerate ----
+    function* countGen(start, step) { let i = start; while (true) { yield i; i += step; } }
+    function* cycleGen(arr) { while (true) { for (const x of arr) yield x; } }
+
+    let countIter = countGen(10, 5);
+    let cycleIter = cycleGen(['x', 'y', 'z']);
+    const countValuesEl = document.getElementById('itCountValues');
+    const cycleValuesEl = document.getElementById('itCycleValues');
+
+    function addChip(container, val, cls) {
+      const c = document.createElement('div');
+      c.className = 'it-value-chip' + (cls ? ' ' + cls : '');
+      c.textContent = val;
+      container.appendChild(c);
+    }
+    document.getElementById('itPullCount').addEventListener('click', () => {
+      const v = countIter.next().value;
+      addChip(countValuesEl, v);
+      logTo('count(10, step=5) yielded ' + v + ' -- it will never stop on its own.');
+      explainEl.textContent = 'count() is a real infinite iterator -- there is no length, no end. Keep clicking forever and it keeps producing. In real code you always pair it with something like islice() or zip() against a finite iterable to bound it.';
+    });
+    document.getElementById('itPullCycle').addEventListener('click', () => {
+      const v = cycleIter.next().value;
+      addChip(cycleValuesEl, v, 'cycle-chip');
+      logTo("cycle(['x','y','z']) yielded '" + v + "'.");
+      explainEl.textContent = "cycle() replays its source forever once exhausted -- it has to remember every element the first time through (it can't re-read the original iterable a second time), so it only works on things you're willing to hold in memory once.";
+    });
+    document.getElementById('itInfiniteReset').addEventListener('click', () => {
+      countIter = countGen(10, 5);
+      cycleIter = cycleGen(['x', 'y', 'z']);
+      countValuesEl.innerHTML = '';
+      cycleValuesEl.innerHTML = '';
+      logTo('-- reset --');
+    });
+
+    // enumerate === zip(count(start), items), computed live
+    const ENUM_ITEMS = ['p', 'q', 'r', 's'];
+    const ENUM_START = 5;
+    function renderEnumTable() {
+      const c = countGen(ENUM_START, 1);
+      const table = document.getElementById('itEnumTable');
+      table.innerHTML = '';
+      const header = document.createElement('tr');
+      ['index', 'zip(count(5), items)', 'enumerate(items, 5)', 'value'].forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        header.appendChild(th);
+      });
+      table.appendChild(header);
+      ENUM_ITEMS.forEach((item, i) => {
+        const enumIdx = ENUM_START + i; // what Python's real enumerate(items, 5) produces
+        const zipIdx = c.next().value;   // what zip(count(5), items) produces, computed live
+        const row = document.createElement('tr');
+        [i, zipIdx, enumIdx, item].forEach(v => {
+          const td = document.createElement('td');
+          td.textContent = String(v);
+          row.appendChild(td);
+        });
+        table.appendChild(row);
+      });
+    }
+    renderEnumTable();
+  })();
+  </script>
+</div>

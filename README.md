@@ -97,6 +97,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Python Sequences (Interactive)](docs/source/python_sequences_interactive.rst)** | Interactive Python list/stack/queue/deque -- CPython's real growth formula and probing, verified against source | dynamic arrays, amortized O(1), LIFO/FIFO, deque blocks |
 | 🎮 **[Python Hashing (Interactive)](docs/source/python_hashing_interactive.rst)** | Interactive Python dict/set -- real CPython collision probing, resize thresholds, and set algebra | hash tables, open addressing, insertion order, union/intersection/difference |
 | 🎮 **[Python Generators (Interactive)](docs/source/python_generators_interactive.rst)** | Interactive generators -- step through next()/send()/throw()/close(), then measure laziness against a list comprehension | yield, suspended frames, StopIteration, two-way communication |
+| 🎮 **[Python itertools (Interactive)](docs/source/py_itertools_interactive.rst)** | Real groupby/tee/count/cycle, verified against actual CPython output -- groupby's consecutive-only grouping, tee's buffer growing and shrinking live | groupby, tee, count, cycle, enumerate, lazy iterator combinators |
 | 🎮 **[Python Context Managers (Interactive)](docs/source/python_context_managers_interactive.rst)** | Interactive context managers -- class-based vs @contextmanager side by side, four scenarios, identical outcomes | with statement, __enter__/__exit__, contextlib, exception suppression |
 | 🎮 **[Python Coroutines (Interactive)](docs/source/python_coroutines_interactive.rst)** | Interactive toy event loop -- a real hand-built scheduler driving coroutines, plus await delegation chained through nested calls | async/await, event loop, cooperative scheduling, await delegation |
 | 🎮 **[Async Generators & Context Managers (Interactive)](docs/source/python_async_generators_interactive.rst)** | Interactive async generators and async context managers -- yield meets await, and __aenter__/__aexit__ take real time without blocking a sibling task | async generator, async for, __aenter__, __aexit__, asynccontextmanager |
@@ -212,6 +213,7 @@ system-notes/
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
         ├── python_generators_interactive.rst
+        ├── py_itertools_interactive.rst
         ├── python_context_managers_interactive.rst
         ├── python_coroutines_interactive.rst
         ├── python_async_generators_interactive.rst

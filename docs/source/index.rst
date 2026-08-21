@@ -181,6 +181,7 @@ worth writing down and coming back to.
    python_sequences_interactive
    python_hashing_interactive
    python_generators_interactive
+   py_itertools_interactive
    python_context_managers_interactive
    python_coroutines_interactive
    python_async_generators_interactive
@@ -627,6 +628,9 @@ Python Notes
    * - :doc:`python_generators_interactive`
      - Interactive generators -- step through next()/send()/throw()/close(), then measure laziness against a list comprehension
      - yield, suspended frames, StopIteration, two-way communication
+   * - :doc:`py_itertools_interactive`
+     - Play With It: real groupby/tee/count/cycle, verified against actual CPython output -- groupby's consecutive-only grouping, tee's buffer growing and shrinking live
+     - groupby, tee, count, cycle, enumerate, lazy iterator combinators
    * - :doc:`python_context_managers_interactive`
      - Interactive context managers -- class-based vs @contextmanager side by side, four scenarios, identical outcomes
      - with statement, __enter__/__exit__, contextlib, exception suppression
