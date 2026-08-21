@@ -200,3 +200,6 @@ See :doc:`threads_processes_synchronization` for the C++ code
 (``std::mutex``, ``std::counting_semaphore``,
 ``std::condition_variable``) behind each of these, and for how they
 map onto the kitchen/restaurant analogies used throughout that page.
+See :doc:`cpp_scoped_lock_interactive` for the deadlock tab's other
+real fix -- ``std::scoped_lock``, which avoids deadlock algorithmically
+instead of by enforcing a consistent lock order.

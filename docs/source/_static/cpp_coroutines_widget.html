@@ -1,0 +1,315 @@
+<div class="cr-root" id="crWidget">
+  <style>
+    #crWidget {
+      --cr-bg: #eef1ee;
+      --cr-panel: #ffffff;
+      --cr-border: #cdd6cc;
+      --cr-text: #1c231d;
+      --cr-muted: #5c675d;
+      --cr-a: #3d5c3d;
+      --cr-b: #7a2f3d;
+      --cr-bad: #b0432a;
+      --cr-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cr-bg);
+      color: var(--cr-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #crWidget * { box-sizing: border-box; }
+    #crWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #crWidget .cr-sub { color: var(--cr-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cr-tabs { display: flex; gap: 8px; margin-bottom: 14px; min-width: 700px; }
+    .cr-tab {
+      background: var(--cr-panel); border: 1px solid var(--cr-border); border-radius: 8px 8px 0 0;
+      padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--cr-muted); cursor: pointer;
+    }
+    .cr-tab.active { color: var(--cr-b); border-bottom: 2px solid var(--cr-b); }
+    .cr-panel { display: none; }
+    .cr-panel.active { display: block; }
+
+    .cr-controls {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      background: var(--cr-panel); border: 1px solid var(--cr-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 14px; min-width: 700px;
+    }
+    .cr-btn { background: var(--cr-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .cr-btn.secondary { background: transparent; color: var(--cr-text); border: 1px solid var(--cr-border); }
+    .cr-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .cr-code {
+      background: #f2f0ea; border: 1px solid #d8d4c8; border-radius: 8px; padding: 10px 14px;
+      margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6;
+      color: #2a2a24; min-width: 700px; white-space: pre;
+    }
+
+    .cr-stage { background: var(--cr-panel); border: 1px solid var(--cr-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+    .cr-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--cr-muted); }
+    .cr-counter-row b { color: #1c231d; font-size: 1.1rem; font-family: ui-monospace, monospace; }
+    .cr-values-row { display: flex; gap: 6px; flex-wrap: wrap; min-height: 46px; }
+    .cr-value-chip {
+      background: #ffffff; border: 2px solid var(--cr-a); border-radius: 6px; padding: 6px 10px;
+      font-family: ui-monospace, monospace; font-weight: 700; font-size: 0.85rem; color: var(--cr-text);
+    }
+
+    .cr-tasks { display: flex; flex-direction: column; gap: 10px; }
+    .cr-task { border: 1px solid var(--cr-border); border-radius: 8px; padding: 10px 12px; }
+    .cr-task-head { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 6px; }
+    .cr-task-head b { font-family: ui-monospace, monospace; }
+    .cr-task-state { color: var(--cr-muted); }
+    .cr-task-state.done { color: var(--cr-a); font-weight: 700; }
+    .cr-task-state.sleeping { color: var(--cr-warn); }
+    .cr-bar-track { height: 8px; border-radius: 4px; background: #f2f0ea; border: 1px solid #d8d4c8; overflow: hidden; }
+    .cr-bar-fill { height: 100%; background: var(--cr-a); transition: width 0.15s ease; }
+
+    .cr-banner { text-align: center; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.8rem; margin-top: 10px; }
+    .cr-banner.ok { background: rgba(61,92,61,0.12); color: var(--cr-a); }
+
+    .cr-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .cr-explain-panel, .cr-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .cr-explain-panel { flex: 1.4; }
+    .cr-box { background: var(--cr-panel); border: 1px solid var(--cr-border); border-radius: 10px; padding: 12px 14px; }
+    .cr-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cr-muted); margin-bottom: 8px; }
+    .cr-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cr-log div { color: var(--cr-muted); }
+    .cr-log div.ok { color: var(--cr-a); }
+    .cr-log div.warn { color: var(--cr-warn); }
+  </style>
+
+  <h3>C++20 Coroutines: Play With It</h3>
+  <div class="cr-sub">Driven by real JS generator functions, the same underlying suspend/resume mechanism C++20 coroutines use -- not a hand-animated simulation. JS can't be single-stepped through native async/await, so this is the closest honest stand-in, same as elsewhere on this site.</div>
+
+  <div class="cr-tabs">
+    <div class="cr-tab active" data-tab="yield">1. co_yield: Lazy Generator</div>
+    <div class="cr-tab" data-tab="await">2. co_await: Suspend, Don't Block</div>
+  </div>
+
+  <div class="cr-panel active" id="panel-yield">
+    <div class="cr-code">Generator&lt;int&gt; squares() {
+    for (int i = 0; i-&gt;/* ... */; ++i)
+        co_yield i * i;   // hand out one value, pause here
+}</div>
+    <div class="cr-controls">
+      <button class="cr-btn" id="crPullOne">Pull next value</button>
+      <button class="cr-btn secondary" id="crPullFive">Pull 5 at once</button>
+      <button class="cr-btn secondary" id="crYieldReset">Reset</button>
+    </div>
+    <div class="cr-stage">
+      <div class="cr-counter-row">
+        <div>values pulled: <b id="crPulled">0</b></div>
+        <div>values actually computed: <b id="crComputed">0</b></div>
+        <div>would an eager <code>std::vector&lt;int&gt;</code> of 1,000,000 have computed: <b>1,000,000</b></div>
+      </div>
+      <div class="cr-values-row" id="crValues"></div>
+    </div>
+  </div>
+
+  <div class="cr-panel" id="panel-await">
+    <div class="cr-code">Task work() {
+    co_await sleep(3);   // suspend here -- scheduler runs OTHER tasks meanwhile
+    co_await sleep(4);
+    co_return;
+}</div>
+    <div class="cr-controls">
+      <button class="cr-btn" id="crTick">Advance 1 Tick</button>
+      <button class="cr-btn secondary" id="crPlay">&#9654; Auto-run</button>
+      <button class="cr-btn secondary" id="crAwaitReset">Reset</button>
+    </div>
+    <div class="cr-stage">
+      <div class="cr-tasks" id="crTasks"></div>
+      <div class="cr-banner ok" id="crAwaitBanner" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="cr-panels">
+    <div class="cr-explain-panel">
+      <div class="cr-box">
+        <div class="cr-panel-title">What's happening right now</div>
+        <div id="crExplain">Pull values one at a time and watch "computed" track "pulled" exactly -- nothing runs ahead of what's actually asked for. Switch to the co_await tab to see three independent tasks share one scheduler without blocking each other.</div>
+      </div>
+    </div>
+    <div class="cr-side-panel-col">
+      <div class="cr-box">
+        <div class="cr-panel-title">Event log</div>
+        <div class="cr-log" id="crLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // ---- Tab 1: co_yield generator ----
+    function* squaresGen() {
+      let i = 0;
+      while (true) { i++; yield i * i; }
+    }
+
+    // ---- Tab 2: co_await cooperative scheduler ----
+    function makeSleeper(durations) {
+      return function* () {
+        for (const d of durations) yield d;
+      };
+    }
+    function makeTask(id, genFn, color) {
+      return { id, gen: genFn(), state: 'running', wakeAtTick: 0, doneAtTick: null, color };
+    }
+    function stepTask(task, currentTick) {
+      if (task.state === 'done') return;
+      if (task.state === 'sleeping' && currentTick < task.wakeAtTick) return;
+      const r = task.gen.next();
+      if (r.done) { task.state = 'done'; task.doneAtTick = currentTick; }
+      else { task.state = 'sleeping'; task.wakeAtTick = currentTick + r.value; }
+    }
+
+    const tabs = document.querySelectorAll('.cr-tab');
+    const panels = { yield: document.getElementById('panel-yield'), await: document.getElementById('panel-await') };
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        if (tab.dataset.tab !== 'await') pause();
+        tabs.forEach(t => t.classList.remove('active'));
+        Object.values(panels).forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        panels[tab.dataset.tab].classList.add('active');
+      });
+    });
+
+    const explainEl = document.getElementById('crExplain');
+    const logEl = document.getElementById('crLog');
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // --- Tab 1 wiring ---
+    let gen, pulled, computed, values;
+    const pulledEl = document.getElementById('crPulled');
+    const computedEl = document.getElementById('crComputed');
+    const valuesEl = document.getElementById('crValues');
+
+    function resetYield() {
+      gen = squaresGen();
+      pulled = 0;
+      computed = 0;
+      values = [];
+      renderYield();
+    }
+    function renderYield() {
+      pulledEl.textContent = pulled;
+      computedEl.textContent = computed;
+      valuesEl.innerHTML = '';
+      values.forEach(v => {
+        const chip = document.createElement('div');
+        chip.className = 'cr-value-chip';
+        chip.textContent = v;
+        valuesEl.appendChild(chip);
+      });
+    }
+    function pullOne() {
+      const r = gen.next();
+      computed++; // the generator body ran once to produce this
+      pulled++;
+      values.push(r.value);
+      logTo(`co_yield produced ${r.value} (computed just now, on demand).`, 'ok');
+      explainEl.textContent = `"computed" just ticked up to match "pulled" exactly -- the generator body only ran the ONE time you asked for a value, not ahead of time.`;
+      renderYield();
+    }
+    document.getElementById('crPullOne').addEventListener('click', pullOne);
+    document.getElementById('crPullFive').addEventListener('click', () => { for (let i = 0; i < 5; i++) pullOne(); });
+    document.getElementById('crYieldReset').addEventListener('click', () => { logTo('-- reset --'); resetYield(); });
+
+    // --- Tab 2 wiring ---
+    let awaitTasks;
+    const tasksEl = document.getElementById('crTasks');
+    const awaitBanner = document.getElementById('crAwaitBanner');
+    let awaitTick;
+    let playing = false;
+    let timer = null;
+
+    const TASK_DEFS = [
+      { id: 'A (slow single wait)', durations: [7], color: '#3d5c3d' },
+      { id: 'B (two short waits)', durations: [2, 2], color: '#7a2f3d' },
+      { id: 'C (three quick waits)', durations: [1, 1, 1], color: '#a67c1f' },
+    ];
+
+    function resetAwait() {
+      awaitTasks = TASK_DEFS.map(d => makeTask(d.id, makeSleeper(d.durations), d.color));
+      awaitTick = 0;
+      awaitBanner.style.display = 'none';
+      renderAwait();
+    }
+    function taskTotal(def) { return def.durations.reduce((a, b) => a + b, 0); }
+    function renderAwait() {
+      tasksEl.innerHTML = '';
+      awaitTasks.forEach((t, i) => {
+        const total = taskTotal(TASK_DEFS[i]);
+        const div = document.createElement('div');
+        div.className = 'cr-task';
+        const head = document.createElement('div');
+        head.className = 'cr-task-head';
+        const b = document.createElement('b');
+        b.textContent = t.id;
+        const state = document.createElement('span');
+        state.className = 'cr-task-state' + (t.state === 'done' ? ' done' : t.state === 'sleeping' ? ' sleeping' : '');
+        state.textContent = t.state === 'done' ? `done at tick ${t.doneAtTick}` : t.state === 'sleeping' ? `awaiting (wakes tick ${t.wakeAtTick})` : 'running';
+        head.appendChild(b);
+        head.appendChild(state);
+        div.appendChild(head);
+        const track = document.createElement('div');
+        track.className = 'cr-bar-track';
+        const fill = document.createElement('div');
+        fill.className = 'cr-bar-fill';
+        const progress = Math.min(awaitTick, total) / total * 100;
+        fill.style.width = progress + '%';
+        fill.style.background = TASK_DEFS[i].color;
+        track.appendChild(fill);
+        div.appendChild(track);
+        tasksEl.appendChild(div);
+      });
+
+      if (awaitTasks.every(t => t.state === 'done')) {
+        awaitBanner.style.display = 'block';
+        const summary = awaitTasks.map((t, i) => `${TASK_DEFS[i].id.split(' ')[0]}@${t.doneAtTick}`).join(', ');
+        awaitBanner.textContent = `All done -- ${summary}. Each finished at exactly the sum of its OWN awaits, unaffected by the others.`;
+      }
+    }
+    function tickAwait() {
+      if (awaitTasks.every(t => t.state === 'done')) return;
+      awaitTick++;
+      const before = awaitTasks.map(t => t.state);
+      awaitTasks.forEach(t => stepTask(t, awaitTick));
+      awaitTasks.forEach((t, i) => {
+        if (before[i] !== 'done' && t.state === 'done') logTo(`tick ${awaitTick}: ${t.id} finished.`, 'ok');
+      });
+      renderAwait();
+      if (awaitTasks.every(t => t.state === 'done')) {
+        explainEl.textContent = 'Notice task A (one long await) did not block B or C from making their own progress in the meantime -- co_await suspends the calling coroutine, it does not block the thread.';
+        pause();
+      }
+    }
+    document.getElementById('crTick').addEventListener('click', tickAwait);
+    document.getElementById('crAwaitReset').addEventListener('click', () => { pause(); logTo('-- reset --'); resetAwait(); });
+    function play() {
+      if (playing) return;
+      playing = true;
+      document.getElementById('crPlay').textContent = '⏸ Pause';
+      timer = setInterval(tickAwait, 450);
+    }
+    function pause() {
+      playing = false;
+      document.getElementById('crPlay').textContent = '▶ Auto-run';
+      clearInterval(timer);
+    }
+    document.getElementById('crPlay').addEventListener('click', () => playing ? pause() : play());
+
+    resetYield();
+    resetAwait();
+  })();
+  </script>
+</div>

@@ -1,0 +1,319 @@
+<div class="fp-root" id="fpWidget">
+  <style>
+    #fpWidget {
+      --fp-bg: #eef1ee;
+      --fp-panel: #ffffff;
+      --fp-border: #cdd6cc;
+      --fp-text: #1c231d;
+      --fp-muted: #5c675d;
+      --fp-a: #3d5c3d;
+      --fp-b: #7a2f3d;
+      --fp-bad: #b0432a;
+      --fp-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--fp-bg);
+      color: var(--fp-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #fpWidget * { box-sizing: border-box; }
+    #fpWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #fpWidget .fp-sub { color: var(--fp-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .fp-controls {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      background: var(--fp-panel); border: 1px solid var(--fp-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 14px; min-width: 700px;
+    }
+    .fp-btn { background: var(--fp-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .fp-btn.secondary { background: transparent; color: var(--fp-text); border: 1px solid var(--fp-border); }
+    .fp-btn.small { padding: 5px 11px; font-size: 0.76rem; }
+    .fp-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .fp-cards { display: flex; flex-wrap: wrap; gap: 12px; min-width: 700px; margin-bottom: 14px; }
+    .fp-card {
+      background: var(--fp-panel); border: 1px solid var(--fp-border); border-radius: 10px;
+      padding: 12px 14px; width: 220px; flex-shrink: 0;
+    }
+    .fp-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+    .fp-card-head b { font-family: ui-monospace, monospace; font-size: 0.9rem; }
+    .fp-policy-badge { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 7px; border-radius: 20px; }
+    .fp-policy-badge.async { background: rgba(61,92,61,0.14); color: var(--fp-a); }
+    .fp-policy-badge.deferred { background: rgba(166,124,31,0.16); color: var(--fp-warn); }
+    .fp-state-line { font-size: 0.78rem; color: var(--fp-muted); margin-bottom: 8px; min-height: 1.1em; }
+    .fp-state-line.ready { color: var(--fp-a); font-weight: 700; }
+    .fp-state-line.bad { color: var(--fp-bad); font-weight: 700; }
+    .fp-bar-track { height: 8px; border-radius: 4px; background: #f2f0ea; border: 1px solid #d8d4c8; overflow: hidden; margin-bottom: 10px; }
+    .fp-bar-fill { height: 100%; background: var(--fp-a); transition: width 0.2s ease; }
+    .fp-bar-fill.deferred-fill { background: var(--fp-warn); }
+    .fp-card-actions { display: flex; gap: 6px; }
+
+    .fp-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .fp-explain-panel, .fp-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .fp-explain-panel { flex: 1.4; }
+    .fp-box { background: var(--fp-panel); border: 1px solid var(--fp-border); border-radius: 10px; padding: 12px 14px; }
+    .fp-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--fp-muted); margin-bottom: 8px; }
+    .fp-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .fp-log div { color: var(--fp-muted); }
+    .fp-log div.ok { color: var(--fp-a); }
+    .fp-log div.info { color: var(--fp-b); }
+    .fp-log div.bad { color: var(--fp-bad); font-weight: 700; }
+    .fp-log div.warn { color: var(--fp-warn); }
+  </style>
+
+  <h3>Futures &amp; Promises: Play With It</h3>
+  <div class="fp-sub">A real discrete-time model of the exact rules below -- not a hand-wave animation.</div>
+
+  <div class="fp-controls">
+    <button class="fp-btn" id="fpAddAsync">+ Add async task</button>
+    <button class="fp-btn secondary" id="fpAddDeferred">+ Add deferred task</button>
+    <button class="fp-btn secondary" id="fpTick">Advance 1 Tick</button>
+    <button class="fp-btn secondary" id="fpPlay">&#9654; Auto-tick</button>
+    <button class="fp-btn secondary" id="fpReset">Reset</button>
+  </div>
+
+  <div class="fp-cards" id="fpCards"></div>
+
+  <div class="fp-panels">
+    <div class="fp-explain-panel">
+      <div class="fp-box">
+        <div class="fp-panel-title">What's happening right now</div>
+        <div id="fpExplain">Add an async task -- it starts running immediately, ticking toward completion on its own. Add a deferred task -- it does nothing at all until something calls get() on it. Try calling get() on a still-running async task (it blocks/advances to completion), then try calling get() a second time on the same task.</div>
+      </div>
+    </div>
+    <div class="fp-side-panel-col">
+      <div class="fp-box">
+        <div class="fp-panel-title">Event log</div>
+        <div class="fp-log" id="fpLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    function createTask(id, policy, workTicks) {
+      return { id, policy, workTicks, ticksElapsed: 0, state: policy === 'deferred' ? 'deferred' : 'running', consumed: false };
+    }
+
+    function tickOne(t) {
+      if (t.state === 'running') {
+        t.ticksElapsed++;
+        if (t.ticksElapsed >= t.workTicks) t.state = 'ready';
+      }
+    }
+
+    function doGet(task) {
+      if (task.consumed) return { error: 'future_already_retrieved' };
+      if (task.state === 'discarded' || task.state === 'discarded_never_run') return { error: 'no_state' };
+      const trace = [];
+      if (task.state === 'deferred') {
+        trace.push('get() on a deferred future -- runs the work synchronously, right now, on this thread.');
+        task.ticksElapsed = task.workTicks;
+        task.state = 'ready';
+      } else if (task.state === 'running') {
+        trace.push('get() on a still-running async future -- blocks until it finishes.');
+        while (task.state !== 'ready') {
+          task.ticksElapsed++;
+          if (task.ticksElapsed >= task.workTicks) task.state = 'ready';
+        }
+      } else {
+        trace.push('get() on an already-ready future -- returns immediately, no wait.');
+      }
+      task.consumed = true;
+      return { value: task.id * 10, trace };
+    }
+
+    function doLetGo(task) {
+      const trace = [];
+      if (task.consumed || task.state === 'discarded' || task.state === 'discarded_never_run') {
+        return { trace: ['Nothing to discard -- already consumed or discarded.'] };
+      }
+      if (task.policy === 'async') {
+        if (task.state === 'running') {
+          trace.push("Destructor of an async future with unfinished work BLOCKS the calling thread until it completes.");
+          while (task.state !== 'ready') {
+            task.ticksElapsed++;
+            if (task.ticksElapsed >= task.workTicks) task.state = 'ready';
+          }
+        } else {
+          trace.push('Already ready -- destructor returns immediately, no blocking.');
+        }
+        task.state = 'discarded';
+      } else if (task.policy === 'deferred') {
+        if (task.state === 'deferred') {
+          trace.push('Deferred future let go WITHOUT ever calling get() -- the work never runs. Not delayed. Never.');
+          task.state = 'discarded_never_run';
+        } else {
+          trace.push('Already ready -- destructor returns immediately.');
+          task.state = 'discarded';
+        }
+      }
+      return { trace };
+    }
+
+    const cardsEl = document.getElementById('fpCards');
+    const explainEl = document.getElementById('fpExplain');
+    const logEl = document.getElementById('fpLog');
+    const addAsyncBtn = document.getElementById('fpAddAsync');
+    const addDeferredBtn = document.getElementById('fpAddDeferred');
+    const tickBtn = document.getElementById('fpTick');
+    const playBtn = document.getElementById('fpPlay');
+    const resetBtn = document.getElementById('fpReset');
+
+    let tasks = [];
+    let nextId = 1;
+    let playing = false;
+    let timer = null;
+
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function stateLabel(t) {
+      if (t.state === 'deferred') return 'Deferred (not started)';
+      if (t.state === 'running') return `Running (${t.ticksElapsed}/${t.workTicks} ticks)`;
+      if (t.state === 'ready' && !t.consumed) return 'Ready, uncollected';
+      if (t.state === 'ready' && t.consumed) return 'Consumed';
+      if (t.state === 'discarded') return 'Discarded (completed first)';
+      if (t.state === 'discarded_never_run') return 'Discarded -- NEVER RAN';
+      return t.state;
+    }
+
+    function render() {
+      cardsEl.innerHTML = '';
+      tasks.forEach(t => {
+        const card = document.createElement('div');
+        card.className = 'fp-card';
+
+        const head = document.createElement('div');
+        head.className = 'fp-card-head';
+        const idEl = document.createElement('b');
+        idEl.textContent = 'task #' + t.id;
+        const badge = document.createElement('span');
+        badge.className = 'fp-policy-badge ' + t.policy;
+        badge.textContent = t.policy;
+        head.appendChild(idEl);
+        head.appendChild(badge);
+        card.appendChild(head);
+
+        const stateLine = document.createElement('div');
+        let cls = 'fp-state-line';
+        if (t.state === 'ready' || t.consumed) cls += ' ready';
+        if (t.state === 'discarded_never_run') cls += ' bad';
+        stateLine.className = cls;
+        stateLine.textContent = stateLabel(t);
+        card.appendChild(stateLine);
+
+        const barTrack = document.createElement('div');
+        barTrack.className = 'fp-bar-track';
+        const barFill = document.createElement('div');
+        barFill.className = 'fp-bar-fill' + (t.policy === 'deferred' ? ' deferred-fill' : '');
+        barFill.style.width = (t.ticksElapsed / t.workTicks * 100) + '%';
+        barTrack.appendChild(barFill);
+        card.appendChild(barTrack);
+
+        const actions = document.createElement('div');
+        actions.className = 'fp-card-actions';
+        const getBtn = document.createElement('button');
+        getBtn.className = 'fp-btn small';
+        getBtn.textContent = 'get()';
+        getBtn.disabled = t.consumed || t.state === 'discarded' || t.state === 'discarded_never_run';
+        getBtn.addEventListener('click', () => onGet(t.id));
+        const letGoBtn = document.createElement('button');
+        letGoBtn.className = 'fp-btn small secondary';
+        letGoBtn.textContent = 'Let go out of scope';
+        letGoBtn.disabled = t.consumed || t.state === 'discarded' || t.state === 'discarded_never_run';
+        letGoBtn.addEventListener('click', () => onLetGo(t.id));
+        actions.appendChild(getBtn);
+        actions.appendChild(letGoBtn);
+        card.appendChild(actions);
+
+        cardsEl.appendChild(card);
+      });
+    }
+
+    function findTask(id) { return tasks.find(t => t.id === id); }
+
+    function onGet(id) {
+      const t = findTask(id);
+      const result = doGet(t);
+      if (result.error === 'future_already_retrieved') {
+        logTo(`task #${id}: get() called AGAIN -- std::future_error: future_already_retrieved.`, 'bad');
+        explainEl.textContent = 'A std::future can only be collected once -- the value moves out on the first get(). Calling it a second time throws std::future_error, exactly like the note warns.';
+      } else {
+        logTo(`task #${id}: ` + result.trace.join(' '), t.policy === 'deferred' ? 'info' : 'ok');
+        logTo(`task #${id}: get() returned ${result.value}.`, 'ok');
+        explainEl.textContent = t.policy === 'deferred'
+          ? 'This deferred task had done ZERO work until get() was called -- then it ran synchronously, on this thread, right here. No background thread was ever involved.'
+          : 'get() only blocks if the value truly wasn\'t ready yet. If you\'d waited for it to finish on its own first, get() would have returned instantly.';
+      }
+      render();
+    }
+
+    function onLetGo(id) {
+      const t = findTask(id);
+      const result = doLetGo(t);
+      const cls = t.state === 'discarded_never_run' ? 'bad' : (t.policy === 'async' ? 'warn' : 'info');
+      logTo(`task #${id}: ` + result.trace.join(' '), cls);
+      if (t.state === 'discarded_never_run') {
+        explainEl.textContent = 'This is the sneaky one: a deferred future that never gets get() or wait() called on it silently never runs its work at all -- not delayed, not queued, just never executed.';
+      } else if (t.policy === 'async') {
+        explainEl.textContent = "An async future's destructor blocking is a real, documented gotcha -- \"fire and forget\" doesn't actually forget; it just moves the wait from get() to the closing brace.";
+      }
+      render();
+    }
+
+    addAsyncBtn.addEventListener('click', () => {
+      const workTicks = 3 + Math.floor(Math.random() * 3);
+      const t = createTask(nextId++, 'async', workTicks);
+      tasks.push(t);
+      logTo(`std::async(std::launch::async, work) -- task #${t.id} starts running immediately, ${workTicks} ticks of work.`, 'info');
+      render();
+    });
+
+    addDeferredBtn.addEventListener('click', () => {
+      const workTicks = 3 + Math.floor(Math.random() * 3);
+      const t = createTask(nextId++, 'deferred', workTicks);
+      tasks.push(t);
+      logTo(`std::async(std::launch::deferred, work) -- task #${t.id} created but does nothing yet.`, 'info');
+      render();
+    });
+
+    tickBtn.addEventListener('click', () => {
+      tasks.forEach(tickOne);
+      render();
+    });
+
+    resetBtn.addEventListener('click', () => {
+      pause();
+      tasks = [];
+      nextId = 1;
+      logEl.innerHTML = '';
+      explainEl.textContent = 'Add an async task -- it starts running immediately, ticking toward completion on its own. Add a deferred task -- it does nothing at all until something calls get() on it. Try calling get() on a still-running async task (it blocks/advances to completion), then try calling get() a second time on the same task.';
+      render();
+    });
+
+    function play() {
+      if (playing) return;
+      playing = true;
+      playBtn.textContent = '⏸ Pause';
+      timer = setInterval(() => { tasks.forEach(tickOne); render(); }, 500);
+    }
+    function pause() {
+      playing = false;
+      playBtn.textContent = '▶ Auto-tick';
+      clearInterval(timer);
+    }
+    playBtn.addEventListener('click', () => playing ? pause() : play());
+
+    render();
+  })();
+  </script>
+</div>

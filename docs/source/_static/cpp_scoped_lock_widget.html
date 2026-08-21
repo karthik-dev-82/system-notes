@@ -1,0 +1,288 @@
+<div class="sl-root" id="slWidget">
+  <style>
+    #slWidget {
+      --sl-bg: #eef1ee;
+      --sl-panel: #ffffff;
+      --sl-border: #cdd6cc;
+      --sl-text: #1c231d;
+      --sl-muted: #5c675d;
+      --sl-a: #3d5c3d;
+      --sl-b: #7a2f3d;
+      --sl-bad: #b0432a;
+      --sl-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--sl-bg);
+      color: var(--sl-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #slWidget * { box-sizing: border-box; }
+    #slWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #slWidget .sl-sub { color: var(--sl-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .sl-controls {
+      display: flex; flex-wrap: wrap; gap: 12px; align-items: center;
+      background: var(--sl-panel); border: 1px solid var(--sl-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 14px; min-width: 700px;
+    }
+    .sl-btn { background: var(--sl-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .sl-btn.secondary { background: transparent; color: var(--sl-text); border: 1px solid var(--sl-border); }
+    .sl-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+    .sl-columns { display: flex; gap: 14px; min-width: 700px; margin-bottom: 14px; }
+    .sl-col { flex: 1; background: var(--sl-panel); border: 1px solid var(--sl-border); border-radius: 10px; padding: 14px; }
+    .sl-col-title { font-weight: 700; font-size: 0.86rem; margin-bottom: 3px; }
+    .sl-col-sub { font-size: 0.72rem; color: var(--sl-muted); margin-bottom: 12px; font-family: ui-monospace, monospace; }
+
+    .sl-mutex-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .sl-mutex {
+      flex: 1; text-align: center; padding: 6px; border-radius: 6px; font-size: 0.76rem;
+      border: 1px solid var(--sl-border); background: #f7f6f2; color: var(--sl-muted); font-family: ui-monospace, monospace;
+    }
+    .sl-mutex.held-a { background: rgba(61,92,61,0.14); color: var(--sl-a); border-color: var(--sl-a); font-weight: 700; }
+    .sl-mutex.held-b { background: rgba(122,47,61,0.14); color: var(--sl-b); border-color: var(--sl-b); font-weight: 700; }
+
+    .sl-thread { border: 1px solid var(--sl-border); border-radius: 8px; padding: 8px 10px; margin-bottom: 8px; font-size: 0.78rem; }
+    .sl-thread b { font-family: ui-monospace, monospace; }
+    .sl-thread .sl-phase { color: var(--sl-muted); margin-top: 2px; }
+    .sl-thread.done { border-color: var(--sl-a); background: rgba(61,92,61,0.08); }
+    .sl-thread.stuck { border-color: var(--sl-bad); background: rgba(176,67,42,0.08); }
+    .sl-thread.backoff { border-color: var(--sl-warn); background: rgba(166,124,31,0.1); }
+
+    .sl-banner { text-align: center; padding: 8px; border-radius: 8px; font-weight: 800; font-size: 0.78rem; margin-top: 6px; }
+    .sl-banner.bad { background: rgba(176,67,42,0.16); color: var(--sl-bad); }
+    .sl-banner.ok { background: rgba(61,92,61,0.12); color: var(--sl-a); }
+
+    .sl-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .sl-explain-panel, .sl-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .sl-explain-panel { flex: 1.4; }
+    .sl-box { background: var(--sl-panel); border: 1px solid var(--sl-border); border-radius: 10px; padding: 12px 14px; }
+    .sl-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--sl-muted); margin-bottom: 8px; }
+    .sl-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .sl-log div { color: var(--sl-muted); }
+    .sl-log div.ok { color: var(--sl-a); }
+    .sl-log div.bad { color: var(--sl-bad); font-weight: 700; }
+    .sl-log div.warn { color: var(--sl-warn); }
+  </style>
+
+  <h3>std::scoped_lock: Play With It</h3>
+  <div class="sl-sub">Both columns run the identical click sequence against two mutexes -- Thread A wants m1 then m2, Thread B wants m2 then m1 (opposite order, the classic deadlock setup).</div>
+
+  <div class="sl-controls">
+    <button class="sl-btn" id="slStepA">Step Thread A</button>
+    <button class="sl-btn" id="slStepB">Step Thread B</button>
+    <button class="sl-btn secondary" id="slForceDeadlock">Try to force a deadlock</button>
+    <button class="sl-btn secondary" id="slReset">Reset</button>
+  </div>
+
+  <div class="sl-columns">
+    <div class="sl-col">
+      <div class="sl-col-title">Naive: sequential <code>lock_guard</code></div>
+      <div class="sl-col-sub">lock(first); lock(second); -- no backoff</div>
+      <div class="sl-mutex-row" id="naiveMutexes"></div>
+      <div id="naiveThreads"></div>
+      <div class="sl-banner" id="naiveBanner" style="display:none;"></div>
+    </div>
+    <div class="sl-col">
+      <div class="sl-col-title"><code>std::scoped_lock(m1, m2)</code></div>
+      <div class="sl-col-sub">try_lock second; on failure, release first and retry</div>
+      <div class="sl-mutex-row" id="scopedMutexes"></div>
+      <div id="scopedThreads"></div>
+      <div class="sl-banner" id="scopedBanner" style="display:none;"></div>
+    </div>
+  </div>
+
+  <div class="sl-panels">
+    <div class="sl-explain-panel">
+      <div class="sl-box">
+        <div class="sl-panel-title">What's happening right now</div>
+        <div id="slExplain">Click "Step Thread A" then "Step Thread B" twice each -- both threads grab their first mutex, then both fail to grab their second. Watch the two columns diverge from that exact same point: naive stays stuck forever; scoped_lock backs off and lets one of them through.</div>
+      </div>
+    </div>
+    <div class="sl-side-panel-col">
+      <div class="sl-box">
+        <div class="sl-panel-title">Event log</div>
+        <div class="sl-log" id="slLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    function makeMutexes() { return { m1: null, m2: null }; }
+    function makeThread(id, order) { return { id, order, holds: [], phase: 'want_first' }; }
+
+    function stepNaive(thread, mutexes) {
+      if (thread.phase === 'done') return 'already-done';
+      if (thread.phase === 'want_first') {
+        const m = thread.order[0];
+        if (mutexes[m] === null) { mutexes[m] = thread.id; thread.holds.push(m); thread.phase = 'want_second'; return 'acquired-first'; }
+        return 'blocked-on-first';
+      }
+      if (thread.phase === 'want_second') {
+        const m = thread.order[1];
+        if (mutexes[m] === null) {
+          mutexes[m] = thread.id;
+          thread.holds.push(m);
+          mutexes[thread.order[0]] = null;
+          mutexes[thread.order[1]] = null;
+          thread.holds = [];
+          thread.phase = 'done';
+          return 'acquired-second-done';
+        }
+        return 'blocked-on-second-holding-first';
+      }
+    }
+
+    function stepScoped(thread, mutexes) {
+      if (thread.phase === 'done') return 'already-done';
+      if (thread.phase === 'backoff') { thread.phase = 'want_first'; return 'retrying'; }
+      if (thread.phase === 'want_first') {
+        const m = thread.order[0];
+        if (mutexes[m] === null) { mutexes[m] = thread.id; thread.holds.push(m); thread.phase = 'want_second'; return 'acquired-first'; }
+        return 'blocked-on-first';
+      }
+      if (thread.phase === 'want_second') {
+        const m = thread.order[1];
+        if (mutexes[m] === null) {
+          mutexes[m] = thread.id;
+          thread.holds.push(m);
+          mutexes[thread.order[0]] = null;
+          mutexes[thread.order[1]] = null;
+          thread.holds = [];
+          thread.phase = 'done';
+          return 'acquired-second-done';
+        }
+        const first = thread.order[0];
+        mutexes[first] = null;
+        thread.holds = [];
+        thread.phase = 'backoff';
+        return 'backoff-released-first';
+      }
+    }
+
+    const naiveMutexesEl = document.getElementById('naiveMutexes');
+    const naiveThreadsEl = document.getElementById('naiveThreads');
+    const naiveBanner = document.getElementById('naiveBanner');
+    const scopedMutexesEl = document.getElementById('scopedMutexes');
+    const scopedThreadsEl = document.getElementById('scopedThreads');
+    const scopedBanner = document.getElementById('scopedBanner');
+    const explainEl = document.getElementById('slExplain');
+    const logEl = document.getElementById('slLog');
+
+    let naiveMutexes, naiveA, naiveB, scopedMutexes, scopedA, scopedB;
+
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function resetState() {
+      naiveMutexes = makeMutexes();
+      naiveA = makeThread('A', ['m1', 'm2']);
+      naiveB = makeThread('B', ['m2', 'm1']);
+      scopedMutexes = makeMutexes();
+      scopedA = makeThread('A', ['m1', 'm2']);
+      scopedB = makeThread('B', ['m2', 'm1']);
+      naiveBanner.style.display = 'none';
+      scopedBanner.style.display = 'none';
+      logEl.innerHTML = '';
+      render();
+    }
+
+    function renderMutexes(el, mutexes) {
+      el.innerHTML = '';
+      ['m1', 'm2'].forEach(m => {
+        const d = document.createElement('div');
+        const owner = mutexes[m];
+        d.className = 'sl-mutex' + (owner === 'A' ? ' held-a' : owner === 'B' ? ' held-b' : '');
+        d.textContent = m + (owner ? (': held by ' + owner) : ': free');
+        el.appendChild(d);
+      });
+    }
+
+    function phaseLabel(t) {
+      if (t.phase === 'want_first') return 'wants ' + t.order[0] + ' (first)';
+      if (t.phase === 'want_second') return 'holds ' + t.order[0] + ', wants ' + t.order[1];
+      if (t.phase === 'backoff') return 'backed off, will retry';
+      if (t.phase === 'done') return 'done -- both acquired then released';
+      return t.phase;
+    }
+
+    function renderThreads(el, tA, tB, isNaive) {
+      el.innerHTML = '';
+      [tA, tB].forEach(t => {
+        const d = document.createElement('div');
+        let cls = 'sl-thread';
+        if (t.phase === 'done') cls += ' done';
+        else if (t.phase === 'backoff') cls += ' backoff';
+        else if (isNaive && t.phase === 'want_second' && (tA.phase === 'want_second' && tB.phase === 'want_second')) cls += ' stuck';
+        d.className = cls;
+        const b = document.createElement('b');
+        b.textContent = 'Thread ' + t.id + ': ';
+        d.appendChild(b);
+        const span = document.createElement('span');
+        span.textContent = phaseLabel(t);
+        d.appendChild(span);
+        el.appendChild(d);
+      });
+    }
+
+    function render() {
+      renderMutexes(naiveMutexesEl, naiveMutexes);
+      renderThreads(naiveThreadsEl, naiveA, naiveB, true);
+      renderMutexes(scopedMutexesEl, scopedMutexes);
+      renderThreads(scopedThreadsEl, scopedA, scopedB, false);
+
+      const naiveStuck = naiveA.phase === 'want_second' && naiveB.phase === 'want_second';
+      if (naiveStuck) {
+        naiveBanner.style.display = 'block';
+        naiveBanner.className = 'sl-banner bad';
+        naiveBanner.textContent = 'DEADLOCKED -- each holds what the other needs, forever.';
+      } else {
+        naiveBanner.style.display = 'none';
+      }
+
+      if (scopedA.phase === 'done' && scopedB.phase === 'done') {
+        scopedBanner.style.display = 'block';
+        scopedBanner.className = 'sl-banner ok';
+        scopedBanner.textContent = 'Both threads completed -- no deadlock, even from the identical starting point.';
+      } else {
+        scopedBanner.style.display = 'none';
+      }
+    }
+
+    function onStep(which) {
+      const rn = which === 'A' ? stepNaive(naiveA, naiveMutexes) : stepNaive(naiveB, naiveMutexes);
+      const rs = which === 'A' ? stepScoped(scopedA, scopedMutexes) : stepScoped(scopedB, scopedMutexes);
+      logTo(`naive, Thread ${which}: ${rn}`, rn.indexOf('holding-first') !== -1 ? 'bad' : (rn.indexOf('done') !== -1 ? 'ok' : ''));
+      logTo(`scoped, Thread ${which}: ${rs}`, rs === 'backoff-released-first' ? 'warn' : (rs.indexOf('done') !== -1 ? 'ok' : ''));
+      if (rs === 'backoff-released-first') {
+        explainEl.textContent = `Thread ${which}'s scoped_lock just tried its second mutex, found it taken, and released its first rather than wait -- that release is exactly what lets the other thread through. The naive column has no such step, which is the whole difference.`;
+      } else if (rn.indexOf('holding-first') !== -1) {
+        explainEl.textContent = `Thread ${which} just blocked on its second mutex while STILL HOLDING its first -- the naive column now has (or is building toward) a real deadlock. Watch the scoped_lock column handle the identical situation differently.`;
+      } else if (rs.indexOf('done') !== -1) {
+        explainEl.textContent = `Thread ${which} completed in the scoped_lock column. Notice the naive column's fate was sealed the moment both threads held their first mutex and reached for their second -- scoped_lock's willingness to let go is the only thing that changes the outcome.`;
+      }
+      render();
+    }
+
+    document.getElementById('slStepA').addEventListener('click', () => onStep('A'));
+    document.getElementById('slStepB').addEventListener('click', () => onStep('B'));
+    document.getElementById('slForceDeadlock').addEventListener('click', () => {
+      resetState();
+      logTo('Running the classic adversarial sequence: A grabs its first, B grabs its first, then both reach for their second.', 'warn');
+      onStep('A'); onStep('B'); onStep('A'); onStep('B');
+    });
+    document.getElementById('slReset').addEventListener('click', resetState);
+
+    resetState();
+  })();
+  </script>
+</div>

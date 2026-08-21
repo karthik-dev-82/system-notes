@@ -86,6 +86,9 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[C++ Observer Pattern (Interactive)](docs/source/cpp_observer_interactive.rst)** | A real heap-use-after-free when an observer is destroyed without unsubscribing, and the weak_ptr fix | Observer pattern, weak_ptr, lock(), dangling pointer |
 | 🎮 **[C++ Strategy Pattern (Interactive)](docs/source/cpp_strategy_interactive.rst)** | Swap pricing algorithms at runtime on the same cart, and see what adding a new one actually costs vs. an if/else chain | Strategy pattern, open/closed principle, polymorphism |
 | 🎮 **[C++ Decorator Pattern (Interactive)](docs/source/cpp_decorator_interactive.rst)** | Real gzip + real AES-GCM, wrapped in two different orders, on the same data | Decorator pattern, CompressionStream, SubtleCrypto, composability |
+| 🎮 **[Futures & Promises (Interactive)](docs/source/cpp_futures_promises_interactive.rst)** | A real discrete-time model of std::async -- get() blocking/invalidation, launch policies, destructor-blocks and deferred-never-runs | std::future, std::promise, std::async, launch::async, launch::deferred |
+| 🎮 **[Multithreading: scoped_lock (Interactive)](docs/source/cpp_scoped_lock_interactive.rst)** | The identical opposite-order two-mutex deadlock setup run through lock_guard (deadlocks) and scoped_lock (doesn't) side by side | std::thread, lock_guard, scoped_lock, deadlock, try_lock |
+| 🎮 **[C++20 Coroutines (Interactive)](docs/source/cpp_coroutines_interactive.rst)** | Real JS generators standing in for C++20 coroutines -- lazy co_yield production, co_await suspending without blocking siblings | co_await, co_yield, co_return, promise_type, cooperative scheduling |
 
 ### Python Notes
 
@@ -203,6 +206,9 @@ system-notes/
         ├── cpp_observer_interactive.rst
         ├── cpp_strategy_interactive.rst
         ├── cpp_decorator_interactive.rst
+        ├── cpp_futures_promises_interactive.rst
+        ├── cpp_scoped_lock_interactive.rst
+        ├── cpp_coroutines_interactive.rst
         ├── python_sequences_interactive.rst
         ├── python_hashing_interactive.rst
         ├── python_generators_interactive.rst

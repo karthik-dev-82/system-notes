@@ -169,6 +169,9 @@ worth writing down and coming back to.
    cpp_observer_interactive
    cpp_strategy_interactive
    cpp_decorator_interactive
+   cpp_futures_promises_interactive
+   cpp_scoped_lock_interactive
+   cpp_coroutines_interactive
 
 .. toctree::
    :hidden:
@@ -594,6 +597,15 @@ C++ Notes
    * - :doc:`cpp_decorator_interactive`
      - Play With It: real gzip + real AES-GCM, wrapped in two different orders, on the same data
      - Decorator pattern, CompressionStream, SubtleCrypto, composability
+   * - :doc:`cpp_futures_promises_interactive`
+     - Play With It: a real discrete-time model of std::async -- get() blocking/invalidation, launch policies, and the destructor-blocks and deferred-never-runs gotchas
+     - std::future, std::promise, std::async, launch::async, launch::deferred
+   * - :doc:`cpp_scoped_lock_interactive`
+     - Play With It: the identical opposite-order two-mutex deadlock setup run through naive lock_guard (deadlocks) and std::scoped_lock (doesn't) side by side
+     - std::thread, lock_guard, scoped_lock, deadlock, try_lock
+   * - :doc:`cpp_coroutines_interactive`
+     - Play With It: real JS generators standing in for C++20 coroutines -- lazy co_yield production, and co_await suspending without blocking sibling tasks
+     - co_await, co_yield, co_return, promise_type, cooperative scheduling
 
 Python Notes
 -----------------
