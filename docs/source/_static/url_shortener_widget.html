@@ -1,0 +1,398 @@
+<div class="us-root" id="usWidget">
+  <style>
+    #usWidget {
+      --us-bg: #eef1ee;
+      --us-panel: #ffffff;
+      --us-border: #cdd6cc;
+      --us-text: #1c231d;
+      --us-muted: #5c675d;
+      --us-a: #3d5c3d;
+      --us-b: #7a2f3d;
+      --us-bad: #b0432a;
+      --us-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--us-bg);
+      color: var(--us-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #usWidget * { box-sizing: border-box; }
+    #usWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #usWidget .us-sub { color: var(--us-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .us-controls {
+      display: flex; flex-wrap: wrap; gap: 14px; align-items: center;
+      background: var(--us-panel); border: 1px solid var(--us-border); border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 10px; min-width: 700px;
+    }
+    .us-controls label { font-size: 0.8rem; color: var(--us-muted); display: flex; align-items: center; gap: 8px; }
+    .us-controls input[type="range"] { width: 120px; accent-color: var(--us-b); }
+    .us-controls input[type="text"] {
+      flex: 1; min-width: 220px; font-family: ui-monospace, monospace; font-size: 0.82rem;
+      padding: 7px 10px; border: 1px solid var(--us-border); border-radius: 6px; background: #fff; color: var(--us-text);
+    }
+    .us-btn { background: var(--us-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .us-btn.secondary { background: transparent; color: var(--us-text); border: 1px solid var(--us-border); }
+    .us-btn.strategy { background: transparent; color: var(--us-muted); border: 1px solid var(--us-border); }
+    .us-btn.strategy.active { background: var(--us-a); color: #f7f4ef; border-color: var(--us-a); }
+
+    .us-stage { background: var(--us-panel); border: 1px solid var(--us-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .us-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-bottom: 12px; }
+    .us-banner.bad { background: rgba(176,67,42,0.16); color: var(--us-bad); }
+    .us-banner.ok { background: rgba(61,92,61,0.12); color: var(--us-a); }
+    .us-banner.warn { background: rgba(166,124,31,0.15); color: var(--us-warn); }
+
+    .us-table-wrap { overflow-x: auto; }
+    table.us-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+    table.us-table th {
+      text-align: left; padding: 6px 10px; font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.05em;
+      color: var(--us-b); border-bottom: 2px solid var(--us-b);
+    }
+    table.us-table td { padding: 6px 10px; border-bottom: 1px solid var(--us-border); vertical-align: top; }
+    table.us-table tr:last-child td { border-bottom: none; }
+    table.us-table td.us-url { max-width: 320px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--us-muted); }
+    table.us-table td.us-code { font-family: ui-monospace, monospace; font-weight: 700; color: var(--us-a); }
+    table.us-table td.us-note { color: var(--us-muted); font-size: 0.78rem; }
+    table.us-table td.us-note.us-collision { color: var(--us-warn); }
+    table.us-table td.us-note.us-dedup { color: var(--us-b); }
+    .us-empty-row td { color: var(--us-muted); font-style: italic; text-align: center; padding: 16px; }
+
+    .us-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .us-explain-panel, .us-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .us-explain-panel { flex: 1.4; }
+    .us-box { background: var(--us-panel); border: 1px solid var(--us-border); border-radius: 10px; padding: 12px 14px; }
+    .us-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--us-muted); margin-bottom: 8px; }
+    .us-log { height: 170px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .us-log div { color: var(--us-muted); }
+    .us-log div.ok { color: var(--us-a); }
+    .us-log div.info { color: var(--us-b); }
+    .us-log div.bad { color: var(--us-bad); font-weight: 700; }
+    .us-log div.warn { color: var(--us-warn); }
+  </style>
+
+  <h3>Short-Code Generation: Play With It</h3>
+  <div class="us-sub">Both strategies are the real algorithm, not a mock -- base62 encoding and FNV-1a hashing genuinely run in your browser.</div>
+
+  <div class="us-controls">
+    <label>Strategy:</label>
+    <button class="us-btn strategy active" id="usStrategyCounter">Counter-based</button>
+    <button class="us-btn strategy" id="usStrategyHash">Hash-based</button>
+    <label id="usCodeLenLabel">Code length: <span id="usCodeLenVal">2</span> chars
+      <input type="range" id="usCodeLenSlider" min="2" max="6" step="1" value="2">
+    </label>
+  </div>
+  <div class="us-controls">
+    <input type="text" id="usUrlInput" placeholder="https://example.com/some/long/path?with=query" maxlength="120">
+    <button class="us-btn" id="usAddBtn">Shorten</button>
+    <button class="us-btn secondary" id="usAddRandomBtn">Add Random Example</button>
+    <button class="us-btn secondary" id="usAddBatchBtn">Add 20 Examples</button>
+    <button class="us-btn secondary" id="usResetBtn">Reset</button>
+  </div>
+
+  <div class="us-stage">
+    <div class="us-banner" id="usBanner" style="display:none;"></div>
+    <div class="us-table-wrap">
+      <table class="us-table">
+        <thead>
+          <tr><th>#</th><th>Long URL</th><th>Short URL</th><th>Note</th></tr>
+        </thead>
+        <tbody id="usTableBody">
+          <tr class="us-empty-row"><td colspan="4">No URLs shortened yet -- add one above.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="us-panels">
+    <div class="us-explain-panel">
+      <div class="us-box">
+        <div class="us-panel-title">What's happening right now</div>
+        <div id="usExplain">Counter-based assigns the next integer and base62-encodes it -- guaranteed unique, forever, with zero retries, but it needs one coordinated counter (or a block-allocation scheme) behind it. Switch to Hash-based and shrink the code length to 2 to force real collisions and watch the retry-with-salt loop resolve them live.</div>
+      </div>
+    </div>
+    <div class="us-side-panel-col">
+      <div class="us-box">
+        <div class="us-panel-title">Event log</div>
+        <div class="us-log" id="usLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    const BASE = ALPHABET.length;
+
+    function toBase62(n) {
+      if (n === 0) return ALPHABET[0];
+      let s = '';
+      while (n > 0) { s = ALPHABET[n % BASE] + s; n = Math.floor(n / BASE); }
+      return s;
+    }
+    function fnv1a(str) {
+      let h = 0x811c9dc5;
+      for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 0x01000193); }
+      return h >>> 0;
+    }
+
+    function makeCounterGenerator(startAt) {
+      let counter = startAt || 0;
+      const urlToCode = new Map();
+      const codeToUrl = new Map();
+      return {
+        strategy: 'counter',
+        submit(url) {
+          const trace = [];
+          if (urlToCode.has(url)) {
+            trace.push('"' + url + '" was already shortened -- reusing existing code, counter untouched.');
+            return { code: urlToCode.get(url), dedup: true, attempts: 0, trace };
+          }
+          const id = counter++;
+          const code = toBase62(id);
+          trace.push('next counter value = ' + id + ' -> base62(' + id + ') = "' + code + '"');
+          urlToCode.set(url, code);
+          codeToUrl.set(code, url);
+          return { code, dedup: false, attempts: 1, id, trace };
+        },
+        codeToUrl, urlToCode,
+      };
+    }
+
+    function makeHashGenerator(codeLen, maxAttempts) {
+      const urlToCode = new Map();
+      const codeToUrl = new Map();
+      return {
+        strategy: 'hash',
+        submit(url) {
+          const trace = [];
+          if (urlToCode.has(url)) {
+            trace.push('"' + url + '" was already shortened -- reusing existing code.');
+            return { code: urlToCode.get(url), dedup: true, attempts: 0, trace };
+          }
+          let attempts = 0;
+          let code;
+          let widened = codeLen;
+          while (true) {
+            attempts++;
+            const salted = attempts === 1 ? url : (url + '#' + attempts);
+            const h = fnv1a(salted);
+            code = toBase62(h % Math.pow(BASE, widened)).padStart(widened, ALPHABET[0]);
+            const existing = codeToUrl.get(code);
+            if (existing === undefined) {
+              trace.push('attempt ' + attempts + ': fnv1a("' + salted + '") -> code "' + code + '" -- free, assigned.');
+              break;
+            }
+            if (existing === url) { trace.push('attempt ' + attempts + ': code "' + code + '" already ours.'); break; }
+            trace.push('attempt ' + attempts + ': fnv1a("' + salted + '") -> code "' + code + '" -- COLLISION, already used by another URL.');
+            if (attempts >= maxAttempts) {
+              widened++;
+              trace.push(maxAttempts + ' attempts exhausted at length ' + (widened - 1) + ' -- widening code length to ' + widened + ' and retrying.');
+              attempts = 0;
+            }
+          }
+          urlToCode.set(url, code);
+          codeToUrl.set(code, url);
+          return { code, dedup: false, attempts, id: null, trace };
+        },
+        codeToUrl, urlToCode,
+      };
+    }
+
+    const strategyCounterBtn = document.getElementById('usStrategyCounter');
+    const strategyHashBtn = document.getElementById('usStrategyHash');
+    const codeLenLabel = document.getElementById('usCodeLenLabel');
+    const codeLenSlider = document.getElementById('usCodeLenSlider');
+    const codeLenVal = document.getElementById('usCodeLenVal');
+    const urlInput = document.getElementById('usUrlInput');
+    const addBtn = document.getElementById('usAddBtn');
+    const addRandomBtn = document.getElementById('usAddRandomBtn');
+    const addBatchBtn = document.getElementById('usAddBatchBtn');
+    const resetBtn = document.getElementById('usResetBtn');
+    const banner = document.getElementById('usBanner');
+    const tableBody = document.getElementById('usTableBody');
+    const explainEl = document.getElementById('usExplain');
+    const logEl = document.getElementById('usLog');
+
+    const EXAMPLE_URLS = [
+      'https://example.com/blog/2026/system-design-basics',
+      'https://shop.example.com/product/wireless-headphones-v3',
+      'https://docs.example.com/api/v2/authentication',
+      'https://news.example.org/world/tech-earnings-report',
+      'https://example.com/user/profile/settings',
+      'https://maps.example.com/directions?from=A&to=B',
+      'https://example.com/video/watch?id=abc123',
+      'https://forum.example.net/thread/12345/replies',
+      'https://example.com/careers/senior-engineer-role',
+      'https://cdn.example.com/assets/report-q3-2026.pdf',
+      'https://example.com/events/conference-2026',
+      'https://support.example.com/ticket/998877',
+      'https://example.com/recipe/lentil-soup-instant-pot',
+      'https://travel.example.com/booking/flight-confirm',
+      'https://example.com/photos/album/summer-trip-2026',
+    ];
+    let exampleIdx = 0;
+
+    let strategy = 'counter';
+    let counterGen, hashGen;
+    let rows = [];
+
+    function currentGen() {
+      return strategy === 'counter' ? counterGen : hashGen;
+    }
+
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function resetState() {
+      counterGen = makeCounterGenerator(0);
+      hashGen = makeHashGenerator(parseInt(codeLenSlider.value, 10), 5);
+      rows = [];
+      exampleIdx = 0;
+      banner.style.display = 'none';
+      logEl.innerHTML = '';
+      render();
+    }
+
+    function addUrl(url) {
+      url = url.trim();
+      if (!url) return;
+      const gen = currentGen();
+      const result = gen.submit(url);
+      rows.push({ url, code: result.code, dedup: result.dedup, attempts: result.attempts });
+
+      logTo('shorten("' + url + '") via ' + gen.strategy + ':', 'info');
+      result.trace.forEach(line => {
+        const isCollision = line.indexOf('COLLISION') !== -1;
+        const isWiden = line.indexOf('widening') !== -1;
+        logTo('  ' + line, isCollision ? 'warn' : (isWiden ? 'bad' : 'ok'));
+      });
+
+      if (result.dedup) {
+        banner.style.display = 'block';
+        banner.className = 'us-banner warn';
+        banner.textContent = 'Already shortened -- returning the existing code "' + result.code + '" instead of minting a new one.';
+        explainEl.textContent = 'This exact URL was submitted before. A real shortener dedups on the long URL so repeated submissions don\'t burn counter values or hash-space needlessly.';
+      } else if (result.attempts > 1) {
+        banner.style.display = 'block';
+        banner.className = 'us-banner bad';
+        banner.textContent = 'Collision! It took ' + result.attempts + ' attempt(s) to find a free code -- see the log for the exact retry sequence.';
+        explainEl.textContent = 'The first hash attempt landed on a code some other URL already owns. The generator salted the input and rehashed until it found a free slot -- this is real collision handling, not a hand-wave.';
+      } else if (strategy === 'hash') {
+        banner.style.display = 'block';
+        banner.className = 'us-banner ok';
+        banner.textContent = 'No collision -- first hash attempt landed on a free code.';
+        explainEl.textContent = 'At this code length, this particular hash happened to land on an unused slot on the first try.';
+      } else {
+        banner.style.display = 'block';
+        banner.className = 'us-banner ok';
+        banner.textContent = 'Assigned counter value ' + result.id + ' -> code "' + result.code + '". Counter-based never collides by construction.';
+        explainEl.textContent = 'Every counter-based code is unique by construction -- there is no retry loop because there is nothing to collide with.';
+      }
+      render();
+    }
+
+    function render() {
+      tableBody.innerHTML = '';
+      if (rows.length === 0) {
+        const tr = document.createElement('tr');
+        tr.className = 'us-empty-row';
+        const td = document.createElement('td');
+        td.colSpan = 4;
+        td.textContent = 'No URLs shortened yet -- add one above.';
+        tr.appendChild(td);
+        tableBody.appendChild(tr);
+        return;
+      }
+      rows.forEach((r, i) => {
+        const tr = document.createElement('tr');
+
+        const tdIdx = document.createElement('td');
+        tdIdx.textContent = String(i + 1);
+        tr.appendChild(tdIdx);
+
+        const tdUrl = document.createElement('td');
+        tdUrl.className = 'us-url';
+        tdUrl.textContent = r.url;
+        tdUrl.title = r.url;
+        tr.appendChild(tdUrl);
+
+        const tdCode = document.createElement('td');
+        tdCode.className = 'us-code';
+        tdCode.textContent = 'short.ly/' + r.code;
+        tr.appendChild(tdCode);
+
+        const tdNote = document.createElement('td');
+        tdNote.className = 'us-note';
+        if (r.dedup) {
+          tdNote.classList.add('us-dedup');
+          tdNote.textContent = 'dedup: reused existing code';
+        } else if (r.attempts > 1) {
+          tdNote.classList.add('us-collision');
+          tdNote.textContent = 'collision: ' + r.attempts + ' attempts needed';
+        } else {
+          tdNote.textContent = strategy === 'counter' ? 'new, sequential' : 'new, no collision';
+        }
+        tr.appendChild(tdNote);
+
+        tableBody.appendChild(tr);
+      });
+    }
+
+    function setStrategy(next) {
+      strategy = next;
+      strategyCounterBtn.classList.toggle('active', next === 'counter');
+      strategyHashBtn.classList.toggle('active', next === 'hash');
+      codeLenLabel.style.opacity = next === 'hash' ? '1' : '0.4';
+      codeLenSlider.disabled = next !== 'hash';
+      explainEl.textContent = next === 'counter'
+        ? 'Counter-based assigns the next integer and base62-encodes it -- guaranteed unique, forever, with zero retries, but it needs one coordinated counter (or a block-allocation scheme) behind it.'
+        : 'Hash-based derives the code from the URL itself via FNV-1a. Shrink the code length to 2 to force real collisions and watch the retry-with-salt loop resolve them live.';
+    }
+
+    codeLenSlider.addEventListener('input', () => {
+      codeLenVal.textContent = codeLenSlider.value;
+    });
+    codeLenSlider.addEventListener('change', () => {
+      hashGen = makeHashGenerator(parseInt(codeLenSlider.value, 10), 5);
+      logTo('code length changed to ' + codeLenSlider.value + ' -- hash generator reset (existing rows keep their old codes).', 'warn');
+    });
+
+    strategyCounterBtn.addEventListener('click', () => setStrategy('counter'));
+    strategyHashBtn.addEventListener('click', () => setStrategy('hash'));
+
+    addBtn.addEventListener('click', () => {
+      if (!urlInput.value.trim()) return;
+      addUrl(urlInput.value);
+      urlInput.value = '';
+    });
+    urlInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') addBtn.click();
+    });
+    addRandomBtn.addEventListener('click', () => {
+      addUrl(EXAMPLE_URLS[exampleIdx % EXAMPLE_URLS.length]);
+      exampleIdx++;
+    });
+    addBatchBtn.addEventListener('click', () => {
+      for (let i = 0; i < 20; i++) {
+        const base = EXAMPLE_URLS[exampleIdx % EXAMPLE_URLS.length];
+        const url = i < EXAMPLE_URLS.length ? base : base + '?v=' + i;
+        addUrl(url);
+        exampleIdx++;
+      }
+    });
+    resetBtn.addEventListener('click', resetState);
+
+    setStrategy('counter');
+    resetState();
+  })();
+  </script>
+</div>
