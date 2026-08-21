@@ -1,15 +1,15 @@
 <div class="pq-root" id="pqWidget">
   <style>
     #pqWidget {
-      --pq-bg: #0f172a;
-      --pq-panel: #16213e;
-      --pq-border: #2a3655;
-      --pq-text: #e2e8f0;
-      --pq-muted: #94a3b8;
-      --pq-a: #4ade80;
-      --pq-b: #38bdf8;
-      --pq-bad: #f87171;
-      --pq-warn: #fbbf24;
+      --pq-bg: #eef1ee;
+      --pq-panel: #ffffff;
+      --pq-border: #cdd6cc;
+      --pq-text: #1c231d;
+      --pq-muted: #5c675d;
+      --pq-a: #3d5c3d;
+      --pq-b: #7a2f3d;
+      --pq-bad: #b0432a;
+      --pq-warn: #a67c1f;
       font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
       background: var(--pq-bg);
       color: var(--pq-text);
@@ -20,7 +20,7 @@
       overflow-x: auto;
     }
     #pqWidget * { box-sizing: border-box; }
-    #pqWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pqWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
     #pqWidget .pq-sub { color: var(--pq-muted); font-size: 0.85rem; margin-bottom: 16px; }
 
     .pq-controls {
@@ -33,32 +33,32 @@
     .pq-toggle { display: inline-flex; border: 1px solid var(--pq-border); border-radius: 8px; overflow: hidden; }
     .pq-toggle button { background: transparent; color: var(--pq-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
     .pq-toggle button.active { background: var(--pq-warn); color: #2a1c00; }
-    .pq-btn { background: var(--pq-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .pq-btn { background: var(--pq-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
     .pq-btn.secondary { background: transparent; color: var(--pq-text); border: 1px solid var(--pq-border); }
 
     .pq-stage { background: var(--pq-panel); border: 1px solid var(--pq-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
 
     .pq-code {
-      background: #0a1128; border: 1px solid var(--pq-border); border-radius: 8px; padding: 10px 0;
+      background: #f2f0ea; border: 1px solid var(--pq-border); border-radius: 8px; padding: 10px 0;
       margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6;
     }
     .pq-code-line { padding: 1px 14px; color: var(--pq-muted); white-space: pre; }
-    .pq-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--pq-b); padding-left: 11px; }
-    .pq-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--pq-warn); }
-    .pq-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--pq-a); }
+    .pq-code-line.hl { background: rgba(122,47,61,0.12); color: #1c231d; border-left: 3px solid var(--pq-b); padding-left: 11px; }
+    .pq-code-line.hl.warn-hl { background: rgba(166,124,31,0.16); border-left-color: var(--pq-warn); }
+    .pq-code-line.hl.ok-hl { background: rgba(61,92,61,0.14); border-left-color: var(--pq-a); }
 
     .pq-counter-row { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; margin-bottom: 12px; font-size: 0.85rem; color: var(--pq-muted); }
-    .pq-counter-row b { color: #fff; font-size: 1.15rem; font-family: ui-monospace, monospace; }
+    .pq-counter-row b { color: #1c231d; font-size: 1.15rem; font-family: ui-monospace, monospace; }
 
     .pq-array-row { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 6px; min-height: 54px; align-items: flex-end; }
     .pq-slot {
       width: 42px; height: 42px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
       font-family: ui-monospace, monospace; font-size: 0.82rem; font-weight: 700;
-      border: 2px solid var(--pq-b); background: #10182e; color: var(--pq-text);
+      border: 2px solid var(--pq-b); background: #ffffff; color: var(--pq-text);
       position: relative; flex-shrink: 0;
     }
     .pq-slot.empty { border: 2px dashed var(--pq-border); color: var(--pq-border); background: transparent; }
-    .pq-slot.shifted { border-color: var(--pq-warn); background: rgba(251,191,36,0.18); }
+    .pq-slot.shifted { border-color: var(--pq-warn); background: rgba(166,124,31,0.18); }
 
     .pq-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
     .pq-explain-panel, .pq-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }

@@ -1,15 +1,15 @@
 <div class="pk-root" id="pkWidget">
   <style>
     #pkWidget {
-      --pk-bg: #0f172a;
-      --pk-panel: #16213e;
-      --pk-border: #2a3655;
-      --pk-text: #e2e8f0;
-      --pk-muted: #94a3b8;
-      --pk-a: #4ade80;
-      --pk-b: #38bdf8;
-      --pk-bad: #f87171;
-      --pk-warn: #fbbf24;
+      --pk-bg: #eef1ee;
+      --pk-panel: #ffffff;
+      --pk-border: #cdd6cc;
+      --pk-text: #1c231d;
+      --pk-muted: #5c675d;
+      --pk-a: #3d5c3d;
+      --pk-b: #7a2f3d;
+      --pk-bad: #b0432a;
+      --pk-warn: #a67c1f;
       font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
       background: var(--pk-bg);
       color: var(--pk-text);
@@ -20,7 +20,7 @@
       overflow-x: auto;
     }
     #pkWidget * { box-sizing: border-box; }
-    #pkWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #fff; }
+    #pkWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
     #pkWidget .pk-sub { color: var(--pk-muted); font-size: 0.85rem; margin-bottom: 16px; }
 
     .pk-controls {
@@ -33,40 +33,40 @@
     .pk-toggle { display: inline-flex; border: 1px solid var(--pk-border); border-radius: 8px; overflow: hidden; }
     .pk-toggle button { background: transparent; color: var(--pk-muted); border: none; padding: 7px 14px; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
     .pk-toggle button.active { background: var(--pk-warn); color: #2a1c00; }
-    .pk-btn { background: var(--pk-b); color: #041322; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .pk-btn { background: var(--pk-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
     .pk-btn.secondary { background: transparent; color: var(--pk-text); border: 1px solid var(--pk-border); }
 
     .pk-stage { background: var(--pk-panel); border: 1px solid var(--pk-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
 
     .pk-code {
-      background: #0a1128; border: 1px solid var(--pk-border); border-radius: 8px; padding: 10px 0;
+      background: #f2f0ea; border: 1px solid var(--pk-border); border-radius: 8px; padding: 10px 0;
       margin-bottom: 14px; font-family: ui-monospace, monospace; font-size: 0.82rem; line-height: 1.6;
     }
     .pk-code-line { padding: 1px 14px; color: var(--pk-muted); white-space: pre; }
-    .pk-code-line.hl { background: rgba(56,189,248,0.16); color: #fff; border-left: 3px solid var(--pk-b); padding-left: 11px; }
-    .pk-code-line.hl.warn-hl { background: rgba(251,191,36,0.16); border-left-color: var(--pk-warn); }
-    .pk-code-line.hl.ok-hl { background: rgba(74,222,128,0.16); border-left-color: var(--pk-a); }
+    .pk-code-line.hl { background: rgba(122,47,61,0.12); color: #1c231d; border-left: 3px solid var(--pk-b); padding-left: 11px; }
+    .pk-code-line.hl.warn-hl { background: rgba(166,124,31,0.16); border-left-color: var(--pk-warn); }
+    .pk-code-line.hl.ok-hl { background: rgba(61,92,61,0.14); border-left-color: var(--pk-a); }
 
     .pk-stack-col { display: flex; flex-direction: column-reverse; gap: 4px; align-items: flex-start; min-height: 220px; justify-content: flex-start; }
     .pk-stack-plate {
       width: 60px; height: 34px; border-radius: 6px; display: flex; align-items: center; justify-content: center;
       font-family: ui-monospace, monospace; font-weight: 800; font-size: 1rem;
-      border: 2px solid var(--pk-a); background: rgba(74,222,128,0.12); color: var(--pk-a);
+      border: 2px solid var(--pk-a); background: rgba(61,92,61,0.10); color: var(--pk-a);
     }
 
     .pk-expr-row { display: flex; gap: 3px; flex-wrap: wrap; margin-bottom: 16px; }
     .pk-expr-char {
       width: 30px; height: 34px; display: flex; align-items: center; justify-content: center;
       font-family: ui-monospace, monospace; font-weight: 800; font-size: 1rem;
-      border-radius: 5px; background: #10182e; border: 2px solid var(--pk-border); color: var(--pk-muted);
+      border-radius: 5px; background: #ffffff; border: 2px solid var(--pk-border); color: var(--pk-muted);
     }
-    .pk-expr-char.cursor { border-color: var(--pk-b); color: #fff; }
+    .pk-expr-char.cursor { border-color: var(--pk-b); color: #1c231d; }
     .pk-expr-char.done-ok { border-color: var(--pk-a); color: var(--pk-a); }
-    .pk-expr-char.done-bad { border-color: var(--pk-bad); color: var(--pk-bad); background: rgba(248,113,113,0.18); }
+    .pk-expr-char.done-bad { border-color: var(--pk-bad); color: var(--pk-bad); background: rgba(176,67,42,0.16); }
 
     .pk-banner { text-align: center; padding: 10px; border-radius: 8px; font-weight: 800; margin-top: 10px; }
-    .pk-banner.bad { background: rgba(248,113,113,0.18); color: var(--pk-bad); }
-    .pk-banner.ok { background: rgba(74,222,128,0.12); color: var(--pk-a); }
+    .pk-banner.bad { background: rgba(176,67,42,0.16); color: var(--pk-bad); }
+    .pk-banner.ok { background: rgba(61,92,61,0.12); color: var(--pk-a); }
 
     .pk-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
     .pk-explain-panel, .pk-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
