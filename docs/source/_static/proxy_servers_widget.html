@@ -1,0 +1,312 @@
+<div class="px-root" id="pxWidget">
+  <style>
+    #pxWidget {
+      --px-bg: #eef1ee;
+      --px-panel: #ffffff;
+      --px-border: #cdd6cc;
+      --px-text: #1c231d;
+      --px-muted: #5c675d;
+      --px-a: #3d5c3d;
+      --px-b: #7a2f3d;
+      --px-bad: #b0432a;
+      --px-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--px-bg);
+      color: var(--px-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #pxWidget * { box-sizing: border-box; }
+    #pxWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #pxWidget .px-sub { color: var(--px-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .px-tabs { display: flex; gap: 8px; margin-bottom: 14px; min-width: 700px; }
+    .px-tab { background: var(--px-panel); border: 1px solid var(--px-border); border-radius: 8px 8px 0 0; padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--px-muted); cursor: pointer; }
+    .px-tab.active { color: var(--px-b); border-bottom: 2px solid var(--px-b); }
+    .px-panel { display: none; }
+    .px-panel.active { display: block; }
+
+    .px-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--px-panel); border: 1px solid var(--px-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 700px; }
+    .px-btn { background: var(--px-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .px-btn.secondary { background: transparent; color: var(--px-text); border: 1px solid var(--px-border); }
+    .px-toggle-row { display: flex; gap: 6px; }
+    .px-toggle { background: transparent; color: var(--px-muted); border: 1px solid var(--px-border); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; }
+    .px-toggle.active { background: var(--px-a); color: #f7f4ef; border-color: var(--px-a); }
+    .px-input { font-family: ui-monospace, monospace; font-size: 0.82rem; padding: 7px 10px; border: 1px solid var(--px-border); border-radius: 6px; background: #fff; color: var(--px-text); min-width: 220px; }
+
+    .px-stage { background: var(--px-panel); border: 1px solid var(--px-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .px-chain-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+    .px-hop { border: 2px solid var(--px-border); border-radius: 8px; padding: 8px 12px; font-size: 0.78rem; text-align: center; background: #f7f6f2; }
+    .px-hop b { display: block; font-family: ui-monospace, monospace; font-size: 0.82rem; margin-top: 3px; }
+    .px-hop.client { border-color: var(--px-a); }
+    .px-hop.proxy { border-color: var(--px-b); }
+    .px-hop.backend { border-color: var(--px-warn); }
+    .px-arrow { color: var(--px-muted); font-size: 1.1rem; }
+
+    .px-header-box { font-family: ui-monospace, monospace; font-size: 0.82rem; background: #f2f0ea; border: 1px solid #d8d4c8; border-radius: 8px; padding: 10px 14px; margin-bottom: 12px; word-break: break-all; }
+    .px-header-box .px-hdr-name { color: var(--px-b); font-weight: 700; }
+
+    .px-result-row { display: flex; gap: 14px; flex-wrap: wrap; }
+    .px-result-box { flex: 1; min-width: 220px; border-radius: 8px; padding: 10px 14px; font-size: 0.82rem; }
+    .px-result-box.bad { background: rgba(176,67,42,0.12); border: 1px solid var(--px-bad); color: var(--px-bad); }
+    .px-result-box.ok { background: rgba(61,92,61,0.1); border: 1px solid var(--px-a); color: var(--px-a); }
+    .px-result-box b { font-family: ui-monospace, monospace; }
+
+    .px-scheme-badge { font-size: 0.68rem; text-transform: uppercase; letter-spacing: 0.04em; padding: 2px 8px; border-radius: 20px; font-weight: 700; }
+    .px-scheme-badge.https { background: rgba(61,92,61,0.16); color: var(--px-a); }
+    .px-scheme-badge.http { background: rgba(176,67,42,0.16); color: var(--px-bad); }
+
+    .px-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .px-explain-panel, .px-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .px-explain-panel { flex: 1.4; }
+    .px-box { background: var(--px-panel); border: 1px solid var(--px-border); border-radius: 10px; padding: 12px 14px; }
+    .px-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--px-muted); margin-bottom: 8px; }
+    .px-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .px-log div { color: var(--px-muted); }
+    .px-log div.ok { color: var(--px-a); }
+    .px-log div.bad { color: var(--px-bad); font-weight: 700; }
+    .px-log div.warn { color: var(--px-warn); }
+  </style>
+
+  <h3>Proxy Servers: Play With It</h3>
+  <div class="px-sub">Both tabs run the real extraction/verification logic -- including the exact attack a naive X-Forwarded-For parser is vulnerable to.</div>
+
+  <div class="px-tabs">
+    <div class="px-tab active" data-tab="xff">1. X-Forwarded-For: Spoofable or Not?</div>
+    <div class="px-tab" data-tab="tls">2. TLS Termination</div>
+  </div>
+
+  <div class="px-panel active" id="panel-xff">
+    <div class="px-controls">
+      <label style="font-size:0.8rem;color:var(--px-muted);">Attacker-injected fake header:</label>
+      <input type="text" class="px-input" id="pxInjected" placeholder="e.g. 6.6.6.6 (leave blank for an honest client)">
+      <button class="px-btn" id="pxBuild">Send Request</button>
+      <button class="px-btn secondary" id="pxReset">Reset</button>
+    </div>
+    <div class="px-stage">
+      <div class="px-chain-row" id="pxChainRow"></div>
+      <div class="px-header-box" id="pxHeaderBox"></div>
+      <div class="px-result-row" id="pxResultRow"></div>
+    </div>
+  </div>
+
+  <div class="px-panel" id="panel-tls">
+    <div class="px-controls">
+      <div class="px-toggle-row">
+        <button class="px-toggle active" id="pxPrivate">Backend on private network</button>
+        <button class="px-toggle" id="pxPublic">Backend reached over public internet</button>
+      </div>
+    </div>
+    <div class="px-stage">
+      <div class="px-chain-row" id="pxTlsChainRow"></div>
+      <div class="px-result-row" id="pxTlsResultRow"></div>
+    </div>
+  </div>
+
+  <div class="px-panels">
+    <div class="px-explain-panel">
+      <div class="px-box">
+        <div class="px-panel-title">What's happening right now</div>
+        <div id="pxExplain">Leave the injected field blank and send a request -- both extraction methods agree on the real client IP. Now type a fake IP into the injected field and send again: the naive "just take the first entry" parser gets fooled instantly, while the trusted-hop-count parser doesn't, because it only ever trusts entries added by your own infrastructure.</div>
+      </div>
+    </div>
+    <div class="px-side-panel-col">
+      <div class="px-box">
+        <div class="px-panel-title">Event log</div>
+        <div class="px-log" id="pxLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const tabs = document.querySelectorAll('.px-tab');
+    const panels = { xff: document.getElementById('panel-xff'), tls: document.getElementById('panel-tls') };
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        Object.values(panels).forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        panels[tab.dataset.tab].classList.add('active');
+      });
+    });
+    const explainEl = document.getElementById('pxExplain');
+    const logEl = document.getElementById('pxLog');
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ---- Tab 1: X-Forwarded-For ----
+    const REAL_CLIENT_IP = '203.0.113.7';
+    const PROXY_CHAIN = ['10.0.0.1', '10.0.0.2'];
+
+    function buildChain(clientInjectedPrefix, realClientIp, proxyChain) {
+      let header = clientInjectedPrefix ? [clientInjectedPrefix] : [];
+      let observedPeer = realClientIp;
+      for (let i = 0; i < proxyChain.length; i++) {
+        header.push(observedPeer);
+        observedPeer = proxyChain[i];
+      }
+      return header;
+    }
+    function naiveExtract(header) { return header[0]; }
+    function correctExtract(header, trustedProxyCount) {
+      const idx = header.length - trustedProxyCount;
+      if (idx < 0) return undefined;
+      return header[idx];
+    }
+
+    const chainRowEl = document.getElementById('pxChainRow');
+    const headerBoxEl = document.getElementById('pxHeaderBox');
+    const resultRowEl = document.getElementById('pxResultRow');
+    const injectedInput = document.getElementById('pxInjected');
+
+    function renderChainTopology() {
+      chainRowEl.innerHTML = '';
+      const nodes = [
+        { cls: 'client', label: 'Client', sub: REAL_CLIENT_IP },
+        { cls: 'proxy', label: 'Edge Proxy', sub: PROXY_CHAIN[0] },
+        { cls: 'proxy', label: 'Internal Proxy', sub: PROXY_CHAIN[1] },
+        { cls: 'backend', label: 'Backend', sub: 'reads X-Forwarded-For' },
+      ];
+      nodes.forEach((n, i) => {
+        if (i > 0) {
+          const arrow = document.createElement('div');
+          arrow.className = 'px-arrow';
+          arrow.textContent = '→';
+          chainRowEl.appendChild(arrow);
+        }
+        const hop = document.createElement('div');
+        hop.className = 'px-hop ' + n.cls;
+        hop.textContent = n.label;
+        const b = document.createElement('b');
+        b.textContent = n.sub;
+        hop.appendChild(b);
+        chainRowEl.appendChild(hop);
+      });
+    }
+
+    function runXff() {
+      const injected = injectedInput.value.trim() || null;
+      const chain = buildChain(injected, REAL_CLIENT_IP, PROXY_CHAIN);
+      headerBoxEl.innerHTML = '';
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'px-hdr-name';
+      nameSpan.textContent = 'X-Forwarded-For: ';
+      headerBoxEl.appendChild(nameSpan);
+      const valueSpan = document.createElement('span');
+      valueSpan.textContent = chain.join(', ');
+      headerBoxEl.appendChild(valueSpan);
+
+      const naive = naiveExtract(chain);
+      const correct = correctExtract(chain, PROXY_CHAIN.length);
+
+      resultRowEl.innerHTML = '';
+      const naiveBox = document.createElement('div');
+      naiveBox.className = 'px-result-box ' + (naive === REAL_CLIENT_IP ? 'ok' : 'bad');
+      naiveBox.innerHTML = '';
+      const naiveLabel = document.createElement('div');
+      naiveLabel.textContent = 'Naive parser (first entry):';
+      naiveBox.appendChild(naiveLabel);
+      const naiveVal = document.createElement('b');
+      naiveVal.textContent = naive;
+      naiveBox.appendChild(naiveVal);
+      resultRowEl.appendChild(naiveBox);
+
+      const correctBox = document.createElement('div');
+      correctBox.className = 'px-result-box ok';
+      const correctLabel = document.createElement('div');
+      correctLabel.textContent = 'Trusted-hop-count parser (2 known proxies, from the right):';
+      correctBox.appendChild(correctLabel);
+      const correctVal = document.createElement('b');
+      correctVal.textContent = correct;
+      correctBox.appendChild(correctVal);
+      resultRowEl.appendChild(correctBox);
+
+      if (injected) {
+        logTo('Client sent X-Forwarded-For: "' + injected + '" before any proxy touched it.', 'warn');
+        logTo('Each real proxy appended what it actually observed as its TCP peer -- that part cannot be spoofed.', 'ok');
+        if (naive === REAL_CLIENT_IP) {
+          logTo('Naive parser happened to still get it right here.', 'ok');
+        } else {
+          logTo('Naive parser returned the ATTACKER\'S fake value: "' + naive + '" -- a real spoofing bug.', 'bad');
+        }
+        explainEl.textContent = 'The client-supplied prefix is just an HTTP header value -- fully attacker-controlled. A naive "take the first entry" parser trusts it completely. The correct approach only trusts the last N entries, where N is the number of proxies YOU control -- everything before that block is untrusted input, no matter what it looks like.';
+      } else {
+        logTo('Honest client, no injected prefix -- both parsers agree: ' + correct, 'ok');
+        explainEl.textContent = 'With no injection, the header is exactly what the real infrastructure added, so both parsing strategies happen to agree. That agreement is exactly what makes the naive approach feel safe right up until someone tries to exploit it.';
+      }
+      renderChainTopology();
+    }
+
+    document.getElementById('pxBuild').addEventListener('click', runXff);
+    document.getElementById('pxReset').addEventListener('click', () => {
+      injectedInput.value = '';
+      logEl.innerHTML = '';
+      logTo('-- reset --');
+      runXff();
+    });
+    renderChainTopology();
+    runXff();
+
+    // ---- Tab 2: TLS termination ----
+    let backendIsPublic = false;
+    const tlsChainRowEl = document.getElementById('pxTlsChainRow');
+    const tlsResultRowEl = document.getElementById('pxTlsResultRow');
+
+    function renderTls() {
+      tlsChainRowEl.innerHTML = '';
+      const backendScheme = backendIsPublic ? 'https' : 'http';
+      const hops = [
+        { label: 'Client', sub: 'browser' },
+        { label: '→ scheme: https', sub: 'TLS terminates here' },
+        { label: 'Reverse Proxy', sub: '' },
+        { label: '→ scheme: ' + backendScheme, sub: backendIsPublic ? 're-encrypted' : 'plaintext, private net' },
+        { label: 'Backend', sub: '' },
+      ];
+      hops.forEach((h, i) => {
+        const hop = document.createElement('div');
+        hop.className = 'px-hop ' + (i === 0 ? 'client' : i === 4 ? 'backend' : 'proxy');
+        hop.textContent = h.label;
+        if (h.sub) {
+          const b = document.createElement('b');
+          b.textContent = h.sub;
+          hop.appendChild(b);
+        }
+        tlsChainRowEl.appendChild(hop);
+      });
+
+      tlsResultRowEl.innerHTML = '';
+      const box = document.createElement('div');
+      box.className = 'px-result-box ok';
+      box.textContent = backendIsPublic
+        ? 'Backend reached over the public internet: the proxy re-encrypts (https) for that hop -- terminating TLS at the edge does not mean the rest of the trip has to be plaintext.'
+        : 'Backend is on a private network segment the proxy also controls: plaintext http for that internal hop is a normal, common trade-off -- the risk model is different once traffic never leaves trusted infrastructure.';
+      tlsResultRowEl.appendChild(box);
+    }
+    document.getElementById('pxPrivate').addEventListener('click', () => {
+      backendIsPublic = false;
+      document.getElementById('pxPrivate').classList.add('active');
+      document.getElementById('pxPublic').classList.remove('active');
+      explainEl.textContent = 'TLS termination means the proxy decrypts the client\'s HTTPS connection and holds the certificate -- the backend never has to. What happens next is a separate decision: on a private network the proxy already controls, plaintext HTTP to the backend is standard practice.';
+      renderTls();
+    });
+    document.getElementById('pxPublic').addEventListener('click', () => {
+      backendIsPublic = true;
+      document.getElementById('pxPublic').classList.add('active');
+      document.getElementById('pxPrivate').classList.remove('active');
+      explainEl.textContent = 'Once the backend hop leaves trusted infrastructure, the proxy has to re-encrypt -- terminating TLS at the edge is about where the CERTIFICATE lives, not a license to send plaintext across a network you don\'t control.';
+      renderTls();
+    });
+    renderTls();
+  })();
+  </script>
+</div>
