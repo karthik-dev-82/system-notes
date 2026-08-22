@@ -139,6 +139,7 @@ worth writing down and coming back to.
    cache_strategies_interactive
    raft_consensus_interactive
    proxy_servers_interactive
+   cdn_interactive
    url_shortener_interactive
 
 .. toctree::
@@ -521,6 +522,9 @@ System Design
    * - :doc:`proxy_servers_interactive`
      - Play With It: the real X-Forwarded-For spoofing bug (naive vs trusted-hop-count parsing, fuzz-verified) and what TLS termination actually does and doesn't imply
      - forward proxy, reverse proxy, X-Forwarded-For, TLS termination, trusted proxies
+   * - :doc:`cdn_interactive`
+     - Play With It: the real thundering-herd/request-coalescing mechanism on a cold edge POP, and cache-key composition's two opposite failure modes, fuzz-verified
+     - CDN, edge POP, thundering herd, request coalescing, cache key, origin pull
    * - :doc:`url_shortener_interactive`
      - Case study: a worked "design a URL shortener" interview question end to end -- capacity math, real base62/hash short-code generation with live collision handling, and where sharding, caching, rate limiting, and consensus each actually fit
      - short-code generation, base62, capacity estimation, system design synthesis

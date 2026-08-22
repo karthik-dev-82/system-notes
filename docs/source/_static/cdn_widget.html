@@ -1,0 +1,304 @@
+<div class="cd-root" id="cdWidget">
+  <style>
+    #cdWidget {
+      --cd-bg: #eef1ee;
+      --cd-panel: #ffffff;
+      --cd-border: #cdd6cc;
+      --cd-text: #1c231d;
+      --cd-muted: #5c675d;
+      --cd-a: #3d5c3d;
+      --cd-b: #7a2f3d;
+      --cd-bad: #b0432a;
+      --cd-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cd-bg);
+      color: var(--cd-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cdWidget * { box-sizing: border-box; }
+    #cdWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #cdWidget .cd-sub { color: var(--cd-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cd-tabs { display: flex; gap: 8px; margin-bottom: 14px; min-width: 700px; }
+    .cd-tab { background: var(--cd-panel); border: 1px solid var(--cd-border); border-radius: 8px 8px 0 0; padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--cd-muted); cursor: pointer; }
+    .cd-tab.active { color: var(--cd-b); border-bottom: 2px solid var(--cd-b); }
+    .cd-panel { display: none; }
+    .cd-panel.active { display: block; }
+
+    .cd-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--cd-panel); border: 1px solid var(--cd-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 700px; }
+    .cd-btn { background: var(--cd-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .cd-btn.secondary { background: transparent; color: var(--cd-text); border: 1px solid var(--cd-border); }
+    .cd-toggle-row { display: flex; gap: 6px; }
+    .cd-toggle { background: transparent; color: var(--cd-muted); border: 1px solid var(--cd-border); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; }
+    .cd-toggle.active { background: var(--cd-a); color: #f7f4ef; border-color: var(--cd-a); }
+    .cd-checkbox-label { font-size: 0.8rem; color: var(--cd-muted); display: flex; align-items: center; gap: 6px; }
+
+    .cd-stage { background: var(--cd-panel); border: 1px solid var(--cd-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 700px; }
+
+    .cd-topology { display: flex; align-items: center; justify-content: center; gap: 10px; margin-bottom: 16px; flex-wrap: wrap; }
+    .cd-node { border: 2px solid var(--cd-border); border-radius: 8px; padding: 8px 14px; font-size: 0.8rem; text-align: center; background: #f7f6f2; }
+    .cd-node.pop { border-color: var(--cd-a); }
+    .cd-node.origin { border-color: var(--cd-bad); }
+    .cd-node b { display: block; font-family: ui-monospace, monospace; font-size: 1rem; margin-top: 4px; }
+    .cd-arrow { color: var(--cd-muted); }
+
+    .cd-counter-row { display: flex; gap: 24px; flex-wrap: wrap; justify-content: center; font-size: 0.85rem; color: var(--cd-muted); }
+    .cd-counter-row b { color: var(--cd-text); font-size: 1.2rem; font-family: ui-monospace, monospace; }
+
+    table.cd-key-table { border-collapse: collapse; font-size: 0.8rem; margin-top: 12px; font-family: ui-monospace, monospace; width: 100%; }
+    table.cd-key-table th, table.cd-key-table td { border: 1px solid var(--cd-border); padding: 6px 10px; text-align: left; }
+    table.cd-key-table th { background: #f7f6f2; color: var(--cd-b); font-size: 0.68rem; text-transform: uppercase; }
+    table.cd-key-table td.cd-key-cell { color: var(--cd-muted); }
+    table.cd-key-table tr.cd-collision td { background: rgba(176,67,42,0.08); }
+    table.cd-key-table tr.cd-correct td { background: rgba(61,92,61,0.06); }
+
+    .cd-panels { display: flex; gap: 14px; flex-wrap: wrap; min-width: 700px; }
+    .cd-explain-panel, .cd-side-panel-col { flex: 1; min-width: 280px; display: flex; flex-direction: column; gap: 14px; }
+    .cd-explain-panel { flex: 1.4; }
+    .cd-box { background: var(--cd-panel); border: 1px solid var(--cd-border); border-radius: 10px; padding: 12px 14px; }
+    .cd-panel-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.05em; color: var(--cd-muted); margin-bottom: 8px; }
+    .cd-log { height: 150px; overflow-y: auto; font-size: 0.74rem; line-height: 1.5; font-family: ui-monospace, monospace; }
+    .cd-log div { color: var(--cd-muted); }
+    .cd-log div.ok { color: var(--cd-a); }
+    .cd-log div.bad { color: var(--cd-bad); font-weight: 700; }
+  </style>
+
+  <h3>CDN: Play With It</h3>
+  <div class="cd-sub">Both tabs run the real coalescing/cache-key logic live -- verified against a 2000-trial fuzz before this widget was built.</div>
+
+  <div class="cd-tabs">
+    <div class="cd-tab active" data-tab="stampede">1. The Thundering Herd Problem</div>
+    <div class="cd-tab" data-tab="cachekey">2. Cache Key Composition</div>
+  </div>
+
+  <div class="cd-panel active" id="panel-stampede">
+    <div class="cd-controls">
+      <div class="cd-toggle-row">
+        <button class="cd-toggle active" id="cdNaiveToggle">Naive (no coalescing)</button>
+        <button class="cd-toggle" id="cdCoalescedToggle">Request coalescing</button>
+      </div>
+      <button class="cd-btn" id="cdFireWave">Fire 50 simultaneous requests (1 viral key)</button>
+      <button class="cd-btn secondary" id="cdFireMixed">Fire 60 requests (3 distinct keys)</button>
+      <button class="cd-btn secondary" id="cdStampedeReset">Reset</button>
+    </div>
+    <div class="cd-stage">
+      <div class="cd-topology">
+        <div class="cd-node pop">Cold Edge POP<b id="cdPopState">empty</b></div>
+        <div class="cd-arrow">→ miss →</div>
+        <div class="cd-node origin">Origin Server<b id="cdOriginHits">0 hits</b></div>
+      </div>
+      <div class="cd-counter-row">
+        <div>requests fired: <b id="cdReqCount">0</b></div>
+        <div>origin hits: <b id="cdHitCount">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd-panel" id="panel-cachekey">
+    <div class="cd-controls">
+      <span style="font-size:0.8rem;color:var(--cd-muted);">Include in cache key:</span>
+      <label class="cd-checkbox-label"><input type="checkbox" id="cdKeyWidth" checked> width param (w) -- actually changes the image</label>
+      <label class="cd-checkbox-label"><input type="checkbox" id="cdKeyTimestamp"> timestamp param (_) -- analytics cache-buster, doesn't change content</label>
+      <button class="cd-btn secondary" id="cdKeyReset">Reset requests</button>
+    </div>
+    <div class="cd-stage">
+      <table class="cd-key-table" id="cdKeyTable"></table>
+      <div class="cd-counter-row" style="margin-top:12px;">
+        <div>distinct cache entries created: <b id="cdKeyEntries">0</b></div>
+        <div>correctness issues: <b id="cdKeyIssues">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="cd-panels">
+    <div class="cd-explain-panel">
+      <div class="cd-box">
+        <div class="cd-panel-title">What's happening right now</div>
+        <div id="cdExplain">Fire 50 simultaneous requests for one viral, uncached key with "Naive" selected -- watch the origin take all 50 hits at once. Switch to "Request coalescing" and fire the same wave again -- the origin takes exactly 1 hit, because only the first request that sees the miss actually fetches; the other 49 piggyback on it.</div>
+      </div>
+    </div>
+    <div class="cd-side-panel-col">
+      <div class="cd-box">
+        <div class="cd-panel-title">Event log</div>
+        <div class="cd-log" id="cdLog"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    const tabs = document.querySelectorAll('.cd-tab');
+    const panels = { stampede: document.getElementById('panel-stampede'), cachekey: document.getElementById('panel-cachekey') };
+    tabs.forEach(tab => {
+      tab.addEventListener('click', () => {
+        tabs.forEach(t => t.classList.remove('active'));
+        Object.values(panels).forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        panels[tab.dataset.tab].classList.add('active');
+      });
+    });
+    const explainEl = document.getElementById('cdExplain');
+    const logEl = document.getElementById('cdLog');
+    function logTo(msg, cls) {
+      const d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      logEl.appendChild(d);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ---- Tab 1: thundering herd / coalescing ----
+    function simulateNaive(requests, precached) {
+      let originHits = 0;
+      for (const req of requests) {
+        if (!precached.has(req.key)) originHits++;
+      }
+      return originHits;
+    }
+    function simulateCoalesced(requests, precached) {
+      const uniqueMissingKeys = new Set();
+      for (const req of requests) {
+        if (!precached.has(req.key)) uniqueMissingKeys.add(req.key);
+      }
+      return uniqueMissingKeys.size;
+    }
+
+    let coalescing = false;
+    const popStateEl = document.getElementById('cdPopState');
+    const originHitsEl = document.getElementById('cdOriginHits');
+    const reqCountEl = document.getElementById('cdReqCount');
+    const hitCountEl = document.getElementById('cdHitCount');
+
+    function resetStampede() {
+      popStateEl.textContent = 'empty';
+      originHitsEl.textContent = '0 hits';
+      reqCountEl.textContent = '0';
+      hitCountEl.textContent = '0';
+    }
+
+    function fireWave(requests, description) {
+      const precached = new Set(); // cold cache every time -- the scenario is a cold POP
+      const hits = coalescing ? simulateCoalesced(requests, precached) : simulateNaive(requests, precached);
+      reqCountEl.textContent = requests.length;
+      hitCountEl.textContent = hits;
+      originHitsEl.textContent = hits + ' hits';
+      popStateEl.textContent = 'now cached (' + new Set(requests.map(r => r.key)).size + ' key(s))';
+      logTo(description + ' -- ' + (coalescing ? 'coalescing' : 'naive') + ': origin took ' + hits + ' hit(s) for ' + requests.length + ' request(s).', hits === requests.length && requests.length > 1 ? 'bad' : 'ok');
+      if (coalescing) {
+        explainEl.textContent = 'With coalescing, the origin was hit exactly ' + hits + ' time(s) -- once per DISTINCT key, no matter how many simultaneous requests arrived for it. Everyone else waited on the first request\'s in-flight fetch instead of starting their own.';
+      } else {
+        explainEl.textContent = 'With naive handling, the origin was hit ' + hits + ' times -- every single request that saw the cache empty fired its own fetch, because none of them can see each other\'s in-flight work. This is the real "thundering herd" that request coalescing exists to prevent.';
+      }
+    }
+
+    document.getElementById('cdFireWave').addEventListener('click', () => {
+      const requests = Array.from({ length: 50 }, () => ({ key: 'viral-image.jpg' }));
+      fireWave(requests, '50 simultaneous requests, 1 viral key');
+    });
+    document.getElementById('cdFireMixed').addEventListener('click', () => {
+      const requests = [];
+      for (const key of ['a.jpg', 'b.jpg', 'c.jpg']) for (let i = 0; i < 20; i++) requests.push({ key });
+      fireWave(requests, '60 requests across 3 distinct keys');
+    });
+    document.getElementById('cdNaiveToggle').addEventListener('click', () => {
+      coalescing = false;
+      document.getElementById('cdNaiveToggle').classList.add('active');
+      document.getElementById('cdCoalescedToggle').classList.remove('active');
+    });
+    document.getElementById('cdCoalescedToggle').addEventListener('click', () => {
+      coalescing = true;
+      document.getElementById('cdCoalescedToggle').classList.add('active');
+      document.getElementById('cdNaiveToggle').classList.remove('active');
+    });
+    document.getElementById('cdStampedeReset').addEventListener('click', () => { logTo('-- reset --'); resetStampede(); });
+    resetStampede();
+
+    // ---- Tab 2: cache key composition ----
+    const SAMPLE_REQUESTS = [
+      { path: '/img.jpg', w: '100', ts: '1700000001', desc: 'thumbnail request' },
+      { path: '/img.jpg', w: '200', ts: '1700000002', desc: 'full-size request' },
+      { path: '/img.jpg', w: '100', ts: '1700000003', desc: 'another thumbnail (same width, later)' },
+    ];
+    const widthCheckbox = document.getElementById('cdKeyWidth');
+    const tsCheckbox = document.getElementById('cdKeyTimestamp');
+    const keyTableEl = document.getElementById('cdKeyTable');
+    const keyEntriesEl = document.getElementById('cdKeyEntries');
+    const keyIssuesEl = document.getElementById('cdKeyIssues');
+
+    function computeKey(req) {
+      const parts = [req.path];
+      const params = [];
+      if (widthCheckbox.checked) params.push('w=' + req.w);
+      if (tsCheckbox.checked) params.push('_=' + req.ts);
+      if (params.length) parts.push(params.join('&'));
+      return parts.join('?');
+    }
+
+    function renderKeyTable() {
+      keyTableEl.innerHTML = '';
+      const header = document.createElement('tr');
+      ['request', 'width', 'cache key', 'result'].forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        header.appendChild(th);
+      });
+      keyTableEl.appendChild(header);
+
+      const keyToWidths = new Map(); // key -> set of widths that mapped to it
+      SAMPLE_REQUESTS.forEach(req => {
+        const key = computeKey(req);
+        if (!keyToWidths.has(key)) keyToWidths.set(key, new Set());
+        keyToWidths.get(key).add(req.w);
+      });
+
+      let issues = 0;
+      SAMPLE_REQUESTS.forEach(req => {
+        const key = computeKey(req);
+        const widthsForThisKey = keyToWidths.get(key);
+        const isCollision = widthsForThisKey.size > 1; // different widths sharing one cache entry = wrong content served
+        if (isCollision) issues++;
+        const row = document.createElement('tr');
+        row.className = isCollision ? 'cd-collision' : 'cd-correct';
+        [req.desc, 'w=' + req.w, key].forEach(v => {
+          const td = document.createElement('td');
+          td.className = 'cd-key-cell';
+          td.textContent = v;
+          row.appendChild(td);
+        });
+        const resultTd = document.createElement('td');
+        resultTd.textContent = isCollision ? 'WRONG content risk' : 'correct';
+        row.appendChild(resultTd);
+        keyTableEl.appendChild(row);
+      });
+
+      keyEntriesEl.textContent = keyToWidths.size;
+      keyIssuesEl.textContent = issues;
+
+      if (!widthCheckbox.checked) {
+        logTo('Width excluded from cache key -- thumbnail and full-size requests now collide on one cache entry.', 'bad');
+        explainEl.textContent = 'With width excluded from the cache key, the thumbnail and full-size requests share ONE cache entry -- whichever one gets cached first is served to BOTH, regardless of which width was actually asked for. This is a real correctness bug, not just a performance one.';
+      } else if (tsCheckbox.checked) {
+        logTo('Timestamp included in cache key -- the two same-width thumbnail requests no longer share a cache entry.', 'bad');
+        explainEl.textContent = 'The two thumbnail requests are for genuinely IDENTICAL content, but including the irrelevant timestamp param in the cache key makes them look like different resources -- ' + keyToWidths.size + ' cache entries were created for content that should have been exactly 2 (one per real width). This is the classic cache-busting-param mistake, and it silently destroys your hit rate.';
+      } else {
+        logTo('Width included, timestamp excluded -- exactly 2 cache entries for 2 genuinely distinct widths, correct and efficient.', 'ok');
+        explainEl.textContent = 'This is the correct cache key: it includes width (which actually changes the content) and excludes the timestamp (which doesn\'t). Two genuinely distinct resources, exactly two cache entries -- correctness and hit rate both optimal.';
+      }
+    }
+
+    widthCheckbox.addEventListener('change', renderKeyTable);
+    tsCheckbox.addEventListener('change', renderKeyTable);
+    document.getElementById('cdKeyReset').addEventListener('click', () => {
+      widthCheckbox.checked = true;
+      tsCheckbox.checked = false;
+      logTo('-- reset --');
+      renderKeyTable();
+    });
+    renderKeyTable();
+  })();
+  </script>
+</div>

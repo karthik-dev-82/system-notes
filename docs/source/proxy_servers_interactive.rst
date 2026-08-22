@@ -228,4 +228,6 @@ See Also
 :doc:`consistent_hashing_interactive` for how a reverse proxy actually
 picks *which* backend to route to, once it's decided to forward the
 request. :doc:`rate_limiting_interactive` for another job reverse
-proxies commonly do at the edge.
+proxies commonly do at the edge. :doc:`cdn_interactive` for what
+changes once you deploy many of these reverse proxies geographically,
+each with its own independent cache.
