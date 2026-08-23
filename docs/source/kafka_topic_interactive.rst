@@ -407,3 +407,8 @@ availability-vs-consistency choice the replication widget above makes
 concrete -- same tradeoff, same "which side gets to keep serving"
 question, worked through on a real 2-node store instead of a Kafka
 partition.
+
+See :doc:`architectural_patterns` for where this fits in the bigger
+picture -- Kafka is this site's deepest worked example of the
+event-driven shape, where producers and consumers are decoupled in
+time rather than blocking on each other's response.

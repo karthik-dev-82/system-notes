@@ -129,6 +129,13 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: Architectural Patterns
+
+   architectural_patterns
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: System Design
 
    cap_theorem_interactive
@@ -486,6 +493,21 @@ Concurrency & Distributed Systems
    * - :doc:`priority_inversion_interactive`
      - Interactive priority inversion -- the bug that nearly stranded Mars Pathfinder, and the priority-inheritance fix, side by side
      - preemption, mutex, priority inheritance, real-time scheduling
+
+Architectural Patterns
+-----------------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`architectural_patterns`
+     - The five shapes a system's components can be arranged in -- client-server, microservices, serverless, event-driven, peer-to-peer -- with a real trade-off and worked example for each, cross-linked to where it already lives on this site
+     - client-server, microservices, serverless, cold start, event-driven, peer-to-peer
 
 System Design
 -----------------

@@ -200,3 +200,8 @@ See :doc:`kafka_topic_interactive` for the same "same key, same owner,
 every time" hashing idea applied to a message log instead of a server
 ring -- Kafka's partition routing is a simpler, fixed-partition-count
 cousin of the reshuffling problem this page solves for servers.
+
+See :doc:`architectural_patterns` for the peer-to-peer shape this
+mechanism enables in its purest form -- real DHT-based P2P systems
+(Chord-style) use exactly this hash-ring idea to answer "which peer
+owns this piece of data" with no central directory at all.
