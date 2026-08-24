@@ -208,3 +208,7 @@ Where This Shows Up
   page's FNV-1a hash function shows up on this site -- a reminder that
   "a good general-purpose string hash" is reusable infrastructure, not
   a one-off choice per data structure.
+* See :doc:`cassandra_interactive` for the LSM-tree write path these
+  per-SSTable filters actually sit on top of -- memtables, SSTables,
+  and compaction, with a live read-amplification counter that shows
+  exactly what a Bloom filter is saving you from checking.

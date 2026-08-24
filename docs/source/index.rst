@@ -112,6 +112,7 @@ worth writing down and coming back to.
    db_redis_structures_interactive
    db_acid_transaction_interactive
    db_composite_index_interactive
+   cassandra_interactive
 
 .. toctree::
    :hidden:
@@ -462,6 +463,9 @@ Databases
    * - :doc:`db_composite_index_interactive`
      - Play With It: composite indexes and the leftmost prefix rule, live
      - composite index, leftmost prefix, covering index, query planner
+   * - :doc:`cassandra_interactive`
+     - Play With It: the real N/W/R quorum-overlap guarantee run as a live fuzz test, plus a real memtable/SSTable/compaction LSM-tree you can write, read, and compact yourself
+     - tunable consistency, quorum, hinted handoff, read repair, LSM-tree, memtable, SSTable, compaction, tombstone
 
 Concurrency & Distributed Systems
 -----------------------------------------

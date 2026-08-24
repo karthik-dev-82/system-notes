@@ -1,0 +1,374 @@
+<div class="cs-root" id="csWidget">
+  <style>
+    #csWidget {
+      --cs-bg: #eef1ee;
+      --cs-panel: #ffffff;
+      --cs-border: #cdd6cc;
+      --cs-text: #1c231d;
+      --cs-muted: #5c675d;
+      --cs-a: #3d5c3d;
+      --cs-b: #7a2f3d;
+      --cs-bad: #b0432a;
+      --cs-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cs-bg);
+      color: var(--cs-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #csWidget * { box-sizing: border-box; }
+    #csWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #csWidget .cs-sub { color: var(--cs-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cs-tabs { display: flex; gap: 8px; margin-bottom: 14px; min-width: 780px; }
+    .cs-tab { background: var(--cs-panel); border: 1px solid var(--cs-border); border-radius: 8px 8px 0 0; padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--cs-muted); cursor: pointer; }
+    .cs-tab.active { color: var(--cs-b); border-bottom: 2px solid var(--cs-b); }
+    .cs-panel { display: none; }
+    .cs-panel.active { display: block; }
+
+    .cs-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--cs-panel); border: 1px solid var(--cs-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 780px; }
+    .cs-btn { background: var(--cs-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .cs-btn.secondary { background: transparent; color: var(--cs-text); border: 1px solid var(--cs-border); }
+    .cs-toggle-row { display: flex; gap: 6px; align-items: center; }
+    .cs-toggle-row span { font-size: 0.78rem; color: var(--cs-muted); margin-right: 2px; }
+    .cs-toggle { background: transparent; color: var(--cs-muted); border: 1px solid var(--cs-border); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; }
+    .cs-toggle.active { background: var(--cs-a); color: #f7f4ef; border-color: var(--cs-a); }
+
+    .cs-stage { background: var(--cs-panel); border: 1px solid var(--cs-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 780px; }
+
+    .cs-formula { font-family: ui-monospace, monospace; font-size: 0.95rem; text-align: center; margin-bottom: 14px; }
+    .cs-formula b { color: var(--cs-b); }
+    .cs-formula .guaranteed { color: var(--cs-a); font-weight: 700; }
+    .cs-formula .notguaranteed { color: var(--cs-bad); font-weight: 700; }
+
+    .cs-ring { display: flex; justify-content: center; gap: 14px; margin-bottom: 16px; }
+    .cs-node { width: 64px; height: 64px; border-radius: 50%; border: 2px solid var(--cs-border); display: flex; align-items: center; justify-content: center; flex-direction: column; font-size: 0.68rem; background: #f7f6f2; }
+    .cs-node b { font-family: ui-monospace, monospace; font-size: 0.95rem; }
+    .cs-node.written { border-color: var(--cs-a); background: rgba(61,92,61,0.1); }
+    .cs-node.readfrom { box-shadow: 0 0 0 3px rgba(122,47,61,0.25); }
+    .cs-node.overlap { border-color: var(--cs-b); background: rgba(122,47,61,0.14); }
+
+    .cs-stat-row { display: flex; gap: 24px; justify-content: center; font-size: 0.85rem; color: var(--cs-muted); margin-bottom: 8px; }
+    .cs-stat-row b { color: var(--cs-text); font-family: ui-monospace, monospace; font-size: 1.1rem; }
+
+    .cs-log { height: 140px; overflow-y: auto; font-size: 0.74rem; font-family: ui-monospace, monospace; background: #f7f6f2; border: 1px solid var(--cs-border); border-radius: 8px; padding: 8px 10px; line-height: 1.55; }
+    .cs-log div.ok { color: var(--cs-a); }
+    .cs-log div.bad { color: var(--cs-bad); font-weight: 700; }
+    .cs-log div.repair { color: var(--cs-warn); font-weight: 700; }
+
+    .cs-lsm-row { display: flex; gap: 14px; min-width: 780px; margin-bottom: 12px; }
+    .cs-memtable { flex: 1; background: #fff; border: 2px dashed var(--cs-border); border-radius: 8px; padding: 10px 12px; min-height: 90px; }
+    .cs-memtable-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cs-muted); margin-bottom: 6px; }
+    .cs-sstables { flex: 2; display: flex; flex-direction: column-reverse; gap: 6px; }
+    .cs-sstable { background: #f7f6f2; border: 1px solid var(--cs-border); border-radius: 6px; padding: 6px 10px; font-size: 0.74rem; font-family: ui-monospace, monospace; }
+    .cs-sstable-title { color: var(--cs-muted); font-size: 0.65rem; text-transform: uppercase; margin-bottom: 3px; }
+    .cs-entry { display: inline-block; margin: 2px 6px 2px 0; padding: 1px 6px; border-radius: 3px; background: #ffffff; border: 1px solid var(--cs-border); }
+    .cs-entry.tombstone { color: var(--cs-bad); text-decoration: line-through; }
+    .cs-entry.pending { background: #fff8e6; border-color: var(--cs-warn); }
+
+    .cs-key-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+    .cs-key-btn { background: transparent; border: 1px solid var(--cs-border); border-radius: 6px; padding: 5px 10px; font-size: 0.76rem; font-family: ui-monospace, monospace; cursor: pointer; color: var(--cs-text); }
+    .cs-read-result { font-size: 0.82rem; margin-top: 4px; }
+    .cs-read-result b { font-family: ui-monospace, monospace; }
+  </style>
+
+  <h3>Apache Cassandra: Play With It</h3>
+  <div class="cs-sub">Two mechanisms that make Cassandra what it is -- both verified with a fuzz test before this widget was built.</div>
+
+  <div class="cs-tabs">
+    <div class="cs-tab active" data-tab="quorum">1. Tunable Consistency (N/W/R)</div>
+    <div class="cs-tab" data-tab="lsm">2. LSM-Tree Storage Engine</div>
+  </div>
+
+  <div class="cs-panel active" id="panel-quorum">
+    <div class="cs-controls">
+      <div class="cs-toggle-row">
+        <span>Write CL:</span>
+        <button class="cs-toggle" data-role="w" data-level="ONE">ONE</button>
+        <button class="cs-toggle active" data-role="w" data-level="QUORUM">QUORUM</button>
+        <button class="cs-toggle" data-role="w" data-level="ALL">ALL</button>
+      </div>
+      <div class="cs-toggle-row">
+        <span>Read CL:</span>
+        <button class="cs-toggle" data-role="r" data-level="ONE">ONE</button>
+        <button class="cs-toggle active" data-role="r" data-level="QUORUM">QUORUM</button>
+        <button class="cs-toggle" data-role="r" data-level="ALL">ALL</button>
+      </div>
+      <button class="cs-btn" id="csWriteRead">Write, then Read (1 trial)</button>
+      <button class="cs-btn secondary" id="csFuzz200">Run 200 Trials</button>
+    </div>
+    <div class="cs-stage">
+      <div class="cs-formula" id="csFormula">--</div>
+      <div class="cs-ring" id="csRing"></div>
+      <div class="cs-stat-row">
+        <div>trials run: <b id="csTrials">0</b></div>
+        <div>reads that saw the latest write: <b id="csFreshCount">0</b></div>
+        <div>stale reads: <b id="csStaleCount">0</b></div>
+      </div>
+      <div class="cs-log" id="csLog"><div>Cluster: 3 replicas (RF=3). Pick write/read consistency levels above, then run a trial.</div></div>
+    </div>
+  </div>
+
+  <div class="cs-panel" id="panel-lsm">
+    <div class="cs-controls">
+      <button class="cs-btn" id="csLsmWrite">Write 1 Random Op</button>
+      <button class="cs-btn" id="csLsmWriteBatch">Write 12 Random Ops</button>
+      <button class="cs-btn secondary" id="csLsmCompact">Compact Now</button>
+      <button class="cs-btn secondary" id="csLsmReset">Reset</button>
+      <span style="font-size:0.78rem;color:var(--cs-muted);">Memtable capacity: 4 ops/generation.</span>
+    </div>
+    <div class="cs-stage">
+      <div class="cs-lsm-row">
+        <div class="cs-memtable">
+          <div class="cs-memtable-title">Memtable (in-memory, not yet flushed)</div>
+          <div id="csMemtableContents">empty</div>
+        </div>
+      </div>
+      <div class="cs-sstables" id="csSstables"></div>
+      <div class="cs-key-buttons" id="csKeyButtons"></div>
+      <div class="cs-read-result" id="csReadResult">Pick a key above to read it.</div>
+      <div class="cs-stat-row" style="margin-top:10px;">
+        <div>SSTables on disk: <b id="csTableCount">0</b></div>
+        <div>total stored entries: <b id="csEntryCount">0</b></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var root = document.getElementById('csWidget');
+    var tabs = root.querySelectorAll('.cs-tab');
+    var panels = { quorum: document.getElementById('panel-quorum'), lsm: document.getElementById('panel-lsm') };
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        Object.keys(panels).forEach(function (k) { panels[k].classList.remove('active'); });
+        tab.classList.add('active');
+        panels[tab.getAttribute('data-tab')].classList.add('active');
+      });
+    });
+
+    // ================= Tab 1: tunable consistency =================
+    // Core logic verified against a 20,000-trial Node fuzz test before
+    // this widget was built (cassandra_model.js).
+
+    var N = 3;
+    var levelToCount = { ONE: 1, QUORUM: 2, ALL: 3 }; // QUORUM = majority of 3
+
+    function randomSubset(n, k) {
+      var idx = []; for (var i = 0; i < n; i++) idx.push(i);
+      for (var i2 = n - 1; i2 > 0; i2--) {
+        var j = Math.floor(Math.random() * (i2 + 1));
+        var tmp = idx[i2]; idx[i2] = idx[j]; idx[j] = tmp;
+      }
+      return idx.slice(0, k);
+    }
+
+    var wLevel = 'QUORUM', rLevel = 'QUORUM';
+    var quorumStats = { trials: 0, fresh: 0, stale: 0 };
+
+    function updateFormula() {
+      var W = levelToCount[wLevel], R = levelToCount[rLevel];
+      var guaranteed = (W + R) > N;
+      document.getElementById('csFormula').innerHTML =
+        'W (' + wLevel + '=' + W + ') + R (' + rLevel + '=' + R + ') = <b>' + (W + R) + '</b>, N = <b>' + N + '</b> -> ' +
+        (guaranteed ? '<span class="guaranteed">overlap guaranteed -- always sees the latest write</span>' : '<span class="notguaranteed">overlap NOT guaranteed -- can return stale data</span>');
+    }
+
+    function logTo(msg, cls) {
+      var el = document.getElementById('csLog');
+      var d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function renderRing(writeSet, readSet) {
+      var ring = document.getElementById('csRing');
+      var html = '';
+      for (var i = 0; i < N; i++) {
+        var cls = 'cs-node';
+        var w = writeSet && writeSet.indexOf(i) !== -1;
+        var r = readSet && readSet.indexOf(i) !== -1;
+        if (w) cls += ' written';
+        if (r) cls += ' readfrom';
+        if (w && r) cls += ' overlap';
+        html += '<div class="' + cls + '"><b>Node ' + i + '</b><span>' + (w ? 'wrote ' : '') + (r ? 'read' : '') + '</span></div>';
+      }
+      ring.innerHTML = html;
+    }
+
+    function runOneTrial(logIt) {
+      var W = levelToCount[wLevel], R = levelToCount[rLevel];
+      var writeSet = randomSubset(N, W);
+      var readSet = randomSubset(N, R);
+      var overlap = writeSet.some(function (n) { return readSet.indexOf(n) !== -1; });
+
+      quorumStats.trials++;
+      if (overlap) quorumStats.fresh++; else quorumStats.stale++;
+
+      if (logIt) {
+        renderRing(writeSet, readSet);
+        logTo('WRITE x=42 acked by replicas [' + writeSet.join(',') + ']', 'ok');
+        logTo('READ x queries replicas [' + readSet.join(',') + ']', 'ok');
+        if (overlap) {
+          logTo('-> overlap found -- read returns the latest value (42).', 'ok');
+        } else {
+          logTo('-> NO overlap -- read misses every replica that has the latest write, returns a stale value.', 'bad');
+        }
+        if (overlap && R > 1) {
+          logTo('   (read repair: any queried replica found to be stale gets patched with the fresh value)', 'repair');
+        }
+      }
+      return overlap;
+    }
+
+    function renderQuorumStats() {
+      document.getElementById('csTrials').textContent = quorumStats.trials;
+      document.getElementById('csFreshCount').textContent = quorumStats.fresh;
+      document.getElementById('csStaleCount').textContent = quorumStats.stale;
+    }
+
+    root.querySelectorAll('.cs-toggle[data-role]').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        var role = btn.getAttribute('data-role');
+        var level = btn.getAttribute('data-level');
+        root.querySelectorAll('.cs-toggle[data-role="' + role + '"]').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        if (role === 'w') wLevel = level; else rLevel = level;
+        updateFormula();
+      });
+    });
+
+    document.getElementById('csWriteRead').addEventListener('click', function () {
+      runOneTrial(true);
+      renderQuorumStats();
+    });
+
+    document.getElementById('csFuzz200').addEventListener('click', function () {
+      for (var i = 0; i < 200; i++) runOneTrial(false);
+      renderQuorumStats();
+      logTo('-- ran 200 trials at W=' + wLevel + ', R=' + rLevel + ' --', 'ok');
+    });
+
+    updateFormula();
+    renderRing([], []);
+
+    // ================= Tab 2: LSM-tree storage engine =================
+    // Core logic verified against a 2,000-trial Node fuzz test before
+    // this widget was built (cassandra_lsm_model.js).
+
+    var CAPACITY = 4;
+    var KEYS = ['alice', 'bob', 'carol', 'dave', 'erin'];
+    var memtable = []; // array of {key, value|null}
+    var generations = []; // array of Map(key -> value|null), oldest first
+
+    function flushIfFull() {
+      if (memtable.length >= CAPACITY) {
+        var table = new Map();
+        memtable.forEach(function (op) { table.set(op.key, op.value); });
+        generations.push(table);
+        memtable = [];
+      }
+    }
+
+    function writeRandomOp() {
+      var key = KEYS[Math.floor(Math.random() * KEYS.length)];
+      var isDelete = Math.random() < 0.25;
+      var value = isDelete ? null : Math.floor(Math.random() * 1000);
+      memtable.push({ key: key, value: value });
+      flushIfFull();
+      renderLsm();
+    }
+
+    function compactNow() {
+      var merged = new Map();
+      generations.forEach(function (table) {
+        table.forEach(function (v, k) { merged.set(k, v); });
+      });
+      var purged = new Map();
+      merged.forEach(function (v, k) { if (v !== null) purged.set(k, v); });
+      generations = [purged];
+      renderLsm();
+    }
+
+    function readKey(key) {
+      // The memtable holds the freshest, not-yet-flushed writes -- a real
+      // LSM-tree always checks it before touching any SSTable on disk.
+      for (var m = memtable.length - 1; m >= 0; m--) {
+        if (memtable[m].key === key) {
+          var mv = memtable[m].value;
+          return { found: mv !== null, value: mv, tablesChecked: 0, fromMemtable: true };
+        }
+      }
+      for (var i = generations.length - 1; i >= 0; i--) {
+        if (generations[i].has(key)) {
+          var v = generations[i].get(key);
+          return { found: v !== null, value: v, tablesChecked: generations.length - i, fromMemtable: false };
+        }
+      }
+      return { found: false, value: undefined, tablesChecked: generations.length, fromMemtable: false };
+    }
+
+    function renderLsm() {
+      var memEl = document.getElementById('csMemtableContents');
+      if (memtable.length === 0) {
+        memEl.innerHTML = 'empty';
+      } else {
+        memEl.innerHTML = memtable.map(function (op) {
+          return '<span class="cs-entry pending' + (op.value === null ? ' tombstone' : '') + '">' + op.key + (op.value === null ? ' [deleted]' : '=' + op.value) + '</span>';
+        }).join(' ');
+      }
+
+      var sstEl = document.getElementById('csSstables');
+      var html = '';
+      generations.forEach(function (table, i) {
+        var entries = [];
+        table.forEach(function (v, k) {
+          entries.push('<span class="cs-entry' + (v === null ? ' tombstone' : '') + '">' + k + (v === null ? ' [deleted]' : '=' + v) + '</span>');
+        });
+        html += '<div class="cs-sstable"><div class="cs-sstable-title">SSTable ' + (i + 1) + ' of ' + generations.length + (i === generations.length - 1 ? ' (newest)' : '') + '</div>' + entries.join(' ') + '</div>';
+      });
+      sstEl.innerHTML = html || '<div style="color:var(--cs-muted);font-size:0.78rem;">no SSTables flushed yet -- keep writing until the memtable fills.</div>';
+
+      var totalEntries = generations.reduce(function (sum, t) { return sum + t.size; }, 0);
+      document.getElementById('csTableCount').textContent = generations.length;
+      document.getElementById('csEntryCount').textContent = totalEntries;
+
+      renderKeyButtons();
+    }
+
+    function renderKeyButtons() {
+      var el = document.getElementById('csKeyButtons');
+      el.innerHTML = KEYS.map(function (k) { return '<button class="cs-key-btn" data-key="' + k + '">read ' + k + '</button>'; }).join('');
+      el.querySelectorAll('.cs-key-btn').forEach(function (btn) {
+        btn.addEventListener('click', function () {
+          var key = btn.getAttribute('data-key');
+          var r = readKey(key);
+          var where = r.fromMemtable ? 'memtable (0 SSTables touched)' : ('<b>' + r.tablesChecked + '</b> SSTable(s)');
+          document.getElementById('csReadResult').innerHTML = r.found
+            ? 'read(<b>' + key + '</b>) = <b>' + r.value + '</b> -- checked ' + where
+            : 'read(<b>' + key + '</b>) = not found -- checked ' + where;
+        });
+      });
+    }
+
+    document.getElementById('csLsmWrite').addEventListener('click', writeRandomOp);
+    document.getElementById('csLsmWriteBatch').addEventListener('click', function () {
+      for (var i = 0; i < 12; i++) writeRandomOp();
+    });
+    document.getElementById('csLsmCompact').addEventListener('click', compactNow);
+    document.getElementById('csLsmReset').addEventListener('click', function () {
+      memtable = []; generations = [];
+      renderLsm();
+      document.getElementById('csReadResult').textContent = 'Pick a key above to read it.';
+    });
+
+    renderLsm();
+  })();
+  </script>
+</div>

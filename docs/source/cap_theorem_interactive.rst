@@ -300,3 +300,7 @@ Where This Shows Up
   isolation levels are what one transaction can see of another
   in-flight transaction's work, the same shape of question this page
   asks about one node and another.
+* See :doc:`cassandra_interactive` for the real system behind this
+  page's last-write-wins default, plus the N/W/R quorum mechanism that
+  lets Cassandra *tune* how far toward C or A a given read or write
+  leans, rather than picking one side of this page's toggle globally.

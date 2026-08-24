@@ -205,3 +205,8 @@ See :doc:`architectural_patterns` for the peer-to-peer shape this
 mechanism enables in its purest form -- real DHT-based P2P systems
 (Chord-style) use exactly this hash-ring idea to answer "which peer
 owns this piece of data" with no central directory at all.
+
+See :doc:`cassandra_interactive` for the real system these virtual
+nodes are drawn from, plus what Cassandra does once the ring above has
+decided which N replicas own a key -- tunable consistency and the
+LSM-tree storage engine underneath each one.
