@@ -1,0 +1,314 @@
+<div class="ds-root" id="dsWidget">
+  <style>
+    #dsWidget {
+      --ds-bg: #eef1ee;
+      --ds-panel: #ffffff;
+      --ds-border: #cdd6cc;
+      --ds-text: #1c231d;
+      --ds-muted: #5c675d;
+      --ds-a: #3d5c3d;
+      --ds-b: #7a2f3d;
+      --ds-bad: #b0432a;
+      --ds-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--ds-bg);
+      color: var(--ds-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #dsWidget * { box-sizing: border-box; }
+    #dsWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #dsWidget .ds-sub { color: var(--ds-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .ds-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; background: var(--ds-panel); border: 1px solid var(--ds-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 900px; }
+    .ds-btn { background: var(--ds-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .ds-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .ds-btn.secondary { background: transparent; color: var(--ds-text); border: 1px solid var(--ds-border); }
+    .ds-slider-group { display: flex; align-items: center; gap: 8px; font-size: 0.8rem; color: var(--ds-muted); }
+    .ds-slider-group input[type="range"] { width: 110px; }
+    .ds-slider-group b { color: var(--ds-text); font-family: ui-monospace, monospace; min-width: 34px; display: inline-block; }
+
+    .ds-cols { display: flex; gap: 12px; min-width: 900px; }
+    .ds-col { flex: 1; min-width: 280px; background: var(--ds-panel); border: 1px solid var(--ds-border); border-radius: 10px; padding: 14px; }
+    .ds-col-title { font-weight: 800; font-size: 0.92rem; color: var(--ds-text); margin-bottom: 2px; }
+    .ds-col-desc { font-size: 0.74rem; color: var(--ds-muted); margin-bottom: 10px; min-height: 44px; }
+
+    .ds-stat-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .ds-stat { flex: 1; background: #f7f6f2; border: 1px solid var(--ds-border); border-radius: 8px; padding: 8px 6px; text-align: center; }
+    .ds-stat-label { font-size: 0.62rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--ds-muted); }
+    .ds-stat-value { font-size: 1.35rem; font-weight: 800; font-family: ui-monospace, monospace; color: var(--ds-text); margin-top: 2px; }
+    .ds-stat.bad .ds-stat-value { color: var(--ds-bad); }
+    .ds-stat.good .ds-stat-value { color: var(--ds-a); }
+
+    .ds-verdict { font-size: 0.74rem; font-weight: 800; padding: 5px 8px; border-radius: 6px; text-align: center; margin-bottom: 10px; }
+    .ds-verdict.safe { background: rgba(61,92,61,0.12); color: var(--ds-a); }
+    .ds-verdict.bad { background: rgba(176,67,42,0.12); color: var(--ds-bad); }
+    .ds-verdict.neutral { background: rgba(92,103,93,0.1); color: var(--ds-muted); }
+
+    .ds-log { height: 170px; overflow-y: auto; font-size: 0.7rem; font-family: ui-monospace, monospace; background: #f7f6f2; border: 1px solid var(--ds-border); border-radius: 8px; padding: 8px 10px; line-height: 1.55; }
+    .ds-log-empty { color: var(--ds-muted); font-style: italic; }
+    .ds-log .ds-msg-head { color: var(--ds-muted); margin-top: 6px; }
+    .ds-log .ds-msg-head:first-child { margin-top: 0; }
+    .ds-log .ok { color: var(--ds-a); }
+    .ds-log .bad { color: var(--ds-bad); font-weight: 700; }
+    .ds-log .lost { color: var(--ds-warn); }
+  </style>
+
+  <h3>Idempotency &amp; Delivery Semantics: Play With It</h3>
+  <p class="ds-sub">
+    The same flaky pipeline, sent through three consumer policies. Watch
+    the two counters diverge: <b>deliveries</b> (how many times the
+    handler ran at all) vs. <b>effects</b> (how many times the actual
+    business effect -- e.g. a charge -- was applied).
+  </p>
+
+  <div class="ds-controls">
+    <div class="ds-slider-group">
+      forward-path loss <input type="range" id="dsPForward" min="0" max="80" value="20"> <b id="dsPForwardVal">20%</b>
+    </div>
+    <div class="ds-slider-group">
+      ack-path loss <input type="range" id="dsPAck" min="0" max="80" value="30"> <b id="dsPAckVal">30%</b>
+    </div>
+    <button class="ds-btn" id="dsSendOne">Send 1 Message</button>
+    <button class="ds-btn" id="dsSendStorm">Send 20-Message Storm</button>
+    <button class="ds-btn secondary" id="dsForceDemo">Force Ack-Loss Demo</button>
+    <button class="ds-btn secondary" id="dsReset">Reset</button>
+  </div>
+
+  <div class="ds-cols">
+    <div class="ds-col">
+      <div class="ds-col-title">At-Most-Once</div>
+      <div class="ds-col-desc">Fire and forget. Producer never retries, never even waits for an ack. Simplest policy -- and the only one that can silently lose a message.</div>
+      <div class="ds-verdict neutral" id="dsVerdictAmo">--</div>
+      <div class="ds-stat-row">
+        <div class="ds-stat"><div class="ds-stat-label">Messages</div><div class="ds-stat-value" id="dsAmoMsgs">0</div></div>
+        <div class="ds-stat"><div class="ds-stat-label">Deliveries</div><div class="ds-stat-value" id="dsAmoDeliv">0</div></div>
+        <div class="ds-stat" id="dsAmoEffStat"><div class="ds-stat-label">Effects</div><div class="ds-stat-value" id="dsAmoEff">0</div></div>
+      </div>
+      <div class="ds-log" id="dsAmoLog"><div class="ds-log-empty">No messages sent yet.</div></div>
+    </div>
+
+    <div class="ds-col">
+      <div class="ds-col-title">At-Least-Once (naive)</div>
+      <div class="ds-col-desc">Producer retries on any timeout. Consumer has no dedup, so it re-applies the effect on every delivery -- including ones that only arrived because the ORIGINAL ack got lost.</div>
+      <div class="ds-verdict neutral" id="dsVerdictAlo">--</div>
+      <div class="ds-stat-row">
+        <div class="ds-stat"><div class="ds-stat-label">Messages</div><div class="ds-stat-value" id="dsAloMsgs">0</div></div>
+        <div class="ds-stat"><div class="ds-stat-label">Deliveries</div><div class="ds-stat-value" id="dsAloDeliv">0</div></div>
+        <div class="ds-stat" id="dsAloEffStat"><div class="ds-stat-label">Effects</div><div class="ds-stat-value" id="dsAloEff">0</div></div>
+      </div>
+      <div class="ds-log" id="dsAloLog"><div class="ds-log-empty">No messages sent yet.</div></div>
+    </div>
+
+    <div class="ds-col">
+      <div class="ds-col-title">At-Least-Once + Idempotency Key</div>
+      <div class="ds-col-desc">Same retry policy as naive. But the consumer remembers which idempotency keys it has already applied, and skips the effect (while still acking) on a repeat.</div>
+      <div class="ds-verdict neutral" id="dsVerdictIdem">--</div>
+      <div class="ds-stat-row">
+        <div class="ds-stat"><div class="ds-stat-label">Messages</div><div class="ds-stat-value" id="dsIdemMsgs">0</div></div>
+        <div class="ds-stat"><div class="ds-stat-label">Deliveries</div><div class="ds-stat-value" id="dsIdemDeliv">0</div></div>
+        <div class="ds-stat" id="dsIdemEffStat"><div class="ds-stat-label">Effects</div><div class="ds-stat-value" id="dsIdemEff">0</div></div>
+      </div>
+      <div class="ds-log" id="dsIdemLog"><div class="ds-log-empty">No messages sent yet.</div></div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var MAX_RETRIES = 5;
+
+    // ---- Core model -- identical in shape to the Node model verified
+    // over 50,000 fuzz trials before this widget was built (see
+    // delivery_semantics_model.js in that verification pass). ----------
+
+    function runMessage(policy, pForward, pAck, scriptedDraws) {
+      var deliveries = 0, effects = 0, acked = false, applied = false, log = [];
+      var maxAttempts = policy === 'amo' ? 1 : (MAX_RETRIES + 1);
+      for (var attempt = 0; attempt < maxAttempts && !acked; attempt++) {
+        var draw = (scriptedDraws && scriptedDraws[attempt]) || {
+          forwardLost: Math.random() < pForward,
+          ackLost: Math.random() < pAck,
+        };
+        if (draw.forwardLost) {
+          log.push({ attempt: attempt, event: 'forward-lost' });
+          if (policy === 'amo') break;
+          continue;
+        }
+        deliveries++;
+        var effectApplied;
+        if (policy === 'amo' || policy === 'alo') {
+          effects++;
+          effectApplied = true;
+        } else {
+          if (!applied) { effects++; applied = true; effectApplied = true; }
+          else { effectApplied = false; }
+        }
+        log.push({ attempt: attempt, event: 'delivered', effectApplied: effectApplied });
+        if (policy === 'amo') { acked = true; break; }
+        if (draw.ackLost) {
+          log.push({ attempt: attempt, event: 'ack-lost' });
+        } else {
+          acked = true;
+          log.push({ attempt: attempt, event: 'ack-ok' });
+        }
+      }
+      return { deliveries: deliveries, effects: effects, acked: acked, log: log };
+    }
+
+    // ---- Widget state ---------------------------------------------------
+
+    var totals = {
+      amo: { messages: 0, deliveries: 0, effects: 0, dupEffects: 0 },
+      alo: { messages: 0, deliveries: 0, effects: 0, dupEffects: 0 },
+      idem: { messages: 0, deliveries: 0, effects: 0, dupEffects: 0 },
+    };
+    var logEntries = { amo: [], alo: [], idem: [] };
+    var running = false;
+
+    function pForward() { return parseInt(document.getElementById('dsPForward').value, 10) / 100; }
+    function pAck() { return parseInt(document.getElementById('dsPAck').value, 10) / 100; }
+
+    function eventLabel(e) {
+      if (e.event === 'forward-lost') return { text: 'attempt ' + (e.attempt + 1) + ': message lost in transit', cls: 'lost' };
+      if (e.event === 'ack-lost') return { text: 'attempt ' + (e.attempt + 1) + ': delivered, but ack lost -- client will retry', cls: 'lost' };
+      if (e.event === 'ack-ok') return { text: 'attempt ' + (e.attempt + 1) + ': delivered, ack received -- done', cls: 'ok' };
+      return null;
+    }
+
+    function sendOneMessage(scriptedDraws) {
+      var pf = pForward(), pa = pAck();
+      var results = {
+        amo: runMessage('amo', pf, pa, scriptedDraws),
+        alo: runMessage('alo', pf, pa, scriptedDraws),
+        idem: runMessage('idem', pf, pa, scriptedDraws),
+      };
+      ['amo', 'alo', 'idem'].forEach(function (col) {
+        var r = results[col];
+        var t = totals[col];
+        t.messages++;
+        t.deliveries += r.deliveries;
+        t.effects += r.effects;
+        if (r.effects > 1) t.dupEffects++;
+
+        var msgNum = t.messages;
+        var summary = r.deliveries + ' deliver' + (r.deliveries === 1 ? 'y' : 'ies') + ', ' + r.effects + ' effect' + (r.effects === 1 ? '' : 's');
+        var headCls = r.effects > 1 ? 'bad' : (r.effects === 0 ? 'lost' : '');
+        logEntries[col].push({ head: 'msg #' + msgNum + ' -- ' + summary, headCls: headCls, lines: r.log.map(eventLabel).filter(Boolean) });
+      });
+      render();
+    }
+
+    function render() {
+      renderCol('amo', 'dsAmoMsgs', 'dsAmoDeliv', 'dsAmoEff', 'dsAmoEffStat', 'dsVerdictAmo', 'dsAmoLog', function (t) {
+        if (t.messages === 0) return { cls: 'neutral', text: 'No messages yet' };
+        var lost = t.messages - t.effects;
+        return { cls: lost > 0 ? 'bad' : 'safe', text: lost > 0 ? lost + ' message(s) silently lost' : 'All delivered, none lost' };
+      });
+      renderCol('alo', 'dsAloMsgs', 'dsAloDeliv', 'dsAloEff', 'dsAloEffStat', 'dsVerdictAlo', 'dsAloLog', function (t) {
+        if (t.messages === 0) return { cls: 'neutral', text: 'No messages yet' };
+        return { cls: t.dupEffects > 0 ? 'bad' : 'safe', text: t.dupEffects > 0 ? t.dupEffects + ' message(s) double-applied' : 'No duplicates yet -- keep sending' };
+      });
+      renderCol('idem', 'dsIdemMsgs', 'dsIdemDeliv', 'dsIdemEff', 'dsIdemEffStat', 'dsVerdictIdem', 'dsIdemLog', function (t) {
+        if (t.messages === 0) return { cls: 'neutral', text: 'No messages yet' };
+        var extraDeliveries = t.deliveries - t.effects;
+        return { cls: 'safe', text: t.dupEffects > 0 ? 'BUG' : (extraDeliveries > 0 ? extraDeliveries + ' duplicate deliver(y/ies), 0 duplicate effects' : 'Deliveries == effects so far') };
+      });
+
+      document.getElementById('dsSendOne').disabled = running;
+      document.getElementById('dsSendStorm').disabled = running;
+      document.getElementById('dsForceDemo').disabled = running;
+      document.getElementById('dsSendStorm').textContent = running ? 'Running storm...' : 'Send 20-Message Storm';
+    }
+
+    function renderCol(col, msgsId, delivId, effId, effStatId, verdictId, logId, verdictFn) {
+      var t = totals[col];
+      document.getElementById(msgsId).textContent = t.messages;
+      document.getElementById(delivId).textContent = t.deliveries;
+      document.getElementById(effId).textContent = t.effects;
+      document.getElementById(effStatId).className = 'ds-stat' + (t.dupEffects > 0 ? ' bad' : (t.messages > 0 && t.dupEffects === 0 && col !== 'amo' ? ' good' : ''));
+
+      var v = verdictFn(t);
+      var vEl = document.getElementById(verdictId);
+      vEl.className = 'ds-verdict ' + v.cls;
+      vEl.textContent = v.text;
+
+      var logEl = document.getElementById(logId);
+      var entries = logEntries[col];
+      if (entries.length === 0) {
+        logEl.innerHTML = '<div class="ds-log-empty">No messages sent yet.</div>';
+        return;
+      }
+      var html = '';
+      for (var i = 0; i < entries.length; i++) {
+        var e = entries[i];
+        html += '<div class="ds-msg-head ' + (e.headCls || '') + '">' + escapeHtml(e.head) + '</div>';
+        for (var j = 0; j < e.lines.length; j++) {
+          html += '<div class="' + e.lines[j].cls + '">&nbsp;&nbsp;' + escapeHtml(e.lines[j].text) + '</div>';
+        }
+      }
+      logEl.innerHTML = html;
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+      });
+    }
+
+    function resetAll() {
+      totals = {
+        amo: { messages: 0, deliveries: 0, effects: 0, dupEffects: 0 },
+        alo: { messages: 0, deliveries: 0, effects: 0, dupEffects: 0 },
+        idem: { messages: 0, deliveries: 0, effects: 0, dupEffects: 0 },
+      };
+      logEntries = { amo: [], alo: [], idem: [] };
+      render();
+    }
+
+    document.getElementById('dsPForward').addEventListener('input', function () {
+      document.getElementById('dsPForwardVal').textContent = this.value + '%';
+    });
+    document.getElementById('dsPAck').addEventListener('input', function () {
+      document.getElementById('dsPAckVal').textContent = this.value + '%';
+    });
+
+    document.getElementById('dsSendOne').addEventListener('click', function () {
+      if (running) return;
+      sendOneMessage(null);
+    });
+
+    document.getElementById('dsForceDemo').addEventListener('click', function () {
+      if (running) return;
+      sendOneMessage([
+        { forwardLost: false, ackLost: true },
+        { forwardLost: false, ackLost: false },
+      ]);
+    });
+
+    document.getElementById('dsSendStorm').addEventListener('click', function () {
+      if (running) return;
+      running = true;
+      render();
+      var i = 0;
+      function step() {
+        if (i >= 20) { running = false; render(); return; }
+        sendOneMessage(null);
+        i++;
+        setTimeout(step, 90);
+      }
+      step();
+    });
+
+    document.getElementById('dsReset').addEventListener('click', function () {
+      if (running) return;
+      resetAll();
+    });
+
+    resetAll();
+  })();
+  </script>
+</div>

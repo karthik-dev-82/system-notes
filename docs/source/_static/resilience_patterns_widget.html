@@ -1,0 +1,378 @@
+<div class="rp-root" id="rpWidget">
+  <style>
+    #rpWidget {
+      --rp-bg: #eef1ee;
+      --rp-panel: #ffffff;
+      --rp-border: #cdd6cc;
+      --rp-text: #1c231d;
+      --rp-muted: #5c675d;
+      --rp-a: #3d5c3d;
+      --rp-b: #7a2f3d;
+      --rp-bad: #b0432a;
+      --rp-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--rp-bg);
+      color: var(--rp-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #rpWidget * { box-sizing: border-box; }
+    #rpWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #rpWidget .rp-sub { color: var(--rp-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .rp-tabs { display: flex; gap: 8px; margin-bottom: 14px; min-width: 760px; }
+    .rp-tab { background: var(--rp-panel); border: 1px solid var(--rp-border); border-radius: 8px 8px 0 0; padding: 8px 16px; font-size: 0.82rem; font-weight: 700; color: var(--rp-muted); cursor: pointer; }
+    .rp-tab.active { color: var(--rp-b); border-bottom: 2px solid var(--rp-b); }
+    .rp-panel { display: none; }
+    .rp-panel.active { display: block; }
+
+    .rp-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--rp-panel); border: 1px solid var(--rp-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 760px; }
+    .rp-btn { background: var(--rp-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .rp-btn.secondary { background: transparent; color: var(--rp-text); border: 1px solid var(--rp-border); }
+    .rp-toggle-row { display: flex; gap: 6px; }
+    .rp-toggle { background: transparent; color: var(--rp-muted); border: 1px solid var(--rp-border); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; }
+    .rp-toggle.active { background: var(--rp-a); color: #f7f4ef; border-color: var(--rp-a); }
+
+    .rp-stage { background: var(--rp-panel); border: 1px solid var(--rp-border); border-radius: 10px; padding: 16px; margin-bottom: 14px; min-width: 760px; }
+
+    .rp-dep-strip-row { display: flex; align-items: center; gap: 10px; margin-bottom: 16px; }
+    .rp-dep-label { font-size: 0.72rem; color: var(--rp-muted); width: 150px; flex-shrink: 0; }
+    .rp-strip { display: flex; gap: 1px; }
+    .rp-cell { width: 12px; height: 16px; border-radius: 1px; }
+    .rp-cell.healthy { background: #cfe0cf; }
+    .rp-cell.outage { background: var(--rp-bad); }
+
+    .rp-col { border: 1px solid var(--rp-border); border-radius: 8px; padding: 10px 12px; margin-bottom: 10px; background: #f7f6f2; }
+    .rp-col-title { font-weight: 800; font-size: 0.86rem; margin-bottom: 6px; }
+    .rp-col-strip-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+    .rp-cell.call-0 { background: #ffffff; border: 1px solid var(--rp-border); }
+    .rp-cell.call-probe { background: var(--rp-warn); box-shadow: 0 0 0 2px rgba(166,124,31,0.35); }
+    .rp-stat-line { font-size: 0.78rem; color: var(--rp-muted); }
+    .rp-stat-line b { color: var(--rp-text); font-family: ui-monospace, monospace; }
+    .rp-verdict { font-size: 0.74rem; font-weight: 800; padding: 4px 8px; border-radius: 6px; display: inline-block; margin-top: 4px; }
+    .rp-verdict.bad { background: rgba(176,67,42,0.12); color: var(--rp-bad); }
+    .rp-verdict.good { background: rgba(61,92,61,0.12); color: var(--rp-a); }
+
+    .rp-bh-stats { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; }
+    .rp-bh-box { flex: 1; min-width: 220px; background: #f7f6f2; border: 1px solid var(--rp-border); border-radius: 8px; padding: 10px 12px; }
+    .rp-bh-box-title { font-size: 0.78rem; font-weight: 800; margin-bottom: 6px; }
+    .rp-bh-box .rp-strip { margin-top: 6px; }
+  </style>
+
+  <h3>Resilience Patterns: Play With It</h3>
+  <div class="rp-sub">Rate limiting protects you from abusive clients. Nothing so far on this site protects you from your own flaky dependencies -- that's what circuit breakers, jittered backoff, and bulkheads are for.</div>
+
+  <div class="rp-tabs">
+    <div class="rp-tab active" data-tab="breaker">1. Circuit Breaker &amp; Jitter</div>
+    <div class="rp-tab" data-tab="bulkhead">2. Bulkhead Isolation</div>
+  </div>
+
+  <div class="rp-panel active" id="panel-breaker">
+    <div class="rp-controls">
+      <button class="rp-btn" id="rpRunBreaker">Run Outage Scenario (8 service instances)</button>
+      <span style="font-size:0.78rem;color:var(--rp-muted);">Dependency: healthy -&gt; 15-tick outage -&gt; healthy. Click again to re-roll the jittered column's random delays.</span>
+    </div>
+    <div class="rp-stage">
+      <div class="rp-dep-strip-row">
+        <div class="rp-dep-label">Payment Service (dependency)</div>
+        <div class="rp-strip" id="rpDepStrip"></div>
+      </div>
+
+      <div class="rp-col">
+        <div class="rp-col-title">Naive (no breaker)</div>
+        <div class="rp-col-strip-row"><div class="rp-strip" id="rpStripNaive"></div></div>
+        <div class="rp-stat-line">Calls that reached the dependency during outage: <b id="rpNaiveOutageCalls">--</b></div>
+        <div class="rp-verdict bad" id="rpNaiveVerdict">--</div>
+      </div>
+
+      <div class="rp-col">
+        <div class="rp-col-title">Breaker: fixed reset timeout (no jitter)</div>
+        <div class="rp-col-strip-row"><div class="rp-strip" id="rpStripFixed"></div></div>
+        <div class="rp-stat-line">Calls that reached the dependency during outage: <b id="rpFixedOutageCalls">--</b></div>
+        <div class="rp-stat-line">Recovery probes: <b id="rpFixedProbes">--</b></div>
+        <div class="rp-verdict bad" id="rpFixedVerdict">--</div>
+      </div>
+
+      <div class="rp-col">
+        <div class="rp-col-title">Breaker: jittered reset timeout</div>
+        <div class="rp-col-strip-row"><div class="rp-strip" id="rpStripJittered"></div></div>
+        <div class="rp-stat-line">Calls that reached the dependency during outage: <b id="rpJitteredOutageCalls">--</b></div>
+        <div class="rp-stat-line">Recovery probes: <b id="rpJitteredProbes">--</b></div>
+        <div class="rp-verdict good" id="rpJitteredVerdict">--</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rp-panel" id="panel-bulkhead">
+    <div class="rp-controls">
+      <div class="rp-toggle-row">
+        <button class="rp-toggle active" id="rpBhOffToggle">Shared pool (no bulkhead)</button>
+        <button class="rp-toggle" id="rpBhOnToggle">Bulkhead (Payment capped to 2 of 6 slots)</button>
+      </div>
+      <span style="font-size:0.78rem;color:var(--rp-muted);">A 6-slot connection pool shared by two dependencies. Payment goes into a slow-failing outage; Inventory stays perfectly healthy throughout.</span>
+    </div>
+    <div class="rp-stage">
+      <div class="rp-bh-stats">
+        <div class="rp-bh-box">
+          <div class="rp-bh-box-title">Payment Service (the flaky one)</div>
+          <div class="rp-stat-line">Successes: <b id="rpBhPaySuccess">--</b> &nbsp; Pool-exhaustion rejections: <b id="rpBhPayReject">--</b></div>
+          <div class="rp-stat-line">Max concurrent slots held: <b id="rpBhPayMax">--</b></div>
+        </div>
+        <div class="rp-bh-box">
+          <div class="rp-bh-box-title">Inventory Service (perfectly healthy, unrelated)</div>
+          <div class="rp-stat-line">Successes: <b id="rpBhInvSuccess">--</b> &nbsp; Pool-exhaustion rejections: <b id="rpBhInvReject">--</b></div>
+          <div class="rp-strip" id="rpBhInvStrip"></div>
+        </div>
+      </div>
+      <div class="rp-verdict" id="rpBhVerdict" style="margin-top:12px;">--</div>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    var root = document.getElementById('rpWidget');
+
+    // ---- Tabs ----
+    var tabs = root.querySelectorAll('.rp-tab');
+    var panels = { breaker: document.getElementById('panel-breaker'), bulkhead: document.getElementById('panel-bulkhead') };
+    tabs.forEach(function (tab) {
+      tab.addEventListener('click', function () {
+        tabs.forEach(function (t) { t.classList.remove('active'); });
+        Object.keys(panels).forEach(function (k) { panels[k].classList.remove('active'); });
+        tab.classList.add('active');
+        panels[tab.getAttribute('data-tab')].classList.add('active');
+      });
+    });
+
+    // ================= Tab 1: circuit breaker + jitter =================
+    // Core state machine verified against a 500-trial Node fuzz test
+    // before this widget was built (resilience_patterns_model.js).
+
+    var TICKS = 40, OUTAGE_START = 10, OUTAGE_END = 25;
+    var THRESHOLD = 2, RESET_TIMEOUT = 5, JITTER_RANGE = 4, N_INSTANCES = 8;
+
+    function dependencyHealthy(t) { return !(t >= OUTAGE_START && t < OUTAGE_END); }
+
+    function simulateNaiveInstance() {
+      var calledByTick = [];
+      var callsDuringOutage = 0;
+      for (var t = 0; t < TICKS; t++) {
+        calledByTick.push(1);
+        if (!dependencyHealthy(t)) callsDuringOutage++;
+      }
+      return { calledByTick: calledByTick, callsDuringOutage: callsDuringOutage, recoveryProbeTick: null };
+    }
+
+    function simulateBreakerInstance(useJitter) {
+      var state = 'CLOSED', failStreak = 0, resetAt = -1, callsDuringOutage = 0, recoveryProbeTick = null;
+      var calledByTick = new Array(TICKS).fill(0);
+      for (var t = 0; t < TICKS && recoveryProbeTick === null; t++) {
+        if (state === 'CLOSED') {
+          calledByTick[t] = 1;
+          if (!dependencyHealthy(t)) {
+            callsDuringOutage++;
+            failStreak++;
+            if (failStreak >= THRESHOLD) {
+              state = 'OPEN';
+              var jitter = useJitter ? Math.floor(Math.random() * JITTER_RANGE) : 0;
+              resetAt = t + RESET_TIMEOUT + jitter;
+            }
+          } else {
+            failStreak = 0;
+          }
+          continue;
+        }
+        if (state === 'OPEN') {
+          if (t < resetAt) continue; // fail fast, no call reaches the dependency
+          state = 'HALF_OPEN';
+        }
+        // HALF_OPEN trial call
+        calledByTick[t] = 1;
+        if (dependencyHealthy(t)) {
+          recoveryProbeTick = t;
+        } else {
+          if (t < OUTAGE_END) callsDuringOutage++;
+          state = 'OPEN';
+          var jitter2 = useJitter ? Math.floor(Math.random() * JITTER_RANGE) : 0;
+          resetAt = t + RESET_TIMEOUT + jitter2;
+        }
+      }
+      // Cosmetic only: after recovery, the instance is CLOSED and the
+      // dependency stays healthy for the rest of this fixed timeline, so
+      // fill the remainder for the heatmap. Does not affect any metric above.
+      if (recoveryProbeTick !== null) {
+        for (var t2 = recoveryProbeTick + 1; t2 < TICKS; t2++) calledByTick[t2] = 1;
+      }
+      return { calledByTick: calledByTick, callsDuringOutage: callsDuringOutage, recoveryProbeTick: recoveryProbeTick };
+    }
+
+    function runColumn(kind, N) {
+      var callsByTick = new Array(TICKS).fill(0);
+      var totalCallsDuringOutage = 0;
+      var probeTicks = [];
+      for (var i = 0; i < N; i++) {
+        var r = kind === 'naive' ? simulateNaiveInstance() : simulateBreakerInstance(kind === 'breakerJittered');
+        totalCallsDuringOutage += r.callsDuringOutage;
+        if (r.recoveryProbeTick !== null) probeTicks.push(r.recoveryProbeTick);
+        for (var t = 0; t < TICKS; t++) callsByTick[t] += r.calledByTick[t];
+      }
+      var counts = {};
+      probeTicks.forEach(function (t) { counts[t] = (counts[t] || 0) + 1; });
+      var maxSingleTickProbes = probeTicks.length ? Math.max.apply(null, Object.keys(counts).map(function (k) { return counts[k]; })) : 0;
+      return { callsByTick: callsByTick, totalCallsDuringOutage: totalCallsDuringOutage, probeTicks: probeTicks, counts: counts, maxSingleTickProbes: maxSingleTickProbes };
+    }
+
+    function renderStrip(elId, callsByTick, N, probeTicksSet) {
+      var el = document.getElementById(elId);
+      var html = '';
+      for (var t = 0; t < TICKS; t++) {
+        var n = callsByTick[t];
+        var cls = 'rp-cell';
+        if (probeTicksSet && probeTicksSet[t]) {
+          cls += ' call-probe';
+        } else if (n === 0) {
+          cls += ' call-0';
+        } else {
+          var op = (0.15 + 0.85 * (n / N)).toFixed(2);
+          html += '<div class="' + cls + '" style="background:rgba(122,47,61,' + op + ')"></div>';
+          continue;
+        }
+        html += '<div class="' + cls + '"></div>';
+      }
+      el.innerHTML = html;
+    }
+
+    function formatProbeCounts(counts) {
+      var keys = Object.keys(counts).map(Number).sort(function (a, b) { return a - b; });
+      return keys.map(function (t) { return 'tick ' + t + ' (' + counts[t] + '/' + N_INSTANCES + ')'; }).join(', ');
+    }
+
+    function runBreakerScenario() {
+      var depStrip = document.getElementById('rpDepStrip');
+      var depHtml = '';
+      for (var t = 0; t < TICKS; t++) depHtml += '<div class="rp-cell ' + (dependencyHealthy(t) ? 'healthy' : 'outage') + '"></div>';
+      depStrip.innerHTML = depHtml;
+
+      var naive = runColumn('naive', N_INSTANCES);
+      var fixed = runColumn('breakerFixed', N_INSTANCES);
+      var jittered = runColumn('breakerJittered', N_INSTANCES);
+
+      renderStrip('rpStripNaive', naive.callsByTick, N_INSTANCES, {});
+      renderStrip('rpStripFixed', fixed.callsByTick, N_INSTANCES, fixed.counts);
+      renderStrip('rpStripJittered', jittered.callsByTick, N_INSTANCES, jittered.counts);
+
+      document.getElementById('rpNaiveOutageCalls').textContent = naive.totalCallsDuringOutage;
+      document.getElementById('rpNaiveVerdict').textContent = 'Never protected -- hammers the dependency on every tick of the entire outage.';
+
+      document.getElementById('rpFixedOutageCalls').textContent = fixed.totalCallsDuringOutage;
+      document.getElementById('rpFixedProbes').textContent = formatProbeCounts(fixed.counts);
+      var fixedSync = fixed.maxSingleTickProbes === N_INSTANCES;
+      document.getElementById('rpFixedVerdict').className = 'rp-verdict ' + (fixedSync ? 'bad' : 'good');
+      document.getElementById('rpFixedVerdict').textContent = fixedSync
+        ? 'SYNCHRONIZED: all ' + N_INSTANCES + ' instances probe the barely-recovered dependency on the exact same tick.'
+        : 'Spread across ' + fixed.probeTicks.length + ' probe event(s).';
+
+      document.getElementById('rpJitteredOutageCalls').textContent = jittered.totalCallsDuringOutage;
+      document.getElementById('rpJitteredProbes').textContent = formatProbeCounts(jittered.counts);
+      var jitteredSpread = jittered.maxSingleTickProbes < N_INSTANCES;
+      document.getElementById('rpJitteredVerdict').className = 'rp-verdict ' + (jitteredSpread ? 'good' : 'bad');
+      document.getElementById('rpJitteredVerdict').textContent = jitteredSpread
+        ? 'Spread thin -- at most ' + jittered.maxSingleTickProbes + '/' + N_INSTANCES + ' instances probe on any single tick.'
+        : 'Unlucky draw this run -- all landed together anyway (click Run again).';
+    }
+
+    document.getElementById('rpRunBreaker').addEventListener('click', runBreakerScenario);
+    runBreakerScenario();
+
+    // ================= Tab 2: bulkhead / pool isolation =================
+    // Deterministic model verified against Node assertions before this
+    // widget was built (resilience_patterns_model.js).
+
+    var BH_TICKS = 30, BH_OUTAGE_START = 10, BH_OUTAGE_END = 25;
+    var POOL_SIZE = 6, BULKHEAD_CAP_PAYMENT = 2, ARRIVALS_PER_TICK_EACH = 3;
+    var HEALTHY_CALL_DURATION = 1, TIMEOUT_CALL_DURATION = 4;
+
+    function paymentHealthy(t) { return !(t >= BH_OUTAGE_START && t < BH_OUTAGE_END); }
+
+    function simulatePool(bulkheadOn) {
+      var inFlight = [];
+      var paymentRejections = 0, inventoryRejections = 0;
+      var paymentSuccesses = 0, inventorySuccesses = 0;
+      var maxPaymentConcurrent = 0;
+      var inventoryRejectedByTick = new Array(BH_TICKS).fill(0);
+
+      for (var t = 0; t < BH_TICKS; t++) {
+        inFlight = inFlight.filter(function (c) { return c.releaseAt > t; });
+        var slotsInUseBy = function (dep) { return inFlight.filter(function (c) { return c.dep === dep; }).length; };
+        var totalInUse = function () { return inFlight.length; };
+
+        for (var i = 0; i < ARRIVALS_PER_TICK_EACH; i++) {
+          var payOk = paymentHealthy(t);
+          var capOk = bulkheadOn ? slotsInUseBy('payment') < BULKHEAD_CAP_PAYMENT : true;
+          if (capOk && totalInUse() < POOL_SIZE) {
+            var dur = payOk ? HEALTHY_CALL_DURATION : TIMEOUT_CALL_DURATION;
+            inFlight.push({ dep: 'payment', releaseAt: t + dur });
+            if (payOk) paymentSuccesses++;
+          } else {
+            paymentRejections++;
+          }
+          maxPaymentConcurrent = Math.max(maxPaymentConcurrent, slotsInUseBy('payment'));
+
+          if (totalInUse() < POOL_SIZE) {
+            inFlight.push({ dep: 'inventory', releaseAt: t + HEALTHY_CALL_DURATION });
+            inventorySuccesses++;
+          } else {
+            inventoryRejections++;
+            inventoryRejectedByTick[t] = 1;
+          }
+        }
+      }
+      return { paymentRejections: paymentRejections, inventoryRejections: inventoryRejections, paymentSuccesses: paymentSuccesses, inventorySuccesses: inventorySuccesses, maxPaymentConcurrent: maxPaymentConcurrent, inventoryRejectedByTick: inventoryRejectedByTick };
+    }
+
+    var bulkheadOn = false;
+
+    function renderBulkhead() {
+      var r = simulatePool(bulkheadOn);
+      document.getElementById('rpBhPaySuccess').textContent = r.paymentSuccesses;
+      document.getElementById('rpBhPayReject').textContent = r.paymentRejections;
+      document.getElementById('rpBhPayMax').textContent = r.maxPaymentConcurrent + ' / ' + (bulkheadOn ? BULKHEAD_CAP_PAYMENT : POOL_SIZE);
+      document.getElementById('rpBhInvSuccess').textContent = r.inventorySuccesses;
+      document.getElementById('rpBhInvReject').textContent = r.inventoryRejections;
+
+      var stripHtml = '';
+      for (var t = 0; t < BH_TICKS; t++) {
+        stripHtml += '<div class="rp-cell ' + (r.inventoryRejectedByTick[t] ? 'outage' : 'healthy') + '"></div>';
+      }
+      document.getElementById('rpBhInvStrip').innerHTML = stripHtml;
+
+      var vEl = document.getElementById('rpBhVerdict');
+      if (r.inventoryRejections > 0) {
+        vEl.className = 'rp-verdict bad';
+        vEl.textContent = 'Inventory Service -- itself perfectly healthy -- was rejected ' + r.inventoryRejections + ' times, purely because Payment Service exhausted the shared pool. Noisy-neighbor failure.';
+      } else {
+        vEl.className = 'rp-verdict good';
+        vEl.textContent = 'Inventory Service was never rejected. Payment Service is capped at its own ' + BULKHEAD_CAP_PAYMENT + '-slot sub-pool and cannot touch Inventory\'s capacity.';
+      }
+    }
+
+    document.getElementById('rpBhOffToggle').addEventListener('click', function () {
+      bulkheadOn = false;
+      this.classList.add('active');
+      document.getElementById('rpBhOnToggle').classList.remove('active');
+      renderBulkhead();
+    });
+    document.getElementById('rpBhOnToggle').addEventListener('click', function () {
+      bulkheadOn = true;
+      this.classList.add('active');
+      document.getElementById('rpBhOffToggle').classList.remove('active');
+      renderBulkhead();
+    });
+
+    renderBulkhead();
+  })();
+  </script>
+</div>

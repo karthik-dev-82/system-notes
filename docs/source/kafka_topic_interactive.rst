@@ -408,6 +408,12 @@ concrete -- same tradeoff, same "which side gets to keep serving"
 question, worked through on a real 2-node store instead of a Kafka
 partition.
 
+See :doc:`delivery_semantics_interactive` for what the offsets above
+are actually *for*: at-most-once vs. at-least-once vs.
+effectively-once delivery, worked through with a live
+deliveries-vs-effects counter, plus how commit-before-vs-after-processing
+timing and Kafka's idempotent producer setting fit into that picture.
+
 See :doc:`architectural_patterns` for where this fits in the bigger
 picture -- Kafka is this site's deepest worked example of the
 event-driven shape, where producers and consumers are decoupled in

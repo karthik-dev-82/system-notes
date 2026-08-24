@@ -124,6 +124,7 @@ worth writing down and coming back to.
    consistent_hashing_interactive
    hash_load_balancer
    kafka_topic_interactive
+   delivery_semantics_interactive
    priority_inversion_interactive
 
 .. toctree::
@@ -147,6 +148,7 @@ worth writing down and coming back to.
    raft_consensus_interactive
    proxy_servers_interactive
    cdn_interactive
+   resilience_patterns_interactive
    url_shortener_interactive
 
 .. toctree::
@@ -490,6 +492,9 @@ Concurrency & Distributed Systems
    * - :doc:`kafka_topic_interactive`
      - Interactive Kafka topic -- send keyed readings, watch partition routing, poll with consumer groups, rebalance live -- plus kill the leader and watch real replication and clean vs. unclean election
      - partitions, consumer groups, offsets, rebalancing, replay, ISR, leader election, unclean.leader.election.enable
+   * - :doc:`delivery_semantics_interactive`
+     - Play With It: at-most-once/at-least-once/idempotent delivery run side by side on the same flaky pipeline -- deliveries vs. effects tracked as two separate numbers
+     - idempotency key, at-least-once, exactly-once, effectively-once, Kafka offset commit timing
    * - :doc:`priority_inversion_interactive`
      - Interactive priority inversion -- the bug that nearly stranded Mars Pathfinder, and the priority-inheritance fix, side by side
      - preemption, mutex, priority inheritance, real-time scheduling
@@ -547,6 +552,9 @@ System Design
    * - :doc:`cdn_interactive`
      - Play With It: the real thundering-herd/request-coalescing mechanism on a cold edge POP, and cache-key composition's two opposite failure modes, fuzz-verified
      - CDN, edge POP, thundering herd, request coalescing, cache key, origin pull
+   * - :doc:`resilience_patterns_interactive`
+     - Play With It: a real closed/open/half-open circuit breaker across 8 service instances (watch fixed vs. jittered reset timeouts either synchronize or spread a recovery-probe herd), plus bulkhead pool isolation protecting a healthy dependency from a flaky one
+     - circuit breaker, half-open probe, jittered backoff, thundering herd, bulkhead, noisy neighbor
    * - :doc:`url_shortener_interactive`
      - Case study: a worked "design a URL shortener" interview question end to end -- capacity math, real base62/hash short-code generation with live collision handling, and where sharding, caching, rate limiting, and consensus each actually fit
      - short-code generation, base62, capacity estimation, system design synthesis
