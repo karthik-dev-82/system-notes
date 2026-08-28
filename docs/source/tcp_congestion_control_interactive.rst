@@ -199,6 +199,35 @@ collapsing too small, and it's exactly the branch the widget above
 simulates (using ``cwnd >= 4`` as the cutoff for "enough packets in
 flight").
 
+Worked Example: One Download, Start to Finish
+--------------------------------------------------------
+
+Watch a single connection move through all four phases in order.
+
+The connection opens and ``cwnd`` starts small, doubling every round
+trip: 1, 2, 4, 8, 16 segments -- slow start, growing fast because the
+sender has no idea yet how much room the network actually has. Say
+the real capacity turns out to be around 20 segments; ``ssthresh``
+gets set near there, and once ``cwnd`` reaches it, growth drops to +1
+per round trip: 17, 18, 19, 20 -- congestion avoidance, easing off
+because overshooting from here is expensive.
+
+A little further in, one segment is lost -- maybe another device on
+the same link briefly saturated it. Three duplicate ACKs arrive for
+that segment almost immediately (there was plenty already in flight to
+generate them), so the sender doesn't wait for a timeout: it resends
+the lost segment and halves ``cwnd`` in the same move -- fast
+retransmit, landing back around 10. Growth resumes the same +1-per-RTT
+climb from there, the same story as before, just from a lower floor.
+
+If instead that same loss had happened right at the start of a small
+burst, with nothing in flight behind it to generate duplicate ACKs,
+the sender would have had no early warning at all -- it would sit
+waiting out the full retransmission timer and then collapse ``cwnd``
+all the way back to 1, restarting slow start from scratch. Same lost
+segment, same network, a much heavier recovery -- purely because there
+wasn't enough evidence in flight to catch it early.
+
 What This Model Leaves Out
 ------------------------------------
 
