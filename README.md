@@ -53,6 +53,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
 | 🎮 **[8b/10b Line Encoding (Interactive)](docs/source/8b10b_encoding_interactive.rst)** | Interactive 8b/10b-style line coding -- send a byte, watch running disparity keep the wire from ever going flat | running disparity, DC balance, clock recovery, sub-block encoding |
 | 🎮 **[CAN Bus Arbitration (Interactive)](docs/source/can_arbitration_interactive.rst)** | Interactive CAN bus arbitration -- pick contending nodes, watch the real bit-by-bit priority race | dominant/recessive bits, wired-AND, bitwise arbitration, priority |
+| 🎮 **[Watchdog Timer (Interactive)](docs/source/watchdog_timer_interactive.rst)** | Interactive watchdog timer -- pet it to stay alive, freeze the program and watch it fire, switch to a real window watchdog's too-early-pet fault | classic vs. window watchdog, petting, timeout, forced reset |
 | 🎮 **[GStreamer Pipelines (Interactive)](docs/source/gstreamer_pipeline_interactive.rst)** | Interactive GStreamer pipeline builder -- chain elements together, real caps negotiation, decodebin's dynamic pad | pads, caps negotiation, decodebin, pipeline states |
 | 🎮 **[Threads & Sync (Interactive)](docs/source/threads_sync_interactive.rst)** | Interactive threads & synchronization -- step through race conditions and deadlock yourself | mutex, semaphore, condition variable, race condition, deadlock |
 | 🧵 **[Threads, Processes & Synchronization](docs/source/threads_processes_synchronization.rst)** | Threads, processes, and synchronization primitives in C++ | mutex, semaphore, condition variable, deadlock, race conditions |
@@ -179,6 +180,7 @@ system-notes/
         ├── image_formats.rst
         ├── 8b10b_encoding_interactive.rst
         ├── can_arbitration_interactive.rst
+        ├── watchdog_timer_interactive.rst
         ├── gstreamer_pipeline_interactive.rst
         ├── threads_sync_interactive.rst
         ├── threads_processes_synchronization.rst

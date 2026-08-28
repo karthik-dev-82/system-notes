@@ -1,0 +1,227 @@
+<div class="wd-root" id="wdWidget">
+  <style>
+    #wdWidget {
+      --wd-bg: #eef1ee;
+      --wd-panel: #ffffff;
+      --wd-border: #cdd6cc;
+      --wd-text: #1c231d;
+      --wd-muted: #5c675d;
+      --wd-a: #3d5c3d;
+      --wd-b: #7a2f3d;
+      --wd-bad: #b0432a;
+      --wd-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--wd-bg);
+      color: var(--wd-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #wdWidget * { box-sizing: border-box; }
+    #wdWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #wdWidget .wd-sub { color: var(--wd-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .wd-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; background: var(--wd-panel); border: 1px solid var(--wd-border); border-radius: 10px; padding: 12px 16px; margin-bottom: 14px; min-width: 700px; }
+    .wd-toggle-row { display: flex; gap: 6px; }
+    .wd-toggle { background: transparent; color: var(--wd-muted); border: 1px solid var(--wd-border); border-radius: 7px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; }
+    .wd-toggle.active { background: var(--wd-a); color: #f7f4ef; border-color: var(--wd-a); }
+    .wd-btn { background: var(--wd-b); color: #f7f4ef; border: none; border-radius: 7px; padding: 8px 16px; font-weight: 700; font-size: 0.85rem; cursor: pointer; }
+    .wd-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .wd-btn.secondary { background: transparent; color: var(--wd-text); border: 1px solid var(--wd-border); }
+    .wd-btn.danger { background: var(--wd-bad); }
+
+    .wd-stage { background: var(--wd-panel); border: 1px solid var(--wd-border); border-radius: 10px; padding: 20px; margin-bottom: 14px; min-width: 700px; text-align: center; }
+    .wd-countdown { font-family: ui-monospace, monospace; font-size: 4rem; font-weight: 800; line-height: 1; margin-bottom: 4px; transition: color 0.2s; }
+    .wd-countdown.ok { color: var(--wd-a); }
+    .wd-countdown.warn { color: var(--wd-warn); }
+    .wd-countdown.danger { color: var(--wd-bad); }
+    .wd-status-line { font-size: 0.9rem; color: var(--wd-muted); margin-bottom: 16px; min-height: 22px; }
+    .wd-status-line.frozen { color: var(--wd-bad); font-weight: 700; }
+
+    .wd-bar { display: flex; gap: 3px; justify-content: center; margin-bottom: 16px; }
+    .wd-seg { width: 30px; height: 22px; border-radius: 3px; border: 1px solid var(--wd-border); background: #f7f6f2; display: flex; align-items: center; justify-content: center; font-size: 0.68rem; font-family: ui-monospace, monospace; color: var(--wd-muted); }
+    .wd-seg.forbidden { background: repeating-linear-gradient(45deg, #fbe4de, #fbe4de 4px, #f7d9d0 4px, #f7d9d0 8px); border-color: var(--wd-bad); color: var(--wd-bad); }
+    .wd-seg.valid { background: rgba(61,92,61,0.08); border-color: var(--wd-a); }
+    .wd-seg.current { outline: 3px solid var(--wd-b); outline-offset: 1px; }
+
+    .wd-stat-row { display: flex; gap: 24px; justify-content: center; font-size: 0.85rem; color: var(--wd-muted); margin-bottom: 4px; }
+    .wd-stat-row b { color: var(--wd-text); font-family: ui-monospace, monospace; font-size: 1.05rem; }
+
+    .wd-log { height: 130px; overflow-y: auto; font-size: 0.74rem; font-family: ui-monospace, monospace; background: #f7f6f2; border: 1px solid var(--wd-border); border-radius: 8px; padding: 8px 10px; line-height: 1.55; text-align: left; }
+    .wd-log div.ok { color: var(--wd-a); }
+    .wd-log div.bad { color: var(--wd-bad); font-weight: 700; }
+    .wd-log div.info { color: var(--wd-muted); }
+  </style>
+
+  <h3>Watchdog Timer: Play With It</h3>
+  <div class="wd-sub">A real countdown, ticking in real time. Keep it alive by petting it -- or freeze the program and watch it fire.</div>
+
+  <div class="wd-controls">
+    <div class="wd-toggle-row">
+      <button class="wd-toggle active" id="wdModeClassic">Classic Watchdog</button>
+      <button class="wd-toggle" id="wdModeWindow">Window Watchdog</button>
+    </div>
+    <button class="wd-btn" id="wdPetBtn">Pet the Watchdog</button>
+    <button class="wd-btn danger" id="wdFreezeBtn">Freeze Program</button>
+    <button class="wd-btn secondary" id="wdResetBtn">Reset Demo</button>
+  </div>
+
+  <div class="wd-stage">
+    <div class="wd-countdown ok" id="wdCountdown">8</div>
+    <div class="wd-status-line" id="wdStatus">Program running normally. Click "Pet the Watchdog" before it hits 0.</div>
+    <div class="wd-bar" id="wdBar"></div>
+    <div class="wd-stat-row">
+      <div>valid pets: <b id="wdValidPets">0</b></div>
+      <div>rejected pets (too early): <b id="wdRejectedPets">0</b></div>
+      <div>resets fired: <b id="wdResets">0</b></div>
+    </div>
+  </div>
+
+  <div class="wd-log" id="wdLog"><div class="info">Timeout = 8 ticks (~0.4s each). Window mode's valid pet range is highlighted green below the countdown; the hatched red zone means "too soon -- petting there is itself a fault."</div></div>
+
+  <script>
+  (function () {
+    var root = document.getElementById('wdWidget');
+
+    // ---- Core state machine -- verified against a Node fuzz/assertion
+    // pass before this widget was built (watchdog_model.js): classic pet
+    // always succeeds; window pet succeeds only within [1, WINDOW_MAX]
+    // and faults as "too-early" above it; an un-petted counter reaching 0
+    // always faults as "timeout". ------------------------------------
+
+    var TIMEOUT = 8;
+    var WINDOW_MAX = 5;
+    var TICK_MS = 400;
+
+    var mode = 'classic';
+    var counter = TIMEOUT;
+    var frozen = false;
+    var stats = { validPets: 0, rejectedPets: 0, resets: 0 };
+    var timer = null;
+
+    function classicPet() { return { ok: true }; }
+    function windowPet(c) { return c > WINDOW_MAX ? { ok: false, reason: 'too-early' } : { ok: true }; }
+
+    function logTo(msg, cls) {
+      var el = document.getElementById('wdLog');
+      var d = document.createElement('div');
+      if (cls) d.className = cls;
+      d.textContent = msg;
+      el.appendChild(d);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    function renderBar() {
+      var bar = document.getElementById('wdBar');
+      var html = '';
+      for (var v = TIMEOUT; v >= 1; v--) {
+        var cls = 'wd-seg';
+        if (mode === 'window') cls += (v > WINDOW_MAX ? ' forbidden' : ' valid');
+        if (v === counter) cls += ' current';
+        html += '<div class="' + cls + '">' + v + '</div>';
+      }
+      bar.innerHTML = html;
+    }
+
+    function render() {
+      var cd = document.getElementById('wdCountdown');
+      cd.textContent = counter;
+      cd.className = 'wd-countdown ' + (counter <= 2 ? 'danger' : counter <= 4 ? 'warn' : 'ok');
+
+      var status = document.getElementById('wdStatus');
+      if (frozen) {
+        status.textContent = 'Program is FROZEN -- it cannot pet the watchdog anymore. Counting down to a forced reset...';
+        status.className = 'wd-status-line frozen';
+      } else if (mode === 'window' && counter > WINDOW_MAX) {
+        status.textContent = 'Too early to pet -- petting now would itself trigger a fault. Wait for the green zone.';
+        status.className = 'wd-status-line';
+      } else {
+        status.textContent = 'Program running normally. ' + (mode === 'window' ? 'Pet while in the green zone.' : 'Pet anytime before it hits 0.');
+        status.className = 'wd-status-line';
+      }
+
+      document.getElementById('wdValidPets').textContent = stats.validPets;
+      document.getElementById('wdRejectedPets').textContent = stats.rejectedPets;
+      document.getElementById('wdResets').textContent = stats.resets;
+      document.getElementById('wdPetBtn').disabled = frozen;
+
+      renderBar();
+    }
+
+    function doReset(reason) {
+      stats.resets++;
+      logTo((reason === 'timeout' ? 'TIMEOUT -- no pet received in time.' : 'TOO-EARLY PET -- petted outside the valid window.') + ' Forced reset #' + stats.resets + '.', 'bad');
+      counter = TIMEOUT;
+      frozen = false;
+      render();
+    }
+
+    function tick() {
+      if (frozen) {
+        // frozen program cannot pet; countdown proceeds regardless
+      }
+      counter--;
+      if (counter <= 0) {
+        doReset('timeout');
+        return;
+      }
+      render();
+    }
+
+    function pet() {
+      if (frozen) return; // a frozen program cannot call pet() at all
+      var result = mode === 'window' ? windowPet(counter) : classicPet();
+      if (result.ok) {
+        stats.validPets++;
+        logTo('Pet accepted at counter=' + counter + '. Reset to ' + TIMEOUT + '.', 'ok');
+        counter = TIMEOUT;
+        render();
+      } else {
+        stats.rejectedPets++;
+        doReset('too-early');
+      }
+    }
+
+    document.getElementById('wdPetBtn').addEventListener('click', pet);
+
+    document.getElementById('wdFreezeBtn').addEventListener('click', function () {
+      frozen = !frozen;
+      if (frozen) {
+        logTo('Program frozen -- simulating a crash/hang. It can no longer pet.', 'bad');
+      } else {
+        logTo('Program un-frozen (demo cancelled without waiting for the reset).', 'info');
+      }
+      render();
+    });
+
+    document.getElementById('wdResetBtn').addEventListener('click', function () {
+      counter = TIMEOUT;
+      frozen = false;
+      stats = { validPets: 0, rejectedPets: 0, resets: 0 };
+      document.getElementById('wdLog').innerHTML = '<div class="info">Demo reset.</div>';
+      render();
+    });
+
+    function setMode(newMode) {
+      mode = newMode;
+      counter = TIMEOUT;
+      frozen = false;
+      stats = { validPets: 0, rejectedPets: 0, resets: 0 };
+      document.getElementById('wdModeClassic').classList.toggle('active', mode === 'classic');
+      document.getElementById('wdModeWindow').classList.toggle('active', mode === 'window');
+      document.getElementById('wdLog').innerHTML = mode === 'window'
+        ? '<div class="info">Window mode: valid pets only in [1,' + WINDOW_MAX + ']. Petting above ' + WINDOW_MAX + ' faults immediately as "too early".</div>'
+        : '<div class="info">Classic mode: pet anytime before the counter hits 0.</div>';
+      render();
+    }
+
+    document.getElementById('wdModeClassic').addEventListener('click', function () { setMode('classic'); });
+    document.getElementById('wdModeWindow').addEventListener('click', function () { setMode('window'); });
+
+    timer = setInterval(tick, TICK_MS);
+    render();
+  })();
+  </script>
+</div>

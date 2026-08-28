@@ -206,3 +206,7 @@ cascading-failure risk these patterns exist to contain.
 :doc:`delivery_semantics_interactive` for what happens on the
 *producer* side when a retry -- the same mechanism a circuit breaker's
 half-open probe uses -- meets a non-idempotent handler.
+:doc:`watchdog_timer_interactive` for the hardware-level ancestor of
+this page's whole idea -- detect that something stopped responding,
+then force a recovery -- one layer down, in a single embedded device
+instead of a distributed system.

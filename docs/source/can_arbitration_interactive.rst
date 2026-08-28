@@ -208,3 +208,8 @@ See :doc:`8b10b_encoding_interactive` for the other Hardware Protocols
 page in this pair -- a completely different real mechanism (line
 encoding for clock recovery) living at the same physical layer this
 page's bus arbitration operates on.
+
+See :doc:`watchdog_timer_interactive` for another embedded-systems
+reliability mechanism from the same corner of hardware -- arbitration
+decides who gets the bus; a watchdog decides what happens when a node
+on it stops responding at all.

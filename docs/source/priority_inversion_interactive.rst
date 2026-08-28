@@ -242,3 +242,12 @@ Related Terms From the Same Topic
      - Hard real-time: missing a deadline is a failure (airbags,
        pacemakers). Soft real-time: missing a deadline just degrades
        quality (video streaming, games)
+
+See Also
+--------------
+
+See :doc:`watchdog_timer_interactive` for the other classic embedded
+fault-tolerance mechanism -- where this page catches one specific
+scheduling bug (a low-priority task blocking a high-priority one), a
+watchdog catches the general case of "something hung and nobody
+noticed," regardless of why.

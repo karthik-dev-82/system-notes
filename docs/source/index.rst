@@ -93,6 +93,7 @@ worth writing down and coming back to.
 
    8b10b_encoding_interactive
    can_arbitration_interactive
+   watchdog_timer_interactive
 
 .. toctree::
    :hidden:
@@ -418,6 +419,9 @@ Hardware Protocols
    * - :doc:`can_arbitration_interactive`
      - Interactive CAN bus arbitration -- pick contending nodes, watch the real bit-by-bit priority race
      - dominant/recessive bits, wired-AND, bitwise arbitration, priority
+   * - :doc:`watchdog_timer_interactive`
+     - Play With It: a real countdown you pet or freeze yourself, plus a real window watchdog whose too-early-pet fault is fuzz-verified
+     - watchdog timer, petting, window watchdog, forced reset, embedded reliability
 
 Media & Streaming
 -------------------------
