@@ -16,6 +16,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🖥️ **[.bashrc Reference](docs/source/bashrc_reference.rst)** | Shell setup, aliases & functions | `.bashrc`, aliases, `__setprompt`, `ssh-agent` |
 | 📊 **[System Monitoring Commands](docs/source/system_monitoring_commands.rst)** | Performance, Diagnostics & Resource Analysis | `htop`, `vmstat`, `iotop`, `iostat`, `ss`, `pidstat` |
 | ⚡ **[Developer Commands](docs/source/developer_commands.rst)** | Daily Engineering Workflows & Tooling | `docker`, `git`, `rsync`, `aria2c`, `find`, `grep` |
+| 🎮 **[Poe the Poet (Interactive)](docs/source/poe_the_poet_interactive.rst)** | A real Poe the Poet task-resolution simulator -- task types, arg passthrough, sequence fail-fast, hidden tasks | poe, pyproject.toml, cmd/shell/script/expr, sequence, parallel, switch |
 | 🎮 **[Network Interfaces (Interactive)](docs/source/network_interfaces_interactive.rst)** | Interactive bridge, TUN/TAP, and VLAN demos -- MAC learning, Layer 2 vs Layer 3 framing, 802.1Q isolation | MAC learning table, TUN/TAP, 802.1Q tagging, VLAN isolation |
 | 🌐 **[Network Interfaces](docs/source/network_interfaces.rst)** | Linux network interfaces, explained with analogies & diagrams | `eth0`, `lo`, `veth`, `docker0`, VLANs, TUN/TAP, NAT |
 | 🎮 **[TCP vs UDP (Interactive)](docs/source/tcp_udp_interactive.rst)** | Interactive TCP vs. UDP packet delivery -- play with loss and see the difference | handshake, retransmission, ordering, best-effort delivery |
@@ -31,6 +32,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Copy-on-Write After fork() (Interactive)](docs/source/cow_fork_interactive.rst)** | Interactive copy-on-write -- fork() a process for free, then watch a write fault either reuse a frame or copy it | fork(), copy-on-write, page faults, reference counting |
 | 🎮 **[Latency Numbers (Interactive)](docs/source/latency_numbers_interactive.rst)** | Interactive latency ladder -- 2012 vs. 2024 hardware, plus a human-timescale rescaling of every hop | CPU cache, RAM, SSD/NVMe, datacenter RTT, cross-continent RTT |
 | 🎮 **[Page Cache (Interactive)](docs/source/page_cache_interactive.rst)** | Interactive page cache -- two processes share one cache, mmap() skips the copy, crash before fsync() and lose it | page cache, mmap, fsync, write-back, cross-process sharing |
+| 🧩 **[Beyond the Bridges: Processor Architecture](docs/source/processor_architecture.rst)** | Where memory and I/O connect in modern Intel, AMD, and ARM chips, and why northbridge/southbridge is now historical | SoC tile, PCH, DMI, CCD/IOD, Infinity Fabric, unified memory, CMN mesh |
+| 🧩 **[The CUDA Moat](docs/source/cuda_gpu_architecture.rst)** | Why GPUs suit neural-net math, and why CUDA specifically (not GPUs generically) is NVIDIA's real moat | SM, CUDA/Tensor cores, HBM, CUDA vs. ROCm/OpenCL, NVLink, NVSwitch |
 | 🎮 **[Packet Journey (Interactive)](docs/source/docker_packet_journey_interactive.rst)** | Interactive packet journey -- container, veth, docker0, netfilter, and back | MASQUERADE, DNAT, PREROUTING/POSTROUTING, conntrack |
 | 🧠 **[Kernel Networking, Docker & OverlayFS](docs/source/kernel_networking_docker_internals.rst)** | Kernel networking stack, Docker internals, iptables, OverlayFS | netfilter, namespaces, cgroups, veth, DNAT/MASQUERADE, overlay2 |
 | 📡 **[LIDAR & SLAM](docs/source/lidar_slam.rst)** | LIDAR and SLAM for navigation where GPS doesn't work | point clouds, localization, mapping, autonomous vehicles |
@@ -40,6 +43,8 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🔐 **[SSH: Your Secret Internet Tunnel](docs/source/ssh_secure_shell.rst)** | How the SSH handshake, encryption, and key auth actually work | key exchange, host keys, password vs. key auth, tunneling |
 | 🎮 **[DNS Resolution (Interactive)](docs/source/dns_resolution_interactive.rst)** | Interactive DNS resolver -- walk root/TLD/authoritative, then watch layered TTL caching and CNAME-following in action | recursive resolver, referral chain, TTL caching, CNAME |
 | 🎮 **[REST APIs (Tutorial + Interactive)](docs/source/rest_api_interactive.rst)** | Tutorial + Play With It: a real in-browser REST API -- resources, HTTP methods, status codes, and genuine idempotency behavior | GET/POST/PUT/PATCH/DELETE, safe vs. idempotent, status codes, statelessness |
+| 🎮 **[REST vs. RPC (Interactive)](docs/source/rest_vs_rpc_interactive.rst)** | Identical flaky-network retry storm hits three handlers side by side, one of them double-charges | idempotency, retry safety, idempotency keys, gRPC/JSON-RPC vs. resource verbs |
+| 🎮 **[Long Polling vs. WebSockets (Interactive)](docs/source/long_poll_vs_ws_interactive.rst)** | Same event schedule, live request-count and delivery-latency comparison | server push, request overhead, reconnect-gap latency, persistent connections |
 | 🎮 **[TLS Certificate Chain (Interactive)](docs/source/tls_cert_chain_interactive.rst)** | Interactive TLS certificate chain -- real ECDSA signatures, four independent trust checks, break each one separately | certificate chain, root/intermediate/leaf, trust store, hostname verification |
 | 🎮 **[UTF-8 & Unicode (Interactive)](docs/source/utf8_encoding_interactive.rst)** | Interactive UTF-8 encode/decode -- step through the real bit-slicing byte by byte, then run it backward | code points, byte-length ranges, bit slicing, self-sync/resync |
 | 🔤 **[Unicode and UTF-8 Encoding](docs/source/unicode_utf8_encoding.rst)** | How Unicode code points and UTF-8's variable-length encoding work | code points, planes, UTF-8 bit patterns, multi-byte characters |
@@ -50,6 +55,7 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Redis Data Structures (Interactive)](docs/source/db_redis_structures_interactive.rst)** | Interactive Redis structures -- hash, sorted set, set, and TTL cache, all on the same country data | hashes, sorted sets, leaderboards, set intersection, TTL/expiry |
 | 🎮 **[ACID Transaction Atomicity (Interactive)](docs/source/db_acid_transaction_interactive.rst)** | Interactive ACID atomicity -- insert a country and capital together, force a mid-way failure, watch rollback vs. an orphaned row | transactions, atomicity, rollback, foreign keys, referential integrity |
 | 🎮 **[Composite Indexes (Interactive)](docs/source/db_composite_index_interactive.rst)** | Interactive composite indexes and the leftmost prefix rule -- which columns actually narrow a search vs. fall back to row-by-row rechecking | composite index, leftmost prefix, covering index, query planner |
+| 🎮 **[Apache Cassandra (Interactive)](docs/source/cassandra_interactive.rst)** | The real N/W/R quorum-overlap guarantee run as a live fuzz test, plus a real memtable/SSTable/compaction LSM-tree you can write, read, and compact yourself | tunable consistency, quorum, hinted handoff, read repair, LSM-tree, memtable, SSTable, compaction, tombstone |
 | 🖼️ **[Image Formats](docs/source/image_formats.rst)** | SVG vs. PNG vs. JPEG, and when to use each | vector vs. raster, transparency, lossy/lossless compression |
 | 🎮 **[8b/10b Line Encoding (Interactive)](docs/source/8b10b_encoding_interactive.rst)** | Interactive 8b/10b-style line coding -- send a byte, watch running disparity keep the wire from ever going flat | running disparity, DC balance, clock recovery, sub-block encoding |
 | 🎮 **[CAN Bus Arbitration (Interactive)](docs/source/can_arbitration_interactive.rst)** | Interactive CAN bus arbitration -- pick contending nodes, watch the real bit-by-bit priority race | dominant/recessive bits, wired-AND, bitwise arbitration, priority |
@@ -64,7 +70,20 @@ A curated collection of reference guides and revision notes -- Linux internals, 
 | 🎮 **[Consistent Hashing (Interactive)](docs/source/consistent_hashing_interactive.rst)** | Interactive consistent hashing ring -- add/remove servers and watch what actually moves | hash ring, virtual nodes, reshuffling, load balancing |
 | ⚖️ **[Hash Load Balancer](docs/source/hash_load_balancer.rst)** | Hash-based load balancing, sticky sessions, and consistent hashing | modulo hashing, session affinity, CDN routing, reshuffling problem |
 | 🎮 **[Apache Kafka (Interactive)](docs/source/kafka_topic_interactive.rst)** | Interactive Kafka topic -- send keyed readings, watch partition routing, poll with consumer groups, rebalance live | partitions, consumer groups, offsets, rebalancing, replay |
+| 🎮 **[Idempotency & Delivery Semantics (Interactive)](docs/source/delivery_semantics_interactive.rst)** | At-most-once/at-least-once/idempotent delivery run side by side on the same flaky pipeline -- deliveries vs. effects tracked as two separate numbers | idempotency key, at-least-once, exactly-once, effectively-once, Kafka offset commit timing |
 | 🎮 **[Priority Inversion (Interactive)](docs/source/priority_inversion_interactive.rst)** | Interactive priority inversion -- the bug that nearly stranded Mars Pathfinder, and the priority-inheritance fix, side by side | preemption, mutex, priority inheritance, real-time scheduling |
+| 🧩 **[Architectural Patterns](docs/source/architectural_patterns.rst)** | The five shapes a system's components can be arranged in -- client-server, microservices, serverless, event-driven, peer-to-peer, with a worked example for each | client-server, microservices, serverless, cold start, event-driven, peer-to-peer |
+| 🎮 **[CAP Theorem (Interactive)](docs/source/cap_theorem_interactive.rst)** | Partition a 2-node store and choose Consistency or Availability, then see why quorum-based systems don't lose everyone | CAP theorem, partition tolerance, AP vs. CP, quorum, last-write-wins, strong vs. eventual consistency |
+| 🎮 **[Rate Limiting (Interactive)](docs/source/rate_limiting_interactive.rst)** | 5 rate-limiting algorithms fired at the same burst -- watch them disagree at the exact same moment | token bucket, leaky bucket, fixed window, sliding window log, sliding window counter |
+| 🎮 **[Bloom Filters (Interactive)](docs/source/bloom_filter_interactive.rst)** | A real bit array and real hash functions -- add words, test words, measure false positives against the textbook formula | bloom filter, false positive rate, double hashing, FNV-1a |
+| 🎮 **[Normalization vs. Denormalization (Interactive)](docs/source/normalization_denormalization_interactive.rst)** | The same data two ways, real PostgreSQL EXPLAIN costs, and a real reproduced update anomaly | normalization, denormalization, joins, update anomaly, EXPLAIN ANALYZE |
+| 🎮 **[Database Sharding (Interactive)](docs/source/database_sharding_interactive.rst)** | Hash-based vs. range-based sharding on the same sequential-key workload -- the real hot-shard problem and two rebalancing operations | sharding, hash sharding, range sharding, hot shard, rebalancing, scatter-gather |
+| 🎮 **[Cache Strategies (Interactive)](docs/source/cache_strategies_interactive.rst)** | cache-aside/read-through/write-through/write-back (crash the cache and see what's actually lost), plus LRU/FIFO/LFU/TTL side by side | cache-aside, read-through, write-through, write-back, LRU, FIFO, LFU, TTL |
+| 🎮 **[Raft Consensus (Interactive)](docs/source/raft_consensus_interactive.rst)** | Real Raft leader election (randomized timeouts, forced split votes, quorum loss) and log replication (AppendEntries, majority commit) | Raft, leader election, terms, log replication, AppendEntries, quorum, consensus |
+| 🎮 **[Proxy Servers (Interactive)](docs/source/proxy_servers_interactive.rst)** | The real X-Forwarded-For spoofing bug (naive vs. trusted-hop-count parsing, fuzz-verified) and what TLS termination actually does and doesn't imply | forward proxy, reverse proxy, X-Forwarded-For, TLS termination, trusted proxies |
+| 🎮 **[CDN (Interactive)](docs/source/cdn_interactive.rst)** | The real thundering-herd/request-coalescing mechanism on a cold edge POP, and cache-key composition's two opposite failure modes, fuzz-verified | CDN, edge POP, thundering herd, request coalescing, cache key, origin pull |
+| 🎮 **[Resilience Patterns (Interactive)](docs/source/resilience_patterns_interactive.rst)** | A real closed/open/half-open circuit breaker across 8 service instances (fixed vs. jittered reset timeouts), plus bulkhead pool isolation | circuit breaker, half-open probe, jittered backoff, thundering herd, bulkhead, noisy neighbor |
+| 🧩 **[URL Shortener Case Study (Interactive)](docs/source/url_shortener_interactive.rst)** | A worked "design a URL shortener" interview question end to end -- capacity math, real base62/hash short-code generation with live collision handling | short-code generation, base62, capacity estimation, system design synthesis |
 | 🎮 **[Bitcoin Mining (Interactive)](docs/source/bitcoin_mining_interactive.rst)** | Interactive Bitcoin mining -- real SHA-256 in your browser, tamper with a block and watch the cascade | proof of work, SHA-256, block hashing, 51% attack cost |
 | ₿ **[Bitcoin, Distributed Ledgers & Zcash](docs/source/bitcoin_distributed_ledgers_zcash.rst)** | Bitcoin, distributed ledgers, and Zcash explained with analogies | blockchain, proof of work, mining, zero-knowledge proofs |
 
@@ -143,6 +162,7 @@ system-notes/
         ├── bashrc_reference.rst
         ├── system_monitoring_commands.rst
         ├── developer_commands.rst
+        ├── poe_the_poet_interactive.rst
         ├── network_interfaces_interactive.rst
         ├── network_interfaces.rst
         ├── tcp_udp_interactive.rst
@@ -158,6 +178,8 @@ system-notes/
         ├── cow_fork_interactive.rst
         ├── latency_numbers_interactive.rst
         ├── page_cache_interactive.rst
+        ├── processor_architecture.rst
+        ├── cuda_gpu_architecture.rst
         ├── docker_packet_journey_interactive.rst
         ├── kernel_networking_docker_internals.rst
         ├── lidar_slam.rst
@@ -167,6 +189,8 @@ system-notes/
         ├── ssh_secure_shell.rst
         ├── dns_resolution_interactive.rst
         ├── rest_api_interactive.rst
+        ├── rest_vs_rpc_interactive.rst
+        ├── long_poll_vs_ws_interactive.rst
         ├── tls_cert_chain_interactive.rst
         ├── utf8_encoding_interactive.rst
         ├── unicode_utf8_encoding.rst
@@ -177,6 +201,7 @@ system-notes/
         ├── db_redis_structures_interactive.rst
         ├── db_acid_transaction_interactive.rst
         ├── db_composite_index_interactive.rst
+        ├── cassandra_interactive.rst
         ├── image_formats.rst
         ├── 8b10b_encoding_interactive.rst
         ├── can_arbitration_interactive.rst
@@ -191,7 +216,20 @@ system-notes/
         ├── consistent_hashing_interactive.rst
         ├── hash_load_balancer.rst
         ├── kafka_topic_interactive.rst
+        ├── delivery_semantics_interactive.rst
         ├── priority_inversion_interactive.rst
+        ├── architectural_patterns.rst
+        ├── cap_theorem_interactive.rst
+        ├── rate_limiting_interactive.rst
+        ├── bloom_filter_interactive.rst
+        ├── normalization_denormalization_interactive.rst
+        ├── database_sharding_interactive.rst
+        ├── cache_strategies_interactive.rst
+        ├── raft_consensus_interactive.rst
+        ├── proxy_servers_interactive.rst
+        ├── cdn_interactive.rst
+        ├── resilience_patterns_interactive.rst
+        ├── url_shortener_interactive.rst
         ├── bitcoin_mining_interactive.rst
         ├── bitcoin_distributed_ledgers_zcash.rst
         ├── spdlog_sinks_architecture.rst
@@ -223,19 +261,67 @@ system-notes/
         ├── python_asyncio_gather_interactive.rst
         └── _static/
             ├── custom.css
+            ├── poe_the_poet_widget.html
+            ├── usb_binding_widget.html
+            ├── tty_sessions_widget.html
+            ├── net_bridge_widget.html
+            ├── net_tuntap_widget.html
+            ├── net_vlan_widget.html
             ├── tcp_udp_widget.html
             ├── tcp_congestion_widget.html
             ├── docker_packet_journey_widget.html
+            ├── dns_resolution_widget.html
+            ├── rest_api_widget.html
+            ├── rest_vs_rpc_widget.html
+            ├── long_poll_vs_ws_widget.html
+            ├── linux_fs_basics_widget.html
+            ├── overlayfs_widget.html
+            ├── proc_explorer_widget.html
+            ├── process_memory_layout_widget.html
+            ├── vma_paging_widget.html
+            ├── cow_fork_widget.html
+            ├── page_cache_widget.html
+            ├── latency_numbers_widget.html
+            ├── processor_architecture_widget.html
+            ├── cuda_moat_widget.html
+            ├── ssh_handshake_widget.html
+            ├── tls_cert_chain_widget.html
+            ├── bitcoin_mining_widget.html
+            ├── utf8_encoding_widget.html
+            ├── 8b10b_encoding_widget.html
+            ├── can_arbitration_widget.html
+            ├── watchdog_timer_widget.html
+            ├── gstreamer_pipeline_widget.html
+            ├── db_index_scan_widget.html
+            ├── db_redis_structures_widget.html
+            ├── db_acid_transaction_widget.html
+            ├── db_isolation_levels_widget.html
+            ├── db_composite_index_widget.html
+            ├── cassandra_widget.html
             ├── threads_sync_widget.html
             ├── hash_load_balancer_widget.html
             ├── consistent_hash_widget.html
-            ├── proc_explorer_widget.html
-            ├── linux_fs_basics_widget.html
-            ├── overlayfs_widget.html
-            ├── process_memory_layout_widget.html
-            ├── vma_paging_widget.html
-            ├── latency_numbers_widget.html
-            ├── page_cache_widget.html
+            ├── kafka_topic_widget.html
+            ├── kafka_replication_widget.html
+            ├── delivery_semantics_widget.html
+            ├── priority_inversion_widget.html
+            ├── cap_partition_widget.html
+            ├── cap_quorum_widget.html
+            ├── rate_limit_widget.html
+            ├── bloom_filter_widget.html
+            ├── normalization_widget.html
+            ├── sharding_widget.html
+            ├── cache_strategies_widget.html
+            ├── eviction_policies_widget.html
+            ├── raft_election_widget.html
+            ├── raft_replication_widget.html
+            ├── proxy_servers_widget.html
+            ├── cdn_widget.html
+            ├── resilience_patterns_widget.html
+            ├── url_shortener_widget.html
+            ├── lidar_pointcloud_widget.html
+            ├── slam_scan_matching_widget.html
+            ├── spdlog_sinks_widget.html
             ├── cpp_memory_widget.html
             ├── cpp_unique_ptr_widget.html
             ├── cpp_shared_ptr_widget.html
@@ -249,28 +335,23 @@ system-notes/
             ├── cpp_observer_widget.html
             ├── cpp_strategy_widget.html
             ├── cpp_decorator_widget.html
+            ├── cpp_futures_promises_widget.html
+            ├── cpp_scoped_lock_widget.html
+            ├── cpp_coroutines_widget.html
             ├── py_list_widget.html
             ├── py_stack_widget.html
             ├── py_queue_widget.html
             ├── py_hashing_widget.html
             ├── py_generator_stepper_widget.html
             ├── py_generator_laziness_widget.html
+            ├── py_itertools_widget.html
             ├── py_context_manager_widget.html
             ├── py_event_loop_widget.html
             ├── py_await_chain_widget.html
             ├── py_async_generator_widget.html
             ├── py_async_context_manager_widget.html
-            ├── net_bridge_widget.html
-            ├── net_tuntap_widget.html
-            ├── net_vlan_widget.html
-            ├── ssh_handshake_widget.html
-            ├── dns_resolution_widget.html
-            ├── rest_api_widget.html
-            ├── tls_cert_chain_widget.html
-            ├── utf8_encoding_widget.html
             ├── concurrency_models_widget.html
-            ├── asyncio_gather_widget.html
-            └── bitcoin_mining_widget.html
+            └── asyncio_gather_widget.html
 
 ```
 
