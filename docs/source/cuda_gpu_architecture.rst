@@ -22,4 +22,6 @@ See :doc:`processor_architecture` for the CPU side of the same "where
 does memory/I-O actually connect" question this page asks about GPUs.
 See :doc:`cpu_vs_gpu_interactive` for the more basic question this
 page assumes an answer to: given the core-count trade-off, when does
-handing work to the GPU actually pay off?
+handing work to the GPU actually pay off? See :doc:`pytorch_basics_interactive`
+for what the matrix multiplication this page describes actually looks
+like inside a real training loop.

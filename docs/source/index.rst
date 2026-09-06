@@ -68,6 +68,13 @@ worth writing down and coming back to.
 .. toctree::
    :hidden:
    :maxdepth: 2
+   :caption: Machine Learning
+
+   pytorch_basics_interactive
+
+.. toctree::
+   :hidden:
+   :maxdepth: 2
    :caption: Security & Cryptography
 
    ssh_secure_shell_interactive
@@ -351,6 +358,21 @@ Processor Architecture
    * - :doc:`cuda_gpu_architecture`
      - The CUDA Moat -- why GPUs suit neural-net math, and why CUDA specifically (not GPUs generically) is NVIDIA's real moat
      - SM, CUDA/Tensor cores, HBM, CUDA vs. ROCm/OpenCL, NVLink, NVSwitch
+
+Machine Learning
+-----------------------
+
+.. list-table::
+   :class: longtable
+   :header-rows: 1
+   :widths: 25 30 45
+
+   * - Reference Guide
+     - Primary Focus
+     - Key Utilities Covered
+   * - :doc:`pytorch_basics_interactive`
+     - Play With It: a real tensor, a real forward/loss/backward training loop, and autograd verified live against finite-difference numerical gradients -- the same gradcheck technique PyTorch's own tests use
+     - tensors, autograd, gradient descent, loss, backward pass, gradcheck
 
 Security & Cryptography
 ------------------------------

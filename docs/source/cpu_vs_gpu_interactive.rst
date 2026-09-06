@@ -198,4 +198,6 @@ See Also
 around flexibility rather than raw core count. :doc:`cuda_gpu_architecture`
 for why matrix multiplication specifically suits a GPU's shape, and
 the separate (CUDA-specific) software story on top of this page's
-hardware one.
+hardware one. :doc:`pytorch_basics_interactive` for what actually runs
+past this page's crossover point -- a real training loop, built on
+the exact same matrix-multiply operation this page's N is the size of.
