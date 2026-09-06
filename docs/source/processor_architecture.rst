@@ -18,4 +18,6 @@ See :doc:`network_interfaces` for the same "what connects to what"
 question one layer up the stack, at the network-interface level rather
 than the chip level. See :doc:`cuda_gpu_architecture` for the same
 question applied to GPUs, where memory sits even closer to the compute
-than anything on this page.
+than anything on this page. See :doc:`cpu_vs_gpu_interactive` for why
+the CPU's flexible-core design this page describes doesn't automatically
+lose to a GPU -- a real, drag-it-yourself crossover point.

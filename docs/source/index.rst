@@ -62,6 +62,7 @@ worth writing down and coming back to.
    :caption: Processor Architecture
 
    processor_architecture
+   cpu_vs_gpu_interactive
    cuda_gpu_architecture
 
 .. toctree::
@@ -344,6 +345,9 @@ Processor Architecture
    * - :doc:`processor_architecture`
      - Beyond the Bridges -- where memory and I/O connect in modern Intel, AMD, and ARM chips, and why northbridge/southbridge is now historical
      - SoC tile, PCH, DMI, CCD/IOD, Infinity Fabric, unified memory, CMN mesh
+   * - :doc:`cpu_vs_gpu_interactive`
+     - Play With It: the real GPU transfer/launch-overhead crossover -- drag matrix size N and watch where the GPU actually stops being the faster choice, fuzz-verified against a real formula
+     - CPU cores vs GPU cores, transfer overhead, kernel launch, N-cubed scaling, crossover point
    * - :doc:`cuda_gpu_architecture`
      - The CUDA Moat -- why GPUs suit neural-net math, and why CUDA specifically (not GPUs generically) is NVIDIA's real moat
      - SM, CUDA/Tensor cores, HBM, CUDA vs. ROCm/OpenCL, NVLink, NVSwitch

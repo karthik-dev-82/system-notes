@@ -1,0 +1,238 @@
+<div class="cg-root" id="cgWidget">
+  <style>
+    #cgWidget {
+      --cg-bg: #eef1ee;
+      --cg-panel: #ffffff;
+      --cg-border: #cdd6cc;
+      --cg-text: #1c231d;
+      --cg-muted: #5c675d;
+      --cg-a: #3d5c3d;
+      --cg-b: #7a2f3d;
+      --cg-bad: #b0432a;
+      --cg-warn: #a67c1f;
+      font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+      background: var(--cg-bg);
+      color: var(--cg-text);
+      border-radius: 12px;
+      padding: 20px;
+      margin: 24px 0;
+      box-sizing: border-box;
+      overflow-x: auto;
+    }
+    #cgWidget * { box-sizing: border-box; }
+    #cgWidget h3 { margin: 0 0 4px; font-size: 1.15rem; color: #7a2f3d; font-family: Georgia, "Iowan Old Style", serif; }
+    #cgWidget .cg-sub { color: var(--cg-muted); font-size: 0.85rem; margin-bottom: 16px; }
+
+    .cg-controls { display: flex; flex-wrap: wrap; gap: 18px; background: var(--cg-panel); border: 1px solid var(--cg-border); border-radius: 10px; padding: 14px 18px; margin-bottom: 14px; min-width: 780px; }
+    .cg-slider-group { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 200px; }
+    .cg-slider-group label { font-size: 0.76rem; color: var(--cg-muted); display: flex; justify-content: space-between; }
+    .cg-slider-group label b { color: var(--cg-text); font-family: ui-monospace, monospace; }
+    .cg-slider-group input[type="range"] { width: 100%; }
+
+    .cg-stage { background: var(--cg-panel); border: 1px solid var(--cg-border); border-radius: 10px; padding: 18px; margin-bottom: 14px; min-width: 780px; }
+
+    .cg-result-row { display: flex; gap: 16px; margin-bottom: 16px; }
+    .cg-result-box { flex: 1; border: 1px solid var(--cg-border); border-radius: 8px; padding: 12px 14px; background: #f7f6f2; }
+    .cg-result-box.winner { border-color: var(--cg-a); background: rgba(61,92,61,0.08); }
+    .cg-result-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cg-muted); margin-bottom: 4px; }
+    .cg-result-value { font-family: ui-monospace, monospace; font-size: 1.3rem; font-weight: 700; }
+    .cg-bar-track { height: 14px; background: #e4e8e3; border-radius: 4px; margin-top: 8px; overflow: hidden; }
+    .cg-bar-fill { height: 100%; border-radius: 4px; }
+    .cg-bar-fill.cpu { background: var(--cg-b); }
+    .cg-bar-fill.gpu { background: var(--cg-a); }
+
+    .cg-verdict { text-align: center; font-size: 0.95rem; font-weight: 700; margin-bottom: 16px; padding: 8px; border-radius: 6px; }
+    .cg-verdict.cpu-wins { background: rgba(122,47,61,0.1); color: var(--cg-b); }
+    .cg-verdict.gpu-wins { background: rgba(61,92,61,0.1); color: var(--cg-a); }
+
+    svg.cg-chart { width: 100%; height: 220px; display: block; }
+    .cg-chart-line { fill: none; stroke-width: 2.5; }
+    .cg-chart-line.cpu { stroke: var(--cg-b); }
+    .cg-chart-line.gpu { stroke: var(--cg-a); }
+    .cg-chart-marker { stroke: var(--cg-warn); stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .cg-chart-label { font-size: 10px; font-family: ui-monospace, monospace; fill: var(--cg-muted); }
+    .cg-chart-axis { stroke: var(--cg-border); stroke-width: 1; }
+
+    .cg-legend { display: flex; gap: 18px; justify-content: center; font-size: 0.78rem; color: var(--cg-muted); margin-top: 6px; }
+    .cg-legend span { display: inline-flex; align-items: center; gap: 6px; }
+    .cg-legend-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; }
+  </style>
+
+  <h3>CPU vs. GPU: Play With It</h3>
+  <div class="cg-sub">A CPU has few, powerful cores; a GPU has thousands of simple ones. That doesn't mean the GPU always wins -- moving data to the GPU and launching work on it costs a fixed amount of time before a single unit of work gets done. Drag matrix size N and watch where that trade-off actually lands.</div>
+
+  <div class="cg-controls">
+    <div class="cg-slider-group">
+      <label>Matrix size N (work = N&sup3;) <b id="cgNVal">1000</b></label>
+      <input type="range" id="cgN" min="0" max="1000" value="500">
+    </div>
+    <div class="cg-slider-group">
+      <label>GPU transfer + launch overhead <b id="cgOverheadVal">0.0002s</b></label>
+      <input type="range" id="cgOverhead" min="0" max="1000" value="500">
+    </div>
+    <div class="cg-slider-group">
+      <label>GPU parallelism factor (vs. 1 CPU core) <b id="cgParallelVal">13x</b></label>
+      <input type="range" id="cgParallel" min="0" max="1000" value="500">
+    </div>
+  </div>
+
+  <div class="cg-stage">
+    <div class="cg-verdict" id="cgVerdict">--</div>
+    <div class="cg-result-row">
+      <div class="cg-result-box" id="cgCpuBox">
+        <div class="cg-result-title">CPU (1 core, no transfer)</div>
+        <div class="cg-result-value" id="cgCpuTime">--</div>
+        <div class="cg-bar-track"><div class="cg-bar-fill cpu" id="cgCpuBar"></div></div>
+      </div>
+      <div class="cg-result-box" id="cgGpuBox">
+        <div class="cg-result-title">GPU (overhead + parallel work)</div>
+        <div class="cg-result-value" id="cgGpuTime">--</div>
+        <div class="cg-bar-track"><div class="cg-bar-fill gpu" id="cgGpuBar"></div></div>
+      </div>
+    </div>
+    <svg class="cg-chart" id="cgChart" viewBox="0 0 700 220"></svg>
+    <div class="cg-legend">
+      <span><i class="cg-legend-dot" style="background:var(--cg-b)"></i>CPU time</span>
+      <span><i class="cg-legend-dot" style="background:var(--cg-a)"></i>GPU time</span>
+      <span><i class="cg-legend-dot" style="background:var(--cg-warn)"></i>crossover N* = <b id="cgCrossoverVal">--</b></span>
+    </div>
+  </div>
+
+  <script>
+  (function () {
+    // ---- Core model -- verified against a Node assertion pass before
+    // this widget was built (cpu_gpu_model.js): work scales as N^3;
+    // T_cpu = work * cpuRate; T_gpu = overhead + work * gpuRate; exactly
+    // one crossover N* exists where the two lines meet. ----------------
+
+    function work(n) { return n * n * n; }
+    function tCpu(n, cpuRate) { return work(n) * cpuRate; }
+    function tGpu(n, overhead, gpuRate) { return overhead + work(n) * gpuRate; }
+    function crossoverN(overhead, cpuRate, gpuRate) { return Math.cbrt(overhead / (cpuRate - gpuRate)); }
+
+    var CPU_RATE = 2.1e-11; // fixed baseline: time per unit of work on 1 CPU core
+
+    function sliderToN(v) {
+      // log scale, 8 to 6000
+      var t = v / 1000;
+      return Math.round(8 * Math.pow(6000 / 8, t));
+    }
+    function sliderToOverhead(v) {
+      var t = v / 1000;
+      return 0.00002 * Math.pow(2 / 0.00002, t); // 0.00002s to 2s
+    }
+    function sliderToParallel(v) {
+      var t = v / 1000;
+      return 2 * Math.pow(2000 / 2, t); // 2x to 2000x
+    }
+
+    var nEl = document.getElementById('cgN');
+    var overheadEl = document.getElementById('cgOverhead');
+    var parallelEl = document.getElementById('cgParallel');
+
+    function fmtTime(s) {
+      if (s < 0.001) return (s * 1e6).toFixed(1) + ' µs';
+      if (s < 1) return (s * 1000).toFixed(2) + ' ms';
+      return s.toFixed(3) + ' s';
+    }
+
+    function buildChartPath(overhead, cpuRate, gpuRate, nMin, nMax, fn) {
+      var points = [];
+      var steps = 60;
+      for (var i = 0; i <= steps; i++) {
+        var logN = Math.log(nMin) + (Math.log(nMax) - Math.log(nMin)) * (i / steps);
+        var n = Math.exp(logN);
+        points.push({ n: n, t: fn(n) });
+      }
+      return points;
+    }
+
+    function render() {
+      var n = sliderToN(parseInt(nEl.value, 10));
+      var overhead = sliderToOverhead(parseInt(overheadEl.value, 10));
+      var parallel = sliderToParallel(parseInt(parallelEl.value, 10));
+      var gpuRate = CPU_RATE / parallel;
+
+      document.getElementById('cgNVal').textContent = n.toLocaleString() + ' x ' + n.toLocaleString();
+      document.getElementById('cgOverheadVal').textContent = fmtTime(overhead);
+      document.getElementById('cgParallelVal').textContent = parallel.toFixed(0) + 'x';
+
+      var cpuT = tCpu(n, CPU_RATE);
+      var gpuT = tGpu(n, overhead, gpuRate);
+      var nStar = crossoverN(overhead, CPU_RATE, gpuRate);
+
+      document.getElementById('cgCpuTime').textContent = fmtTime(cpuT);
+      document.getElementById('cgGpuTime').textContent = fmtTime(gpuT);
+      document.getElementById('cgCrossoverVal').textContent = Math.round(nStar).toLocaleString();
+
+      var maxT = Math.max(cpuT, gpuT);
+      document.getElementById('cgCpuBar').style.width = (100 * cpuT / maxT) + '%';
+      document.getElementById('cgGpuBar').style.width = (100 * gpuT / maxT) + '%';
+
+      var verdictEl = document.getElementById('cgVerdict');
+      var cpuBoxEl = document.getElementById('cgCpuBox');
+      var gpuBoxEl = document.getElementById('cgGpuBox');
+      if (cpuT < gpuT) {
+        var ratio = gpuT / cpuT;
+        verdictEl.className = 'cg-verdict cpu-wins';
+        verdictEl.textContent = 'CPU wins here -- ' + ratio.toFixed(1) + 'x faster. N is too small for the GPU’s overhead to pay off.';
+        cpuBoxEl.classList.add('winner'); gpuBoxEl.classList.remove('winner');
+      } else {
+        var ratio2 = cpuT / gpuT;
+        verdictEl.className = 'cg-verdict gpu-wins';
+        verdictEl.textContent = 'GPU wins here -- ' + ratio2.toFixed(1) + 'x faster. N is large enough that raw parallelism dominates the fixed overhead.';
+        gpuBoxEl.classList.add('winner'); cpuBoxEl.classList.remove('winner');
+      }
+
+      renderChart(overhead, gpuRate, n, nStar);
+    }
+
+    function renderChart(overhead, gpuRate, currentN, nStar) {
+      var svg = document.getElementById('cgChart');
+      var W = 700, H = 220, padL = 55, padB = 26, padT = 10, padR = 10;
+      var nMin = 8, nMax = 6000;
+
+      var cpuPoints = buildChartPath(overhead, CPU_RATE, gpuRate, nMin, nMax, function (n) { return tCpu(n, CPU_RATE); });
+      var gpuPoints = buildChartPath(overhead, CPU_RATE, gpuRate, nMin, nMax, function (n) { return tGpu(n, overhead, gpuRate); });
+
+      var allTimes = cpuPoints.concat(gpuPoints).map(function (p) { return p.t; }).filter(function (t) { return t > 0; });
+      var logTMin = Math.log(Math.min.apply(null, allTimes) * 0.5);
+      var logTMax = Math.log(Math.max.apply(null, allTimes) * 1.5);
+      var logNMin = Math.log(nMin), logNMax = Math.log(nMax);
+
+      function xFor(n) { return padL + (Math.log(n) - logNMin) / (logNMax - logNMin) * (W - padL - padR); }
+      function yFor(t) { return H - padB - (Math.log(t) - logTMin) / (logTMax - logTMin) * (H - padB - padT); }
+
+      function pathFor(points) {
+        return points.map(function (p, i) { return (i === 0 ? 'M ' : 'L ') + xFor(p.n).toFixed(1) + ' ' + yFor(p.t).toFixed(1); }).join(' ');
+      }
+
+      var markerX = xFor(currentN);
+      var crossX = (nStar >= nMin && nStar <= nMax) ? xFor(nStar) : null;
+
+      var html = '';
+      html += '<line class="cg-chart-axis" x1="' + padL + '" y1="' + padT + '" x2="' + padL + '" y2="' + (H - padB) + '"></line>';
+      html += '<line class="cg-chart-axis" x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - padR) + '" y2="' + (H - padB) + '"></line>';
+      html += '<text class="cg-chart-label" x="' + padL + '" y="' + (H - 6) + '">N=' + nMin + '</text>';
+      html += '<text class="cg-chart-label" x="' + (W - padR - 40) + '" y="' + (H - 6) + '">N=' + nMax + '</text>';
+      html += '<text class="cg-chart-label" x="2" y="' + (padT + 10) + '">time →</text>';
+      if (crossX !== null) {
+        html += '<line class="cg-chart-marker" x1="' + crossX.toFixed(1) + '" y1="' + padT + '" x2="' + crossX.toFixed(1) + '" y2="' + (H - padB) + '"></line>';
+      }
+      html += '<path class="cg-chart-line cpu" d="' + pathFor(cpuPoints) + '"></path>';
+      html += '<path class="cg-chart-line gpu" d="' + pathFor(gpuPoints) + '"></path>';
+      html += '<line x1="' + markerX.toFixed(1) + '" y1="' + padT + '" x2="' + markerX.toFixed(1) + '" y2="' + (H - padB) + '" stroke="#1c231d" stroke-width="1.5" opacity="0.35"></line>';
+      html += '<circle cx="' + markerX.toFixed(1) + '" cy="' + yFor(tCpu(currentN, CPU_RATE)).toFixed(1) + '" r="4" fill="var(--cg-b)"></circle>';
+      html += '<circle cx="' + markerX.toFixed(1) + '" cy="' + yFor(tGpu(currentN, overhead, gpuRate)).toFixed(1) + '" r="4" fill="var(--cg-a)"></circle>';
+
+      svg.innerHTML = html;
+    }
+
+    [nEl, overheadEl, parallelEl].forEach(function (el) {
+      el.addEventListener('input', render);
+    });
+
+    render();
+  })();
+  </script>
+</div>
