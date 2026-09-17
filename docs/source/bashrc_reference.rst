@@ -249,8 +249,8 @@ sessions (fresh SSH connections, new TTYs), your ``~/.bash_profile`` or
      - Uses ``vim`` for interactive tools (``crontab``, ``git commit``,
        ``nano``/``pico`` aliases).
    * - **Color Schemes**
-     - ``CLICOLOR=1``, ``LS_COLORS``
-     - Full color-coding for directory listings based on file extension.
+     - ``eza`` integration
+     - Replaces legacy ``LS_COLORS`` with native rich color coding and icons.
    * - **Man Page Colors**
      - ``LESS_TERMCAP_*``
      - Adds color highlights (bold/underline) when reading man pages via
@@ -281,42 +281,31 @@ Navigation Shortcuts
   ``....`` (``cd ../../..``), ``.....`` (``cd ../../../..``)
 * **Home / Web / Back:** ``home`` (``cd ~``), ``web`` (``cd /var/www/html``),
   ``bd`` (``cd "$OLDPWD"``)
+* **Smart CD:** The standard ``cd`` is mapped to ``z`` (zoxide) for faster directory jumping.
 
-Directory Listings (``ls`` variants)
+Directory Listings (``eza`` aliases)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. list-table::
    :class: longtable
    :header-rows: 1
-   :widths: 15 30 55
+   :widths: 15 35 50
 
    * - Alias
      - Command
      - Purpose
    * - ``ls``
-     - ``ls -Fh --color=always``
-     - Base colorized view with file-type indicators (``/``, ``*``).
-   * - ``la``
-     - ``ls -Alh``
-     - Show all files including hidden (``.dotfiles``).
+     - ``eza --color=always --group-directories-first``
+     - Base colorized view ensuring directories appear at the top.
    * - ``ll``
-     - ``ls -Fls``
-     - Long listing format with block sizes.
-   * - ``lx`` / ``lk``
-     - ``ls -lXBh`` / ``ls -lSrh``
-     - Sort by **extension** / Sort by **size** (descending).
-   * - ``lc`` / ``lu`` / ``lt``
-     - ``ls -lcrh`` / ``-lurh`` / ``-ltrh``
-     - Sort by **change time** / **access time** / **modification date**.
-   * - ``lr`` / ``lw`` / ``lm``
-     - ``ls -lRh`` / ``ls -xAh`` / ``... | more``
-     - **Recursive** / **Wide** horizontal layout / **Paged** listing.
-   * - ``lf`` / ``ldir``
-     - *grep filter*
-     - Show **files only** / Show **directories only**.
-   * - ``labc``
-     - ``ls -lap``
-     - Alphabetical listing with slash indicators.
+     - ``eza -l --icons``
+     - Long listing format with block sizes and file-type icons.
+   * - ``la``
+     - ``eza -la --icons``
+     - Show all files including hidden (``.dotfiles``) with icons.
+   * - ``lt``
+     - ``eza --tree --level=2``
+     - Replaces legacy ``tree`` command; shows a hierarchical view.
 
 Permissions & System Controls
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -330,14 +319,11 @@ Permissions & System Controls
 Search, Process & Disk Operations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-* **Search:** ``h`` *(Grep history)*, ``p`` *(Grep running processes)*,
-  ``f`` *(Grep filenames under* ``.`` *)*
-* **Process Watch:** ``topcpu`` *(Top 10 CPU consuming processes)*,
-  ``psme`` *(Pretty table of your active processes)*
-* **Disk Space:** ``folders`` (``du -h --max-depth=1``),
+* **Search:** ``h`` *(rg history)*, ``p`` *(Grep running processes)*,
+  ``f`` / ``fd`` *(Modern filename search using fdfind)*
+* **Process Watch:** ``psme`` *(Pretty table of your active processes)*
+* **Disk Space:** ``diskspace`` (``du -S | sort -n -r | less -R``), ``folders`` (``du -h --max-depth=1``),
   ``folderssort`` *(Sorted size by folder)*, ``mountedinfo`` (``df -hT``)
-* **Directory Trees:** ``tree`` *(Colorized files + dirs)*,
-  ``treed`` *(Directories only)*
 * **Archives:**
 
   * Compress: ``mktar`` (``.tar``), ``mkbz2`` (``.tar.bz2``), ``mkgz`` (``.tar.gz``)
@@ -349,7 +335,6 @@ Search, Process & Disk Operations
   * ``cpu`` → Calculates live CPU utilization percentage from ``/proc/stat``
   * ``sha1`` → ``openssl sha1``
   * ``logs`` → Continuous live tail of non-rotated log files under ``/var/log``
-  * ``countfiles`` → Counts total files, links, and directories under current folder
   * ``checkcommand`` → Runs ``type -t`` to reveal if a word is an alias, builtin, or binary
   * ``ipview`` / ``openports`` → Lists global network IPs / Lists active TCP/UDP ports with PIDs
 
@@ -358,15 +343,6 @@ Search, Process & Disk Operations
 
 Navigation & Filesystem
 ~~~~~~~~~~~~~~~~~~~~~~~~~
-
-``up <n>``
-^^^^^^^^^^^
-
-Moves up :math:`n` directory levels in a single command.
-
-.. code-block:: bash
-
-   up 3  # Equivalent to cd ../../..
 
 ``pwdtail``
 ^^^^^^^^^^^^
@@ -379,15 +355,6 @@ directory.
    $ pwd -> /var/www/html/site/assets
    $ pwdtail -> site/assets
 
-``search_file <filename>``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Executes a quick global search for a file starting from root ``/`` while
-suppressing permission errors.
-
-.. code-block:: bash
-
-   search_file "nginx.conf"
 
 ``extract <file1> [file2 ...]``
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -395,21 +362,15 @@ suppressing permission errors.
 Universal archive unpacker. Automatically detects format from extension
 (``.tar.gz``, ``.zip``, ``.7z``, ``.rar``, ``.bz2``, ``.gz``, ``.Z``).
 
-Code Search (``grep`` Wrappers)
+Code Search
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 ``ftext <pattern>``
 ^^^^^^^^^^^^^^^^^^^^^
 
-Recursively searches for text across the current directory while excluding
-common compiled binaries, node modules, build artifacts, and auto-generated
-files (``.so``, ``.o``, ``.js``, ``.html``, ``Makefile``, etc.).
-
-``ftextcount <pattern>``
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Uses the same exclusion filters as ``ftext``, but returns a **sorted file
-count list** of occurrences in descending order instead of line matches.
+Now aliased to ``rg`` (ripgrep). Recursively searches for text across the current 
+directory with blazing speed, automatically respecting ``.gitignore`` rules and 
+skipping hidden/binary files.
 
 System & Maintenance
 ~~~~~~~~~~~~~~~~~~~~~~
