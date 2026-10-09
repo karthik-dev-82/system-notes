@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ADAM-6052 Signal Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+
+<style>
+  /* Layout: a poster of seven illustrated panels on a 6-column grid, read in order from the module outward. */
+  :root {
+    --bg: #e3eaee;
+    --surface: #f8fafb;
+    --ink: #16212b;
+    --muted: #55656f;
+    --line: #c5d0d7;
+    --shade: rgba(107, 74, 148, 0.13);
+    --modbody: #cfe0ec;
+    --term: #4f9a6a;
+    --in: #1d5f8a;
+    --out: #b8531b;
+    --net: #23766a;
+    --deb: #6b4a94;
+    --rpm: #8a6a00;
+    --warn: #a8281f;
+    --lamp: #f2b705;
+    --display: "Barlow Condensed", "Arial Narrow", sans-serif;
+    --body: "IBM Plex Sans", system-ui, sans-serif;
+    --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0f161b; --surface: #18222a; --ink: #e5edf2; --muted: #94a5b1; --line: #2e3b45;
+      --shade: rgba(185, 154, 224, 0.17); --modbody: #29404f; --term: #3f8f5a;
+      --in: #6fb5e3; --out: #f0975a; --net: #5fc4b2; --deb: #b99ae0; --rpm: #e0b04a; --warn: #f07a70; --lamp: #ffd24a;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0f161b; --surface: #18222a; --ink: #e5edf2; --muted: #94a5b1; --line: #2e3b45;
+    --shade: rgba(185, 154, 224, 0.17); --modbody: #29404f; --term: #3f8f5a;
+    --in: #6fb5e3; --out: #f0975a; --net: #5fc4b2; --deb: #b99ae0; --rpm: #e0b04a; --warn: #f07a70; --lamp: #ffd24a;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body { background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 14.5px; line-height: 1.45; margin: 0; padding-inline: 18px; padding-block: 26px 48px; }
+  .wrap { max-width: 1160px; margin: 0 auto; }
+  header { margin-bottom: 18px; }
+  .eyebrow { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--muted); }
+  h1 { font-family: var(--display); font-weight: 700; font-size: 3rem; line-height: 1; margin: 4px 0 6px; letter-spacing: 0.01em; text-wrap: balance; }
+  header p { margin: 0; color: var(--muted); max-width: 60ch; }
+
+  .grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; }
+  .p1 { grid-column: span 4; } .p2 { grid-column: span 2; }
+  .p3 { grid-column: span 2; } .p4 { grid-column: span 4; }
+  .p5 { grid-column: span 3; } .p6 { grid-column: span 3; }
+  .p7, .p8 { grid-column: span 6; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-top: 5px solid var(--c); border-radius: 6px; padding: 14px 16px 16px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+  .panel h2 { font-family: var(--display); font-weight: 700; font-size: 1.45rem; text-transform: uppercase; letter-spacing: 0.03em; margin: 0; line-height: 1.05; display: flex; align-items: baseline; gap: 10px; }
+  .panel h2 .n { font-family: var(--mono); font-size: 0.8rem; font-weight: 500; color: var(--surface); background: var(--c); border-radius: 3px; padding: 1px 7px; letter-spacing: 0; }
+  .cap { margin: 0; color: var(--muted); font-size: 0.86rem; }
+  svg { display: block; max-width: 100%; height: auto; }
+  svg text { font-family: var(--mono); font-size: 11px; fill: var(--ink); }
+  svg text.m { fill: var(--muted); }
+  svg text.d { font-family: var(--display); font-weight: 700; font-size: 18px; letter-spacing: 0.02em; }
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { font-family: var(--mono); font-size: 0.74rem; padding: 2px 8px; border: 1px solid var(--c, var(--line)); color: var(--c, var(--ink)); border-radius: 3px; font-variant-numeric: tabular-nums; }
+  .chip.solid { background: var(--c); color: var(--surface); }
+  button.plain { font: inherit; font-size: 0.82rem; font-weight: 600; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 4px; padding: 5px 12px; cursor: pointer; }
+  button.plain:hover { border-color: var(--muted); }
+  button.big { background: var(--c); color: var(--surface); border-color: var(--c); }
+  button:focus-visible, input:focus-visible { outline: 2px solid var(--in); outline-offset: 2px; }
+  .ctl { display: grid; grid-template-columns: 7.2rem 1fr 5.2rem; gap: 10px; align-items: center; font-size: 0.82rem; }
+  .ctl output { font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+  .ctl input[type="range"] { width: 100%; min-width: 0; accent-color: var(--c); }
+  .row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .mode { border: 1px solid var(--line); border-radius: 5px; padding: 8px 10px 10px; background: var(--bg); }
+  .mode b { font-family: var(--display); font-size: 1.1rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--c); display: block; }
+  .mode span { font-size: 0.8rem; color: var(--muted); }
+  .verdict { font-weight: 600; font-size: 0.86rem; }
+  .verdict.good { color: var(--net); } .verdict.bad { color: var(--warn); }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+  .seg button { font: inherit; font-size: 0.8rem; padding: 4px 11px; border: 0; background: var(--bg); color: var(--ink); cursor: pointer; }
+  .seg button[aria-pressed="true"] { background: var(--c); color: var(--surface); font-weight: 600; }
+  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+  .step { display: flex; align-items: center; gap: 10px; font-family: var(--display); font-weight: 600; font-size: 1.05rem; text-transform: uppercase; letter-spacing: 0.03em; }
+  .twocol { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); gap: 18px; align-items: start; }
+  .readout { display: flex; flex-wrap: wrap; gap: 6px 20px; align-items: baseline; font-family: var(--mono); font-variant-numeric: tabular-nums; font-size: 0.8rem; }
+  .readout b { font-size: 1.5rem; font-family: var(--display); letter-spacing: 0.02em; }
+  .caution { margin-top: 14px; background: var(--surface); border: 1px solid var(--line); border-left: 10px solid var(--rpm); border-radius: 4px; padding: 10px 14px; font-weight: 600; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .caution span { font-weight: 400; color: var(--muted); }
+  .intro { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 16px; margin-bottom: 14px; align-items: start; }
+  .box { background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 14px 18px; min-width: 0; }
+  .box h2 { font-family: var(--display); font-size: 1.3rem; text-transform: uppercase; letter-spacing: 0.03em; margin: 0 0 6px; }
+  .box p { margin: 0 0 8px; max-width: 70ch; } .box p:last-child { margin-bottom: 0; }
+  dl.words { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; font-size: 0.86rem; }
+  dl.words dt { font-weight: 600; font-family: var(--mono); font-size: 0.8rem; }
+  dl.words dd { margin: 0; color: var(--muted); }
+  .bar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-bottom: 12px; }
+  details.explain { border-top: 1px dashed var(--line); padding-top: 8px; }
+  details.explain summary { cursor: pointer; font-family: var(--display); font-weight: 700; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--c); }
+  details.explain summary:focus-visible { outline: 2px solid var(--in); outline-offset: 2px; }
+  details.explain .tx { margin-top: 6px; display: grid; gap: 8px; max-width: 78ch; }
+  details.explain p { margin: 0; }
+  details.explain .tip { background: var(--bg); border-left: 4px solid var(--c); padding: 6px 10px; border-radius: 3px; }
+  details.explain b { font-weight: 600; }
+  footer { margin-top: 14px; font-size: 0.76rem; color: var(--muted); max-width: 95ch; }
+  footer a { color: var(--in); }
+
+  @media (max-width: 900px) {
+    .p1, .p2, .p3, .p4, .p5, .p6, .p7, .p8 { grid-column: 1 / -1; }
+    .intro { grid-template-columns: 1fr; }
+    .twocol { grid-template-columns: 1fr; }
+    .ctl { grid-template-columns: 1fr 5rem; } .ctl input { grid-column: 1 / -1; grid-row: 2; }
+    h1 { font-size: 2.4rem; }
+  }
+  @media (prefers-reduced-motion: reduce) { .spin { animation: none !important; } }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { transform-box: view-box; transform-origin: 130px 150px; animation: spin 3s linear infinite; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Advantech remote I/O</div>
+    <h1>ADAM-6052 Signal Map</h1>
+    <p>Sixteen signals in and out over Ethernet. Every picture is clickable, and every panel has a plain-words explanation underneath.</p>
+  </header>
+
+  <div class="intro">
+    <section class="box" aria-labelledby="bigp">
+      <h2 id="bigp">What is this box?</h2>
+      <p>The ADAM-6052 is a small box that sits between machinery and a computer network. On one side, wires from switches, sensors and lamps screw into it. On the other side, one network cable (Ethernet) plugs in.</p>
+      <p>That lets a computer far away <b>see</b> whether something is on or off, <b>count</b> how many times it pulsed, and <b>switch</b> things on or off. It has 8 pins for listening (inputs) and 8 pins for acting (outputs).</p>
+      <p>Nothing here needs hardware knowledge. The panels go in order, from the box itself outward.</p>
+    </section>
+    <section class="box" aria-labelledby="wordsp">
+      <h2 id="wordsp">Words you will see</h2>
+      <dl class="words">
+        <dt>Terminal</dt><dd>A screw connector. A bare wire goes in, a screw tightens it.</dd>
+        <dt>Ground (GND)</dt><dd>The 0 volt wire. Electricity returns to the power source through it.</dd>
+        <dt>Pulse</dt><dd>One quick blip: the signal goes on, then off.</dd>
+        <dt>Hz, kHz</dt><dd>Pulses per second. 1 kHz is 1,000 per second.</dd>
+        <dt>Load</dt><dd>Whatever an output switches: a lamp, a buzzer, a relay.</dd>
+        <dt>Isolated</dt><dd>Electrically separated, so a surge on the wiring side cannot jump into the module.</dd>
+      </dl>
+    </section>
+  </div>
+  <div class="bar"><button class="plain" id="toggleEx" type="button" aria-pressed="true">Hide the explanations</button></div>
+
+  <div class="grid">
+
+    <!-- 1 MODULE -->
+    <section class="panel p1" style="--c:var(--in)" aria-labelledby="h1p">
+      <h2 id="h1p"><span class="n">1</span>The module</h2>
+      <svg viewBox="0 0 560 290" role="img" aria-label="ADAM-6052 front view: 8 input terminals on top, 8 output terminals below, Ethernet on the left, power on the right">
+        <!-- ethernet -->
+        <line x1="24" y1="150" x2="108" y2="150" stroke="var(--net)" stroke-width="6" stroke-linecap="round"/>
+        <rect x="108" y="134" width="46" height="32" rx="4" fill="var(--net)"/>
+        <rect x="154" y="126" width="12" height="48" rx="2" fill="var(--ink)" opacity="0.7"/>
+        <text x="24" y="130" fill="var(--net)" style="fill:var(--net)" class="d">Ethernet</text>
+        <text x="24" y="176" class="m">Modbus · MQTT · web</text>
+        <!-- body -->
+        <rect x="166" y="48" width="244" height="200" rx="10" fill="var(--modbody)" stroke="var(--in)" stroke-width="2"/>
+        <!-- inputs strip -->
+        <rect x="176" y="56" width="224" height="38" rx="4" fill="none" stroke="var(--in)" stroke-width="2"/>
+        <g id="inTerms"></g>
+        <g id="inLeds"></g>
+        <text x="288" y="152" text-anchor="middle" class="d" style="font-size:24px">ADAM-6052</text>
+        <text x="288" y="170" text-anchor="middle" class="m">16-channel I/O</text>
+        <g id="outLeds"></g>
+        <rect x="176" y="202" width="224" height="38" rx="4" fill="none" stroke="var(--out)" stroke-width="2"/>
+        <g id="outTerms"></g>
+        <!-- power -->
+        <rect x="410" y="118" width="26" height="64" rx="4" fill="var(--term)"/>
+        <circle cx="423" cy="136" r="6" fill="var(--modbody)" stroke="var(--ink)"/><circle cx="423" cy="164" r="6" fill="var(--modbody)" stroke="var(--ink)"/>
+        <line x1="436" y1="136" x2="520" y2="136" stroke="var(--warn)" stroke-width="4" stroke-linecap="round"/>
+        <line x1="436" y1="164" x2="520" y2="164" stroke="var(--ink)" stroke-width="4" stroke-linecap="round"/>
+        <text x="445" y="120" class="d" style="fill:var(--rpm)">Power</text>
+        <text x="445" y="190" class="m">10–30 V DC</text>
+        <!-- brackets -->
+        <path d="M176 44 V36 H400 V44" fill="none" stroke="var(--in)" stroke-width="2"/>
+        <text x="288" y="24" text-anchor="middle" class="d" style="fill:var(--in)">8 inputs · DI 0–7 · isolated</text>
+        <path d="M176 252 V260 H400 V252" fill="none" stroke="var(--out)" stroke-width="2"/>
+        <text x="288" y="282" text-anchor="middle" class="d" style="fill:var(--out)">8 outputs · DO 0–7 · source type</text>
+      </svg>
+      <p class="cap">LEDs show a sample state: inputs 0, 2 and 5 on; outputs 1 and 4 on.</p>
+      <details class="explain" open style="--c:var(--in)"><summary>In plain words</summary><div class="tx">
+        <p><b>Inputs</b> are where the module listens. A wire from a switch or sensor goes into an input terminal, and the module reports whether that signal is on or off.</p>
+        <p><b>Outputs</b> are where the module acts. It can switch power to something, such as a lamp, a buzzer or a relay.</p>
+        <p><b>Isolated</b> means the input wiring is separated from the module's own electronics by a barrier (listed as 2,000 V). A surge or a wiring mistake out in the field is then less likely to damage the module or your network.</p>
+        <p>The module also needs its own power supply, 10 to 30 volts DC, shown on the right. The little lights show which channels are on right now.</p></div></details>
+    </section>
+
+    <!-- 2 INPUT WIRING -->
+    <section class="panel p2" style="--c:var(--in)" aria-labelledby="h2p">
+      <h2 id="h2p"><span class="n">2</span>Wiring an input</h2>
+      <svg viewBox="0 0 300 110" role="img" aria-label="Dry contact: a switch between ground and the input">
+        <g stroke="var(--ink)" stroke-width="3" fill="none" stroke-linecap="round">
+          <line x1="18" y1="86" x2="42" y2="86"/><line x1="23" y1="92" x2="37" y2="92"/><line x1="28" y1="98" x2="32" y2="98"/>
+          <line x1="30" y1="86" x2="30" y2="70"/><line x1="30" y1="70" x2="70" y2="70"/>
+          <line x1="150" y1="70" x2="250" y2="70"/>
+        </g>
+        <circle cx="70" cy="70" r="4" fill="var(--ink)"/><circle cx="150" cy="70" r="4" fill="var(--ink)"/>
+        <line id="lever" x1="70" y1="70" x2="140" y2="38" stroke="var(--in)" stroke-width="5" stroke-linecap="round"/>
+        <rect x="250" y="50" width="40" height="40" rx="4" fill="var(--modbody)" stroke="var(--in)" stroke-width="2"/>
+        <text x="270" y="75" text-anchor="middle" class="d" style="fill:var(--in)">DI</text>
+        <text x="30" y="18" class="d" style="fill:var(--in)">Dry contact</text>
+      </svg>
+      <div class="chips"><button class="plain big" id="swBtn" type="button" aria-pressed="false">Close the switch</button><span class="chip solid" id="swRead" style="--c:var(--in)"></span></div>
+      <svg viewBox="0 0 300 92" role="img" aria-label="Wet contact voltage zones from 0 to 30 volts">
+        <text x="10" y="14" class="d" style="fill:var(--in)">Wet contact</text>
+        <rect x="10" y="26" width="28" height="22" fill="var(--in)" opacity="0.85"/>
+        <rect x="38" y="26" width="65" height="22" fill="var(--line)"/>
+        <rect x="103" y="26" width="187" height="22" fill="var(--net)" opacity="0.85"/>
+        <text x="24" y="42" text-anchor="middle" style="fill:var(--surface)">0</text>
+        <text x="196" y="42" text-anchor="middle" style="fill:var(--surface)">1</text>
+        <text x="70" y="42" text-anchor="middle" class="m">?</text>
+        <text x="10" y="66" class="m">0 V</text><text x="28" y="66" class="m">3</text><text x="95" y="66" class="m">10</text><text x="266" y="66" class="m">30 V</text>
+        <path id="vMark" d="M10 24 l-6 -10 h12 z" fill="var(--ink)"/>
+        <text x="10" y="86" class="m">0 = off   ? = not guaranteed   1 = on</text>
+      </svg>
+      <div class="ctl" style="grid-template-columns:1fr 4.5rem"><input id="volt" type="range" min="0" max="30" step="0.5" value="24" aria-label="Sensor voltage"><output id="voltOut"></output></div>
+      <details class="explain" open style="--c:var(--in)"><summary>In plain words</summary><div class="tx">
+        <p>An input has to tell the difference between <b>on</b> and <b>off</b>. What you connect decides how.</p>
+        <p><b>Dry contact</b> means a plain switch, button or relay contact. It carries no voltage of its own. It only joins two wires, or does not. Here one side goes to ground and the other to the input. If the switch is open, the module reads <b>1</b>. If it is closed to ground, it reads <b>0</b>. That feels backwards, but closing the switch pulls the input down to 0 volts. Click the switch to see it.</p>
+        <p><b>Wet contact</b> means the wire already has voltage on it, because it comes from something powered, like a sensor or another machine's signal wire. The module does not supply anything. It just measures the voltage. Between 10 and 30 volts it reads <b>1</b> (on). Between 0 and 3 volts it reads <b>0</b> (off).</p>
+        <p><b>The "?" zone</b> is 3 to 10 volts. The module does not promise a correct reading there, so a healthy signal should never sit in it. A 12 volt signal is fine, but a flat battery sagging to 9 volts would land in the "?" zone and give unreliable readings. Drag the slider to see.</p>
+        <p class="tip">Quick test: is there voltage on the wire? Then it is wet. Is it just a switch that connects or disconnects? Then it is dry.</p></div></details>
+    </section>
+
+    <!-- 3 MODES -->
+    <section class="panel p3" style="--c:var(--rpm)" aria-labelledby="h3p">
+      <h2 id="h3p"><span class="n">3</span>One input, three jobs</h2>
+      <div class="row2" style="grid-template-columns:1fr">
+        <div class="mode" style="--c:var(--in)"><b>Digital input</b>
+          <svg viewBox="0 0 220 44"><path d="M4 36 H70 V8 H216" fill="none" stroke="var(--in)" stroke-width="3"/></svg><span>Is it on?</span></div>
+        <div class="mode" style="--c:var(--rpm)"><b>Counter</b>
+          <svg viewBox="0 0 220 44"><path d="M4 36 H20 V10 H34 V36 H62 V10 H76 V36 H104 V10 H118 V36 H146 V10 H160 V36 H216" fill="none" stroke="var(--rpm)" stroke-width="3"/><text x="27" y="8" text-anchor="middle">1</text><text x="69" y="8" text-anchor="middle">2</text><text x="111" y="8" text-anchor="middle">3</text><text x="153" y="8" text-anchor="middle">4</text></svg><span>How many pulses so far?</span></div>
+        <div class="mode" style="--c:var(--net)"><b>Frequency</b>
+          <svg viewBox="0 0 220 44"><path d="M4 36 H12 V10 H22 V36 H34 V10 H44 V36 H56 V10 H66 V36 H78 V10 H88 V36 H100 V10 H110 V36 H122 V10 H132 V36 H144 V10 H154 V36 H166 V10 H176 V36 H188 V10 H198 V36 H216" fill="none" stroke="var(--net)" stroke-width="3"/></svg><span>How many per second?</span></div>
+      </div>
+      <p class="cap">Set per channel, from the module's web page. Counting tops out at 3 kHz.</p>
+      <details class="explain" open style="--c:var(--rpm)"><summary>In plain words</summary><div class="tx">
+        <p>Each input pin can do one of three jobs. You choose per pin, on the module's own web page.</p>
+        <p><b>Digital input</b> answers "is it on right now?" Good for a door switch or a warning light.</p>
+        <p><b>Counter</b> keeps a running total of pulses, like the odometer in a car. It holds a 32-bit number, so it can reach about 4.29 billion before it wraps around to zero, and an overflow flag tells you when that happened.</p>
+        <p><b>Frequency</b> answers "how many pulses per second?", like a speedometer instead of an odometer.</p>
+        <p>The limit is 3 kHz, which is 3,000 pulses per second. Pulses arriving faster than that get missed.</p></div></details>
+    </section>
+
+    <!-- 4 RPM -->
+    <section class="panel p4" style="--c:var(--rpm)" aria-labelledby="h4p">
+      <h2 id="h4p"><span class="n">4</span>Counting a spinning wheel</h2>
+      <div class="twocol">
+        <svg viewBox="0 0 260 250" role="img" aria-label="Toothed wheel passing a sensor that makes one pulse per tooth">
+          <rect x="106" y="8" width="48" height="30" rx="4" fill="var(--modbody)" stroke="var(--rpm)" stroke-width="2"/>
+          <text x="130" y="28" text-anchor="middle" class="m">sensor</text>
+          <path d="M160 23 H178 V9 H190 V23 H202 V9 H214 V23 H226 V9 H238 V23 H254" fill="none" stroke="var(--rpm)" stroke-width="2.5"/>
+          <g class="spin" id="wheel"><circle cx="130" cy="150" r="58" fill="var(--ink)" opacity="0.88"/><g id="teeth"></g><circle cx="130" cy="150" r="14" fill="var(--surface)"/><circle cx="130" cy="150" r="5" fill="var(--ink)"/></g>
+        </svg>
+        <div style="display:grid;gap:12px;min-width:0">
+          <div class="ctl"><label for="rpmIn">Speed</label><input id="rpmIn" type="range" min="0" max="4000" step="50" value="2200"><output id="rpmOut"></output></div>
+          <div class="ctl"><label for="teethIn">Teeth</label><input id="teethIn" type="range" min="1" max="120" step="1" value="60"><output id="teethOut"></output></div>
+          <svg viewBox="0 0 420 46" role="img" aria-label="Calculation chain from RPM to pulses per second">
+            <rect x="2" y="6" width="104" height="34" rx="4" fill="none" stroke="var(--rpm)" stroke-width="2"/><text id="cRpm" x="54" y="28" text-anchor="middle"></text>
+            <path d="M110 23 h24 m-6 -6 l6 6 l-6 6" stroke="var(--ink)" stroke-width="2" fill="none"/>
+            <text x="172" y="20" text-anchor="middle" class="m">÷ 60</text><text id="cTeeth" x="172" y="35" text-anchor="middle" class="m"></text>
+            <path d="M214 23 h24 m-6 -6 l6 6 l-6 6" stroke="var(--ink)" stroke-width="2" fill="none"/>
+            <rect x="242" y="6" width="130" height="34" rx="4" id="cBox" fill="none" stroke-width="2"/><text id="cHz" x="307" y="28" text-anchor="middle"></text>
+          </svg>
+          <svg viewBox="0 0 420 50" role="img" aria-label="Pulse rate against the 3 kilohertz limit">
+            <rect x="2" y="8" width="416" height="16" rx="3" fill="var(--bg)" stroke="var(--line)"/>
+            <rect id="hzBar" x="2" y="8" width="0" height="16" rx="3"/>
+            <line x1="280" y1="2" x2="280" y2="30" stroke="var(--ink)" stroke-width="2"/>
+            <text x="280" y="44" text-anchor="middle" class="m">3 kHz limit</text><text x="2" y="44" class="m">0</text><text x="418" y="44" text-anchor="end" class="m">4.5 kHz</text>
+          </svg>
+          <div class="verdict" id="rpmVerdict"></div>
+        </div>
+      </div>
+
+      <details class="explain" open style="--c:var(--rpm)"><summary>In plain words</summary><div class="tx">
+        <p>Picture a gear on a spinning shaft. A sensor next to it gives one pulse every time a tooth goes past. Count the pulses and you know how fast the shaft turns.</p>
+        <p>The sum is two steps. <b>RPM divided by 60</b> gives turns per second. <b>Times the number of teeth</b> gives pulses per second. At 2,200 RPM that is 36.7 turns a second, and with 60 teeth that is 2,200 pulses a second.</p>
+        <p>The input can follow 3,000 pulses a second. Faster than that, it drops pulses and the speed reads too low. The fix is a wheel with fewer teeth, or a sensor that gives one pulse per turn. Move the sliders until the bar turns red to see the limit.</p>
+        <p>Two ways to read it: in <b>frequency</b> mode the module hands you pulses per second directly. In <b>counter</b> mode you read the total twice, then divide the difference by the seconds between the reads. Either way the module does not know about RPM. The software reading it does the sum above.</p>
+        <p class="tip">The sensor must give a clean on-or-off pulse, such as a Hall or proximity sensor. A raw wobbly signal from a magnetic pickup needs converting first.</p></div></details>
+    </section>
+
+    <!-- 5 OUTPUTS -->
+    <section class="panel p5" style="--c:var(--out)" aria-labelledby="h5p">
+      <h2 id="h5p"><span class="n">5</span>Driving a load</h2>
+      <svg viewBox="0 0 300 232" role="img" aria-label="Source-type output: the supply goes through the module's switch, then the load, then ground">
+        <line x1="20" y1="22" x2="280" y2="22" stroke="var(--warn)" stroke-width="4" stroke-linecap="round"/>
+        <text x="20" y="14" class="d" style="fill:var(--warn)">+V · 10–35 V DC</text>
+        <rect x="70" y="56" width="160" height="92" rx="8" fill="var(--modbody)" stroke="var(--out)" stroke-width="2"/>
+        <text x="80" y="72" class="m">inside the module</text>
+        <path id="wireTop" d="M150 22 V86" fill="none" stroke-width="4" stroke-linecap="round"/>
+        <circle cx="150" cy="86" r="4" fill="var(--ink)"/><circle cx="150" cy="124" r="4" fill="var(--ink)"/>
+        <line id="outSw" x1="150" y1="86" x2="150" y2="124" stroke="var(--out)" stroke-width="5" stroke-linecap="round"/>
+        <text x="166" y="110" class="m">switch</text>
+        <path id="wireMid" d="M150 124 V160" fill="none" stroke-width="4" stroke-linecap="round"/>
+        <text x="166" y="154" class="m">DO pin</text>
+        <circle id="lamp" cx="150" cy="178" r="17" stroke="var(--ink)" stroke-width="2.5"/>
+        <path d="M139 167 L161 189 M161 167 L139 189" stroke="var(--ink)" stroke-width="2"/>
+        <text x="176" y="182" class="m">load</text>
+        <path id="wireBot" d="M150 195 V216" fill="none" stroke-width="4" stroke-linecap="round"/>
+        <g stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="132" y1="216" x2="168" y2="216"/><line x1="138" y1="223" x2="162" y2="223"/><line x1="145" y1="230" x2="155" y2="230"/></g>
+      </svg>
+      <div class="chips" style="--c:var(--out)"><button class="plain big" id="doBtn" type="button" aria-pressed="false">Turn output on</button><span class="chip">1 A each</span><span class="chip">pulses to 5 kHz</span></div>
+      <details class="explain" open style="--c:var(--out)"><summary>In plain words</summary><div class="tx">
+        <p>An <b>output</b> is the module switching power on and off for something else. That something is the <b>load</b>: a lamp, a buzzer, the coil of a relay.</p>
+        <p><b>Source type</b> means that when an output turns on, the pin <b>pushes voltage out</b>. You connect the load between that pin and ground, and current flows through it. Press the button to see the path light up. The opposite design, called <b>sink type</b>, instead connects the load to ground and expects the positive voltage to come from elsewhere. Mixing the two up is a very common wiring mistake.</p>
+        <p>Each output is rated 10 to 35 volts DC and up to 1 amp. That suits a lamp, a buzzer or a relay. A big motor needs a relay or contactor in between. There is built-in protection if you draw too much current.</p>
+        <p>An output can also <b>pulse</b>, switching on and off up to 5,000 times a second, or <b>delay</b> its change by a set time.</p>
+        <p class="tip">Check the module's wiring diagram for exactly where the output power supply connects before powering anything.</p></div></details>
+    </section>
+
+    <!-- 6 NETWORK -->
+    <section class="panel p6" style="--c:var(--net)" aria-labelledby="h6p">
+      <h2 id="h6p"><span class="n">6</span>Talking to the world</h2>
+      <svg viewBox="0 0 320 232" role="img" aria-label="The module connected over Ethernet to a PLC or SCADA, a cloud broker, a browser and a peer module">
+        <g stroke="var(--net)" stroke-width="3" fill="none"><line x1="160" y1="116" x2="70" y2="46"/><line x1="160" y1="116" x2="250" y2="46"/><line x1="160" y1="116" x2="70" y2="186"/><line x1="160" y1="116" x2="250" y2="186"/></g>
+        <rect x="108" y="96" width="104" height="40" rx="6" fill="var(--modbody)" stroke="var(--in)" stroke-width="2"/>
+        <text x="160" y="121" text-anchor="middle" class="d">ADAM-6052</text>
+        <g id="nodes"></g>
+      </svg>
+      <div class="chips" style="--c:var(--net)"><span class="chip">also SNMP</span><span class="chip">REST API</span><span class="chip">GCL logic rules</span></div>
+      <details class="explain" open style="--c:var(--net)"><summary>In plain words</summary><div class="tx">
+        <p>The module has one network socket. Once it is on your network, different programs can talk to it, each in its own "language".</p>
+        <p><b>Modbus TCP</b> is a very common language for industrial controllers. A PLC or SCADA screen asks things like "what is input 3?" and the module answers with a number.</p>
+        <p><b>MQTT</b> works like a post office. The module posts a message ("input 3 changed to 1") to a server called a broker, and anything that subscribed receives it. TLS means the messages are encrypted.</p>
+        <p><b>SNMP</b> is used by network-monitoring tools. <b>REST API</b> lets ordinary web programs talk to it with web requests.</p>
+        <p><b>The setup page:</b> type the module's address into a web browser to choose what each pin does.</p>
+        <p><b>Peer-to-peer:</b> one ADAM can pass its inputs straight to another ADAM's outputs, with no computer between them. A button here could light a lamp across the plant.</p>
+        <p><b>Logic rules (GCL):</b> small if-this-then-that rules stored in the module, such as "if input 0 is on, switch output 1 on".</p></div></details>
+    </section>
+
+    <!-- 7 PUTTING IT TOGETHER -->
+    <section class="panel p7" style="--c:var(--out)" aria-labelledby="h7p">
+      <h2 id="h7p"><span class="n">7</span>Putting it together: brake to lamp</h2>
+      <svg viewBox="0 0 760 320" role="img" aria-label="Park brake switch wired to input DI 1, with a rule in the module driving output DO 0 to an indicator lamp, and Ethernet carrying the same state to a dashboard">
+        <rect x="14" y="104" width="130" height="72" rx="6" fill="var(--surface)" stroke="var(--ink)" stroke-width="2"/>
+        <text x="79" y="128" text-anchor="middle" class="d" style="font-size:16px">Park brake</text>
+        <text x="79" y="146" text-anchor="middle" class="m">24 V when applied</text>
+        <text id="bkSw" x="79" y="166" text-anchor="middle" style="font-weight:500"></text>
+        <path id="bkWireIn" d="M144 140 H256" fill="none" stroke-width="5" stroke-linecap="round"/>
+        <rect x="270" y="40" width="230" height="240" rx="10" fill="var(--modbody)" stroke="var(--in)" stroke-width="2"/>
+        <text x="385" y="64" text-anchor="middle" class="d">ADAM-6052</text>
+        <rect x="256" y="126" width="26" height="28" rx="3" fill="var(--term)"/>
+        <text x="290" y="132" style="fill:var(--in);font-weight:500">DI 1</text>
+        <text id="bkRead" x="290" y="148"></text>
+        <g id="bkRule"><rect id="bkRuleBox" x="300" y="172" width="170" height="46" rx="5" fill="var(--surface)" stroke-width="2"/>
+          <text id="bkRuleT1" x="385" y="192" text-anchor="middle"></text><text id="bkRuleT2" x="385" y="208" text-anchor="middle" class="m"></text></g>
+        <text x="385" y="266" text-anchor="middle" class="m">output supply 24 V in</text>
+        <rect x="486" y="208" width="26" height="28" rx="3" fill="var(--term)"/>
+        <text x="480" y="236" text-anchor="end" style="fill:var(--out);font-weight:500">DO 0</text>
+        <rect x="498" y="66" width="14" height="26" rx="2" fill="var(--net)"/>
+        <path id="bkNet" d="M512 79 H600" fill="none" stroke-width="4" stroke-linecap="round"/>
+        <text id="bkNetT1" x="556" y="56" text-anchor="middle" style="fill:var(--net);font-weight:600;font-size:12px"></text>
+        <text id="bkNetT2" x="556" y="71" text-anchor="middle" style="fill:var(--ink);font-weight:600;font-size:12px"></text>
+        <rect x="600" y="44" width="152" height="70" rx="6" fill="var(--ink)"/>
+        <text x="676" y="68" text-anchor="middle" class="m" style="fill:var(--surface);opacity:0.75">dashboard</text>
+        <text id="bkDash" x="676" y="92" text-anchor="middle" class="d" style="fill:var(--surface);font-size:15px"></text>
+        <path id="bkWireOut" d="M512 222 H668" fill="none" stroke-width="5" stroke-linecap="round"/>
+        <text x="520" y="208" class="m" style="fill:var(--out)">DO 0 pushes 24 V</text>
+        <circle id="bkLamp" cx="690" cy="222" r="22" stroke="var(--ink)" stroke-width="2.5"/>
+        <path d="M675 207 L705 237 M705 207 L675 237" stroke="var(--ink)" stroke-width="2"/>
+        <path id="bkWireGnd" d="M690 244 V282" fill="none" stroke-width="5" stroke-linecap="round"/>
+        <g stroke="var(--ink)" stroke-width="3" stroke-linecap="round"><line x1="672" y1="282" x2="708" y2="282"/><line x1="678" y1="290" x2="702" y2="290"/><line x1="685" y1="298" x2="695" y2="298"/></g>
+        <text x="520" y="262" class="m">lamp 24 V, 2 W is about 0.08 A</text>
+      </svg>
+      <div class="chips" style="--c:var(--out)"><button class="plain big" id="bkBtn" type="button" aria-pressed="false">Apply the park brake</button>
+        <span class="seg" role="group" aria-label="What joins the input to the output"><button type="button" id="bkRuleBtn" aria-pressed="true">Rule inside the module</button><button type="button" id="bkSoftBtn" aria-pressed="false">Software commands it</button></span></div>
+      <details class="explain" open style="--c:var(--out)"><summary>In plain words</summary><div class="tx">
+        <p><b>The setup:</b> the park brake switch puts 24 V on its wire when the brake is applied. That wire goes into input DI 1. A 24 V indicator lamp is connected between output DO 0 and ground.</p>
+        <p><b>What happens, in order:</b></p>
+        <ol style="margin:0;padding-left:1.2em;display:grid;gap:4px">
+          <li>The brake is applied, so 24 V appears on the wire and DI 1 reads 1.</li>
+          <li>Something turns DO 0 on (see below).</li>
+          <li>DO 0 pushes 24 V to the lamp. Current flows through it to ground and it lights.</li>
+          <li>The brake is released, DI 1 reads 0, DO 0 turns off, and the lamp goes out.</li>
+        </ol>
+        <p><b>Who turns DO 0 on?</b> Pick either. With a <b>rule inside the module</b>, the module itself says "if DI 1 is 1, then DO 0 is 1" and no computer is needed. With <b>software commanding it</b>, a computer reads DI 1 over Ethernet, decides, and sends a command back to switch DO 0.</p>
+        <p><b>The dashboard</b> reads DI 1 over Ethernet at the same time. One input feeds both the screen and the lamp.</p>
+        <p class="tip">If the brake signal is a plain switch to ground instead (a dry contact), DI 1 reads 0 when the brake is applied, so the rule becomes "if DI 1 is 0". If you only want a lamp, the vehicle's own wiring could light it directly. The module is worth it when you also want the dashboard, or logic such as "lamp only if the engine is running".</p>
+      </div></details>
+    </section>
+
+    <!-- 8 DEBOUNCE -->
+    <section class="panel p8" style="--c:var(--deb)" aria-labelledby="h8p">
+      <h2 id="h8p"><span class="n">8</span>Cleaning up a chattering switch</h2>
+      <div class="steps">
+        <div class="step"><svg width="64" height="34" viewBox="0 0 64 34"><path d="M2 30 H10 V6 H14 V26 H18 V8 H22 V24 H27 V6 H62" fill="none" stroke="var(--out)" stroke-width="2.5"/></svg>Contact bounces</div>
+        <div class="step"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="19" r="12" fill="none" stroke="var(--deb)" stroke-width="2.5"/><path d="M17 19 V11 M17 19 L23 22 M13 3 H21" stroke="var(--deb)" stroke-width="2.5" fill="none"/></svg>Wait it out</div>
+        <div class="step"><svg width="64" height="34" viewBox="0 0 64 34"><path d="M2 30 H20 V6 H62" fill="none" stroke="var(--deb)" stroke-width="2.5"/></svg>Read once</div>
+        <div class="step"><svg width="34" height="34" viewBox="0 0 34 34"><circle cx="17" cy="17" r="14" fill="var(--net)"/><path d="M9 17 L15 23 L25 11" stroke="var(--surface)" stroke-width="3" fill="none"/></svg>One press</div>
+      </div>
+      <div class="ctl" style="grid-template-columns:7.2rem auto 1fr"><label>Filter</label><span class="seg" role="group" aria-label="Filter method"><button type="button" id="mLock" aria-pressed="true">Lockout timer</button><button type="button" id="mSamp" aria-pressed="false">N matching reads</button></span><span></span></div>
+      <div class="ctl"><label for="bnc">Switch bounces</label><input id="bnc" type="range" min="1" max="30" step="1" value="8"><output id="bncOut"></output></div>
+      <div class="ctl"><label for="win" id="winLabel">Filter waits</label><input id="win" type="range" min="1" max="60" step="1" value="20"><output id="winOut"></output></div>
+      <svg id="scope" viewBox="0 0 700 200" role="img" aria-label="Raw switch signal and the filtered signal over 110 milliseconds"></svg>
+      <div class="readout"><span>raw edges <b id="rawN"></b></span><span>presses <b id="pressN"></b></span><span id="lat"></span><button class="plain" type="button" id="reseed">New bounce</button></div>
+      <div class="verdict" id="debVerdict"></div>
+      <details class="explain" open style="--c:var(--deb)"><summary>In plain words</summary><div class="tx">
+        <p>A mechanical button does not close cleanly. When you press it, the metal contacts spring against each other for a few thousandths of a second, so the signal flickers on, off, on, off before it settles. You feel one press. A fast input sees many.</p>
+        <p><b>Debouncing</b> is a rule that turns that flicker into one clean press. It matters here because, with an input set as a counter, every flicker is counted as a pulse.</p>
+        <p><b>Lockout timer:</b> on the first change, start a timer and ignore the pin. When the time is up, look once. Still pressed? Then register one press.</p>
+        <p><b>N matching reads:</b> look at the pin every millisecond, and only accept a new state after N looks in a row agree.</p>
+        <p><b>The one rule:</b> the wait has to be longer than the bounce. Try it. Leave the bounce at 8 ms and drag the wait down to 3 ms. The filter gives up too early and registers an extra press. Click New bounce a few times: some bounces get away with it and some do not, which is exactly why a short wait cannot be trusted. For the N-reads method, N times 1 ms must beat the bounce, because a 1 ms look can miss a quick flicker between looks.</p>
+        <p class="tip">Sensors with no moving contacts, such as proximity or Hall sensors, do not bounce. I could not confirm whether the ADAM-6052 has a built-in input filter, so check its manual before wiring a plain button to a counter input.</p></div></details>
+    </section>
+  </div>
+
+  <div class="caution">Emergency stop <span>Let the module report it. Keep the real stop hard-wired.</span></div>
+  <footer>
+    Figures as reported in an
+    <a href="https://csi.pl/wp-content/uploads/2019/01/ADAM_6052_DataSheet.pdf" rel="noopener">ADAM-6052 datasheet copy</a>,
+    a <a href="https://www.assured-systems.com/advantech-adam-6052-16-ch-source-type-isolated-digital-io-modbus-tcp-module/" rel="noopener">distributor listing</a> and the
+    <a href="https://iotmart.advantech.com.tw/Data-Acquisition-Control/Remote-IO-Module-Ethernet-I-O-Module/model-ADAM-6052-D.htm" rel="noopener">-D variant page</a>.
+    Confirm against the datasheet for your exact unit. Not confirmed: whether the inputs have a configurable filter.
+  </footer>
+</div>
+
+<script>
+(function () {
+  var NS = 'http://www.w3.org/2000/svg';
+  function $(id) { return document.getElementById(id); }
+  function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+
+  // ---- panel 1: terminals and LEDs ----
+  (function () {
+    var inOn = [1,0,1,0,0,1,0,0], outOn = [0,1,0,0,1,0,0,0], s = '', l = '', o = '', ol = '';
+    for (var i = 0; i < 8; i++) {
+      var x = 180 + i * 27.5;
+      s += '<rect x="' + x + '" y="60" width="22" height="30" rx="3" fill="var(--term)"/><circle cx="' + (x + 11) + '" cy="72" r="6" fill="var(--modbody)" stroke="var(--ink)"/><line x1="' + (x + 11 - 3) + '" y1="72" x2="' + (x + 11 + 3) + '" y2="72" stroke="var(--ink)"/><text x="' + (x + 11) + '" y="86" text-anchor="middle" style="fill:var(--surface);font-size:9px">' + i + '</text>';
+      l += '<circle cx="' + (x + 11) + '" cy="108" r="5" fill="' + (inOn[i] ? 'var(--in)' : 'var(--line)') + '" stroke="var(--ink)" stroke-width="0.8"/>';
+      o += '<rect x="' + x + '" y="206" width="22" height="30" rx="3" fill="var(--term)"/><circle cx="' + (x + 11) + '" cy="224" r="6" fill="var(--modbody)" stroke="var(--ink)"/><line x1="' + (x + 11 - 3) + '" y1="224" x2="' + (x + 11 + 3) + '" y2="224" stroke="var(--ink)"/><text x="' + (x + 11) + '" y="214" text-anchor="middle" style="fill:var(--surface);font-size:9px">' + i + '</text>';
+      ol += '<circle cx="' + (x + 11) + '" cy="190" r="5" fill="' + (outOn[i] ? 'var(--out)' : 'var(--line)') + '" stroke="var(--ink)" stroke-width="0.8"/>';
+    }
+    $('inTerms').innerHTML = s; $('inLeds').innerHTML = l; $('outTerms').innerHTML = o; $('outLeds').innerHTML = ol;
+  })();
+
+  // ---- panel 2: dry switch and wet voltage ----
+  (function () {
+    var closed = false, btn = $('swBtn');
+    function sw() {
+      var lever = $('lever');
+      if (closed) { lever.setAttribute('x2', '150'); lever.setAttribute('y2', '70'); }
+      else { lever.setAttribute('x2', '140'); lever.setAttribute('y2', '38'); }
+      btn.setAttribute('aria-pressed', String(closed));
+      btn.textContent = closed ? 'Open the switch' : 'Close the switch';
+      $('swRead').textContent = closed ? 'reads 0 · tied to ground' : 'reads 1 · open';
+    }
+    btn.addEventListener('click', function () { closed = !closed; sw(); }); sw();
+    var volt = $('volt');
+    function v() {
+      var val = +volt.value;
+      $('vMark').setAttribute('transform', 'translate(' + (val / 30 * 280) + ' 0)');
+      $('voltOut').textContent = val.toFixed(1) + ' V' + (val >= 10 ? ' = 1' : val <= 3 ? ' = 0' : ' = ?');
+    }
+    volt.addEventListener('input', v); v();
+  })();
+
+  // ---- panel 4: wheel and RPM ----
+  (function () {
+    var rpm = $('rpmIn'), teeth = $('teethIn');
+    function build(n) {
+      var g = '', R = 58, w = Math.max(1.2, Math.min(7, (2 * Math.PI * R / n) * 0.5));
+      for (var i = 0; i < n; i++) {
+        var a = i * 360 / n;
+        g += '<rect x="' + (130 - w / 2) + '" y="' + (150 - R - 9) + '" width="' + w + '" height="10" fill="' + (i === 0 ? 'var(--rpm)' : 'var(--ink)') + '" opacity="' + (i === 0 ? 1 : 0.88) + '" transform="rotate(' + a + ' 130 150)"/>';
+      }
+      $('teeth').innerHTML = g;
+    }
+    function upd() {
+      var r = +rpm.value, t = +teeth.value, hz = r / 60 * t, max = 3000 * 60 / t, over = hz > 3000;
+      $('rpmOut').textContent = fmt(r) + ' RPM'; $('teethOut').textContent = t + ' teeth';
+      build(t);
+      $('wheel').style.animationDuration = r > 0 ? (6000 / r).toFixed(2) + 's' : '0s';
+      $('wheel').style.animationPlayState = r > 0 ? 'running' : 'paused';
+      $('cRpm').textContent = fmt(r) + ' RPM'; $('cTeeth').textContent = '× ' + t + ' teeth'; $('cHz').textContent = fmt(hz) + ' pulses/s';
+      var col = over ? 'var(--warn)' : 'var(--net)';
+      $('cBox').setAttribute('stroke', col);
+      var bar = $('hzBar'); bar.setAttribute('width', (Math.min(hz, 4500) / 4500 * 416).toFixed(1)); bar.setAttribute('fill', col);
+      var v = $('rpmVerdict');
+      v.className = 'verdict ' + (over ? 'bad' : 'good');
+      v.textContent = over ? 'Over 3 kHz: pulses would be missed. Top safe speed here is ' + fmt(max) + ' RPM.' : 'Within range. Top safe speed here is ' + fmt(max) + ' RPM.';
+    }
+    rpm.addEventListener('input', upd); teeth.addEventListener('input', upd); upd();
+  })();
+
+  // ---- panel 5: output switch ----
+  (function () {
+    var on = false, btn = $('doBtn');
+    function upd() {
+      var c = on ? 'var(--out)' : 'var(--line)';
+      ['wireTop', 'wireMid', 'wireBot'].forEach(function (id) { $(id).setAttribute('stroke', c); });
+      var sw = $('outSw');
+      if (on) { sw.setAttribute('x2', '150'); sw.setAttribute('y2', '124'); } else { sw.setAttribute('x2', '176'); sw.setAttribute('y2', '110'); }
+      $('lamp').setAttribute('fill', on ? 'var(--lamp)' : 'var(--surface)');
+      btn.setAttribute('aria-pressed', String(on));
+      btn.textContent = on ? 'Turn output off' : 'Turn output on';
+    }
+    btn.addEventListener('click', function () { on = !on; upd(); }); upd();
+  })();
+
+  // ---- panel 6: network nodes ----
+  (function () {
+    var nodes = [
+      { x: 8, y: 14, a: 'PLC / SCADA', b: 'Modbus TCP' },
+      { x: 202, y: 14, a: 'Cloud broker', b: 'MQTT + TLS' },
+      { x: 8, y: 154, a: 'Browser', b: 'setup page' },
+      { x: 202, y: 154, a: 'Another ADAM', b: 'mirrored I/O' }
+    ], s = '';
+    nodes.forEach(function (n) {
+      s += '<rect x="' + n.x + '" y="' + n.y + '" width="110" height="64" rx="6" fill="var(--surface)" stroke="var(--net)" stroke-width="2"/><text x="' + (n.x + 55) + '" y="' + (n.y + 28) + '" text-anchor="middle" class="d" style="font-size:16px">' + n.a + '</text><text x="' + (n.x + 55) + '" y="' + (n.y + 48) + '" text-anchor="middle" style="fill:var(--net)">' + n.b + '</text>';
+    });
+    $('nodes').innerHTML = s;
+  })();
+
+  // ---- panel 7: brake to lamp ----
+  (function () {
+    var braked = false, mode = 'rule';
+    function upd() {
+      var on = braked;
+      var cIn = on ? 'var(--in)' : 'var(--line)', cOut = on ? 'var(--out)' : 'var(--line)', cNet = 'var(--net)';
+      $('bkWireIn').setAttribute('stroke', cIn);
+      $('bkSw').textContent = on ? 'applied' : 'released';
+      $('bkRead').textContent = on ? 'reads 1' : 'reads 0';
+      $('bkRead').style.fill = on ? 'var(--in)' : 'var(--muted)';
+      var box = $('bkRuleBox');
+      if (mode === 'rule') {
+        box.setAttribute('stroke', on ? 'var(--out)' : 'var(--muted)'); box.removeAttribute('stroke-dasharray');
+        $('bkRuleT1').textContent = 'rule: if DI 1 = 1'; $('bkRuleT2').textContent = 'then DO 0 = 1';
+        $('bkNetT1').textContent = 'Ethernet'; $('bkNetT2').textContent = 'DI 1 = ' + (on ? '1' : '0');
+      } else {
+        box.setAttribute('stroke', 'var(--muted)'); box.setAttribute('stroke-dasharray', '5 4');
+        $('bkRuleT1').textContent = 'no rule here'; $('bkRuleT2').textContent = 'software decides';
+        $('bkNetT1').textContent = 'reads DI 1,'; $('bkNetT2').textContent = 'sends DO 0';
+      }
+      $('bkNet').setAttribute('stroke', cNet);
+      $('bkDash').textContent = on ? 'PARK BRAKE APPLIED' : 'Park brake off';
+      ['bkWireOut', 'bkWireGnd'].forEach(function (id) { $(id).setAttribute('stroke', cOut); });
+      $('bkLamp').setAttribute('fill', on ? 'var(--lamp)' : 'var(--surface)');
+      $('bkBtn').setAttribute('aria-pressed', String(on));
+      $('bkBtn').textContent = on ? 'Release the park brake' : 'Apply the park brake';
+      $('bkRuleBtn').setAttribute('aria-pressed', String(mode === 'rule'));
+      $('bkSoftBtn').setAttribute('aria-pressed', String(mode === 'soft'));
+    }
+    $('bkBtn').addEventListener('click', function () { braked = !braked; upd(); });
+    $('bkRuleBtn').addEventListener('click', function () { mode = 'rule'; upd(); });
+    $('bkSoftBtn').addEventListener('click', function () { mode = 'soft'; upd(); });
+    upd();
+  })();
+
+  // ---- panel 8: debounce (tested in Node: 6,000 trials, window longer than the bounce gives exactly one press) ----
+  var T0 = 10, END = 110;
+  function rng32(seed) { return function () { seed |= 0; seed = (seed + 0x6D2B79F5) | 0; var t = Math.imul(seed ^ (seed >>> 15), 1 | seed); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function makeRaw(bounceMs, seed) {
+    var r = rng32(seed), edges = [], t = T0, v = 1;
+    edges.push({ t: t, v: 1 });
+    while (t < T0 + bounceMs) { t += 0.1 + r() * 1.4; v = 1 - v; edges.push({ t: t, v: v }); }
+    if (v === 0) { t += 0.1 + r() * 1.4; edges.push({ t: t, v: 1 }); }
+    return edges;
+  }
+  function levelAt(edges, t) { var v = 0; for (var i = 0; i < edges.length && edges[i].t <= t; i++) v = edges[i].v; return v; }
+  function lockout(edges, T) {
+    var stable = 0, next = 0, out = [];
+    for (var i = 0; i < edges.length; i++) {
+      var e = edges[i];
+      if (e.t < next || e.v === stable) continue;
+      var lv = levelAt(edges, e.t + T); next = e.t + T;
+      if (lv !== stable) { stable = lv; out.push({ t: e.t + T, v: stable }); }
+    }
+    return out;
+  }
+  function nsample(edges, N) {
+    var stable = 0, cnt = 0, out = [];
+    for (var s = 0; s <= 200; s += 1) {
+      var lv = levelAt(edges, s);
+      if (lv !== stable) { cnt++; if (cnt >= N) { stable = lv; cnt = 0; out.push({ t: s, v: stable }); } } else cnt = 0;
+    }
+    return out;
+  }
+  function rises(list) { var n = 0, prev = 0; list.forEach(function (e) { if (e.v === 1 && prev === 0) n++; prev = e.v; }); return n; }
+
+  (function () {
+    var method = 'lock', seed = 3, bnc = $('bnc'), win = $('win'), X0 = 64, SC = 5.6;
+    function x(t) { return X0 + t * SC; }
+    function wave(edges, yLow, yHigh) {
+      var d = 'M ' + x(0) + ' ' + yLow;
+      edges.forEach(function (e) { d += ' H ' + x(Math.min(e.t, END)).toFixed(1) + ' V ' + (e.v ? yHigh : yLow); });
+      return d + ' H ' + x(END);
+    }
+    function draw() {
+      var B = +bnc.value, W = +win.value, raw = makeRaw(B, seed);
+      var out = method === 'lock' ? lockout(raw, W) : nsample(raw, W);
+      var presses = rises(out), rawN = rises(raw);
+      $('bncOut').textContent = B + ' ms';
+      $('winOut').textContent = W + (method === 'lock' ? ' ms' : ' reads');
+      $('winLabel').textContent = method === 'lock' ? 'Filter waits' : 'Reads that agree';
+      var s = '';
+      for (var t = 0; t <= END; t += 10) s += '<line x1="' + x(t) + '" x2="' + x(t) + '" y1="14" y2="172" stroke="var(--line)"/><text x="' + x(t) + '" y="190" text-anchor="middle" class="m">' + t + '</text>';
+      s += '<text x="0" y="190" class="m">ms</text>';
+      if (method === 'lock') s += '<rect x="' + x(T0) + '" y="14" width="' + (Math.min(W, END - T0) * SC) + '" height="76" fill="var(--shade)"/>';
+      s += '<text x="0" y="52" class="m">switch</text><text x="0" y="136" class="m">filtered</text>';
+      s += '<path d="' + wave(raw, 80, 28) + '" fill="none" stroke="var(--out)" stroke-width="2"/>';
+      s += '<path d="' + wave(out, 160, 108) + '" fill="none" stroke="var(--deb)" stroke-width="2.5"/>';
+      var prev = 0;
+      out.forEach(function (e) { if (e.v === 1 && prev === 0) s += '<circle cx="' + x(Math.min(e.t, END)) + '" cy="108" r="4.5" fill="var(--deb)"/>'; prev = e.v; });
+      $('scope').innerHTML = s;
+      $('rawN').textContent = rawN; $('pressN').textContent = presses;
+      var up = null; out.forEach(function (e) { if (up === null && e.v === 1) up = e.t; });
+      $('lat').textContent = up === null ? '' : 'confirmed after ' + Math.round(up - T0) + ' ms';
+      var v = $('debVerdict');
+      if (presses === 1) { v.className = 'verdict good'; v.textContent = 'One push, one press. A bare counter would have counted ' + rawN + '.'; }
+      else if (presses === 0) { v.className = 'verdict bad'; v.textContent = 'Missed. The filter looked at a moment the contact was open.'; }
+      else { v.className = 'verdict bad'; v.textContent = 'Fooled: ' + presses + ' presses from one push. The window is shorter than the bounce.'; }
+    }
+    function setMethod(m) { method = m; $('mLock').setAttribute('aria-pressed', String(m === 'lock')); $('mSamp').setAttribute('aria-pressed', String(m === 'samp')); draw(); }
+    $('mLock').addEventListener('click', function () { setMethod('lock'); });
+    $('mSamp').addEventListener('click', function () { setMethod('samp'); });
+    $('reseed').addEventListener('click', function () { seed = Math.floor(Math.random() * 100000) + 1; draw(); });
+    bnc.addEventListener('input', draw); win.addEventListener('input', draw);
+    draw();
+  })();
+})();
+</script>
+<script>
+(function () {
+  var btn = document.getElementById('toggleEx');
+  btn.addEventListener('click', function () {
+    var show = btn.getAttribute('aria-pressed') !== 'true';
+    document.querySelectorAll('details.explain').forEach(function (d) { d.open = show; });
+    btn.setAttribute('aria-pressed', String(show));
+    btn.textContent = show ? 'Hide the explanations' : 'Show the explanations';
+  });
+})();
+</script>
+<script>
+(function () {
+  function send() {
+    var h = Math.ceil(document.body.getBoundingClientRect().height);
+    if (window.parent !== window) window.parent.postMessage({ adamPosterHeight: h }, '*');
+  }
+  window.addEventListener('load', send);
+  window.addEventListener('resize', send);
+  if (window.ResizeObserver) new ResizeObserver(send).observe(document.body);
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(send);
+})();
+</script>
+</body>
+</html>

@@ -406,4 +406,5 @@ distributed-systems and software level, instead of a hardware
 countdown. :doc:`priority_inversion_interactive` for another real,
 mission-critical embedded reliability story. :doc:`can_arbitration_interactive`
 for another hardware-level mechanism from the same corner of embedded
-systems.
+systems. :doc:`adam_6052_interactive` for the remote I/O box that
+reports a machine's switch and sensor states over Ethernet.

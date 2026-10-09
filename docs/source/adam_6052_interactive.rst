@@ -1,5 +1,5 @@
-CAN Bus Arbitration: Play With It
-=====================================
+ADAM-6052: Play With It
+==============================
 
 .. raw:: html
 
@@ -134,86 +134,94 @@ CAN Bus Arbitration: Play With It
      }
    </style>
 
-Every modern car, aircraft, and even SpaceX rockets run on CAN
-(Controller Area Network) -- a single shared pair of wires that every
-sensor and controller on the bus talks over at once. The obvious
-question: what happens when the brakes controller and the seat heater
-both need to say something at the exact same instant? Ethernet's
-answer is to let them collide, notice the wreckage afterward, and
-retry. CAN's answer is stranger and better: it lets them collide *on
-purpose*, resolves who wins bit by bit while the collision is still
-happening, and never wastes a single bit doing it.
+The ADAM-6052 is a small box that sits between machinery and a
+computer network. On one side, wires from switches, sensors and lamps
+screw into it. On the other side, one Ethernet cable plugs in. That
+lets a computer far away **see** whether something is on or off,
+**count** how many times it pulsed, and **switch** things on or off.
+It has 8 pins for listening (inputs) and 8 pins for acting (outputs).
 
-The Two Wire States That Make This Work
----------------------------------------------
-
-CAN's two wires don't encode "0" and "1" symmetrically. One state is
-**dominant** (a logical 0) and the other is **recessive** (a logical
-1). The bus itself behaves like a wired-AND: if even one node drives
-dominant while every other node drives recessive, *the entire bus
-reads dominant* -- recessive is the wire's default, resting state, and
-dominant physically overrides it the instant both are driven at once.
-
-That single electrical fact is the whole mechanism. A node's message
-ID is transmitted bit by bit, most significant bit first, and a
-**lower numeric ID means more leading dominant (0) bits** -- which is
-exactly why a lower CAN ID is treated as *higher priority*.
+The poster below goes in order, from the box itself outward: the
+module, how an input is wired, what an input can do, counting a
+spinning wheel, driving a load, the network, a full worked example
+(a park-brake signal reaching both a dashboard and a lamp), and
+cleaning up a bouncing switch. Every picture is clickable, and every
+panel has a plain-words explanation underneath.
 
 Play With It
 ------------------
 
-Pick which nodes are transmitting at the same instant, then watch the
-actual bit-by-bit race: every node drives its own ID bit, then reads
-back what the bus actually settled to. The moment a node's own bit
-disagrees with the bus, it has already lost -- it stops immediately,
-mid-ID, and everyone else keeps going until exactly one node remains.
-
 .. raw:: html
-   :file: _static/can_arbitration_widget.html
 
-Why Nothing Is Ever Wasted
---------------------------------
+   <iframe id="adamPoster" src="_static/adam_6052_poster.html"
+           title="ADAM-6052 illustrated poster"
+           style="width:100%; height:3000px; border:1px solid #cdd6cc; border-radius:4px; background:#ffffff;"
+           loading="lazy"></iframe>
+   <script>
+   window.addEventListener('message', function (e) {
+     var f = document.getElementById('adamPoster');
+     if (f && e.source === f.contentWindow && e.data && e.data.adamPosterHeight) {
+       f.style.height = (e.data.adamPosterHeight + 4) + 'px';
+     }
+   });
+   </script>
 
-.. list-table::
-   :class: longtable
-   :header-rows: 1
-   :widths: 30 35 35
+The poster is also available on its own page:
+`open the poster in a full window <_static/adam_6052_poster.html>`__.
 
-   * - 
-     - CAN bus arbitration
-     - Ethernet-style CSMA/CD
-   * - When is a collision noticed?
-     - Immediately, bit by bit, while it's happening
-     - Only after the fact, once both frames are already fully sent
-   * - What gets thrown away?
-     - Nothing -- losing nodes simply stop and wait for this frame to
-       finish
-     - The entire colliding frame, on every node involved
-   * - How does a loser retry?
-     - It doesn't need to "retry" anything -- it just tries again on
-       the next frame
-     - Random backoff, then resend the whole frame, hoping not to
-       collide again
+The Questions Beginners Hit First
+-----------------------------------------
 
-This is the detail that makes CAN's arbitration different from a
-retry-based scheme in kind, not just in speed: a node that loses
-arbitration hasn't wasted any bandwidth at all. Every bit it sent
-before losing was a real, correctly-received bit -- it just happened to
-lose a priority contest it was allowed to enter every time, for free.
+**Does an input switching change an output?** No. An input and an
+output are independent. An input changing updates the module's input
+light and its stored value, which anything on the network can read. An
+output only turns on when something tells it to: software sends a
+command, a rule inside the module does it, or the module's
+peer-to-peer feature passes an input to another ADAM's output.
+
+**How does a dashboard get a signal?** Over Ethernet, not through an
+output. The dashboard reads the input's value using Modbus TCP, or the
+module publishes it as an MQTT message. An "output" here means a
+physical pin that switches power to a load such as a lamp or a buzzer.
+
+**What is the difference between dry and wet contact?** A dry contact
+is a plain switch that carries no voltage of its own; open reads 1 and
+closed to ground reads 0. A wet contact is a wire that already carries
+voltage from a powered sensor; 10 to 30 volts reads 1 and 0 to 3 volts
+reads 0. The module does not promise a correct reading between 3 and
+10 volts.
+
+**What does "source type" mean for an output?** When the output turns
+on, the pin pushes voltage out, and the load connects from that pin to
+ground. The opposite design, sink type, connects the load to ground
+instead. Mixing the two up is a common wiring mistake.
+
+What Is Not Confirmed
+---------------------------
+
+The module figures come from search results quoting an ADAM-6052
+datasheet copy and distributor listings, not from Advantech's own PDF,
+and several listings are for the ADAM-6052-D variant. Confirm against
+the datasheet for your exact unit. Also not confirmed: whether the
+inputs have a configurable filter, the exact steps to set up a rule or
+a peer-to-peer mapping, and where the output power supply connects.
+
+Remember
+------------
+
+#. An input listens and an output acts. They are separate, and nothing
+   copies one to the other unless you set that up.
+#. Data reaches a dashboard over Ethernet, not through an output pin.
+#. Every input can be a plain on/off input, a counter, or a frequency
+   input, up to 3 kHz (3,000 pulses per second).
+#. A switch with moving contacts bounces. A debounce wait must be
+   longer than the bounce, or one push counts as several.
 
 See Also
--------------
+--------------
 
-See :doc:`8b10b_encoding_interactive` for the other Hardware Protocols
-page in this pair -- a completely different real mechanism (line
-encoding for clock recovery) living at the same physical layer this
-page's bus arbitration operates on.
-
-See :doc:`watchdog_timer_interactive` for another embedded-systems
-reliability mechanism from the same corner of hardware -- arbitration
-decides who gets the bus; a watchdog decides what happens when a node
-on it stops responding at all.
-
-See :doc:`adam_6052_interactive` for a real I/O module that puts
-switch and sensor signals onto an Ethernet network, with the wiring
-basics explained from scratch.
+:doc:`can_arbitration_interactive` for another hardware-level
+mechanism from the same corner of embedded systems.
+:doc:`watchdog_timer_interactive` for how a controller recovers when
+it stops responding. :doc:`tcp_udp_interactive` for the TCP that
+Modbus TCP runs on top of.

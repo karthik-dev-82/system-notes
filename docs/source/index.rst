@@ -102,6 +102,7 @@ worth writing down and coming back to.
    8b10b_encoding_interactive
    can_arbitration_interactive
    watchdog_timer_interactive
+   adam_6052_interactive
 
 .. toctree::
    :hidden:
@@ -448,6 +449,9 @@ Hardware Protocols
    * - :doc:`watchdog_timer_interactive`
      - Play With It: a real countdown you pet or freeze yourself, plus a real window watchdog whose too-early-pet fault is fuzz-verified
      - watchdog timer, petting, window watchdog, forced reset, embedded reliability
+   * - :doc:`adam_6052_interactive`
+     - Play With It: an illustrated poster of the ADAM-6052 Ethernet I/O module -- wiring an input (dry vs. wet contact), counting a toothed wheel, driving a load, and a worked park-brake-to-lamp example
+     - ADAM-6052, digital input/output, dry/wet contact, source-type output, counter, Modbus TCP, MQTT, debounce
 
 Media & Streaming
 -------------------------
